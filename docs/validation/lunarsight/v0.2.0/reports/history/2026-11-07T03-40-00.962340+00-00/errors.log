@@ -1,0 +1,9 @@
+Site04
+Traceback (most recent call last):
+  File "/kaggle/temp/lunarsight-data/src/pipeline.py", line 269, in run
+    process_site(root,site,scen,g,records,state,sites,eph,a,b,end,offline)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/kaggle/temp/lunarsight-data/src/pipeline.py", line 143, in process_site
+    raise ValueError(f"Seam failed provisional acceptance: {seam}")
+ValueError: Seam failed provisional acceptance: {'fine': '5m', 'coarse': '80m', 'switch_m': 5500, 'paired': 7920, 'sampled': 7920, 'median_signed_m': 0.083251953125, 'p95_abs_m': 20.956539154052734, 'p95_abs_angle_deg': 0.1886725754396632}
+

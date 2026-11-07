@@ -1,0 +1,40 @@
+{
+  "version": "lunar-sphere-enu-v2",
+  "R_ref_m": 1737400,
+  "horizons_candidate_radius_m": 1737400,
+  "vertical_reference": "LOLA radial height relative to lunar reference sphere; source lineage plus GeoTIFF CRS, independently checked against Horizons center radii and spherical shape at run time",
+  "frame": "MOON_ME/DE421",
+  "horizons_frame_reference": "https://ssd.jpl.nasa.gov/horizons/manual.html#ref_frames",
+  "longitude_convention": "East-positive [0,360) in site properties, azimuth from geographic north clockwise",
+  "pixel_registration": "Rasterio corner affine converted once to cell centre; GDAL AREA_OR_POINT retained",
+  "interpolation_method": "Nearest valid DEM cell at each radial sample; circular linear horizon interpolation only across two fully covered adjacent bearings",
+  "panel_height_m": 1,
+  "antenna_height_m": 2,
+  "az_steps_deg": [
+    0.25,
+    0.125
+  ],
+  "radial_spacing_m": [
+    2.5,
+    40,
+    120
+  ],
+  "middle_radius_m": 200000,
+  "scan_radius_m": 400000,
+  "comparison_radius_m": 300000,
+  "near_radius_rule": "Round down to 500 m below nearest footprint boundary minus 500 m, cap at 8000 m",
+  "footprint_margin_m": 275,
+  "near_seam_fallback": "Follow the inset 5 m raster footprint per bearing if the fixed-radius near seam fails and both fallback validation phases meet the same limits",
+  "tol_status": "PROVISIONAL G0 review needed",
+  "tol_horizon_deg": 0.1,
+  "tol_event_minutes": 5,
+  "tol_duration_minutes": 10,
+  "seam_median_limit_m": 10,
+  "seam_p95_angle_limit_deg": 0.15,
+  "reference_links": [
+    "https://pgda.gsfc.nasa.gov/products/78",
+    "https://pgda.gsfc.nasa.gov/products/90",
+    "https://pds-geosciences.wustl.edu/workshops/LRO_DataUsersWorkshop/2014/LOLA.pdf",
+    "https://ssd.jpl.nasa.gov/horizons/manual.html"
+  ]
+}

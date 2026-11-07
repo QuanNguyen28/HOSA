@@ -1,0 +1,170 @@
+{
+  "scenario_status": "PROVISIONAL",
+  "site_id": "Site01_P1",
+  "geometry_tolerance_status": "PROVISIONAL G0 review needed",
+  "azimuth_0.25_vs_0.125": {
+    "angles_by_height_m": {
+      "1": {
+        "comparable": 2880,
+        "p95_abs_deg": 0.011884653686164317,
+        "max_abs_deg": 0.5597935022975423
+      },
+      "2": {
+        "comparable": 2880,
+        "p95_abs_deg": 0.011193265729504942,
+        "max_abs_deg": 0.09359855530391714
+      }
+    },
+    "temporal": {
+      "sun_state": {
+        "minutes_state_diff": 0.0,
+        "delta_visible_minutes": 0.0,
+        "delta_blocked_minutes": 0.0,
+        "events_first": 0,
+        "events_second": 0,
+        "matched_first_within_15min": 0,
+        "max_matched_event_shift_minutes": null
+      },
+      "earth_state": {
+        "minutes_state_diff": 0.0,
+        "delta_visible_minutes": 0.0,
+        "delta_blocked_minutes": 0.0,
+        "events_first": 2,
+        "events_second": 2,
+        "matched_first_within_15min": 2,
+        "max_matched_event_shift_minutes": 0.0
+      },
+      "joint_state": {
+        "minutes_state_diff": 0.0,
+        "delta_visible_minutes": 0.0,
+        "delta_blocked_minutes": 0.0,
+        "events_first": 2,
+        "events_second": 2,
+        "matched_first_within_15min": 2,
+        "max_matched_event_shift_minutes": 0.0
+      }
+    },
+    "decisions_changed": 0,
+    "max_duration_delta_minutes": {
+      "total_sun_hours_L": 0.0,
+      "total_sun_hours_U": 0.0,
+      "longest_dark_hours_L": 0.0,
+      "longest_dark_hours_U": 0.0,
+      "longest_blackout_hours_L": 0.0,
+      "longest_blackout_hours_U": 0.0,
+      "longest_joint_hours_L": 0.0,
+      "longest_joint_hours_U": 0.0
+    },
+    "sensitive": true
+  },
+  "radius_400km_vs_300km": {
+    "angles_by_height_m": {
+      "1": {
+        "comparable": 1440,
+        "p95_abs_deg": 0.0,
+        "max_abs_deg": 0.0
+      },
+      "2": {
+        "comparable": 1440,
+        "p95_abs_deg": 0.0,
+        "max_abs_deg": 0.0
+      }
+    },
+    "temporal": {
+      "sun_state": {
+        "minutes_state_diff": 0.0,
+        "delta_visible_minutes": 0.0,
+        "delta_blocked_minutes": 0.0,
+        "events_first": 0,
+        "events_second": 0,
+        "matched_first_within_15min": 0,
+        "max_matched_event_shift_minutes": null
+      },
+      "earth_state": {
+        "minutes_state_diff": 0.0,
+        "delta_visible_minutes": 0.0,
+        "delta_blocked_minutes": 0.0,
+        "events_first": 2,
+        "events_second": 2,
+        "matched_first_within_15min": 2,
+        "max_matched_event_shift_minutes": 0.0
+      },
+      "joint_state": {
+        "minutes_state_diff": 0.0,
+        "delta_visible_minutes": 0.0,
+        "delta_blocked_minutes": 0.0,
+        "events_first": 2,
+        "events_second": 2,
+        "matched_first_within_15min": 2,
+        "max_matched_event_shift_minutes": 0.0
+      }
+    },
+    "decisions_changed": 0,
+    "max_duration_delta_minutes": {
+      "total_sun_hours_L": 0.0,
+      "total_sun_hours_U": 0.0,
+      "longest_dark_hours_L": 0.0,
+      "longest_dark_hours_U": 0.0,
+      "longest_blackout_hours_L": 0.0,
+      "longest_blackout_hours_U": 0.0,
+      "longest_joint_hours_L": 0.0,
+      "longest_joint_hours_U": 0.0
+    },
+    "sensitive": false
+  },
+  "time_5min_vs_1min": {
+    "case_start": "2026-11-14 00:00:00+00:00",
+    "case_end": "2026-11-17 00:00:00+00:00",
+    "window": "first supported 72h activity; both targets",
+    "temporal": {
+      "sun_state": {
+        "minutes_state_diff": 0.0,
+        "delta_visible_minutes": 0.0,
+        "delta_blocked_minutes": 0.0,
+        "events_first": 0,
+        "events_second": 0,
+        "matched_first_within_15min": 0,
+        "max_matched_event_shift_minutes": null
+      },
+      "earth_state": {
+        "minutes_state_diff": 0.0,
+        "delta_visible_minutes": 0.0,
+        "delta_blocked_minutes": 0.0,
+        "events_first": 1,
+        "events_second": 1,
+        "matched_first_within_15min": 1,
+        "max_matched_event_shift_minutes": 0.0
+      },
+      "joint_state": {
+        "minutes_state_diff": 0.0,
+        "delta_visible_minutes": 0.0,
+        "delta_blocked_minutes": 0.0,
+        "events_first": 1,
+        "events_second": 1,
+        "matched_first_within_15min": 1,
+        "max_matched_event_shift_minutes": 0.0
+      }
+    },
+    "decision_5min": "FAIL",
+    "decision_1min": "FAIL",
+    "bounds_abs_delta_minutes": {
+      "total_sun_hours": [
+        0.0,
+        0.0
+      ],
+      "longest_dark_hours": [
+        0.0,
+        0.0
+      ],
+      "longest_blackout_hours": [
+        1.6797230273368768e-10,
+        1.6797230273368768e-10
+      ],
+      "longest_joint_hours": [
+        1.6200374375330284e-11,
+        1.6200374375330284e-11
+      ]
+    },
+    "sensitive": false
+  }
+}

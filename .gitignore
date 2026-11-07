@@ -23,6 +23,12 @@ data/cache/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !data/cache/.gitkeep
+!data/processed/lunarsight/
+data/processed/lunarsight/*
+!data/processed/lunarsight/v0.2.0/
+!data/cache/lunarsight/
+data/cache/lunarsight/*
+!data/cache/lunarsight/v0.2.0/
 *.tif
 *.tiff
 *.img

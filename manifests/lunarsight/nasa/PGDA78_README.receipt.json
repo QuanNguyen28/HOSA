@@ -1,0 +1,20 @@
+{
+  "id": "p78_readme",
+  "filename": "PGDA78_README",
+  "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/README",
+  "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+  "role": "metadata",
+  "unit": null,
+  "site": null,
+  "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/README",
+  "bytes": 1829,
+  "sha256": "e985a2337c9de1cd665b0ddad8b7f1fac88d65c96d1e47d1b975a91c8e53e7bd",
+  "accessed_utc": "2026-11-07T03:40:04.316247+00:00",
+  "status": "VERIFIED_BYTES",
+  "http_headers": {
+    "Content-Length": "1829",
+    "ETag": "W/\"725-17d954b6b83\"",
+    "Last-Modified": "Tue, 07 Dec 2021 14:28:07 GMT",
+    "Content-Type": "application/octet-stream"
+  }
+}

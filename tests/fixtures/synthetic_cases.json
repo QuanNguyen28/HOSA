@@ -1,0 +1,144 @@
+{
+  "label": "SYNTHETIC ONLY",
+  "cardinal_obstacle": {
+    "observer_lon_e_deg": 222,
+    "observer_lat_deg": -89.4,
+    "observer_z_m": 0,
+    "height_m": 1,
+    "distance_m": 1000,
+    "elevation_deg": 5,
+    "azimuths_deg": [
+      0,
+      90,
+      180,
+      270
+    ]
+  },
+  "duration_cases": [
+    {
+      "s": "VVV",
+      "e": "VVV",
+      "hours": [
+        1,
+        1,
+        1
+      ],
+      "sun": [
+        3,
+        3
+      ],
+      "dark": [
+        0,
+        0
+      ],
+      "blackout": [
+        0,
+        0
+      ],
+      "joint": [
+        3,
+        3
+      ]
+    },
+    {
+      "s": "BBB",
+      "e": "BBB",
+      "hours": [
+        1,
+        1,
+        1
+      ],
+      "sun": [
+        0,
+        0
+      ],
+      "dark": [
+        3,
+        3
+      ],
+      "blackout": [
+        3,
+        3
+      ],
+      "joint": [
+        0,
+        0
+      ]
+    },
+    {
+      "s": "???",
+      "e": "???",
+      "hours": [
+        1,
+        1,
+        1
+      ],
+      "sun": [
+        0,
+        3
+      ],
+      "dark": [
+        0,
+        3
+      ],
+      "blackout": [
+        0,
+        3
+      ],
+      "joint": [
+        0,
+        3
+      ]
+    },
+    {
+      "s": "V?V",
+      "e": "VVV",
+      "hours": [
+        1,
+        1,
+        1
+      ],
+      "sun": [
+        2,
+        3
+      ],
+      "dark": [
+        0,
+        1
+      ],
+      "blackout": [
+        0,
+        0
+      ],
+      "joint": [
+        1,
+        3
+      ]
+    },
+    {
+      "s": "B?B",
+      "e": "VVV",
+      "hours": [
+        1.25,
+        0.5,
+        2
+      ],
+      "sun": [
+        0,
+        0.5
+      ],
+      "dark": [
+        2,
+        3.75
+      ],
+      "blackout": [
+        0,
+        0
+      ],
+      "joint": [
+        0,
+        0.5
+      ]
+    }
+  ]
+}

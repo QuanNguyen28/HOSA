@@ -1,0 +1,21 @@
+{
+  "id": "Site01_roi",
+  "filename": "Site01_ROIs.tgz",
+  "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site01/Site01_ROIs.tgz",
+  "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+  "role": "roi",
+  "unit": null,
+  "site": "Site01",
+  "frame": "MOON_ME/DE421",
+  "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site01/Site01_ROIs.tgz",
+  "bytes": 2934,
+  "sha256": "40b961417a344ce0274aecbab522e171a22f658507d82e8fb4d7bc97526ffc4f",
+  "accessed_utc": "2026-11-07T03:40:16.614505+00:00",
+  "status": "VERIFIED_BYTES",
+  "http_headers": {
+    "Content-Length": "2934",
+    "ETag": "W/\"b76-1761e686da8\"",
+    "Last-Modified": "Tue, 01 Dec 2020 13:05:29 GMT",
+    "Content-Type": "application/octet-stream"
+  }
+}

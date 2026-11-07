@@ -1,0 +1,13 @@
+# LunarSight skill inventory
+
+The five project skills live under `.agents/skills/`. They were authored for this project using Codex Skill Creator and the [Agent Skills specification](https://agentskills.io/specification). All five passed the Skill Creator frontmatter validator. They are packaged as source folders; this delivery does not install them into any account library.
+
+| Skill | Purpose and main dependencies | Representative validation | Limits |
+|---|---|---|---|
+| `nasa-data-ingestion` | PGDA download, hashing and cache; Requests, Rasterio | PASS: official Site01 DEM (40,980,810 bytes), ROI, count and error acquired; exact cached SHA-256 rechecked. PGDA answered HTTP 206 for two different ranges in each regional asset. | Host-dependent transfer rate; original DEMs are excluded from the ZIP. |
+| `lunar-dem-eda` | CRS, masks, EDA and ROI; Rasterio, PyProj, GeoPandas, NumPy | PASS: opened NASA Site01 3,200×3,200 DEM, exact 10,240,000 finite pixels, two projection references, interior ROI pixel and round trip. Synthetic scale/offset and NoData case passed. | Systematic percentiles; the vertical interpretation relies on documented LOLA product lineage. |
+| `kaggle-notebook-runner` | Private CPU notebook import and execution; Kaggle UI, ipynb | PASS for representative operation: imported self-contained notebook into Private editor; verified NASA/JPL egress and started Save & Run All; commit log shows the Python bootstrap and passing synthetic tests. See execution status for final version/export evidence. | Needs a Kaggle account and Internet permissions. CLI account authentication was not configured or needed. |
+| `jpl-horizons-processing` | Observer settings and parser; Requests, Pandas | PASS: Site01 Sun/Earth at 5 min, 4,897 UTC rows each; 1 min, 4,321 rows each for 72 h. Real header verified observer frame, radii and angles; malformed synthetic rows rejected. | Exact requests reproduce the cache; service ephemerides can change with JPL updates. |
+| `scientific-data-validation` | Terrain angles, V/B/? and sensitivity; NumPy, Pandas, pytest | PASS for representative checks: 17 pytest cases, including four headings, analytic obstruction, curvature, UTC boundary, all AND cases and irregular duration. A 2 km real Site01 check compared 85 decisive samples against independent Cartesian ENU (max elevation difference ~6.13e-10°). | Published numerical tolerances and scenario are provisional. The ENU comparison does not replace an external reference-tool study. |
+
+The authoritative references for each workflow are linked in its `SKILL.md`. End-to-end checks, which differ from representative skill checks, are listed in `reports/execution_status.json`.

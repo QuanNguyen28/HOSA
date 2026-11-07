@@ -1,0 +1,1356 @@
+{
+  "method_version": "0.2.0",
+  "updated_utc": "2026-11-07T04:04:37.016388+00:00",
+  "records": [
+    {
+      "id": "p78_readme",
+      "filename": "PGDA78_README",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/README",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "metadata",
+      "unit": null,
+      "site": null,
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/README",
+      "bytes": 1829,
+      "sha256": "e985a2337c9de1cd665b0ddad8b7f1fac88d65c96d1e47d1b975a91c8e53e7bd",
+      "accessed_utc": "2026-11-07T03:40:04.316247+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "1829",
+        "ETag": "W/\"725-17d954b6b83\"",
+        "Last-Modified": "Tue, 07 Dec 2021 14:28:07 GMT",
+        "Content-Type": "application/octet-stream"
+      }
+    },
+    {
+      "id": "Site01_dem",
+      "filename": "Site01_final_adj_5mpp_surf.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site01/Site01_final_adj_5mpp_surf.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "dem",
+      "unit": "m",
+      "site": "Site01",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site01/Site01_final_adj_5mpp_surf.tif",
+      "bytes": 40980810,
+      "sha256": "3ba7b97cb00a2bcf21189c3aeb535f65afc21207154ab9f0d43c5bdc1f7e747e",
+      "accessed_utc": "2026-11-07T03:40:26.146489+00:00",
+      "status": "PASS",
+      "http_headers": {
+        "Content-Length": "40980810",
+        "ETag": "W/\"271514a-17285c7fa58\"",
+        "Last-Modified": "Fri, 05 Jun 2020 18:39:35 GMT",
+        "Content-Type": "image/tiff"
+      },
+      "metadata": {
+        "shape": [
+          3200,
+          3200
+        ],
+        "pixel_size_m": [
+          5.0,
+          5.0
+        ],
+        "affine": [
+          5.0,
+          0.0,
+          -19000.0,
+          0.0,
+          -5.0,
+          -4000.0
+        ],
+        "bounds_xy_m": [
+          -19000.0,
+          -20000.0,
+          -3000.0,
+          -4000.0
+        ],
+        "crs_wkt": "PROJCRS[\"unnamed\",BASEGEOGCRS[\"unnamed ellipse\",DATUM[\"unknown\",ELLIPSOID[\"unnamed\",1737400,0,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]],CONVERSION[\"unnamed\",METHOD[\"Polar Stereographic (variant B)\",ID[\"EPSG\",9829]],PARAMETER[\"Latitude of standard parallel\",-90,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8832]],PARAMETER[\"Longitude of origin\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8833]],PARAMETER[\"False easting\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8806]],PARAMETER[\"False northing\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8807]]],CS[Cartesian,2],AXIS[\"easting\",north,ORDER[1],LENGTHUNIT[\"metre\",1]],AXIS[\"northing\",north,ORDER[2],LENGTHUNIT[\"metre\",1]]]",
+        "dtype": "float32",
+        "nodata": "NaN",
+        "scale": 1.0,
+        "offset": 0.0,
+        "pixel_registration": "Area",
+        "band_unit": null,
+        "tags": {
+          "NC_GLOBAL#Conventions": "COARDS, CF-1.5",
+          "NC_GLOBAL#GMT_version": "5.4.5 [64-bit]",
+          "NC_GLOBAL#history": "xyz2grd -bi3 -I5 -R-1.90000000000e+04/-3.00000000000e+03/-2.00000000000e+04/-4.00000000000e+03 -Gtest.grd -r",
+          "NC_GLOBAL#node_offset": "1",
+          "x#actual_range": "{-19000,-3000}",
+          "x#long_name": "x",
+          "y#actual_range": "{-20000,-4000}",
+          "y#long_name": "y",
+          "z#actual_range": "{-523.1834106445312,1959.496215820312}",
+          "z#long_name": "z",
+          "z#_FillValue": "nan",
+          "AREA_OR_POINT": "Area"
+        },
+        "checks_against_spherical_projection": [
+          {
+            "lon_deg": 0,
+            "lat_deg": -85,
+            "x_m": 0.0,
+            "y_m": 151713.04441849753,
+            "error_m": 0.0
+          },
+          {
+            "lon_deg": 90,
+            "lat_deg": -85,
+            "x_m": 151713.04441849753,
+            "y_m": 9.289744711800661e-12,
+            "error_m": 0.0
+          }
+        ],
+        "vertical_reference": "LOLA radial height above 1737400 m sphere (source lineage); MOON_ME/DE421",
+        "unit_from_source": "m"
+      },
+      "stats": {
+        "valid_pixels": 10240000,
+        "nodata_pixels": 0,
+        "nodata_percent": 0.0,
+        "zero_percent_of_valid": 0.0,
+        "min": -523.1834106445312,
+        "max": 1959.4962158203125,
+        "mean": 1139.0587825653129,
+        "std_population": 422.1791279242874,
+        "percentiles": {
+          "1": -179.58843536376952,
+          "5": 328.46317291259766,
+          "25": 889.9641571044922,
+          "50": 1199.6669921875,
+          "75": 1432.7047424316406,
+          "95": 1728.5864562988281,
+          "99": 1897.8499816894534
+        },
+        "percentile_method": "systematic sample of pixel centres",
+        "percentile_stride_px": 6,
+        "percentile_n": 285156
+      }
+    },
+    {
+      "id": "Site01_error",
+      "filename": "Site01_final_adj_5mpp_toterr.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site01/Site01_final_adj_5mpp_toterr.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "error",
+      "unit": "m RMS",
+      "site": "Site01",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site01/Site01_final_adj_5mpp_toterr.tif",
+      "bytes": 40980810,
+      "sha256": "cf2cf52f52d2aa51e60d058010d10b0ebfb1d3e920f5a2b9a46eb6c51054ab1c",
+      "accessed_utc": "2026-11-07T03:40:16.384733+00:00",
+      "status": "PASS",
+      "http_headers": {
+        "Content-Length": "40980810",
+        "ETag": "W/\"271514a-17285c82d20\"",
+        "Last-Modified": "Fri, 05 Jun 2020 18:39:48 GMT",
+        "Content-Type": "image/tiff"
+      },
+      "metadata": {
+        "shape": [
+          3200,
+          3200
+        ],
+        "pixel_size_m": [
+          5.0,
+          5.0
+        ],
+        "affine": [
+          5.0,
+          0.0,
+          -19000.0,
+          0.0,
+          -5.0,
+          -4000.0
+        ],
+        "bounds_xy_m": [
+          -19000.0,
+          -20000.0,
+          -3000.0,
+          -4000.0
+        ],
+        "crs_wkt": "PROJCRS[\"unnamed\",BASEGEOGCRS[\"unnamed ellipse\",DATUM[\"unknown\",ELLIPSOID[\"unnamed\",1737400,0,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]],CONVERSION[\"unnamed\",METHOD[\"Polar Stereographic (variant B)\",ID[\"EPSG\",9829]],PARAMETER[\"Latitude of standard parallel\",-90,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8832]],PARAMETER[\"Longitude of origin\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8833]],PARAMETER[\"False easting\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8806]],PARAMETER[\"False northing\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8807]]],CS[Cartesian,2],AXIS[\"easting\",north,ORDER[1],LENGTHUNIT[\"metre\",1]],AXIS[\"northing\",north,ORDER[2],LENGTHUNIT[\"metre\",1]]]",
+        "dtype": "float32",
+        "nodata": "NaN",
+        "scale": 1.0,
+        "offset": 0.0,
+        "pixel_registration": "Area",
+        "band_unit": null,
+        "tags": {
+          "NC_GLOBAL#Conventions": "COARDS, CF-1.5",
+          "NC_GLOBAL#GMT_version": "5.4.5 [64-bit]",
+          "NC_GLOBAL#history": "xyz2grd -bi3 -I5 -R-1.90000000000e+04/-3.00000000000e+03/-2.00000000000e+04/-4.00000000000e+03 -Gtest.grd -r",
+          "NC_GLOBAL#node_offset": "1",
+          "x#actual_range": "{-19000,-3000}",
+          "x#long_name": "x",
+          "y#actual_range": "{-20000,-4000}",
+          "y#long_name": "y",
+          "z#actual_range": "{0.0615781843662262,5.582818508148193}",
+          "z#long_name": "z",
+          "z#_FillValue": "nan",
+          "AREA_OR_POINT": "Area"
+        },
+        "checks_against_spherical_projection": [
+          {
+            "lon_deg": 0,
+            "lat_deg": -85,
+            "x_m": 0.0,
+            "y_m": 151713.04441849753,
+            "error_m": 0.0
+          },
+          {
+            "lon_deg": 90,
+            "lat_deg": -85,
+            "x_m": 151713.04441849753,
+            "y_m": 9.289744711800661e-12,
+            "error_m": 0.0
+          }
+        ],
+        "unit_from_source": "m RMS"
+      },
+      "stats": {
+        "valid_pixels": 10240000,
+        "nodata_pixels": 0,
+        "nodata_percent": 0.0,
+        "zero_percent_of_valid": 0.0,
+        "min": 0.061578184366226196,
+        "max": 5.582818508148193,
+        "mean": 0.4045424510687776,
+        "std_population": 0.1812192946748114,
+        "percentiles": {
+          "1": 0.13345748856663703,
+          "5": 0.18508704006671906,
+          "25": 0.2783113196492195,
+          "50": 0.3724691569805145,
+          "75": 0.49246183037757874,
+          "95": 0.7363064289093018,
+          "99": 1.0095886588096625
+        },
+        "percentile_method": "systematic sample of pixel centres",
+        "percentile_stride_px": 6,
+        "percentile_n": 285156
+      }
+    },
+    {
+      "id": "Site01_count",
+      "filename": "Site01_final_adj_5mpp_ldec.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site01/Site01_final_adj_5mpp_ldec.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "count",
+      "unit": "LOLA spots",
+      "site": "Site01",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site01/Site01_final_adj_5mpp_ldec.tif",
+      "bytes": 40980744,
+      "sha256": "16d6ed21020ad48fa71d94e7437492acf5bf04118f52bcd292f57f22ead4cd23",
+      "accessed_utc": "2026-11-07T03:40:22.143028+00:00",
+      "status": "PASS",
+      "http_headers": {
+        "Content-Length": "40980744",
+        "ETag": "W/\"2715108-17285c811c8\"",
+        "Last-Modified": "Fri, 05 Jun 2020 18:39:41 GMT",
+        "Content-Type": "image/tiff"
+      },
+      "metadata": {
+        "shape": [
+          3200,
+          3200
+        ],
+        "pixel_size_m": [
+          5.0,
+          5.0
+        ],
+        "affine": [
+          5.0,
+          0.0,
+          -19000.0,
+          0.0,
+          -5.0,
+          -4000.0
+        ],
+        "bounds_xy_m": [
+          -19000.0,
+          -20000.0,
+          -3000.0,
+          -4000.0
+        ],
+        "crs_wkt": "PROJCRS[\"unnamed\",BASEGEOGCRS[\"unnamed ellipse\",DATUM[\"unknown\",ELLIPSOID[\"unnamed\",1737400,0,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]],CONVERSION[\"unnamed\",METHOD[\"Polar Stereographic (variant B)\",ID[\"EPSG\",9829]],PARAMETER[\"Latitude of standard parallel\",-90,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8832]],PARAMETER[\"Longitude of origin\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8833]],PARAMETER[\"False easting\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8806]],PARAMETER[\"False northing\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8807]]],CS[Cartesian,2],AXIS[\"easting\",north,ORDER[1],LENGTHUNIT[\"metre\",1]],AXIS[\"northing\",north,ORDER[2],LENGTHUNIT[\"metre\",1]]]",
+        "dtype": "float32",
+        "nodata": "NaN",
+        "scale": 1.0,
+        "offset": 0.0,
+        "pixel_registration": "Area",
+        "band_unit": null,
+        "tags": {
+          "NC_GLOBAL#Conventions": "COARDS, CF-1.5",
+          "NC_GLOBAL#GMT_version": "5.4.5 [64-bit]",
+          "NC_GLOBAL#history": "xyz2grd -bi3 -I5 -R-1.90000000000e+04/-3.00000000000e+03/-2.00000000000e+04/-4.00000000000e+03 -Gtest.grd -r",
+          "NC_GLOBAL#node_offset": "1",
+          "x#actual_range": "{-19000,-3000}",
+          "x#long_name": "x",
+          "y#actual_range": "{-20000,-4000}",
+          "y#long_name": "y",
+          "z#actual_range": "{0,5}",
+          "z#long_name": "z",
+          "z#_FillValue": "nan",
+          "AREA_OR_POINT": "Area"
+        },
+        "checks_against_spherical_projection": [
+          {
+            "lon_deg": 0,
+            "lat_deg": -85,
+            "x_m": 0.0,
+            "y_m": 151713.04441849753,
+            "error_m": 0.0
+          },
+          {
+            "lon_deg": 90,
+            "lat_deg": -85,
+            "x_m": 151713.04441849753,
+            "y_m": 9.289744711800661e-12,
+            "error_m": 0.0
+          }
+        ],
+        "unit_from_source": "LOLA spots"
+      },
+      "stats": {
+        "valid_pixels": 10240000,
+        "nodata_pixels": 0,
+        "nodata_percent": 0.0,
+        "zero_percent_of_valid": 90.5058203125,
+        "min": 0.0,
+        "max": 5.0,
+        "mean": 0.09999199218750002,
+        "std_population": 0.3169594930718671,
+        "percentiles": {
+          "1": 0.0,
+          "5": 0.0,
+          "25": 0.0,
+          "50": 0.0,
+          "75": 0.0,
+          "95": 1.0,
+          "99": 1.0
+        },
+        "percentile_method": "systematic sample of pixel centres",
+        "percentile_stride_px": 6,
+        "percentile_n": 285156
+      }
+    },
+    {
+      "id": "Site01_roi",
+      "filename": "Site01_ROIs.tgz",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site01/Site01_ROIs.tgz",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "roi",
+      "unit": null,
+      "site": "Site01",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site01/Site01_ROIs.tgz",
+      "bytes": 2934,
+      "sha256": "40b961417a344ce0274aecbab522e171a22f658507d82e8fb4d7bc97526ffc4f",
+      "accessed_utc": "2026-11-07T03:40:16.614505+00:00",
+      "status": "PASS",
+      "http_headers": {
+        "Content-Length": "2934",
+        "ETag": "W/\"b76-1761e686da8\"",
+        "Last-Modified": "Tue, 01 Dec 2020 13:05:29 GMT",
+        "Content-Type": "application/octet-stream"
+      },
+      "metadata": {
+        "validated_site_roi_id": "Site01_ROIs:0",
+        "crs_wkt": "PROJCRS[\"unnamed\",BASEGEOGCRS[\"unnamed ellipse\",DATUM[\"unknown\",ELLIPSOID[\"unnamed\",1737400,0,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]],CONVERSION[\"unnamed\",METHOD[\"Polar Stereographic (variant B)\",ID[\"EPSG\",9829]],PARAMETER[\"Latitude of standard parallel\",-90,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8832]],PARAMETER[\"Longitude of origin\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8833]],PARAMETER[\"False easting\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8806]],PARAMETER[\"False northing\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8807]]],CS[Cartesian,2],AXIS[\"easting\",north,ORDER[1],LENGTHUNIT[\"metre\",1]],AXIS[\"northing\",north,ORDER[2],LENGTHUNIT[\"metre\",1]]]"
+      }
+    },
+    {
+      "id": "Site04_dem",
+      "filename": "Site04_final_adj_5mpp_surf.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site04/Site04_final_adj_5mpp_surf.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "dem",
+      "unit": "m",
+      "site": "Site04",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site04/Site04_final_adj_5mpp_surf.tif",
+      "bytes": 40980806,
+      "sha256": "38ff70dbdf2f066c2cfa94a646c3a59d653ce7f6b4528b15fc1b43ee397ce758",
+      "accessed_utc": "2026-11-07T03:42:46.401528+00:00",
+      "status": "PASS",
+      "http_headers": {
+        "Content-Length": "40980806",
+        "ETag": "W/\"2715146-17285c863d0\"",
+        "Last-Modified": "Fri, 05 Jun 2020 18:40:02 GMT",
+        "Content-Type": "image/tiff"
+      },
+      "metadata": {
+        "shape": [
+          3200,
+          3200
+        ],
+        "pixel_size_m": [
+          5.0,
+          5.0
+        ],
+        "affine": [
+          5.0,
+          0.0,
+          -9000.0,
+          0.0,
+          -5.0,
+          1000.0
+        ],
+        "bounds_xy_m": [
+          -9000.0,
+          -15000.0,
+          7000.0,
+          1000.0
+        ],
+        "crs_wkt": "PROJCRS[\"unnamed\",BASEGEOGCRS[\"unnamed ellipse\",DATUM[\"unknown\",ELLIPSOID[\"unnamed\",1737400,0,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]],CONVERSION[\"unnamed\",METHOD[\"Polar Stereographic (variant B)\",ID[\"EPSG\",9829]],PARAMETER[\"Latitude of standard parallel\",-90,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8832]],PARAMETER[\"Longitude of origin\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8833]],PARAMETER[\"False easting\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8806]],PARAMETER[\"False northing\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8807]]],CS[Cartesian,2],AXIS[\"easting\",north,ORDER[1],LENGTHUNIT[\"metre\",1]],AXIS[\"northing\",north,ORDER[2],LENGTHUNIT[\"metre\",1]]]",
+        "dtype": "float32",
+        "nodata": "NaN",
+        "scale": 1.0,
+        "offset": 0.0,
+        "pixel_registration": "Area",
+        "band_unit": null,
+        "tags": {
+          "NC_GLOBAL#Conventions": "COARDS, CF-1.5",
+          "NC_GLOBAL#GMT_version": "5.4.5 [64-bit]",
+          "NC_GLOBAL#history": "xyz2grd -bi3 -I5 -R-9.00000000000e+03/7.00000000000e+03/-1.50000000000e+04/1.00000000000e+03 -Gtest.grd -r",
+          "NC_GLOBAL#node_offset": "1",
+          "x#actual_range": "{-9000,7000}",
+          "x#long_name": "x",
+          "y#actual_range": "{-15000,1000}",
+          "y#long_name": "y",
+          "z#actual_range": "{-2847.877197265625,1805.072631835938}",
+          "z#long_name": "z",
+          "z#_FillValue": "nan",
+          "AREA_OR_POINT": "Area"
+        },
+        "checks_against_spherical_projection": [
+          {
+            "lon_deg": 0,
+            "lat_deg": -85,
+            "x_m": 0.0,
+            "y_m": 151713.04441849753,
+            "error_m": 0.0
+          },
+          {
+            "lon_deg": 90,
+            "lat_deg": -85,
+            "x_m": 151713.04441849753,
+            "y_m": 9.289744711800661e-12,
+            "error_m": 0.0
+          }
+        ],
+        "vertical_reference": "LOLA radial height above 1737400 m sphere (source lineage); MOON_ME/DE421",
+        "unit_from_source": "m"
+      },
+      "stats": {
+        "valid_pixels": 10240000,
+        "nodata_pixels": 0,
+        "nodata_percent": 0.0,
+        "zero_percent_of_valid": 0.0,
+        "min": -2847.877197265625,
+        "max": 1805.0726318359375,
+        "mean": 245.34379158594024,
+        "std_population": 1246.3162681477759,
+        "percentiles": {
+          "1": -2736.1782470703124,
+          "5": -2429.5980224609375,
+          "25": -481.2652816772461,
+          "50": 667.936767578125,
+          "75": 1250.3681640625,
+          "95": 1583.0169677734375,
+          "99": 1685.8947753906255
+        },
+        "percentile_method": "systematic sample of pixel centres",
+        "percentile_stride_px": 6,
+        "percentile_n": 285156
+      }
+    },
+    {
+      "id": "Site04_error",
+      "filename": "Site04_final_adj_5mpp_toterr.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site04/Site04_final_adj_5mpp_toterr.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "error",
+      "unit": "m RMS",
+      "site": "Site04",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site04/Site04_final_adj_5mpp_toterr.tif",
+      "bytes": 40980808,
+      "sha256": "416c4baa3b64def0182bb3379a1a9228482efd8ce32a39309ea8de5d0330fbe6",
+      "accessed_utc": "2026-11-07T03:42:47.506219+00:00",
+      "status": "PASS",
+      "http_headers": {
+        "Content-Length": "40980808",
+        "ETag": "W/\"2715148-17285c89698\"",
+        "Last-Modified": "Fri, 05 Jun 2020 18:40:15 GMT",
+        "Content-Type": "image/tiff"
+      },
+      "metadata": {
+        "shape": [
+          3200,
+          3200
+        ],
+        "pixel_size_m": [
+          5.0,
+          5.0
+        ],
+        "affine": [
+          5.0,
+          0.0,
+          -9000.0,
+          0.0,
+          -5.0,
+          1000.0
+        ],
+        "bounds_xy_m": [
+          -9000.0,
+          -15000.0,
+          7000.0,
+          1000.0
+        ],
+        "crs_wkt": "PROJCRS[\"unnamed\",BASEGEOGCRS[\"unnamed ellipse\",DATUM[\"unknown\",ELLIPSOID[\"unnamed\",1737400,0,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]],CONVERSION[\"unnamed\",METHOD[\"Polar Stereographic (variant B)\",ID[\"EPSG\",9829]],PARAMETER[\"Latitude of standard parallel\",-90,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8832]],PARAMETER[\"Longitude of origin\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8833]],PARAMETER[\"False easting\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8806]],PARAMETER[\"False northing\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8807]]],CS[Cartesian,2],AXIS[\"easting\",north,ORDER[1],LENGTHUNIT[\"metre\",1]],AXIS[\"northing\",north,ORDER[2],LENGTHUNIT[\"metre\",1]]]",
+        "dtype": "float32",
+        "nodata": "NaN",
+        "scale": 1.0,
+        "offset": 0.0,
+        "pixel_registration": "Area",
+        "band_unit": null,
+        "tags": {
+          "NC_GLOBAL#Conventions": "COARDS, CF-1.5",
+          "NC_GLOBAL#GMT_version": "5.4.5 [64-bit]",
+          "NC_GLOBAL#history": "xyz2grd -bi3 -I5 -R-9.00000000000e+03/7.00000000000e+03/-1.50000000000e+04/1.00000000000e+03 -Gtest.grd -r",
+          "NC_GLOBAL#node_offset": "1",
+          "x#actual_range": "{-9000,7000}",
+          "x#long_name": "x",
+          "y#actual_range": "{-15000,1000}",
+          "y#long_name": "y",
+          "z#actual_range": "{0.06385684758424759,7.635095596313477}",
+          "z#long_name": "z",
+          "z#_FillValue": "nan",
+          "AREA_OR_POINT": "Area"
+        },
+        "checks_against_spherical_projection": [
+          {
+            "lon_deg": 0,
+            "lat_deg": -85,
+            "x_m": 0.0,
+            "y_m": 151713.04441849753,
+            "error_m": 0.0
+          },
+          {
+            "lon_deg": 90,
+            "lat_deg": -85,
+            "x_m": 151713.04441849753,
+            "y_m": 9.289744711800661e-12,
+            "error_m": 0.0
+          }
+        ],
+        "unit_from_source": "m RMS"
+      },
+      "stats": {
+        "valid_pixels": 10240000,
+        "nodata_pixels": 0,
+        "nodata_percent": 0.0,
+        "zero_percent_of_valid": 0.0,
+        "min": 0.06385684758424759,
+        "max": 7.635095596313477,
+        "mean": 0.4116648169231769,
+        "std_population": 0.22262524799770425,
+        "percentiles": {
+          "1": 0.1297316573560238,
+          "5": 0.16842909902334213,
+          "25": 0.26022978127002716,
+          "50": 0.3605698198080063,
+          "75": 0.5052895396947861,
+          "95": 0.8294507563114166,
+          "99": 1.2064775049686438
+        },
+        "percentile_method": "systematic sample of pixel centres",
+        "percentile_stride_px": 6,
+        "percentile_n": 285156
+      }
+    },
+    {
+      "id": "Site04_count",
+      "filename": "Site04_final_adj_5mpp_ldec.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site04/Site04_final_adj_5mpp_ldec.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "count",
+      "unit": "LOLA spots",
+      "site": "Site04",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site04/Site04_final_adj_5mpp_ldec.tif",
+      "bytes": 40980740,
+      "sha256": "fcc8c2219ae2368d5b2a1f6aec05fcf96cf725f3035ac8d80efc312a4ff29227",
+      "accessed_utc": "2026-11-07T03:42:46.686055+00:00",
+      "status": "PASS",
+      "http_headers": {
+        "Content-Length": "40980740",
+        "ETag": "W/\"2715104-17285c87b40\"",
+        "Last-Modified": "Fri, 05 Jun 2020 18:40:08 GMT",
+        "Content-Type": "image/tiff"
+      },
+      "metadata": {
+        "shape": [
+          3200,
+          3200
+        ],
+        "pixel_size_m": [
+          5.0,
+          5.0
+        ],
+        "affine": [
+          5.0,
+          0.0,
+          -9000.0,
+          0.0,
+          -5.0,
+          1000.0
+        ],
+        "bounds_xy_m": [
+          -9000.0,
+          -15000.0,
+          7000.0,
+          1000.0
+        ],
+        "crs_wkt": "PROJCRS[\"unnamed\",BASEGEOGCRS[\"unnamed ellipse\",DATUM[\"unknown\",ELLIPSOID[\"unnamed\",1737400,0,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]],CONVERSION[\"unnamed\",METHOD[\"Polar Stereographic (variant B)\",ID[\"EPSG\",9829]],PARAMETER[\"Latitude of standard parallel\",-90,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8832]],PARAMETER[\"Longitude of origin\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8833]],PARAMETER[\"False easting\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8806]],PARAMETER[\"False northing\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8807]]],CS[Cartesian,2],AXIS[\"easting\",north,ORDER[1],LENGTHUNIT[\"metre\",1]],AXIS[\"northing\",north,ORDER[2],LENGTHUNIT[\"metre\",1]]]",
+        "dtype": "float32",
+        "nodata": "NaN",
+        "scale": 1.0,
+        "offset": 0.0,
+        "pixel_registration": "Area",
+        "band_unit": null,
+        "tags": {
+          "NC_GLOBAL#Conventions": "COARDS, CF-1.5",
+          "NC_GLOBAL#GMT_version": "5.4.5 [64-bit]",
+          "NC_GLOBAL#history": "xyz2grd -bi3 -I5 -R-9.00000000000e+03/7.00000000000e+03/-1.50000000000e+04/1.00000000000e+03 -Gtest.grd -r",
+          "NC_GLOBAL#node_offset": "1",
+          "x#actual_range": "{-9000,7000}",
+          "x#long_name": "x",
+          "y#actual_range": "{-15000,1000}",
+          "y#long_name": "y",
+          "z#actual_range": "{0,5}",
+          "z#long_name": "z",
+          "z#_FillValue": "nan",
+          "AREA_OR_POINT": "Area"
+        },
+        "checks_against_spherical_projection": [
+          {
+            "lon_deg": 0,
+            "lat_deg": -85,
+            "x_m": 0.0,
+            "y_m": 151713.04441849753,
+            "error_m": 0.0
+          },
+          {
+            "lon_deg": 90,
+            "lat_deg": -85,
+            "x_m": 151713.04441849753,
+            "y_m": 9.289744711800661e-12,
+            "error_m": 0.0
+          }
+        ],
+        "unit_from_source": "LOLA spots"
+      },
+      "stats": {
+        "valid_pixels": 10240000,
+        "nodata_pixels": 0,
+        "nodata_percent": 0.0,
+        "zero_percent_of_valid": 90.845888671875,
+        "min": 0.0,
+        "max": 5.0,
+        "mean": 0.09608525390625,
+        "std_population": 0.3102354621098649,
+        "percentiles": {
+          "1": 0.0,
+          "5": 0.0,
+          "25": 0.0,
+          "50": 0.0,
+          "75": 0.0,
+          "95": 1.0,
+          "99": 1.0
+        },
+        "percentile_method": "systematic sample of pixel centres",
+        "percentile_stride_px": 6,
+        "percentile_n": 285156
+      }
+    },
+    {
+      "id": "Site04_roi",
+      "filename": "Site04_ROIs.tgz",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site04/Site04_ROIs.tgz",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "roi",
+      "unit": null,
+      "site": "Site04",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site04/Site04_ROIs.tgz",
+      "bytes": 1712,
+      "sha256": "8e8b788f9fdf6400f23fd36dad02138102bd1a905b4b71a5739a9a4fd8a0e07a",
+      "accessed_utc": "2026-11-07T03:42:46.596098+00:00",
+      "status": "PASS",
+      "http_headers": {
+        "Content-Length": "1712",
+        "ETag": "W/\"6b0-1761e69a240\"",
+        "Last-Modified": "Tue, 01 Dec 2020 13:06:48 GMT",
+        "Content-Type": "application/octet-stream"
+      },
+      "metadata": {
+        "validated_site_roi_id": "Site04_ROIs:2",
+        "crs_wkt": "PROJCRS[\"unnamed\",BASEGEOGCRS[\"unnamed ellipse\",DATUM[\"unknown\",ELLIPSOID[\"unnamed\",1737400,0,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]],CONVERSION[\"unnamed\",METHOD[\"Polar Stereographic (variant B)\",ID[\"EPSG\",9829]],PARAMETER[\"Latitude of standard parallel\",-90,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8832]],PARAMETER[\"Longitude of origin\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8833]],PARAMETER[\"False easting\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8806]],PARAMETER[\"False northing\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8807]]],CS[Cartesian,2],AXIS[\"easting\",north,ORDER[1],LENGTHUNIT[\"metre\",1]],AXIS[\"northing\",north,ORDER[2],LENGTHUNIT[\"metre\",1]]]"
+      }
+    },
+    {
+      "id": "dem80",
+      "filename": "LDEM_80S_80MPP_ADJ.TIF",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_80S_80MPP_ADJ.TIF",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/90",
+      "role": "dem",
+      "unit": "m",
+      "site": null,
+      "frame": "MOON_ME/DE421",
+      "nasa_display_size": "181M",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_80S_80MPP_ADJ.TIF",
+      "bytes": 189158392,
+      "sha256": "82030dcbdd7c4bb0c7d858e9b4b293b9f2cda5a543ba31ec0f42784bd6beee5a",
+      "accessed_utc": "2026-11-07T03:41:02.565467+00:00",
+      "status": "PASS",
+      "transfer": "ordered validated HTTP byte ranges",
+      "http_headers": {
+        "ETag": "W/\"b4653f8-189326141f0\"",
+        "Last-Modified": "Fri, 07 Jul 2023 22:03:02 GMT",
+        "Content-Type": "image/tiff",
+        "Accept-Ranges": "bytes",
+        "Content-Length": "189158392"
+      },
+      "metadata": {
+        "shape": [
+          7600,
+          7600
+        ],
+        "pixel_size_m": [
+          80.0,
+          80.0
+        ],
+        "affine": [
+          80.0,
+          0.0,
+          -304000.0,
+          0.0,
+          -80.0,
+          304000.0
+        ],
+        "bounds_xy_m": [
+          -304000.0,
+          -304000.0,
+          304000.0,
+          304000.0
+        ],
+        "crs_wkt": "PROJCRS[\"Moon (2015) - Sphere / Ocentric / South Polar\",BASEGEOGCRS[\"Moon (2015) - Sphere / Ocentric\",DATUM[\"Moon (2015) - Sphere\",ELLIPSOID[\"Moon (2015) - Sphere\",1737400,0,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Reference Meridian\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"IAU\",30100]],CONVERSION[\"unnamed\",METHOD[\"Polar Stereographic (variant B)\",ID[\"EPSG\",9829]],PARAMETER[\"Latitude of standard parallel\",-90,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8832]],PARAMETER[\"Longitude of origin\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8833]],PARAMETER[\"False easting\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8806]],PARAMETER[\"False northing\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8807]]],CS[Cartesian,2],AXIS[\"easting\",north,ORDER[1],LENGTHUNIT[\"metre\",1]],AXIS[\"northing\",north,ORDER[2],LENGTHUNIT[\"metre\",1]],ID[\"IAU\",30135]]",
+        "dtype": "float32",
+        "nodata": "NaN",
+        "scale": 1.0,
+        "offset": 0.0,
+        "pixel_registration": "Area",
+        "band_unit": null,
+        "tags": {
+          "NC_GLOBAL#Conventions": "CF-1.7",
+          "NC_GLOBAL#description": "Mean value per bin",
+          "NC_GLOBAL#GMT_version": "6.5.0_2402709_2023.01.09 [64-bit]",
+          "NC_GLOBAL#history": "gmt grdmath ldem_80s_final_adj_80mpp_surf.grd 1000.0 MUL = test.grd",
+          "NC_GLOBAL#node_offset": "1",
+          "NC_GLOBAL#title": "Produced by grdmath",
+          "x#actual_range": "{-304,304}",
+          "x#axis": "X",
+          "x#long_name": "x",
+          "y#actual_range": "{-304,304}",
+          "y#axis": "Y",
+          "y#long_name": "y",
+          "z#actual_range": "{-7295.51708984375,7026.3310546875}",
+          "z#long_name": "z",
+          "z#_FillValue": "nan",
+          "AREA_OR_POINT": "Area"
+        },
+        "checks_against_spherical_projection": [
+          {
+            "lon_deg": 0,
+            "lat_deg": -85,
+            "x_m": 0.0,
+            "y_m": 151713.04441849753,
+            "error_m": 0.0
+          },
+          {
+            "lon_deg": 90,
+            "lat_deg": -85,
+            "x_m": 151713.04441849753,
+            "y_m": 9.289744711800661e-12,
+            "error_m": 0.0
+          }
+        ],
+        "vertical_reference": "LOLA radial height above 1737400 m sphere (source lineage); MOON_ME/DE421",
+        "unit_from_source": "m"
+      },
+      "stats": {
+        "valid_pixels": 57760000,
+        "nodata_pixels": 0,
+        "nodata_percent": 0.0,
+        "zero_percent_of_valid": 0.0,
+        "min": -7295.51708984375,
+        "max": 7026.3310546875,
+        "mean": -1500.6467437345402,
+        "std_population": 2059.245365185769,
+        "percentiles": {
+          "1": -5361.378203125,
+          "5": -4551.3791015625,
+          "25": -2844.79833984375,
+          "50": -1720.2100830078125,
+          "75": -390.3418884277344,
+          "95": 2385.469775390624,
+          "99": 4313.244648437505
+        },
+        "percentile_method": "systematic sample of pixel centres",
+        "percentile_stride_px": 13,
+        "percentile_n": 342225
+      }
+    },
+    {
+      "id": "dem240",
+      "filename": "LDEM_60S_240MPP_ADJ.TIF",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_60S_240MPP_ADJ.TIF",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/90",
+      "role": "dem",
+      "unit": "m",
+      "site": null,
+      "frame": "MOON_ME/DE421",
+      "nasa_display_size": "210M",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_60S_240MPP_ADJ.TIF",
+      "bytes": 218961039,
+      "sha256": "3f9663257b63022f2b0d5a623482ff3cadddceb91594a4e4ca14a94d8cec8b34",
+      "accessed_utc": "2026-11-07T03:41:13.707820+00:00",
+      "status": "PASS",
+      "transfer": "ordered validated HTTP byte ranges",
+      "http_headers": {
+        "ETag": "W/\"d0d148f-18932623038\"",
+        "Last-Modified": "Fri, 07 Jul 2023 22:04:03 GMT",
+        "Content-Type": "image/tiff",
+        "Accept-Ranges": "bytes",
+        "Content-Length": "218961039"
+      },
+      "metadata": {
+        "shape": [
+          7760,
+          7760
+        ],
+        "pixel_size_m": [
+          240.0,
+          240.0
+        ],
+        "affine": [
+          240.0,
+          0.0,
+          -931200.0,
+          0.0,
+          -240.0,
+          931200.0
+        ],
+        "bounds_xy_m": [
+          -931200.0,
+          -931200.0,
+          931200.0,
+          931200.0
+        ],
+        "crs_wkt": "PROJCRS[\"Moon (2015) - Sphere / Ocentric / South Polar\",BASEGEOGCRS[\"Moon (2015) - Sphere / Ocentric\",DATUM[\"Moon (2015) - Sphere\",ELLIPSOID[\"Moon (2015) - Sphere\",1737400,0,LENGTHUNIT[\"metre\",1]]],PRIMEM[\"Reference Meridian\",0,ANGLEUNIT[\"degree\",0.0174532925199433]],ID[\"IAU\",30100]],CONVERSION[\"unnamed\",METHOD[\"Polar Stereographic (variant B)\",ID[\"EPSG\",9829]],PARAMETER[\"Latitude of standard parallel\",-90,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8832]],PARAMETER[\"Longitude of origin\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8833]],PARAMETER[\"False easting\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8806]],PARAMETER[\"False northing\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8807]]],CS[Cartesian,2],AXIS[\"easting\",north,ORDER[1],LENGTHUNIT[\"metre\",1]],AXIS[\"northing\",north,ORDER[2],LENGTHUNIT[\"metre\",1]],ID[\"IAU\",30135]]",
+        "dtype": "float32",
+        "nodata": "NaN",
+        "scale": 1.0,
+        "offset": 0.0,
+        "pixel_registration": "Area",
+        "band_unit": null,
+        "tags": {
+          "NC_GLOBAL#Conventions": "CF-1.7",
+          "NC_GLOBAL#description": "Mean value per bin",
+          "NC_GLOBAL#GMT_version": "6.5.0_2402709_2023.01.09 [64-bit]",
+          "NC_GLOBAL#history": "gmt grdmath ldem_60s_final_adj_240mpp_surf.grd 1000.0 MUL = test.grd",
+          "NC_GLOBAL#node_offset": "1",
+          "NC_GLOBAL#title": "Produced by grdmath",
+          "x#actual_range": "{-931.2,931.2}",
+          "x#axis": "X",
+          "x#long_name": "x",
+          "y#actual_range": "{-931.2,931.2}",
+          "y#axis": "Y",
+          "y#long_name": "y",
+          "z#actual_range": "{-9127.1142578125,7024.77001953125}",
+          "z#long_name": "z",
+          "z#_FillValue": "nan",
+          "AREA_OR_POINT": "Area"
+        },
+        "checks_against_spherical_projection": [
+          {
+            "lon_deg": 0,
+            "lat_deg": -85,
+            "x_m": 0.0,
+            "y_m": 151713.04441849753,
+            "error_m": 0.0
+          },
+          {
+            "lon_deg": 90,
+            "lat_deg": -85,
+            "x_m": 151713.04441849753,
+            "y_m": 9.289744711800661e-12,
+            "error_m": 0.0
+          }
+        ],
+        "vertical_reference": "LOLA radial height above 1737400 m sphere (source lineage); MOON_ME/DE421",
+        "unit_from_source": "m"
+      },
+      "stats": {
+        "valid_pixels": 60217600,
+        "nodata_pixels": 0,
+        "nodata_percent": 0.0,
+        "zero_percent_of_valid": 0.0,
+        "min": -9127.1142578125,
+        "max": 7024.77001953125,
+        "mean": -1451.9356475520788,
+        "std_population": 2344.9994634592726,
+        "percentiles": {
+          "1": -6934.03140625,
+          "5": -5287.1283203125,
+          "25": -3137.2080078125,
+          "50": -1243.694091796875,
+          "75": 112.1715087890625,
+          "95": 2300.4433105468747,
+          "99": 3934.987783203127
+        },
+        "percentile_method": "systematic sample of pixel centres",
+        "percentile_stride_px": 14,
+        "percentile_n": 308025
+      }
+    }
+  ],
+  "horizons": [
+    {
+      "name": "Site01_P1_sun_5min_cf2d5a7a2d1c",
+      "identity": {
+        "method_version": "0.1.0",
+        "site_id": "Site01_P1",
+        "dataset_sha256": "3ba7b97cb00a2bcf21189c3aeb535f65afc21207154ab9f0d43c5bdc1f7e747e",
+        "observer_height_m": 1,
+        "endpoint": "https://ssd.jpl.nasa.gov/api/horizons.api",
+        "params": {
+          "format": "json",
+          "COMMAND": "'10'",
+          "OBJ_DATA": "'NO'",
+          "MAKE_EPHEM": "'YES'",
+          "EPHEM_TYPE": "'OBSERVER'",
+          "CENTER": "'coord@301'",
+          "COORD_TYPE": "'GEODETIC'",
+          "SITE_COORD": "'222.904021926,-89.438926465,1.959321167'",
+          "START_TIME": "'2026-11-14 00:00:00'",
+          "STOP_TIME": "'2026-12-01 00:00:00'",
+          "STEP_SIZE": "'5 min'",
+          "QUANTITIES": "'4'",
+          "TIME_TYPE": "'UT'",
+          "TIME_DIGITS": "'SECONDS'",
+          "CSV_FORMAT": "'YES'",
+          "APPARENT": "'AIRLESS'",
+          "ANG_FORMAT": "'DEG'",
+          "SKIP_DAYLT": "'NO'",
+          "EXTRA_PREC": "'YES'",
+          "CAL_FORMAT": "'CAL'"
+        }
+      },
+      "url": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND=%2710%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40301%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27222.904021926%2C-89.438926465%2C1.959321167%27&START_TIME=%272026-11-14+00%3A00%3A00%27&STOP_TIME=%272026-12-01+00%3A00%3A00%27&STEP_SIZE=%275+min%27&QUANTITIES=%274%27&TIME_TYPE=%27UT%27&TIME_DIGITS=%27SECONDS%27&CSV_FORMAT=%27YES%27&APPARENT=%27AIRLESS%27&ANG_FORMAT=%27DEG%27&SKIP_DAYLT=%27NO%27&EXTRA_PREC=%27YES%27&CAL_FORMAT=%27CAL%27",
+      "accessed_utc": "2026-11-07T03:41:26.210070+00:00",
+      "raw_file": "raw/horizons/Site01_P1_sun_5min_cf2d5a7a2d1c.json",
+      "sha256": "828991efad8454b3f0da9c221edd217b579e951355e0cc84ff3f83b9326a7bb0",
+      "bytes": 315458,
+      "http_headers": {
+        "Date": "Sat, 07 Nov 2026 03:41:25 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": null,
+        "ETag": null
+      },
+      "signature": {
+        "version": "1.2",
+        "source": "NASA/JPL Horizons API"
+      },
+      "target": 10,
+      "observer_lon_e_deg": 222.9040219,
+      "observer_lat_deg": -89.4389265,
+      "observer_alt_km": 1.95932,
+      "observer_frame": "MEAN_ME (high precision)        {East-longitude positive}",
+      "observer_radii_m": [
+        1737400.0,
+        1737400.0,
+        1737400.0
+      ],
+      "angle_units": "degree",
+      "time_scale": "UTC",
+      "step_minutes": 5,
+      "expected_rows": 4897,
+      "received_rows": 4897,
+      "missing_timestamps": 0,
+      "missing_angles": 0,
+      "azimuth_min_deg": 57.173136095,
+      "azimuth_max_deg": 263.698584388,
+      "elevation_min_deg": 0.979928658,
+      "elevation_max_deg": 1.774349728,
+      "parsed_file": "processed/ephemeris/Site01_P1_sun_5min_cf2d5a7a2d1c.csv",
+      "header_file": "raw/horizons/Site01_P1_sun_5min_cf2d5a7a2d1c.header.txt"
+    },
+    {
+      "name": "Site01_P1_earth_5min_0d1dd7e592f9",
+      "identity": {
+        "method_version": "0.1.0",
+        "site_id": "Site01_P1",
+        "dataset_sha256": "3ba7b97cb00a2bcf21189c3aeb535f65afc21207154ab9f0d43c5bdc1f7e747e",
+        "observer_height_m": 2,
+        "endpoint": "https://ssd.jpl.nasa.gov/api/horizons.api",
+        "params": {
+          "format": "json",
+          "COMMAND": "'399'",
+          "OBJ_DATA": "'NO'",
+          "MAKE_EPHEM": "'YES'",
+          "EPHEM_TYPE": "'OBSERVER'",
+          "CENTER": "'coord@301'",
+          "COORD_TYPE": "'GEODETIC'",
+          "SITE_COORD": "'222.904021926,-89.438926465,1.960321167'",
+          "START_TIME": "'2026-11-14 00:00:00'",
+          "STOP_TIME": "'2026-12-01 00:00:00'",
+          "STEP_SIZE": "'5 min'",
+          "QUANTITIES": "'4'",
+          "TIME_TYPE": "'UT'",
+          "TIME_DIGITS": "'SECONDS'",
+          "CSV_FORMAT": "'YES'",
+          "APPARENT": "'AIRLESS'",
+          "ANG_FORMAT": "'DEG'",
+          "SKIP_DAYLT": "'NO'",
+          "EXTRA_PREC": "'YES'",
+          "CAL_FORMAT": "'CAL'"
+        }
+      },
+      "url": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND=%27399%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40301%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27222.904021926%2C-89.438926465%2C1.960321167%27&START_TIME=%272026-11-14+00%3A00%3A00%27&STOP_TIME=%272026-12-01+00%3A00%3A00%27&STEP_SIZE=%275+min%27&QUANTITIES=%274%27&TIME_TYPE=%27UT%27&TIME_DIGITS=%27SECONDS%27&CSV_FORMAT=%27YES%27&APPARENT=%27AIRLESS%27&ANG_FORMAT=%27DEG%27&SKIP_DAYLT=%27NO%27&EXTRA_PREC=%27YES%27&CAL_FORMAT=%27CAL%27",
+      "accessed_utc": "2026-11-07T03:41:27.044650+00:00",
+      "raw_file": "raw/horizons/Site01_P1_earth_5min_0d1dd7e592f9.json",
+      "sha256": "e6a1c754211ea91e312d1fd992349713ca3ae5c25f71406c5b20390be0c46d52",
+      "bytes": 315458,
+      "http_headers": {
+        "Date": "Sat, 07 Nov 2026 03:41:26 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": null,
+        "ETag": null
+      },
+      "signature": {
+        "version": "1.2",
+        "source": "NASA/JPL Horizons API"
+      },
+      "target": 399,
+      "observer_lon_e_deg": 222.9040219,
+      "observer_lat_deg": -89.4389265,
+      "observer_alt_km": 1.96032,
+      "observer_frame": "MEAN_ME (high precision)        {East-longitude positive}",
+      "observer_radii_m": [
+        1737400.0,
+        1737400.0,
+        1737400.0
+      ],
+      "angle_units": "degree",
+      "time_scale": "UTC",
+      "step_minutes": 5,
+      "expected_rows": 4897,
+      "received_rows": 4897,
+      "missing_timestamps": 0,
+      "missing_angles": 0,
+      "azimuth_min_deg": 129.877961762,
+      "azimuth_max_deg": 143.756400865,
+      "elevation_min_deg": -5.050998541,
+      "elevation_max_deg": 5.865484693,
+      "parsed_file": "processed/ephemeris/Site01_P1_earth_5min_0d1dd7e592f9.csv",
+      "header_file": "raw/horizons/Site01_P1_earth_5min_0d1dd7e592f9.header.txt"
+    },
+    {
+      "name": "Site01_P1_sun_1min_2b05fa08baa7",
+      "identity": {
+        "method_version": "0.1.0",
+        "site_id": "Site01_P1",
+        "dataset_sha256": "3ba7b97cb00a2bcf21189c3aeb535f65afc21207154ab9f0d43c5bdc1f7e747e",
+        "observer_height_m": 1,
+        "endpoint": "https://ssd.jpl.nasa.gov/api/horizons.api",
+        "params": {
+          "format": "json",
+          "COMMAND": "'10'",
+          "OBJ_DATA": "'NO'",
+          "MAKE_EPHEM": "'YES'",
+          "EPHEM_TYPE": "'OBSERVER'",
+          "CENTER": "'coord@301'",
+          "COORD_TYPE": "'GEODETIC'",
+          "SITE_COORD": "'222.904021926,-89.438926465,1.959321167'",
+          "START_TIME": "'2026-11-14 00:00:00'",
+          "STOP_TIME": "'2026-11-17 00:00:00'",
+          "STEP_SIZE": "'1 min'",
+          "QUANTITIES": "'4'",
+          "TIME_TYPE": "'UT'",
+          "TIME_DIGITS": "'SECONDS'",
+          "CSV_FORMAT": "'YES'",
+          "APPARENT": "'AIRLESS'",
+          "ANG_FORMAT": "'DEG'",
+          "SKIP_DAYLT": "'NO'",
+          "EXTRA_PREC": "'YES'",
+          "CAL_FORMAT": "'CAL'"
+        }
+      },
+      "url": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND=%2710%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40301%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27222.904021926%2C-89.438926465%2C1.959321167%27&START_TIME=%272026-11-14+00%3A00%3A00%27&STOP_TIME=%272026-11-17+00%3A00%3A00%27&STEP_SIZE=%271+min%27&QUANTITIES=%274%27&TIME_TYPE=%27UT%27&TIME_DIGITS=%27SECONDS%27&CSV_FORMAT=%27YES%27&APPARENT=%27AIRLESS%27&ANG_FORMAT=%27DEG%27&SKIP_DAYLT=%27NO%27&EXTRA_PREC=%27YES%27&CAL_FORMAT=%27CAL%27",
+      "accessed_utc": "2026-11-07T03:42:35.147974+00:00",
+      "raw_file": "raw/horizons/Site01_P1_sun_1min_2b05fa08baa7.json",
+      "sha256": "5af08de9850184f7aa6db041d08ad8418fe0a2b27c89cf3dcd8f6569014cb15e",
+      "bytes": 279170,
+      "http_headers": {
+        "Date": "Sat, 07 Nov 2026 03:42:34 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": null,
+        "ETag": null
+      },
+      "signature": {
+        "version": "1.2",
+        "source": "NASA/JPL Horizons API"
+      },
+      "target": 10,
+      "observer_lon_e_deg": 222.9040219,
+      "observer_lat_deg": -89.4389265,
+      "observer_alt_km": 1.95932,
+      "observer_frame": "MEAN_ME (high precision)        {East-longitude positive}",
+      "observer_radii_m": [
+        1737400.0,
+        1737400.0,
+        1737400.0
+      ],
+      "angle_units": "degree",
+      "time_scale": "UTC",
+      "step_minutes": 1,
+      "expected_rows": 4321,
+      "received_rows": 4321,
+      "missing_timestamps": 0,
+      "missing_angles": 0,
+      "azimuth_min_deg": 227.163410183,
+      "azimuth_max_deg": 263.698584388,
+      "elevation_min_deg": 1.171854424,
+      "elevation_max_deg": 1.495093567,
+      "parsed_file": "processed/ephemeris/Site01_P1_sun_1min_2b05fa08baa7.csv",
+      "header_file": "raw/horizons/Site01_P1_sun_1min_2b05fa08baa7.header.txt"
+    },
+    {
+      "name": "Site01_P1_earth_1min_0e4b12e27d30",
+      "identity": {
+        "method_version": "0.1.0",
+        "site_id": "Site01_P1",
+        "dataset_sha256": "3ba7b97cb00a2bcf21189c3aeb535f65afc21207154ab9f0d43c5bdc1f7e747e",
+        "observer_height_m": 2,
+        "endpoint": "https://ssd.jpl.nasa.gov/api/horizons.api",
+        "params": {
+          "format": "json",
+          "COMMAND": "'399'",
+          "OBJ_DATA": "'NO'",
+          "MAKE_EPHEM": "'YES'",
+          "EPHEM_TYPE": "'OBSERVER'",
+          "CENTER": "'coord@301'",
+          "COORD_TYPE": "'GEODETIC'",
+          "SITE_COORD": "'222.904021926,-89.438926465,1.960321167'",
+          "START_TIME": "'2026-11-14 00:00:00'",
+          "STOP_TIME": "'2026-11-17 00:00:00'",
+          "STEP_SIZE": "'1 min'",
+          "QUANTITIES": "'4'",
+          "TIME_TYPE": "'UT'",
+          "TIME_DIGITS": "'SECONDS'",
+          "CSV_FORMAT": "'YES'",
+          "APPARENT": "'AIRLESS'",
+          "ANG_FORMAT": "'DEG'",
+          "SKIP_DAYLT": "'NO'",
+          "EXTRA_PREC": "'YES'",
+          "CAL_FORMAT": "'CAL'"
+        }
+      },
+      "url": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND=%27399%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40301%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27222.904021926%2C-89.438926465%2C1.960321167%27&START_TIME=%272026-11-14+00%3A00%3A00%27&STOP_TIME=%272026-11-17+00%3A00%3A00%27&STEP_SIZE=%271+min%27&QUANTITIES=%274%27&TIME_TYPE=%27UT%27&TIME_DIGITS=%27SECONDS%27&CSV_FORMAT=%27YES%27&APPARENT=%27AIRLESS%27&ANG_FORMAT=%27DEG%27&SKIP_DAYLT=%27NO%27&EXTRA_PREC=%27YES%27&CAL_FORMAT=%27CAL%27",
+      "accessed_utc": "2026-11-07T03:42:35.929687+00:00",
+      "raw_file": "raw/horizons/Site01_P1_earth_1min_0e4b12e27d30.json",
+      "sha256": "bf11e700ff53293e8f27f0edaac3909ae18eacbc417d4508df23705eeecae87f",
+      "bytes": 279170,
+      "http_headers": {
+        "Date": "Sat, 07 Nov 2026 03:42:35 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": null,
+        "ETag": null
+      },
+      "signature": {
+        "version": "1.2",
+        "source": "NASA/JPL Horizons API"
+      },
+      "target": 399,
+      "observer_lon_e_deg": 222.9040219,
+      "observer_lat_deg": -89.4389265,
+      "observer_alt_km": 1.96032,
+      "observer_frame": "MEAN_ME (high precision)        {East-longitude positive}",
+      "observer_radii_m": [
+        1737400.0,
+        1737400.0,
+        1737400.0
+      ],
+      "angle_units": "degree",
+      "time_scale": "UTC",
+      "step_minutes": 1,
+      "expected_rows": 4321,
+      "received_rows": 4321,
+      "missing_timestamps": 0,
+      "missing_angles": 0,
+      "azimuth_min_deg": 131.874291952,
+      "azimuth_max_deg": 135.837147195,
+      "elevation_min_deg": -5.050998541,
+      "elevation_max_deg": -1.34122466,
+      "parsed_file": "processed/ephemeris/Site01_P1_earth_1min_0e4b12e27d30.csv",
+      "header_file": "raw/horizons/Site01_P1_earth_1min_0e4b12e27d30.header.txt"
+    },
+    {
+      "name": "Site04_P1_sun_5min_a9308b181ba5",
+      "identity": {
+        "method_version": "0.1.0",
+        "site_id": "Site04_P1",
+        "dataset_sha256": "38ff70dbdf2f066c2cfa94a646c3a59d653ce7f6b4528b15fc1b43ee397ce758",
+        "observer_height_m": 1,
+        "endpoint": "https://ssd.jpl.nasa.gov/api/horizons.api",
+        "params": {
+          "format": "json",
+          "COMMAND": "'10'",
+          "OBJ_DATA": "'NO'",
+          "MAKE_EPHEM": "'YES'",
+          "EPHEM_TYPE": "'OBSERVER'",
+          "CENTER": "'coord@301'",
+          "COORD_TYPE": "'GEODETIC'",
+          "SITE_COORD": "'203.733786260,-89.779799557,1.738992188'",
+          "START_TIME": "'2026-11-14 00:00:00'",
+          "STOP_TIME": "'2026-12-01 00:00:00'",
+          "STEP_SIZE": "'5 min'",
+          "QUANTITIES": "'4'",
+          "TIME_TYPE": "'UT'",
+          "TIME_DIGITS": "'SECONDS'",
+          "CSV_FORMAT": "'YES'",
+          "APPARENT": "'AIRLESS'",
+          "ANG_FORMAT": "'DEG'",
+          "SKIP_DAYLT": "'NO'",
+          "EXTRA_PREC": "'YES'",
+          "CAL_FORMAT": "'CAL'"
+        }
+      },
+      "url": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND=%2710%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40301%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27203.733786260%2C-89.779799557%2C1.738992188%27&START_TIME=%272026-11-14+00%3A00%3A00%27&STOP_TIME=%272026-12-01+00%3A00%3A00%27&STEP_SIZE=%275+min%27&QUANTITIES=%274%27&TIME_TYPE=%27UT%27&TIME_DIGITS=%27SECONDS%27&CSV_FORMAT=%27YES%27&APPARENT=%27AIRLESS%27&ANG_FORMAT=%27DEG%27&SKIP_DAYLT=%27NO%27&EXTRA_PREC=%27YES%27&CAL_FORMAT=%27CAL%27",
+      "accessed_utc": "2026-11-07T03:42:51.621489+00:00",
+      "raw_file": "raw/horizons/Site04_P1_sun_5min_a9308b181ba5.json",
+      "sha256": "a2ac74d20b2b1f4afeee7a125142323727654e8ac0cefccbf875ae4ad5e41ec7",
+      "bytes": 315458,
+      "http_headers": {
+        "Date": "Sat, 07 Nov 2026 03:42:51 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": null,
+        "ETag": null
+      },
+      "signature": {
+        "version": "1.2",
+        "source": "NASA/JPL Horizons API"
+      },
+      "target": 10,
+      "observer_lon_e_deg": 203.7337863,
+      "observer_lat_deg": -89.7797996,
+      "observer_alt_km": 1.73899,
+      "observer_frame": "MEAN_ME (high precision)        {East-longitude positive}",
+      "observer_radii_m": [
+        1737400.0,
+        1737400.0,
+        1737400.0
+      ],
+      "angle_units": "degree",
+      "time_scale": "UTC",
+      "step_minutes": 5,
+      "expected_rows": 4897,
+      "received_rows": 4897,
+      "missing_timestamps": 0,
+      "missing_angles": 0,
+      "azimuth_min_deg": 76.335605395,
+      "azimuth_max_deg": 282.877754358,
+      "elevation_min_deg": 1.312169341,
+      "elevation_max_deg": 1.605692236,
+      "parsed_file": "processed/ephemeris/Site04_P1_sun_5min_a9308b181ba5.csv",
+      "header_file": "raw/horizons/Site04_P1_sun_5min_a9308b181ba5.header.txt"
+    },
+    {
+      "name": "Site04_P1_earth_5min_8c1ffb6d6238",
+      "identity": {
+        "method_version": "0.1.0",
+        "site_id": "Site04_P1",
+        "dataset_sha256": "38ff70dbdf2f066c2cfa94a646c3a59d653ce7f6b4528b15fc1b43ee397ce758",
+        "observer_height_m": 2,
+        "endpoint": "https://ssd.jpl.nasa.gov/api/horizons.api",
+        "params": {
+          "format": "json",
+          "COMMAND": "'399'",
+          "OBJ_DATA": "'NO'",
+          "MAKE_EPHEM": "'YES'",
+          "EPHEM_TYPE": "'OBSERVER'",
+          "CENTER": "'coord@301'",
+          "COORD_TYPE": "'GEODETIC'",
+          "SITE_COORD": "'203.733786260,-89.779799557,1.739992187'",
+          "START_TIME": "'2026-11-14 00:00:00'",
+          "STOP_TIME": "'2026-12-01 00:00:00'",
+          "STEP_SIZE": "'5 min'",
+          "QUANTITIES": "'4'",
+          "TIME_TYPE": "'UT'",
+          "TIME_DIGITS": "'SECONDS'",
+          "CSV_FORMAT": "'YES'",
+          "APPARENT": "'AIRLESS'",
+          "ANG_FORMAT": "'DEG'",
+          "SKIP_DAYLT": "'NO'",
+          "EXTRA_PREC": "'YES'",
+          "CAL_FORMAT": "'CAL'"
+        }
+      },
+      "url": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND=%27399%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40301%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27203.733786260%2C-89.779799557%2C1.739992187%27&START_TIME=%272026-11-14+00%3A00%3A00%27&STOP_TIME=%272026-12-01+00%3A00%3A00%27&STEP_SIZE=%275+min%27&QUANTITIES=%274%27&TIME_TYPE=%27UT%27&TIME_DIGITS=%27SECONDS%27&CSV_FORMAT=%27YES%27&APPARENT=%27AIRLESS%27&ANG_FORMAT=%27DEG%27&SKIP_DAYLT=%27NO%27&EXTRA_PREC=%27YES%27&CAL_FORMAT=%27CAL%27",
+      "accessed_utc": "2026-11-07T03:42:52.401352+00:00",
+      "raw_file": "raw/horizons/Site04_P1_earth_5min_8c1ffb6d6238.json",
+      "sha256": "0e4f919b82de43abbc5a7ef498f4cfee13bfe7204d123cc5299aedbfb187014a",
+      "bytes": 315458,
+      "http_headers": {
+        "Date": "Sat, 07 Nov 2026 03:42:52 GMT",
+        "Content-Type": "application/json",
+        "Content-Length": null,
+        "ETag": null
+      },
+      "signature": {
+        "version": "1.2",
+        "source": "NASA/JPL Horizons API"
+      },
+      "target": 399,
+      "observer_lon_e_deg": 203.7337863,
+      "observer_lat_deg": -89.7797996,
+      "observer_alt_km": 1.73999,
+      "observer_frame": "MEAN_ME (high precision)        {East-longitude positive}",
+      "observer_radii_m": [
+        1737400.0,
+        1737400.0,
+        1737400.0
+      ],
+      "angle_units": "degree",
+      "time_scale": "UTC",
+      "step_minutes": 5,
+      "expected_rows": 4897,
+      "received_rows": 4897,
+      "missing_timestamps": 0,
+      "missing_angles": 0,
+      "azimuth_min_deg": 149.029382345,
+      "azimuth_max_deg": 162.934103004,
+      "elevation_min_deg": -4.848067143,
+      "elevation_max_deg": 6.05708175,
+      "parsed_file": "processed/ephemeris/Site04_P1_earth_5min_8c1ffb6d6238.csv",
+      "header_file": "raw/horizons/Site04_P1_earth_5min_8c1ffb6d6238.header.txt"
+    }
+  ]
+}

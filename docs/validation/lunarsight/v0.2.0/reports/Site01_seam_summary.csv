@@ -1,0 +1,3 @@
+fine,coarse,switch_min_m,switch_max_m,azimuth_phase_deg,method,paired,sampled,median_signed_m,p95_abs_m,p95_abs_angle_deg,accepted_for_model
+5m,80m,6500.0,6500.0,0.0,fixed,7920,7920,-0.05035400390625,10.6463165283203,0.09173706899568392,True
+80m,240m,200000.0,200000.0,0.0,fixed,7920,7920,-0.092041015625,31.806066894531245,0.009106160388514039,True

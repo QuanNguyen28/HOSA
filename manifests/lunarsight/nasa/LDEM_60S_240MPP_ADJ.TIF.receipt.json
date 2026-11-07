@@ -1,0 +1,24 @@
+{
+  "id": "dem240",
+  "filename": "LDEM_60S_240MPP_ADJ.TIF",
+  "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_60S_240MPP_ADJ.TIF",
+  "source_page": "https://pgda.gsfc.nasa.gov/products/90",
+  "role": "dem",
+  "unit": "m",
+  "site": null,
+  "frame": "MOON_ME/DE421",
+  "nasa_display_size": "210M",
+  "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_60S_240MPP_ADJ.TIF",
+  "bytes": 218961039,
+  "sha256": "3f9663257b63022f2b0d5a623482ff3cadddceb91594a4e4ca14a94d8cec8b34",
+  "accessed_utc": "2026-11-07T03:41:13.707820+00:00",
+  "status": "VERIFIED_BYTES",
+  "transfer": "ordered validated HTTP byte ranges",
+  "http_headers": {
+    "ETag": "W/\"d0d148f-18932623038\"",
+    "Last-Modified": "Fri, 07 Jul 2023 22:04:03 GMT",
+    "Content-Type": "image/tiff",
+    "Accept-Ranges": "bytes",
+    "Content-Length": "218961039"
+  }
+}

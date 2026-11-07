@@ -1,0 +1,156 @@
+{
+  "pipeline_status": "PARTIAL",
+  "provider": "Kaggle",
+  "started_utc": "2026-11-07T03:40:00.962340+00:00",
+  "finished_utc": "2026-11-07T03:42:53.966741+00:00",
+  "method_version": "0.1.0",
+  "scenario_status": "PROVISIONAL",
+  "scenario_utc": "2026-11-14T00:00:00Z",
+  "steps": {
+    "synthetic_tests": {
+      "status": "PASS",
+      "detail": "17 passed, 2 warnings in 1.87s"
+    },
+    "source_Site01_count": {
+      "status": "PASS",
+      "bytes": 40980744,
+      "sha256": "16d6ed21020ad48fa71d94e7437492acf5bf04118f52bcd292f57f22ead4cd23"
+    },
+    "source_Site01_dem": {
+      "status": "PASS",
+      "bytes": 40980810,
+      "sha256": "3ba7b97cb00a2bcf21189c3aeb535f65afc21207154ab9f0d43c5bdc1f7e747e"
+    },
+    "source_Site01_error": {
+      "status": "PASS",
+      "bytes": 40980810,
+      "sha256": "cf2cf52f52d2aa51e60d058010d10b0ebfb1d3e920f5a2b9a46eb6c51054ab1c"
+    },
+    "source_Site01_roi": {
+      "status": "PASS",
+      "bytes": 2934,
+      "sha256": "40b961417a344ce0274aecbab522e171a22f658507d82e8fb4d7bc97526ffc4f"
+    },
+    "source_dem240": {
+      "status": "PASS",
+      "bytes": 218961039,
+      "sha256": "3f9663257b63022f2b0d5a623482ff3cadddceb91594a4e4ca14a94d8cec8b34"
+    },
+    "source_dem80": {
+      "status": "PASS",
+      "bytes": 189158392,
+      "sha256": "82030dcbdd7c4bb0c7d858e9b4b293b9f2cda5a543ba31ec0f42784bd6beee5a"
+    },
+    "source_p78_readme": {
+      "status": "PASS",
+      "bytes": 1829,
+      "sha256": "e985a2337c9de1cd665b0ddad8b7f1fac88d65c96d1e47d1b975a91c8e53e7bd"
+    },
+    "dem80_eda": {
+      "status": "PASS"
+    },
+    "dem240_eda": {
+      "status": "PASS"
+    },
+    "Site01_site_catalog": {
+      "status": "PASS",
+      "site_id": "Site01_P1",
+      "roi": "Site01_ROIs:0"
+    },
+    "Site01_dem_eda": {
+      "status": "PASS"
+    },
+    "Site01_ephemeris": {
+      "status": "PASS",
+      "rows_per_target": 4897,
+      "boundary_utc": "2026-12-01 00:00:00+00:00"
+    },
+    "Site01_geometry": {
+      "status": "PASS",
+      "scan_radii_m": [
+        6500,
+        200000,
+        400000
+      ],
+      "checks": {
+        "1": {
+          "checks": 170,
+          "max_delta_el_deg": 6.644236272279613e-10,
+          "max_delta_az_deg": 2.284821221110178e-09
+        },
+        "2": {
+          "checks": 170,
+          "max_delta_el_deg": 2.7634694532707726e-10,
+          "max_delta_az_deg": 1.7041656974470243e-10
+        }
+      },
+      "covered_pct": {
+        "1": 100.0,
+        "2": 100.0
+      }
+    },
+    "Site01_visibility": {
+      "status": "PASS",
+      "detail": "Executed under the provisional scenario; sampled model only",
+      "start_count": 1344,
+      "states": {
+        "sun_state": {
+          "V": 4896
+        },
+        "earth_state": {
+          "V": 3956,
+          "B": 940
+        },
+        "joint_state": {
+          "V": 3956,
+          "B": 940
+        }
+      }
+    },
+    "Site01_sensitivity": {
+      "status": "PASS",
+      "detail": "Measured both angular steps, both time steps and both radii; tolerance values provisional"
+    },
+    "Site01_pipeline": {
+      "status": "PASS"
+    },
+    "source_Site04_count": {
+      "status": "PASS",
+      "bytes": 40980740,
+      "sha256": "fcc8c2219ae2368d5b2a1f6aec05fcf96cf725f3035ac8d80efc312a4ff29227"
+    },
+    "source_Site04_dem": {
+      "status": "PASS",
+      "bytes": 40980806,
+      "sha256": "38ff70dbdf2f066c2cfa94a646c3a59d653ce7f6b4528b15fc1b43ee397ce758"
+    },
+    "source_Site04_error": {
+      "status": "PASS",
+      "bytes": 40980808,
+      "sha256": "416c4baa3b64def0182bb3379a1a9228482efd8ce32a39309ea8de5d0330fbe6"
+    },
+    "source_Site04_roi": {
+      "status": "PASS",
+      "bytes": 1712,
+      "sha256": "8e8b788f9fdf6400f23fd36dad02138102bd1a905b4b71a5739a9a4fd8a0e07a"
+    },
+    "Site04_site_catalog": {
+      "status": "PASS",
+      "site_id": "Site04_P1",
+      "roi": "Site04_ROIs:2"
+    },
+    "Site04_dem_eda": {
+      "status": "PASS"
+    },
+    "Site04_ephemeris": {
+      "status": "PASS",
+      "rows_per_target": 4897,
+      "boundary_utc": "2026-12-01 00:00:00+00:00"
+    },
+    "Site04_pipeline": {
+      "status": "FAIL",
+      "detail": "ValueError: Seam failed provisional acceptance: {'fine': '5m', 'coarse': '80m', 'switch_m': 5500, 'paired': 7920, 'sampled': 7920, 'median_signed_m': 0.083251953125, 'p95_abs_m': 20.956539154052734, 'p95_abs_angle_deg': 0.1886725754396632}"
+    }
+  },
+  "note": "Kaggle version status is external to Python and must be verified in the UI or CLI."
+}

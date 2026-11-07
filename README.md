@@ -13,7 +13,7 @@ Bộ khung này tách rõ các lớp dữ liệu, tính toán và giao diện đ
 5. tính visibility, metric và mission windows;
 6. kết nối giao diện Explore, Compare và Plan.
 
-Trong giai đoạn đầu, repository chỉ cam kết API health và cấu trúc module. Chưa đưa tọa độ thật, kết quả tính hoặc token dịch vụ vào mã nguồn.
+Pipeline dữ liệu đã chạy cho Site01 và Site04 trên Kaggle. Kết quả mẫu dùng kịch bản `PROVISIONAL` bắt đầu ngày 14/11/2026 UTC. Xem [dữ liệu, cách chạy lại và bằng chứng kiểm định](docs/validation/lunarsight/README.md).
 
 ## Cấu trúc
 
@@ -32,12 +32,12 @@ HOSA/
 │   └── package.json
 ├── data/
 │   ├── raw/                  # dữ liệu gốc, bất biến, không commit
-│   ├── processed/            # dữ liệu chuẩn hóa, có version
-│   └── cache/                # cache Horizons và kết quả tính
+│   ├── processed/            # dữ liệu chuẩn hóa và kết quả phiên bản v0.2.0
+│   └── cache/                # snapshot phản hồi Horizons và thư mục chạy cục bộ
 ├── manifests/                # catalog, checksum, request config
-├── scripts/                  # script tải, kiểm tra và tạo cache
+├── scripts/                  # runner dữ liệu và notebook Kaggle
 ├── docs/                     # quyết định kỹ thuật, validation, giới hạn
-├── tests/                    # dành cho test về sau; chưa có test giả
+├── tests/                    # kiểm thử khoa học và fixture tổng hợp
 ├── .env.example
 ├── .gitignore
 └── Makefile
@@ -72,6 +72,7 @@ Kết quả mẫu:
 
 - `data/raw/` không sửa sau khi tải; mọi nguồn phải có bản ghi trong `manifests/datasets.csv`.
 - Không commit GeoTIFF lớn, credential hoặc response chứa thông tin nhạy cảm.
+- Dữ liệu xử lý và cache JPL đã kiểm định nằm trong snapshot `v0.2.0`. Dữ liệu NASA gốc được tải riêng từ [bản phát hành dữ liệu](https://github.com/QuanNguyen28/HOSA/releases/tag/lunarsight-data-v0.2.0).
 - Mọi thời gian dùng UTC ISO 8601; mọi góc dùng độ; đơn vị khoảng cách phải ghi trong schema.
 - Cache key phải bao gồm site, khoảng thời gian, bước lấy mẫu, tham số Horizons, dataset version và method version.
 - Không dùng kết quả placeholder làm kết quả khoa học.

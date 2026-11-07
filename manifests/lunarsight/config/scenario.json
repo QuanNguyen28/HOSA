@@ -1,0 +1,19 @@
+{
+  "scenario_id": "south_pole_demo_v1",
+  "status": "PROVISIONAL",
+  "A_utc": "2026-11-14T00:00:00Z",
+  "B_utc": "2026-11-28T00:00:00Z",
+  "end_utc": "2026-12-01T00:00:00Z",
+  "D_hours": 72,
+  "model_step_minutes": 5,
+  "start_step_minutes": 15,
+  "site_ids": [
+    "Site01_P1",
+    "Site04_P1"
+  ],
+  "geometry_version": "lunar-sphere-enu-v2",
+  "example_constraints": {
+    "max_darkness_hours": 12,
+    "max_earth_blackout_hours": 6
+  }
+}

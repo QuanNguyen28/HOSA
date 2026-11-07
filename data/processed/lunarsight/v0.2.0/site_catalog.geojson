@@ -1,0 +1,71 @@
+{
+  "type": "FeatureCollection",
+  "lunar_reference": {
+    "frame": "MOON_ME/DE421",
+    "radius_m": 1737400.0,
+    "axis_order": "east longitude [-180,180), latitude; degrees",
+    "rfc7946_earth_crs": false
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "id": "Site01_P1",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -137.0959780737777,
+          -89.43892646479243
+        ]
+      },
+      "properties": {
+        "site_id": "Site01_P1",
+        "region": "Connecting Ridge",
+        "lon_e_deg": 222.90402192622227,
+        "lat_deg": -89.43892646479243,
+        "dem_z_m": 1958.3211669921875,
+        "roi_id": "Site01_ROIs:0",
+        "dataset_id": "Site01_dem",
+        "dem_sha256": "3ba7b97cb00a2bcf21189c3aeb535f65afc21207154ab9f0d43c5bdc1f7e747e",
+        "coverage_status": "VALID_ROI_PIXEL",
+        "pixel_row": 1692,
+        "pixel_col": 1483,
+        "x_m": -11582.5,
+        "y_m": -12462.5,
+        "roi_crs_wkt": "PROJCRS[\"unnamed\",BASEGEOGCRS[\"unnamed ellipse\",DATUM[\"unknown\",ELLIPSOID[\"unnamed\",1737400,0,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]],CONVERSION[\"unnamed\",METHOD[\"Polar Stereographic (variant B)\",ID[\"EPSG\",9829]],PARAMETER[\"Latitude of standard parallel\",-90,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8832]],PARAMETER[\"Longitude of origin\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8833]],PARAMETER[\"False easting\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8806]],PARAMETER[\"False northing\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8807]]],CS[Cartesian,2],AXIS[\"easting\",north,ORDER[1],LENGTHUNIT[\"metre\",1]],AXIS[\"northing\",north,ORDER[2],LENGTHUNIT[\"metre\",1]]]",
+        "selection": "First valid snapped interior centre from lexically sorted NASA ROI shapefiles; demo point",
+        "lola_spots_at_site": 0.0,
+        "elevation_rms_error_m_at_site": 0.4367169141769409
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "Site04_P1",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -156.26621373964247,
+          -89.77979955709672
+        ]
+      },
+      "properties": {
+        "site_id": "Site04_P1",
+        "region": "Shackleton Rim",
+        "lon_e_deg": 203.7337862603575,
+        "lat_deg": -89.77979955709672,
+        "dem_z_m": 1737.9921875,
+        "roi_id": "Site04_ROIs:2",
+        "dataset_id": "Site04_dem",
+        "dem_sha256": "38ff70dbdf2f066c2cfa94a646c3a59d653ce7f6b4528b15fc1b43ee397ce758",
+        "coverage_status": "VALID_ROI_PIXEL",
+        "pixel_row": 1422,
+        "pixel_col": 1262,
+        "x_m": -2687.5,
+        "y_m": -6112.5,
+        "roi_crs_wkt": "PROJCRS[\"unnamed\",BASEGEOGCRS[\"unnamed ellipse\",DATUM[\"unknown\",ELLIPSOID[\"unnamed\",1737400,0,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433,ID[\"EPSG\",9122]]]],CONVERSION[\"unnamed\",METHOD[\"Polar Stereographic (variant B)\",ID[\"EPSG\",9829]],PARAMETER[\"Latitude of standard parallel\",-90,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8832]],PARAMETER[\"Longitude of origin\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8833]],PARAMETER[\"False easting\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8806]],PARAMETER[\"False northing\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8807]]],CS[Cartesian,2],AXIS[\"easting\",north,ORDER[1],LENGTHUNIT[\"metre\",1]],AXIS[\"northing\",north,ORDER[2],LENGTHUNIT[\"metre\",1]]]",
+        "selection": "First valid snapped interior centre from lexically sorted NASA ROI shapefiles; demo point",
+        "lola_spots_at_site": 0.0,
+        "elevation_rms_error_m_at_site": 0.1291041076183319
+      }
+    }
+  ]
+}

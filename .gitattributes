@@ -1,0 +1,2 @@
+# Keep archived response bytes identical to their SHA-256 receipts on checkout.
+data/cache/lunarsight/v0.2.0/raw/horizons/** -text
