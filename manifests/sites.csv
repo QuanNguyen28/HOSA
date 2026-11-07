@@ -1,0 +1,3 @@
+site_id,display_name,source,projected_x_m,projected_y_m,longitude_east_deg,latitude_deg,surface_elevation_m,dem_dataset_id,roi_id,coverage_status,notes
+SITE01,Connecting Ridge,,,,,,,DEM-SITE01-V1,,pending_validation,Chỉ là mã site chờ kiểm tra dữ liệu
+SITE04,Shackleton Rim,,,,,,,DEM-SITE04-V1,,pending_validation,Chỉ là mã site chờ kiểm tra dữ liệu
