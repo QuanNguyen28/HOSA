@@ -57,7 +57,7 @@ class DEM:
         x,y=np.broadcast_arrays(x,y)
         shape=x.shape; x,y=x.ravel(),y.ravel()
         finite=np.isfinite(x)&np.isfinite(y)
-        cols,rows=(~self.ds.transform)*(np.where(finite,x,0.),np.where(finite,y,0.))
+        cols,rows=(~self.ds.transform) @ (np.where(finite,x,0.),np.where(finite,y,0.))
         rr,cc=np.floor(rows).astype("int64"),np.floor(cols).astype("int64")
         good=np.flatnonzero(finite&(rr>=0)&(rr<self.ds.height)&(cc>=0)&(cc<self.ds.width))
         out=np.full(x.shape,np.nan)

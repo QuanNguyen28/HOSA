@@ -1,0 +1,43 @@
+{
+  "name": "Site04_P1_earth_1min_3d03274224c4",
+  "identity": {
+    "method_version": "0.1.0",
+    "site_id": "Site04_P1",
+    "dataset_sha256": "38ff70dbdf2f066c2cfa94a646c3a59d653ce7f6b4528b15fc1b43ee397ce758",
+    "observer_height_m": 2,
+    "endpoint": "https://ssd.jpl.nasa.gov/api/horizons.api",
+    "params": {
+      "format": "json",
+      "COMMAND": "'399'",
+      "OBJ_DATA": "'NO'",
+      "MAKE_EPHEM": "'YES'",
+      "EPHEM_TYPE": "'OBSERVER'",
+      "CENTER": "'coord@301'",
+      "COORD_TYPE": "'GEODETIC'",
+      "SITE_COORD": "'203.733786260,-89.779799557,1.739992187'",
+      "START_TIME": "'2026-11-14 00:00:00'",
+      "STOP_TIME": "'2026-11-17 00:00:00'",
+      "STEP_SIZE": "'1 min'",
+      "QUANTITIES": "'4'",
+      "TIME_TYPE": "'UT'",
+      "TIME_DIGITS": "'SECONDS'",
+      "CSV_FORMAT": "'YES'",
+      "APPARENT": "'AIRLESS'",
+      "ANG_FORMAT": "'DEG'",
+      "SKIP_DAYLT": "'NO'",
+      "EXTRA_PREC": "'YES'",
+      "CAL_FORMAT": "'CAL'"
+    }
+  },
+  "url": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND=%27399%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40301%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27203.733786260%2C-89.779799557%2C1.739992187%27&START_TIME=%272026-11-14+00%3A00%3A00%27&STOP_TIME=%272026-11-17+00%3A00%3A00%27&STEP_SIZE=%271+min%27&QUANTITIES=%274%27&TIME_TYPE=%27UT%27&TIME_DIGITS=%27SECONDS%27&CSV_FORMAT=%27YES%27&APPARENT=%27AIRLESS%27&ANG_FORMAT=%27DEG%27&SKIP_DAYLT=%27NO%27&EXTRA_PREC=%27YES%27&CAL_FORMAT=%27CAL%27",
+  "accessed_utc": "2026-11-09T08:54:23.323953+00:00",
+  "raw_file": "raw/horizons/Site04_P1_earth_1min_3d03274224c4.json",
+  "sha256": "ae5903fe56698b28b4710159a06441b2be2711809fe19948cd1e8084cb67d098",
+  "bytes": 279170,
+  "http_headers": {
+    "Date": "Mon, 09 Nov 2026 08:54:22 GMT",
+    "Content-Type": "application/json",
+    "Content-Length": null,
+    "ETag": null
+  }
+}

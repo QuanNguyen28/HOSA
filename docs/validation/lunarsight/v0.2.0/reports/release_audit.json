@@ -1,0 +1,346 @@
+{
+  "schema_version": "lunarsight-release-audit-v1",
+  "generated_utc": "2026-11-09T09:06:27.849730+00:00",
+  "release": {
+    "dataset_version": "v0.2.0",
+    "scenario_id": "south_pole_demo_v1"
+  },
+  "technical_status": "PASS",
+  "external_gates": [
+    {
+      "id": "G0_APPROVAL",
+      "status": "PENDING",
+      "evidence": "docs/approvals/g0-signoff.md"
+    },
+    {
+      "id": "OPEN_SOURCE_LICENSE",
+      "status": "PENDING",
+      "evidence": "docs/submission/2026-official-requirements.md"
+    },
+    {
+      "id": "USER_TEST_3_TO_5",
+      "status": "NOT_RUN",
+      "evidence": "docs/validation/lunarsight/v0.2.0/user_test_results.md"
+    },
+    {
+      "id": "EVENT_SUBMISSION",
+      "status": "PENDING",
+      "evidence": "docs/release-checklist.md"
+    }
+  ],
+  "git": {
+    "commit": "ef6aa9e6630f3e78c94200bb8eb881f6338b0177",
+    "branch": "feature/lunarsight-data",
+    "dirty": true,
+    "changed_path_count": 44
+  },
+  "summary": {
+    "checks": 39,
+    "passed": 39,
+    "failed": 0
+  },
+  "checks": [
+    {
+      "id": "file:manifests/lunarsight/config/scenario.json",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "id": "file:manifests/lunarsight/config/geometry_config.json",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "id": "file:manifests/lunarsight/source_manifest.json",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "id": "scenario:locked_fields",
+      "status": "PASS",
+      "detail": "{\"D_hours\": 72, \"model_step_minutes\": 5, \"scenario_id\": \"south_pole_demo_v1\", \"site_ids\": [\"Site01_P1\", \"Site04_P1\"], \"start_step_minutes\": 15, \"status\": \"PROVISIONAL\"}"
+    },
+    {
+      "id": "scenario:domain",
+      "status": "PASS",
+      "detail": "14-day start domain plus 72-hour tail"
+    },
+    {
+      "id": "geometry:locked_fields",
+      "status": "PASS",
+      "detail": "{\"antenna_height_m\": 2, \"panel_height_m\": 1, \"tol_duration_minutes\": 10, \"tol_event_minutes\": 5, \"tol_horizon_deg\": 0.1}"
+    },
+    {
+      "id": "provenance:records",
+      "status": "PASS",
+      "detail": "11 records; allowed statuses ['PASS', 'VERIFIED_BYTES']"
+    },
+    {
+      "id": "file:data/processed/lunarsight/v0.2.0/visibility/Site01_intervals.csv",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "id": "rows:Site01_intervals",
+      "status": "PASS",
+      "detail": "expected 4896; found 4896"
+    },
+    {
+      "id": "identity:Site01_intervals",
+      "status": "PASS",
+      "detail": "site=Site01_P1; scenario_status=PROVISIONAL"
+    },
+    {
+      "id": "grid:Site01_intervals",
+      "status": "PASS",
+      "detail": "continuous half-open 5-minute intervals"
+    },
+    {
+      "id": "file:data/processed/lunarsight/v0.2.0/visibility/Site01_windows.csv",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "id": "rows:Site01_windows",
+      "status": "PASS",
+      "detail": "expected 1344; found 1344"
+    },
+    {
+      "id": "identity:Site01_windows",
+      "status": "PASS",
+      "detail": "site=Site01_P1; scenario_status=PROVISIONAL"
+    },
+    {
+      "id": "grid:Site01_windows",
+      "status": "PASS",
+      "detail": "indices 0..1343; exact 15-minute starts; fixed 72-hour windows"
+    },
+    {
+      "id": "file:data/processed/lunarsight/v0.2.0/visibility/Site04_intervals.csv",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "id": "rows:Site04_intervals",
+      "status": "PASS",
+      "detail": "expected 4896; found 4896"
+    },
+    {
+      "id": "identity:Site04_intervals",
+      "status": "PASS",
+      "detail": "site=Site04_P1; scenario_status=PROVISIONAL"
+    },
+    {
+      "id": "grid:Site04_intervals",
+      "status": "PASS",
+      "detail": "continuous half-open 5-minute intervals"
+    },
+    {
+      "id": "file:data/processed/lunarsight/v0.2.0/visibility/Site04_windows.csv",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "id": "rows:Site04_windows",
+      "status": "PASS",
+      "detail": "expected 1344; found 1344"
+    },
+    {
+      "id": "identity:Site04_windows",
+      "status": "PASS",
+      "detail": "site=Site04_P1; scenario_status=PROVISIONAL"
+    },
+    {
+      "id": "grid:Site04_windows",
+      "status": "PASS",
+      "detail": "indices 0..1343; exact 15-minute starts; fixed 72-hour windows"
+    },
+    {
+      "id": "file:docs/validation/lunarsight/v0.2.0/reports/sensitivity.json",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "id": "file:docs/validation/lunarsight/v0.2.0/reports/Site04_sensitivity.json",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "id": "sensitivity:Site01",
+      "status": "PASS",
+      "detail": "5-minute and 1-minute decisions agree"
+    },
+    {
+      "id": "sensitivity:Site04",
+      "status": "PASS",
+      "detail": "independent 1-minute gate PASS and decisions agree"
+    },
+    {
+      "id": "file:data/processed/lunarsight/v0.2.0/site_catalog.geojson",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "id": "file:frontend/public/assets/nasa/lroc_color_2k.jpg",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "id": "file:frontend/public/assets/nasa/ldem_3_8bit.jpg",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "id": "file:docs/validation/lunarsight/v0.2.0/reports/scientific_validation.md",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "id": "file:docs/validation/lunarsight/v0.2.0/reports/application_acceptance.md",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "id": "file:docs/demo/lunarsight-demo-script.md",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "id": "file:docs/approvals/g0-signoff.md",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "id": "file:docs/submission/project-description-en.md",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "id": "file:docs/submission/2026-official-requirements.md",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "id": "file:docs/submission/media-shot-list.md",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "id": "file:docs/handover/release-handover.md",
+      "status": "PASS",
+      "detail": "present"
+    },
+    {
+      "id": "file:docs/validation/lunarsight/v0.2.0/user_test_results.md",
+      "status": "PASS",
+      "detail": "present"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "manifests/lunarsight/config/scenario.json",
+      "bytes": 443,
+      "sha256": "441bb47cb74434afb882ce4d5fb7dc8052cae5d264aaeb7cac78682e97e342e8"
+    },
+    {
+      "path": "manifests/lunarsight/config/geometry_config.json",
+      "bytes": 1795,
+      "sha256": "fcb0256783dc46d13dded69a0908979af18047eacd3e5dbd78f3d08e7958b7df"
+    },
+    {
+      "path": "manifests/lunarsight/source_manifest.json",
+      "bytes": 55484,
+      "sha256": "df15dd5a0e257d1622634ca8ca64c9802a12b3967ee90aee1e727cb721a5d53e"
+    },
+    {
+      "path": "data/processed/lunarsight/v0.2.0/visibility/Site01_intervals.csv",
+      "bytes": 1240800,
+      "sha256": "ae0416a458449f71f091f8a6ab7d292eeef6d76bb46ef448ba0e9e102373ffef"
+    },
+    {
+      "path": "data/processed/lunarsight/v0.2.0/visibility/Site01_windows.csv",
+      "bytes": 204358,
+      "sha256": "26a8998165e45c9e0e964d05ca54096c23b1a1c3349222a5a4415db60b5b2cb0"
+    },
+    {
+      "path": "data/processed/lunarsight/v0.2.0/visibility/Site04_intervals.csv",
+      "bytes": 1241857,
+      "sha256": "7326a7698ed95c68036b4aa9298aef5007c3f8cf082700a8ef047ddd0f798ed6"
+    },
+    {
+      "path": "data/processed/lunarsight/v0.2.0/visibility/Site04_windows.csv",
+      "bytes": 205230,
+      "sha256": "3e0fb146263ef44923fea07dc0984bb3eb096b576e7ff9b9dde71a7007d9ef97"
+    },
+    {
+      "path": "docs/validation/lunarsight/v0.2.0/reports/sensitivity.json",
+      "bytes": 4782,
+      "sha256": "6711e83d08d64056f848fec5b5dc327c926b7b1b9650c99106c1d0dc57cd7474"
+    },
+    {
+      "path": "docs/validation/lunarsight/v0.2.0/reports/Site04_sensitivity.json",
+      "bytes": 3756,
+      "sha256": "b7a716090f0f7b40a264c7ff4e580648d50d8589629ce3f9d1cf6973b7577d68"
+    },
+    {
+      "path": "data/processed/lunarsight/v0.2.0/site_catalog.geojson",
+      "bytes": 3776,
+      "sha256": "2c72dbf75723c0c528357cda2f641b384567448c97722f65ccb9548ab6a81065"
+    },
+    {
+      "path": "frontend/public/assets/nasa/lroc_color_2k.jpg",
+      "bytes": 457942,
+      "sha256": "f7130a1822681fa7512d7dcfd40db8c10b9ba4f06777910348698260ed7a2170"
+    },
+    {
+      "path": "frontend/public/assets/nasa/ldem_3_8bit.jpg",
+      "bytes": 111552,
+      "sha256": "6d93f887e7d8bedfe35ab89ba785e5e3ca12381bd092a5e6abe2c707dda8bb98"
+    },
+    {
+      "path": "docs/validation/lunarsight/v0.2.0/reports/scientific_validation.md",
+      "bytes": 1605,
+      "sha256": "389dc64a6d7f25b23351cb3328a5924c73c82fe26243ea9151035d022b5ab12b"
+    },
+    {
+      "path": "docs/validation/lunarsight/v0.2.0/reports/application_acceptance.md",
+      "bytes": 2684,
+      "sha256": "20e7f4faabb5a5a6af55b6a3ba67146e7fe5367b0e02d420f9fb0b8cf8f8cfcf"
+    },
+    {
+      "path": "docs/demo/lunarsight-demo-script.md",
+      "bytes": 3477,
+      "sha256": "21e0dca32ce98773bb8648becca5c8679707887060bd4117c592483dbbdc3714"
+    },
+    {
+      "path": "docs/approvals/g0-signoff.md",
+      "bytes": 4382,
+      "sha256": "a4104a17d6386cdfcd71fe67114ebb744d04b5fefc947693d4951b571cab1d24"
+    },
+    {
+      "path": "docs/submission/project-description-en.md",
+      "bytes": 4865,
+      "sha256": "44876f02e91c806af5cf6103b4790beb68e8f78dd63790aea03fa56529438e3b"
+    },
+    {
+      "path": "docs/submission/2026-official-requirements.md",
+      "bytes": 3398,
+      "sha256": "824478fbb512dedf19f4fcebdc03cadb178544847c79508d9ef7972bf9595696"
+    },
+    {
+      "path": "docs/submission/media-shot-list.md",
+      "bytes": 3484,
+      "sha256": "8b85725a39576a01e0f0acf3e1069f2e0f6a4fb3c5eb2f2bc8827b463bece2ea"
+    },
+    {
+      "path": "docs/handover/release-handover.md",
+      "bytes": 3637,
+      "sha256": "fbf6bffaa273fbf6ddc188b06095036d8ccc44dd970b19c4e62a9bcec4544d44"
+    },
+    {
+      "path": "docs/validation/lunarsight/v0.2.0/user_test_results.md",
+      "bytes": 2915,
+      "sha256": "dc2e6d1d649cef53fdac0daffa89fe54482f8dca7477e784fb0c1f1ca984c3dc"
+    }
+  ]
+}

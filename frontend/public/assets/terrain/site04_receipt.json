@@ -1,0 +1,48 @@
+{
+  "generated_utc": "2026-11-09T07:47:59.650637+00:00",
+  "source": "data/raw/Site04/Site04_final_adj_5mpp_surf.tif",
+  "source_sha256": "38ff70dbdf2f066c2cfa94a646c3a59d653ce7f6b4528b15fc1b43ee397ce758",
+  "source_metadata": {
+    "shape": [
+      3200,
+      3200
+    ],
+    "crs_wkt": "PROJCS[\"unnamed\",GEOGCS[\"unnamed ellipse\",DATUM[\"unknown\",SPHEROID[\"unnamed\",1737400,0]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]]],PROJECTION[\"Polar_Stereographic\"],PARAMETER[\"latitude_of_origin\",-90],PARAMETER[\"central_meridian\",0],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1],AXIS[\"Easting\",NORTH],AXIS[\"Northing\",NORTH]]",
+    "transform": [
+      5.0,
+      0.0,
+      -9000.0,
+      0.0,
+      -5.0,
+      1000.0
+    ],
+    "bounds": [
+      -9000.0,
+      -15000.0,
+      7000.0,
+      1000.0
+    ],
+    "nodata": "nan",
+    "source_range_m": [
+      -2847.877197265625,
+      1805.072631835938
+    ]
+  },
+  "parameters": {
+    "size": 1024,
+    "azimuth_deg": 315,
+    "altitude_deg": 38,
+    "height_encoding": "Byte linear scale of source elevation range"
+  },
+  "outputs": {
+    "site04_height.png": {
+      "bytes": 103442,
+      "sha256": "e5476b035d519f5a629f1cbe2c647dbc9b20e307d5ce8a6c1999d531b5209129"
+    },
+    "site04_hillshade.jpg": {
+      "bytes": 363402,
+      "sha256": "b7c648b0c1be1fe2f0686a410a1633b0904833837e965da043817ac92c583af7"
+    }
+  },
+  "scientific_use": false
+}
