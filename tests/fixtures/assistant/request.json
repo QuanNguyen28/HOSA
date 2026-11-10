@@ -1,0 +1,21 @@
+{
+  "text": "Lịch hạ cánh bị lùi ba ngày. Giữ phần cứng, đổi điểm trong vùng này, tối liên tục không quá 12 giờ.",
+  "baseline": {
+    "scenario_id": "south_pole_demo_v1",
+    "arrival_utc": "2026-11-14T00:00:00Z",
+    "duration_hours": 72,
+    "hardware": {
+      "sun_panel": 1,
+      "earth_antenna": 2
+    },
+    "constraints": {
+      "max_darkness_hours": 12,
+      "max_earth_blackout_hours": 6
+    },
+    "current_site_id": "Site01_P1"
+  },
+  "selected_site_ids": [
+    "Site01_P1",
+    "Site04_P1"
+  ]
+}
