@@ -295,7 +295,7 @@ function App() {
                       <div className="window-summary">
                         <div><span>72H DECISION</span><strong>{analysis.window_72h.decision}</strong></div>
                         <div><span>MAX DARK</span><strong>{analysis.window_72h.longest_dark_hours[1].toFixed(1)} h</strong></div>
-                        <div><span>MAX BLACKOUT</span><strong>{analysis.window_72h.longest_blackout_hours[1].toFixed(1)} h</strong></div>
+                        <div><span>TOTAL EARTH LOS</span><strong>{analysis.window_72h.total_earth_los_hours[0].toFixed(1)} h</strong></div>
                       </div>
                     ) : (
                       <p className="grid-only-note">72 h metrics require an exact 15-minute start. Use Compare to select a supported start index.</p>

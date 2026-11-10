@@ -1,35 +1,10 @@
-from datetime import datetime, timezone
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import Field, field_validator, model_validator
 
-Hours = Annotated[float, Field(strict=True, ge=0, le=72)]
-Decision = Literal["PASS", "FAIL", "INDETERMINATE"]
-Status = Literal["FEASIBLE", "NO_FEASIBLE_IN_EVALUATED_SET", "INSUFFICIENT_DATA"]
+from app.mission.models import (Contract, Constraints, Hardware, Hours, Fraction, Decision, Status, utc, MissionTarget, MissionRequest, ContactRequirements)
 
-
-def utc(value: str) -> datetime:
-    parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
-    if parsed.tzinfo is None:
-        raise ValueError("An explicit time zone is required")
-    return parsed.astimezone(timezone.utc)
-
-
-class Contract(BaseModel):
-    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
-
-
-class Constraints(Contract):
-    max_darkness_hours: Hours
-    max_earth_blackout_hours: Hours
-
-
-class Hardware(Contract):
-    sun_panel: Annotated[float, Field(strict=True, ge=0)]
-    earth_antenna: Annotated[float, Field(strict=True, ge=0)]
-
-
-RankMetric = Literal["longest_dark_hours", "longest_blackout_hours", "total_sun_hours", "longest_joint_hours"]
+RankMetric = Literal["total_sun_hours", "total_earth_los_hours", "longest_dark_hours", "longest_blackout_hours", "longest_joint_hours"]
 
 
 class RankRange(Contract):
@@ -54,20 +29,60 @@ class Candidate(Contract):
     events: list[dict] = Field(default_factory=list)
     metric_context: dict[str, dict] = Field(default_factory=dict)
     violations: list[dict] = Field(default_factory=list)
+    sensitivity: dict = Field(default_factory=dict)
+    soft_constraint_states: dict[str, Decision] = Field(default_factory=dict)
+    soft_violations: list[dict] = Field(default_factory=list)
+    nominal_sampled_decision: Decision | None = None
+    validation: dict = Field(default_factory=dict)
+    contact_analysis: dict | None = None
+    coordinate: dict | None = None
+    analysis_result_id: str | None = None
 
 
 
 class CompareRequest(Contract):
-    scenario_id: str
-    site_ids: list[str] = Field(min_length=1, max_length=2)
+    scenario_id: str = "south_pole_demo_v1"
+    site_ids: list[str] = Field(default_factory=list, max_length=20)
+    targets: list[MissionTarget] = Field(default_factory=list, max_length=20)
+    data_source: Literal["snapshot", "coordinate"] = "snapshot"
     arrival_utc: str
-    constraints: Constraints
-    min_sunlit_fraction: Annotated[float, Field(strict=True, ge=0, le=1)] | None = None
+    constraints: Constraints = Field(default_factory=Constraints)
+    min_sunlit_fraction: Fraction | None = None
+    min_earth_los_fraction: Fraction | None = None
+    contact_requirements: ContactRequirements | None = None
+    offline: bool = False
     hardware: Hardware | None = None
     duration_hours: Annotated[float, Field(strict=True, gt=0)] = 72
     current_site_id: str | None = None
-    rank_by: RankMetric = "longest_dark_hours"
+    rank_by: RankMetric = "total_earth_los_hours"
     expected_source_hash: str | None = None
+
+    @model_validator(mode="after")
+    def mission_contract(self):
+        if bool(self.site_ids) == bool(self.targets):
+            raise ValueError("Supply either site_ids or targets")
+        if self.targets:
+            identities = [t.model_dump_json() for t in self.targets]
+            if len(set(identities)) != len(identities):
+                raise ValueError("Duplicate targets are not allowed")
+        if self.min_sunlit_fraction is None and self.min_earth_los_fraction is None and self.contact_requirements is None:
+            raise ValueError("Supply min_sunlit_fraction, min_earth_los_fraction or contact_requirements")
+        for target in self.mission_targets():
+            self.mission(target)
+        return self
+
+    def mission_targets(self):
+        return self.targets or [MissionTarget(site_id=site) for site in self.site_ids]
+
+    def mission(self, target, start_utc=None):
+        if not float(self.duration_hours).is_integer():
+            raise ValueError("duration_hours must be a whole number of hours")
+        hardware = self.hardware or Hardware(sun_panel=1., earth_antenna=2.)
+        return MissionRequest(**target.model_dump(), start_utc=start_utc or self.arrival_utc,
+            duration_hours=int(self.duration_hours), panel_height_m=hardware.sun_panel,
+            antenna_height_m=hardware.earth_antenna, min_sunlit_fraction=self.min_sunlit_fraction,
+            min_earth_los_fraction=self.min_earth_los_fraction, constraints=self.constraints,
+            contact_requirements=self.contact_requirements, offline=self.offline)
 
     @field_validator("arrival_utc")
     @classmethod
@@ -87,6 +102,14 @@ class SearchRequest(CompareRequest):
     until_utc: str
     max_results: Annotated[int, Field(strict=True, ge=1, le=20)] = 5
     non_overlapping: bool = Field(default=True, strict=True)
+    start_step_minutes: int = Field(default=15, strict=True, ge=5, le=1440)
+
+    @field_validator("start_step_minutes")
+    @classmethod
+    def five_minute_step(cls, value):
+        if value % 5:
+            raise ValueError("start_step_minutes must be a multiple of 5")
+        return value
 
     @field_validator("until_utc")
     @classmethod
@@ -96,7 +119,7 @@ class SearchRequest(CompareRequest):
 
 
 class PlanningResult(Contract):
-    schema_version: Literal["1.0"] = "1.0"
+    schema_version: Literal["2.0"] = "2.0"
     result_id: str
     operation: Literal["compare", "window_search"]
     status: Status

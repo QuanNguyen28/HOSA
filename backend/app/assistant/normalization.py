@@ -5,6 +5,7 @@ from app.planning.service import start_index
 from app.planning.repository import digest
 from .models import ParseRequest, RequestPatch, RequestSpec, utc
 from .provider import AssistantError
+from .sites import resolve_coordinates
 
 
 def baseline_issue(request: ParseRequest, caps: dict) -> str | None:
@@ -31,6 +32,8 @@ def normalize_request(request: ParseRequest, patch: RequestPatch, caps: dict) ->
     if patch.unresolved_fields or patch.clarification_questions:
         raise AssistantError("UNRESOLVED_FIELDS")
     user_sources = [request.text, *(turn.answer for turn in request.clarifications)]
+    for turn in request.conversation_history:
+        user_sources.extend([turn.text, *(item.answer for item in turn.clarifications)])
     if any(not q.strip() or not any(q in source for source in user_sources) for q in patch.source_quotes):
         raise AssistantError("UNSUPPORTED_SOURCE_QUOTE")
     if patch.arrival_shift_days is not None and patch.arrival_utc is not None:
@@ -48,27 +51,43 @@ def normalize_request(request: ParseRequest, patch: RequestPatch, caps: dict) ->
             at = utc(patch.arrival_utc)
         except ValueError as error:
             raise AssistantError("UNRESOLVED_ARRIVAL") from error
-    if patch.search_from_utc is not None or patch.search_until_utc is not None:
-        if patch.search_from_utc is None or patch.search_until_utc is None:
+    context = request.planning_context
+    search_from, search_until = patch.search_from_utc, patch.search_until_utc
+    if search_from is None and search_until is None and patch.arrival_shift_days is None and patch.arrival_utc is None:
+        search_from, search_until = context.search_from_utc, context.search_until_utc
+    if search_from is not None or search_until is not None:
+        if search_from is None or search_until is None:
             raise AssistantError("INCOMPLETE_SEARCH_RANGE")
         try:
-            first = start_index(patch.search_from_utc, scenario)
-            stop = start_index(patch.search_until_utc, scenario, allow_stop=True)
+            first = start_index(search_from, scenario)
+            stop = start_index(search_until, scenario, allow_stop=True)
         except ValueError as error:
             raise AssistantError("UNRESOLVED_SEARCH_RANGE") from error
         if stop <= first:
             raise AssistantError("INVALID_SEARCH_RANGE")
-        if (patch.arrival_shift_days is not None or patch.arrival_utc is not None) and not utc(patch.search_from_utc) <= at < utc(patch.search_until_utc):
+        if (patch.arrival_shift_days is not None or patch.arrival_utc is not None) and not utc(search_from) <= at < utc(search_until):
             raise AssistantError("AMBIGUOUS_ARRIVAL")
-        at = utc(patch.search_from_utc)
+        at = utc(search_from)
     arrival = at.isoformat().replace("+00:00", "Z")
     index = start_index(arrival, scenario)
-    selected = [b.current_site_id]
-    if patch.site_scope == "selected":
+    selected = request.selected_site_ids if request.selected_site_ids is not None else [b.current_site_id]
+    if patch.site_scope == "keep_current":
+        selected = [b.current_site_id]
+    elif patch.site_scope == "selected" and patch.site_ids is None and patch.site_coordinates is None:
         if not request.selected_site_ids:
             raise AssistantError("MISSING_REGION")
         selected = request.selected_site_ids
-    if len(set(selected)) != len(selected) or any(s not in scenario["site_ids"] for s in selected):
+    explicit = patch.site_ids
+    if patch.site_coordinates is not None:
+        coordinate_site = [resolve_coordinates(patch.site_coordinates)]
+        if explicit is not None and explicit != coordinate_site:
+            raise AssistantError("AMBIGUOUS_SITE_SELECTION")
+        explicit = coordinate_site
+    if explicit is not None:
+        if patch.site_scope == "keep_current" and explicit != [b.current_site_id]:
+            raise AssistantError("AMBIGUOUS_SITE_SELECTION")
+        selected = explicit
+    if not selected or len(set(selected)) != len(selected) or any(s not in scenario["site_ids"] for s in selected):
         raise AssistantError("UNSUPPORTED_SITE_SCOPE")
     constraints = b.constraints.model_copy(update={k: getattr(patch, k) for k in
         ("max_darkness_hours", "max_earth_blackout_hours") if getattr(patch, k) is not None})
@@ -76,9 +95,11 @@ def normalize_request(request: ParseRequest, patch: RequestPatch, caps: dict) ->
         scenario_id=b.scenario_id, arrival_utc=arrival,
         end_utc=(at + timedelta(hours=scenario["D_hours"])).isoformat().replace("+00:00", "Z"),
         start_index=index, site_ids=selected, hardware=b.hardware,
-        constraints=constraints, min_sunlit_fraction=patch.min_sunlit_fraction,
-        search_from_utc=utc(patch.search_from_utc).isoformat().replace("+00:00", "Z") if patch.search_from_utc else None,
-        search_until_utc=utc(patch.search_until_utc).isoformat().replace("+00:00", "Z") if patch.search_until_utc else None,
-        rank_by=patch.rank_by or "longest_dark_hours",
+        constraints=constraints,
+        min_sunlit_fraction=patch.min_sunlit_fraction if patch.min_sunlit_fraction is not None else b.min_sunlit_fraction,
+        min_earth_los_fraction=patch.min_earth_los_fraction if patch.min_earth_los_fraction is not None else b.min_earth_los_fraction,
+        search_from_utc=utc(search_from).isoformat().replace("+00:00", "Z") if search_from else None,
+        search_until_utc=utc(search_until).isoformat().replace("+00:00", "Z") if search_until else None,
+        rank_by=patch.rank_by or context.rank_by,
         current_site_id=b.current_site_id, baseline_hash=digest(b.model_dump()), source_hash=caps["source_hash"],
     )

@@ -7,15 +7,14 @@ from pathlib import Path
 from uuid import uuid4
 
 from app.core.errors import DomainError
+from app.mission.identity import digest
+from app.mission.evaluation import EVALUATION_VERSION, VALIDATION_VERSION
+from app.services.lunarsight.visibility import SENSITIVITY_VERSION
 from app.services.lunarsight import planning as legacy
 from .metrics import METRICS
 from .models import PlanningResult, utc
 
-METHOD_VERSION = "planning-services-1.0"
-
-
-def digest(value) -> str:
-    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()).hexdigest()
+METHOD_VERSION = "planning-services-3.0"
 
 
 class SnapshotRepository:
@@ -24,14 +23,23 @@ class SnapshotRepository:
         scenario = payload["scenarios"][0]
         root = legacy.repository_root()
         paths = [root/"manifests/lunarsight/config/scenario.json", root/"manifests/lunarsight/config/geometry_config.json",
-                 root/"manifests/lunarsight/source_manifest.json"]
+                 root/"manifests/lunarsight/source_manifest.json", legacy.processed_root()/"derivation.json"]
         for prefix in legacy.SUPPORTED_SITES.values():
             paths.extend(legacy.processed_root()/"visibility"/f"{prefix}_{kind}.csv" for kind in ("windows", "intervals"))
+        paths.extend(sorted((legacy.processed_root()/"horizon").glob("*.csv")))
+        paths.extend(sorted((root/"docs/validation/lunarsight/v0.2.0/reports").glob("*_seam_summary.csv")))
+        paths.extend(sorted((legacy.processed_root()/"ephemeris").glob("*.csv")))
         hashes = {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest() if p.is_file() else "MISSING" for p in paths}
         return {"scenario": scenario, "dataset_version": payload["dataset_version"], "method_version": METHOD_VERSION,
-                "source_hash": digest({"files": hashes, "dataset": payload["dataset_version"], "method": METHOD_VERSION}),
-                "source_files": hashes, "supported_constraints": ["max_darkness_hours", "max_earth_blackout_hours", "min_sunlit_fraction"],
+                "source_hash": digest({"files": hashes, "dataset": payload["dataset_version"], "method": METHOD_VERSION,
+                    "evaluation": EVALUATION_VERSION, "validation": VALIDATION_VERSION, "sensitivity": SENSITIVITY_VERSION}),
+                "source_files": hashes, "supported_constraints": ["min_sunlit_fraction", "min_earth_los_fraction"],
+                "supported_soft_constraints": ["max_darkness_hours", "max_earth_blackout_hours"],
                 "supported_operations": ["compare", "window_search"], "ranking_metrics": list(METRICS),
+                "supported_contact_requirements": ["min_contact_minutes", "setup_minutes", "required_windows", "first_contact_deadline_minutes"],
+                "data_sources": ["snapshot", "coordinate"],
+                "coordinate_analysis": {"target": "site_id or exact coordinates", "duration_hours": [1, 72],
+                    "start_step_minutes": 5, "max_search_evaluations": 128},
                 "warnings": payload["warnings"]}
 
     def windows(self, site_id: str) -> dict[int, dict]:
@@ -91,13 +99,21 @@ class ResultRepository:
 
 def result_csv(result: PlanningResult) -> str:
     stream = io.StringIO()
-    fields = ["candidate_id", "site_id", "start_utc", "end_utc", "decision", "dataset_version", "method_version", "source_hash"]
+    fields = ["candidate_id", "site_id", "start_utc", "end_utc", "decision", "dataset_version", "method_version", "source_hash",
+              "min_sunlit_fraction", "min_earth_los_fraction", "soft_constraint_states_json", "soft_violations_json",
+              "sensitivity_status", "sensitivity_scope_json", "sensitivity_comparisons_json"]
     fields += [metric+suffix for metric in METRICS for suffix in ("_L", "_U")]
     writer = csv.DictWriter(stream, fieldnames=fields)
     writer.writeheader()
     for candidate in result.candidates:
         row = {k: getattr(candidate, k) for k in ("candidate_id", "site_id", "start_utc", "end_utc", "decision")}
         row.update(dataset_version=result.dataset_version, method_version=result.method_version, source_hash=result.source_hash)
+        row.update(min_sunlit_fraction=result.request["min_sunlit_fraction"], min_earth_los_fraction=result.request["min_earth_los_fraction"],
+                   soft_constraint_states_json=json.dumps(candidate.soft_constraint_states, separators=(",", ":")),
+                   soft_violations_json=json.dumps(candidate.soft_violations, separators=(",", ":")))
+        row.update(sensitivity_status=candidate.sensitivity.get("status", "NOT_EVALUATED"),
+                   sensitivity_scope_json=json.dumps(candidate.sensitivity.get("scope", {}), separators=(",", ":")),
+                   sensitivity_comparisons_json=json.dumps(candidate.sensitivity.get("comparisons", {}), separators=(",", ":")))
         for metric, pair in candidate.metrics.items():
             row[metric+"_L"], row[metric+"_U"] = pair
         writer.writerow(row)

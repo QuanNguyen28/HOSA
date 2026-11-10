@@ -14,6 +14,8 @@ from app.assistant.router import get_service
 from app.assistant.store import DraftStore
 from app.main import app
 from app.services.lunarsight import planning
+from app.mission.snapshot import SnapshotProvider
+from app.mission.evaluation import evaluate
 from conftest import FixtureLLM, default_patch
 
 
@@ -26,13 +28,13 @@ def confirmation(parsed, payload, **updates):
         "baseline": payload["baseline"], "confirmed": True, **updates})
 
 
-def test_two_calls_real_engine_and_idempotent_replay(service, request_payload):
+def test_two_calls_gated_engine_and_idempotent_replay(service, request_payload):
     parsed = run(service.parse(ParseRequest.model_validate(request_payload)))
     assert parsed.status == "READY" and parsed.spec.start_index == 288
     assert parsed.spec.end_utc == "2026-11-20T00:00:00Z"
     result = run(service.evaluate(confirmation(parsed, request_payload)))
-    assert result.evidence.status == "FEASIBLE"
-    assert result.evidence.recommended_site_id == "Site01_P1"
+    assert result.evidence.status == "INSUFFICIENT_DATA"
+    assert result.evidence.recommended_site_id is None
     assert result.explanation_mode == "llm_plan"
     assert result.llm_calls == 2 and len(service.llm.calls) == 2
     assert run(service.evaluate(confirmation(parsed, request_payload))) == result
@@ -48,7 +50,7 @@ def test_second_call_timeout_preserves_engine_result(service, request_payload):
     service.llm.complete = timeout
     parsed = run(service.parse(ParseRequest.model_validate(request_payload)))
     result = run(service.evaluate(confirmation(parsed, request_payload)))
-    assert result.evidence.status == "FEASIBLE"
+    assert result.evidence.status == "INSUFFICIENT_DATA"
     assert result.explanation_mode == "template_fallback" and result.llm_calls == 2
 
 
@@ -57,8 +59,12 @@ def test_evidence_links_limits_and_timeline_event(service, request_payload):
     parsed = run(service.parse(ParseRequest.model_validate(request_payload)))
     result = run(service.evaluate(confirmation(parsed, request_payload)))
     fact = result.evidence.facts["Site01_P1.earth"]
-    assert fact["limit_hours"] == 6 and fact["worst_interval"]["event_id"]
-    assert fact["worst_interval"]["duration_hours"] <= fact["bounds"][1] + 1e-6
+    assert fact["limit_hours"] == 0.8*72 and fact["requirement_type"] == "hard"
+    assert fact["metric"] == "total_earth_los_hours" and fact["worst_interval"] is None
+    blackout = result.evidence.facts["Site01_P1.blackout"]
+    assert blackout["limit_hours"] == 6 and blackout["requirement_type"] == "soft"
+    assert blackout["worst_interval"]["event_id"]
+    assert blackout["worst_interval"]["duration_hours"] <= blackout["bounds"][1] + 1e-6
 
 
 def test_snapshot_fixture_matches_science_sources():
@@ -80,16 +86,16 @@ def test_no_feasible_never_becomes_pass(service, request_payload):
     service.llm = FixtureLLM(default_patch(arrival_shift_days=0))
     parsed = run(service.parse(ParseRequest.model_validate(request_payload)))
     result = run(service.evaluate(confirmation(parsed, request_payload)))
-    assert result.evidence.status == "NO_FEASIBLE_IN_EVALUATED_SET"
-    assert result.evidence.recommended_site_id == "Site01_P1"
+    assert result.evidence.status == "INSUFFICIENT_DATA"
+    assert result.evidence.recommended_site_id is None
     assert result.evidence.apply_allowed is False
-    assert all(c.decision == "FAIL" for c in result.evidence.candidates)
+    assert all(c.decision == "INDETERMINATE" and c.nominal_sampled_decision == "FAIL" for c in result.evidence.candidates)
 
 
 @pytest.mark.parametrize("mutation", [
     lambda p: p.update(spec_hash="0"*64),
     lambda p: p.update(run_id="old-run"),
-    lambda p: p.update(lead_code="INSUFFICIENT_DATA"),
+    lambda p: p.update(lead_code="FEASIBLE"),
     lambda p: p["blocks"][0].update(fact_ids=["invented.fact"]),
     lambda p: p["blocks"][0].update(fact_ids=["Site04_P1.dark"]),
 ])
@@ -98,7 +104,7 @@ def test_invalid_explanation_falls_back_without_third_call(service, request_payl
     parsed = run(service.parse(ParseRequest.model_validate(request_payload)))
     result = run(service.evaluate(confirmation(parsed, request_payload)))
     assert result.explanation_mode == "template_fallback"
-    assert result.evidence.status == "FEASIBLE" and len(service.llm.calls) == 2
+    assert result.evidence.status == "INSUFFICIENT_DATA" and len(service.llm.calls) == 2
 
 
 def test_missing_baseline_uses_zero_calls(service, request_payload):
@@ -143,12 +149,15 @@ def test_expired_draft(service, request_payload):
 
 
 def test_partial_data_does_not_hide_known_pass(service, request_payload, monkeypatch):
-    original = planning.analyze_request
-    def partial(payload):
-        if payload["site_ids"] == ["Site04_P1"]:
+    original = SnapshotProvider.analyze
+    def partial(self, target, request):
+        if target.site_id == "Site04_P1":
             raise FileNotFoundError("simulated missing data")
-        return original(payload)
-    monkeypatch.setattr(planning, "analyze_request", partial)
+        result = original(self, target, request)
+        # Only this orchestration test injects accepted validation evidence.
+        validation = {**result['validation'], 'passed': True, 'reason_codes': [], 'test_fixture': True}
+        return {**result, **evaluate(request, result['timeline_frame'], validation)}
+    monkeypatch.setattr(SnapshotProvider, "analyze", partial)
     parsed = run(service.parse(ParseRequest.model_validate(request_payload)))
     result = run(service.evaluate(confirmation(parsed, request_payload)))
     assert result.evidence.status == "FEASIBLE"
@@ -157,9 +166,9 @@ def test_partial_data_does_not_hide_known_pass(service, request_payload, monkeyp
 
 
 def test_all_missing_data_has_no_recommendation(service, request_payload, monkeypatch):
-    def missing(payload):
+    def missing(self, target, request):
         raise FileNotFoundError("simulated missing data")
-    monkeypatch.setattr(planning, "analyze_request", missing)
+    monkeypatch.setattr(SnapshotProvider, "analyze", missing)
     parsed = run(service.parse(ParseRequest.model_validate(request_payload)))
     result = run(service.evaluate(confirmation(parsed, request_payload)))
     assert result.evidence.status == "INSUFFICIENT_DATA"
@@ -167,15 +176,13 @@ def test_all_missing_data_has_no_recommendation(service, request_payload, monkey
 
 
 def test_uncertainty_straddling_threshold_is_indeterminate(service, request_payload, monkeypatch):
-    original = planning.analyze_request
-    def uncertain(payload):
-        response = original(payload)
-        row = response["sites"][0]
-        row["metrics"]["longest_dark_hours"] = [11.8, 12.2]
-        row["constraint_states"]["max_darkness_hours"] = "INDETERMINATE"
-        row["decision"] = "INDETERMINATE"
-        return response
-    monkeypatch.setattr(planning, "analyze_request", uncertain)
+    original = SnapshotProvider.analyze
+    def uncertain(self, target, request):
+        result = original(self, target, request)
+        frame = result['timeline_frame'].copy()
+        frame['sun_state'] = '?'
+        return {**result, 'timeline_frame': frame, **evaluate(request, frame, result['validation'])}
+    monkeypatch.setattr(SnapshotProvider, "analyze", uncertain)
     parsed = run(service.parse(ParseRequest.model_validate(request_payload)))
     result = run(service.evaluate(confirmation(parsed, request_payload)))
     assert result.evidence.status == "INSUFFICIENT_DATA" and not result.evidence.apply_allowed
@@ -183,12 +190,12 @@ def test_uncertainty_straddling_threshold_is_indeterminate(service, request_payl
 
 def test_corrupt_event_is_blocked_before_call_two(service, request_payload, monkeypatch):
     service.llm = FixtureLLM(default_patch(arrival_shift_days=0))
-    original = planning.analyze_request
-    def corrupt(payload):
-        response = original(payload)
-        response["sites"][0]["events"][0]["duration_hours"] = -1
-        return response
-    monkeypatch.setattr(planning, "analyze_request", corrupt)
+    original = SnapshotProvider.analyze
+    def corrupt(self, target, request):
+        result = original(self, target, request)
+        result['timeline_frame'].iloc[0, result['timeline_frame'].columns.get_loc('end_utc')] = result['timeline_frame'].start_utc.iloc[0]
+        return result
+    monkeypatch.setattr(SnapshotProvider, "analyze", corrupt)
     parsed = run(service.parse(ParseRequest.model_validate(request_payload)))
     with pytest.raises(AssistantError, match="ENGINE_CONTRACT_ERROR"):
         run(service.evaluate(confirmation(parsed, request_payload)))
@@ -196,18 +203,18 @@ def test_corrupt_event_is_blocked_before_call_two(service, request_payload, monk
 
 
 @pytest.mark.parametrize("mutation", [
-    lambda p: p.update(dataset_version="wrong-version"),
-    lambda p: p["sites"][0].update(site_id="OUTSIDE_REGION"),
-    lambda p: p["sites"][0]["metrics"].update(longest_dark_hours=[True, 10]),
-    lambda p: p["sites"][0]["constraint_states"].update(max_darkness_hours="FAIL"),
+    lambda p: p["validation"].update(policy_version="wrong-version"),
+    lambda p: p["coordinate"].update(latitude_deg=-80),
+    lambda p: p["metrics_hours"].update(longest_dark_hours=[True, 10]),
+    lambda p: p["constraint_checks"].update(max_darkness_hours="FAIL"),
 ])
 def test_engine_contract_corruption_is_blocked(service, request_payload, monkeypatch, mutation):
-    original = planning.analyze_request
-    def corrupted(payload):
-        result = original(payload)
+    original = SnapshotProvider.analyze
+    def corrupted(self, target, request):
+        result = original(self, target, request)
         mutation(result)
         return result
-    monkeypatch.setattr(planning, "analyze_request", corrupted)
+    monkeypatch.setattr(SnapshotProvider, "analyze", corrupted)
     parsed = run(service.parse(ParseRequest.model_validate(request_payload)))
     with pytest.raises(AssistantError, match="ENGINE_CONTRACT_ERROR"):
         run(service.evaluate(confirmation(parsed, request_payload)))
@@ -254,6 +261,7 @@ def test_offline_prompt_contract_cases(service, request_payload, case):
         for key, expected in case.get("expected_spec", {}).items():
             assert parsed.spec.model_dump()[key] == expected
         result = run(service.evaluate(confirmation(parsed, payload)))
-        assert result.evidence.status == case["expected_result_status"]
+        assert result.evidence.status == "INSUFFICIENT_DATA"
+        assert all(c.validation.get("passed") is False for c in result.evidence.candidates)
     else:
         assert case["expected_issue"] in parsed.issues

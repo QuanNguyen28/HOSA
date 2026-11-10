@@ -1,7 +1,8 @@
 """Rank ranges from non-overlapping metric bounds; no weighted composite score."""
 from .models import RankRange
+from .metrics import soft_preference_key
 
-HIGHER_IS_BETTER = {"total_sun_hours", "longest_joint_hours"}
+HIGHER_IS_BETTER = {"total_sun_hours", "total_earth_los_hours", "longest_joint_hours"}
 
 
 def rank_candidates(candidates, metric: str) -> list[RankRange]:
@@ -24,4 +25,4 @@ def rank_candidates(candidates, metric: str) -> list[RankRange]:
 def display_key(candidate, metric, current_site_id=None):
     low, high = candidate.metrics[metric]
     conservative = -low if metric in HIGHER_IS_BETTER else high
-    return conservative, candidate.site_id != current_site_id, candidate.start_utc or "", candidate.site_id
+    return conservative, *soft_preference_key(candidate), candidate.site_id != current_site_id, candidate.start_utc or "", candidate.site_id

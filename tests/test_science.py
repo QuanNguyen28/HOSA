@@ -128,3 +128,35 @@ def test_t12_t15_limits():
     assert [max_rule([2,4],x) for x in (1,2,4)]==["FAIL","INDETERMINATE","PASS"]
     for m in (-1,73,float("nan"),float("inf"),True):
         with pytest.raises(ValueError): max_rule([1,2],m)
+
+
+def event_frame(step, blocked):
+    start=pd.Timestamp('2026-11-17T00:00:00Z')
+    grid=pd.date_range(start,periods=60//step+1,freq=f'{step}min')
+    states=['B' if any(a<=i*step<b for a,b in blocked) else 'V' for i in range(len(grid)-1)]
+    return pd.DataFrame({'start_utc':grid[:-1],'end_utc':grid[1:],'earth_state':states})
+
+
+def test_event_matching_never_reuses_a_boundary():
+    from backend.app.services.lunarsight.visibility import sensitivity, match_events
+    first=event_frame(5,[(5,10),(15,20)])
+    second=event_frame(1,[(10,15),(24,29)])
+    result=sensitivity(first,second,['earth_state'])['earth_state']
+    assert result['events_first']==result['events_second']==4
+    assert result['matched_first_within_15min']==4
+    assert result['max_matched_event_shift_minutes']==9
+    left,right,pairs=match_events(first.set_index('start_utc').earth_state,
+                                  second.set_index('start_utc').earth_state)
+    assert len({a for a,b,s in pairs})==len(pairs)
+    assert len({b for a,b,s in pairs})==len(pairs)
+    assert pairs==sorted(pairs)
+
+
+def test_event_matching_reports_unmatched_boundaries_on_both_sides():
+    from backend.app.services.lunarsight.visibility import sensitivity
+    first=event_frame(5,[(5,10)])
+    second=event_frame(1,[(40,45)])
+    result=sensitivity(first,second,['earth_state'])['earth_state']
+    assert result['matched_first_within_15min']==0
+    assert result['unmatched_first']==result['unmatched_second']==2
+    assert result['max_matched_event_shift_minutes'] is None

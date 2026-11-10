@@ -1,6 +1,15 @@
 # Demo tương tác terminal
 
-Chạy từ `G:\My Drive\H1\HOSA`. Không cần khởi động Uvicorn; CLI gọi cùng AssistantService và bộ tính mà API dùng.
+Policy hiện tại: tổng thời gian có nắng và Earth LOS là yêu cầu cứng; baseline phải
+có `min_sunlit_fraction` và `min_earth_los_fraction` (fixture minh họa đều là 0,8).
+Các giới hạn tối/mất LOS liên tục trong `constraints` là mong muốn mềm, có thể
+vượt mà phương án vẫn đạt yêu cầu cứng. Xem [hợp đồng mới](planning-cli.md).
+
+Chạy từ thư mục gốc repo. Không cần khởi động Uvicorn; CLI gọi cùng AssistantService và bộ tính mà API dùng. Trên Linux:
+
+```bash
+backend/.venv/bin/python scripts/assistant_chat.py
+```
 
 ## 1. Dùng OpenRouter thật
 
@@ -30,13 +39,17 @@ Chế độ này ghi rõ **DEMO GIẢ LẬP LLM**: chỉ phần hiểu ngôn ng�
 
 ## 3. Các lệnh
 
-- /new hoặc /reset: bỏ yêu cầu hiện tại, bắt đầu lại; giữ kế hoạch gốc.
-- /baseline: xem mốc gốc đang dùng.
-- /sites all: chọn cả hai P1.
-- /sites Site01_P1 hoặc /sites Site01_P1,Site04_P1: thay danh sách điểm được chọn.
+- `/new`: bỏ yêu cầu đang chờ, giữ kế hoạch làm việc, vùng chọn và lịch sử.
+- `/reset`: xóa lịch sử, yêu cầu đang chờ và khôi phục toàn bộ ngữ cảnh ban đầu.
+- `/baseline`: xem kế hoạch làm việc, `selected_site_ids` và cấu hình tìm kiếm hiện tại.
+- `/sites`: xem vùng chọn và tọa độ catalog (độ, vĩ độ và kinh độ đông).
+- `/sites all`: chọn cả hai P1; không tự thay site hiện tại bằng kết quả xếp hạng.
+- `/sites Site04_P1`: chọn Site04 và đặt site hiện tại trong kế hoạch làm việc thành Site04. Chấp nhận cả alias `Site01`, `Site04`.
+- `/sites Site01_P1,Site04_P1`: chọn rõ danh sách hai điểm.
+- `/sites coords -89.779800 203.733786`: nhận diện Site04_P1 bằng vĩ độ và kinh độ đông. Chấp nhận kinh độ -180 đến 360 độ; chỉ khớp P1 đã xử lý trong sai số nhập tối đa 1 m. Tọa độ khác bị từ chối, không thay thế bằng điểm gần nhất hoặc ngoại suy kết quả khoa học.
 - /quit: kết thúc, kể cả đang chờ trả lời hoặc xác nhận.
 
-Mốc gốc demo: 14/11/2026 00:00 UTC, 72 giờ, Site01_P1; panel 1 m, antenna 2 m, ngưỡng tối 12 giờ và mất Earth LOS 6 giờ. Chỉ nhận ngày bắt đầu trên lưới 15 phút từ 14/11 đến trước 28/11/2026 UTC. CLI không tự áp dụng kết quả để đổi baseline.
+Mốc gốc demo: 14/11/2026 00:00 UTC, 72 giờ, Site01_P1; panel 1 m, antenna 2 m; yêu cầu cứng nắng và Earth LOS đều tối thiểu 80%; mong muốn mềm tối 12 giờ và mất Earth LOS 6 giờ. Chỉ nhận ngày bắt đầu trên lưới 15 phút từ 14/11 đến trước 28/11/2026 UTC. Sau khi người dùng nhập `y` và đánh giá hoàn tất, CLI nhớ kế hoạch đã đánh giá làm baseline cho lượt sau (ngày, ngưỡng, vùng chọn, metric xếp hạng, khoảng tìm kiếm). Với một site, site đó trở thành site hiện tại; với hai site, giữ site hiện tại và vùng chọn hai site. Không tự áp dụng site/ngày được đề xuất từ kết quả xếp hạng. Đây là trạng thái làm việc để tiếp tục trao đổi, không phải phê duyệt nhiệm vụ; trạng thái FAIL hoặc thiếu dữ liệu vẫn được giữ đúng trong lịch sử. Hủy bản nháp không thay kế hoạch làm việc.
 
 Dùng `--context <file.json>` nếu muốn thay ngữ cảnh theo schema mẫu tại tests/fixtures/assistant/request.json. `--max-clarifications 3` giới hạn số vòng hỏi lại; tối đa 6.
 
@@ -58,3 +71,25 @@ ParseResponse có questions và patch để client hiển thị. Khi đủ dữ 
 ```
 
 Đã chạy kịch bản terminal qua stdin tới FEASIBLE, không có API LLM thật. Transcript thử nằm trong data/cache/assistant/terminal-demo-transcript.txt. Model miễn phí hiện tại từng timeout ở lần thử trước; dùng --demo để diễn tập luồng hỏi đáp khi không muốn phụ thuộc endpoint.
+
+## 6. Hội thoại nhiều lượt
+
+CLI gửi tối đa 8 lượt trước qua `ParseRequest.conversation_history`; mỗi lượt gồm lời người dùng, câu trả lời làm rõ, kết cục và tóm tắt kết quả. `baseline`, `selected_site_ids` và `planning_context` là trạng thái hiện tại có thẩm quyền. Model chỉ trích thay đổi của yêu cầu mới, không cộng lại các lần dịch ngày cũ. Ngày chính xác mới sẽ bỏ khoảng tìm kiếm cũ; thay ngưỡng không làm mất khoảng tìm kiếm đang dùng.
+
+Thông tin thiếu vẫn được giữ qua lượt nhập sau; `/new` bỏ yêu cầu đang chờ. Tối đa 6 câu bổ sung cho một yêu cầu. Lỗi model không tự retry và không thay kế hoạch làm việc. Lệnh đọc `/baseline`, `/sites` dùng được khi hỏi lại hoặc chờ xác nhận; lệnh thay trạng thái khi chờ xác nhận hủy bản nháp cũ để tránh chạy với ngữ cảnh đã đổi.
+
+Ví dụ:
+
+```text
+/sites Site04_P1
+/baseline
+Đổi lịch hạ cánh sang 2026-11-17T00:00:00Z, giữ nguyên phần cứng
+y
+Giảm tối liên tục tối đa xuống 8 giờ, giữ các thông tin khác
+y
+/baseline
+```
+
+Lượt cuối vẫn dùng Site04 và ngày 17/11; chỉ ngưỡng tối thay đổi. Có thể chọn site bằng ngôn ngữ tự nhiên hoặc tọa độ có nhãn vĩ độ/kinh độ đông; backend xác minh site sau khi model trích thông tin.
+
+Ngữ cảnh chỉ tồn tại trong phiên CLI, chưa lưu qua lần thoát chương trình. API `/parse` cũng nhận `conversation_history` và `planning_context`, nhưng client API phải lưu/gửi lại trạng thái; không có lịch sử toàn cục dùng chung giữa người dùng. Các summary trong lịch sử không được dùng làm source_quote; chỉ lời người dùng được chấp nhận.

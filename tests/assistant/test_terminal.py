@@ -34,7 +34,7 @@ def test_missing_information_questions_then_answer_then_evaluate(service, reques
     assert second.status == "READY" and second.spec.start_index == 288 and not second.questions
     result = asyncio.run(service.evaluate(EvaluateRequest(draft_id=second.draft_id,spec_hash=second.spec_hash,
                                                           baseline=request_payload["baseline"],confirmed=True)))
-    assert result.evidence.status == "FEASIBLE"
+    assert result.evidence.status == "INSUFFICIENT_DATA"
     assert service.llm.calls == ["RequestPatch","RequestPatch","ExplainPlan"]
 
 
@@ -79,7 +79,7 @@ def test_terminal_demo_question_answer_confirmation_result(service, request_payl
     code = run_console(service,request_payload,ask=lambda _: next(answers),say=output.append,demo=True)
     assert code == 0
     assert any("Cần làm rõ" in line for line in output)
-    assert any("FEASIBLE" in line for line in output)
+    assert any("INSUFFICIENT_DATA" in line for line in output)
     assert any("API thật = 0" in line for line in output)
     assert service.llm.calls == ["RequestPatch","RequestPatch","ExplainPlan"]
 

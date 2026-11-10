@@ -1,0 +1,326 @@
+{
+  "$defs": {
+    "Constraints": {
+      "additionalProperties": false,
+      "description": "Optional soft preferences; exceeding these never rejects a candidate.",
+      "properties": {
+        "max_darkness_hours": {
+          "anyOf": [
+            {
+              "maximum": 72,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Soft preference: maximum continuous darkness, in hours",
+          "title": "Max Darkness Hours"
+        },
+        "max_earth_blackout_hours": {
+          "anyOf": [
+            {
+              "maximum": 72,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Soft preference: maximum continuous loss of Earth-centre LOS, in hours",
+          "title": "Max Earth Blackout Hours"
+        }
+      },
+      "title": "Constraints",
+      "type": "object"
+    },
+    "ContactRequirements": {
+      "additionalProperties": false,
+      "properties": {
+        "min_contact_minutes": {
+          "description": "Minimum continuous usable Earth-centre LOS after setup",
+          "exclusiveMinimum": 0,
+          "title": "Min Contact Minutes",
+          "type": "number"
+        },
+        "setup_minutes": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Setup Minutes",
+          "type": "number"
+        },
+        "required_windows": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Number of distinct qualifying visibility windows, not sessions packed into one window",
+          "title": "Required Windows"
+        },
+        "first_contact_deadline_minutes": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Minutes since mission start by which setup plus one complete qualifying contact must finish",
+          "title": "First Contact Deadline Minutes"
+        }
+      },
+      "required": [
+        "min_contact_minutes"
+      ],
+      "title": "ContactRequirements",
+      "type": "object"
+    },
+    "Hardware": {
+      "additionalProperties": false,
+      "properties": {
+        "sun_panel": {
+          "minimum": 0,
+          "title": "Sun Panel",
+          "type": "number"
+        },
+        "earth_antenna": {
+          "minimum": 0,
+          "title": "Earth Antenna",
+          "type": "number"
+        }
+      },
+      "required": [
+        "sun_panel",
+        "earth_antenna"
+      ],
+      "title": "Hardware",
+      "type": "object"
+    },
+    "MissionTarget": {
+      "additionalProperties": false,
+      "properties": {
+        "site_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Site Id"
+        },
+        "latitude_deg": {
+          "anyOf": [
+            {
+              "exclusiveMaximum": 90,
+              "exclusiveMinimum": -90,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Latitude Deg"
+        },
+        "longitude_e_deg": {
+          "anyOf": [
+            {
+              "maximum": 360,
+              "minimum": -180,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Longitude E Deg"
+        }
+      },
+      "title": "MissionTarget",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "scenario_id": {
+      "default": "south_pole_demo_v1",
+      "title": "Scenario Id",
+      "type": "string"
+    },
+    "site_ids": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 20,
+      "title": "Site Ids",
+      "type": "array"
+    },
+    "targets": {
+      "items": {
+        "$ref": "#/$defs/MissionTarget"
+      },
+      "maxItems": 20,
+      "title": "Targets",
+      "type": "array"
+    },
+    "data_source": {
+      "default": "snapshot",
+      "enum": [
+        "snapshot",
+        "coordinate"
+      ],
+      "title": "Data Source",
+      "type": "string"
+    },
+    "arrival_utc": {
+      "title": "Arrival Utc",
+      "type": "string"
+    },
+    "constraints": {
+      "$ref": "#/$defs/Constraints"
+    },
+    "min_sunlit_fraction": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Min Sunlit Fraction"
+    },
+    "min_earth_los_fraction": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Min Earth Los Fraction"
+    },
+    "contact_requirements": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ContactRequirements"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "offline": {
+      "default": false,
+      "title": "Offline",
+      "type": "boolean"
+    },
+    "hardware": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Hardware"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "duration_hours": {
+      "default": 72,
+      "exclusiveMinimum": 0,
+      "title": "Duration Hours",
+      "type": "number"
+    },
+    "current_site_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Current Site Id"
+    },
+    "rank_by": {
+      "default": "total_earth_los_hours",
+      "enum": [
+        "total_sun_hours",
+        "total_earth_los_hours",
+        "longest_dark_hours",
+        "longest_blackout_hours",
+        "longest_joint_hours"
+      ],
+      "title": "Rank By",
+      "type": "string"
+    },
+    "expected_source_hash": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Expected Source Hash"
+    },
+    "until_utc": {
+      "title": "Until Utc",
+      "type": "string"
+    },
+    "max_results": {
+      "default": 5,
+      "maximum": 20,
+      "minimum": 1,
+      "title": "Max Results",
+      "type": "integer"
+    },
+    "non_overlapping": {
+      "default": true,
+      "title": "Non Overlapping",
+      "type": "boolean"
+    },
+    "start_step_minutes": {
+      "default": 15,
+      "maximum": 1440,
+      "minimum": 5,
+      "title": "Start Step Minutes",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "arrival_utc",
+    "until_utc"
+  ],
+  "title": "SearchRequest",
+  "type": "object"
+}

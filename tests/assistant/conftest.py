@@ -38,8 +38,8 @@ class FixtureLLM:
             payload = {"run_id": evidence["run_id"], "spec_hash": evidence["spec_hash"],
                 "lead_code": evidence["status"], "blocks": [
                     {"site_id": c["site_id"], "candidate_id": c["candidate_id"],
-                     "reason_code": "DATA_MISSING" if c["issue"] else "EARTH_LOS" if c["constraint_states"].get("max_earth_blackout_hours") == "FAIL" else "SUNLIGHT" if c["constraint_states"].get("min_sunlit_fraction") == "FAIL" else "DARKNESS",
-                     "fact_ids": [c["candidate_id"] + (".availability" if c["issue"] else ".earth" if c["constraint_states"].get("max_earth_blackout_hours") == "FAIL" else ".sun" if c["constraint_states"].get("min_sunlit_fraction") == "FAIL" else ".dark")]}
+                     "reason_code": "DATA_MISSING" if c["issue"] else "EARTH_LOS" if c["constraint_states"].get("min_earth_los_fraction") == "FAIL" else "SUNLIGHT",
+                     "fact_ids": [c["candidate_id"] + (".availability" if c["issue"] else ".earth" if c["constraint_states"].get("min_earth_los_fraction") == "FAIL" else ".sun")]}
                     for c in evidence["candidates"]]}
             if self.mutate:
                 self.mutate(payload)
@@ -53,6 +53,7 @@ def request_payload():
         "baseline": {"scenario_id": "south_pole_demo_v1", "arrival_utc": "2026-11-14T00:00:00Z",
             "duration_hours": 72, "hardware": {"sun_panel": 1, "earth_antenna": 2},
             "constraints": {"max_darkness_hours": 12, "max_earth_blackout_hours": 6},
+            "min_sunlit_fraction": 0.8, "min_earth_los_fraction": 0.8,
             "current_site_id": "Site01_P1"}, "selected_site_ids": ["Site01_P1", "Site04_P1"]}
 
 

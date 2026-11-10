@@ -9,12 +9,13 @@ TEMPLATES = {
     "search_range": "Bạn cho phép đổi ngày trong khoảng nào? Nêu đủ hai mốc ISO có múi giờ; mốc cuối không bao gồm.",
     "site_scope": "Bạn muốn giữ điểm hiện tại hay chọn Site01_P1, Site04_P1 hoặc cả hai?",
     "mission_duration": "Thời lượng nhiệm vụ là bao nhiêu? Dữ liệu demo hiện hỗ trợ 72 giờ.",
-    "constraints": "Bạn muốn đặt ngưỡng nào và bao nhiêu giờ? Ví dụ tối liên tục tối đa 12 giờ.",
+    "constraints": "Bạn cần tối thiểu bao nhiêu % thời gian có nắng và có Earth LOS? Có muốn đặt thêm mong muốn mềm về khoảng tối hoặc mất LOS liên tục không?",
     "request": "Bạn hãy nêu lại phần cần thay đổi cụ thể hơn.",
 }
 ISSUE_FIELDS = {
     "MISSING_BASELINE": ["request"], "INVALID_BASELINE_TIME": ["arrival_utc"],
     "MISSING_REGION": ["site_scope"], "UNSUPPORTED_SITE_SCOPE": ["site_scope"],
+    "UNSUPPORTED_SITE_COORDINATES": ["site_scope"], "AMBIGUOUS_SITE_SELECTION": ["site_scope"],
     "AMBIGUOUS_ARRIVAL": ["arrival_utc"], "UNRESOLVED_ARRIVAL": ["arrival_utc"],
     "INCOMPLETE_SEARCH_RANGE": ["search_range"], "UNRESOLVED_SEARCH_RANGE": ["search_range"],
     "INVALID_SEARCH_RANGE": ["search_range"], "OUTSIDE_TIME_COVERAGE": ["arrival_utc"],
@@ -25,7 +26,7 @@ ALIASES = {"arrival": "arrival_utc", "date": "arrival_utc", "arrival_change": "a
            "region": "site_scope", "selected_region": "site_scope", "duration": "mission_duration",
            "mission_duration_s": "mission_duration", "max_darkness_hours": "constraints",
            "max_earth_blackout_hours": "constraints", "search_until_utc": "search_range",
-           "search_from_utc": "search_range"}
+           "search_from_utc": "search_range", "min_sunlit_fraction": "constraints", "min_earth_los_fraction": "constraints"}
 
 
 def questions_for(issue: str, patch=None):
@@ -45,5 +46,7 @@ def questions_for(issue: str, patch=None):
             text = "Mốc bắt đầu cần đúng lưới 15 phút. Bạn chọn thời điểm nào có phút 00, 15, 30 hoặc 45? Hệ thống không tự làm tròn."
         elif issue == "MISSING_BASELINE":
             text = "Bạn cần cung cấp kế hoạch gốc gồm ngày giờ, thời lượng, điểm và cấu hình phần cứng trước khi thay lịch."
+        elif issue == "UNSUPPORTED_SITE_COORDINATES":
+            text = "Tọa độ chưa có phân tích Sun/Earth. Hiện chỉ nhận hai điểm P1 trong catalog (sai số nhập tối đa 1 m); chọn Site01_P1 hoặc Site04_P1."
         result.append(ClarificationQuestion(field=field, question=text))
     return result

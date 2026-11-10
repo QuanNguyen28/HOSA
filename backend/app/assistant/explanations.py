@@ -11,8 +11,8 @@ def valid_plan(plan, evidence):
     candidates = {c.candidate_id: c for c in evidence.candidates}
     if sorted(identity(b) for b in plan.blocks) != sorted(candidates):
         return False
-    suffix = {"DARKNESS": "dark", "EARTH_LOS": "earth", "SUNLIGHT": "sun", "DATA_MISSING": "availability"}
-    constraint = {"DARKNESS": "max_darkness_hours", "EARTH_LOS": "max_earth_blackout_hours", "SUNLIGHT": "min_sunlit_fraction"}
+    suffix = {"DARKNESS": "dark", "BLACKOUT": "blackout", "EARTH_LOS": "earth", "SUNLIGHT": "sun", "DATA_MISSING": "availability"}
+    constraint = {"EARTH_LOS": "min_earth_los_fraction", "SUNLIGHT": "min_sunlit_fraction"}
     for block in plan.blocks:
         key = identity(block)
         candidate = candidates[key]
@@ -40,17 +40,22 @@ def render(evidence, plan=None):
             texts.append(f"{label}: chưa đủ dữ liệu; không dùng để xếp hạng.")
             fact_ids.append(f"{key}.availability")
             continue
-        dark, earth = c.metrics["longest_dark_hours"], c.metrics["longest_blackout_hours"]
-        texts.append(f"{label}: {c.decision}; tối liên tục {dark[0]:.2f}–{dark[1]:.2f} giờ "
-                     f"(ngưỡng {evidence.request.constraints.max_darkness_hours:g}); "
-                     f"mất tầm nhìn Trái Đất {earth[0]:.2f}–{earth[1]:.2f} giờ "
-                     f"(ngưỡng {evidence.request.constraints.max_earth_blackout_hours:g}).")
-        fact_ids.extend((f"{key}.dark", f"{key}.earth"))
-        if evidence.request.min_sunlit_fraction is not None or evidence.request.rank_by == "total_sun_hours":
-            low, high = c.metrics["total_sun_hours"]
-            suffix = f"; ngưỡng tối thiểu {evidence.request.min_sunlit_fraction*100:g}%" if evidence.request.min_sunlit_fraction is not None else ""
-            texts.append(f"{label}: có nắng {low:.2f}–{high:.2f} giờ ({low/72*100:.2f}–{high/72*100:.2f}%){suffix}.")
-            fact_ids.append(f"{key}.sun")
+        sun, earth = c.metrics["total_sun_hours"], c.metrics["total_earth_los_hours"]
+        texts.append(f"{label}: {c.decision} theo yêu cầu cứng; có nắng {sun[0]:.2f}–{sun[1]:.2f} giờ "
+                     f"(tối thiểu {evidence.request.min_sunlit_fraction*100:g}%); "
+                     f"có Earth LOS {earth[0]:.2f}–{earth[1]:.2f} giờ "
+                     f"(tối thiểu {evidence.request.min_earth_los_fraction*100:g}%).")
+        fact_ids.extend((f"{key}.sun", f"{key}.earth"))
+        for name, metric, suffix, title in (("max_darkness_hours", "longest_dark_hours", "dark", "tối liên tục"),
+                                           ("max_earth_blackout_hours", "longest_blackout_hours", "blackout", "mất Earth LOS liên tục")):
+            if name not in c.soft_constraint_states:
+                continue
+            low, high = c.metrics[metric]
+            limit = getattr(evidence.request.constraints, name)
+            state = c.soft_constraint_states[name]
+            note = "vượt mong muốn" if state == "FAIL" else "chưa xác định" if state == "INDETERMINATE" else "đáp ứng mong muốn"
+            texts.append(f"{label}: yêu cầu mềm {title} {low:.2f}–{high:.2f} giờ, mong muốn ≤ {limit:g} giờ; {note}, không làm đổi kết luận yêu cầu cứng.")
+            fact_ids.append(f"{key}.{suffix}")
         if evidence.request.rank_by == "longest_joint_hours":
             low, high = c.metrics["longest_joint_hours"]
             texts.append(f"{label}: khoảng khả kiến đồng thời dài nhất {low:.2f}–{high:.2f} giờ.")

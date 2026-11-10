@@ -1,5 +1,10 @@
 # Backend planning dùng chung — PolarWindow và BroBYW
 
+Chính sách quyết định và hợp đồng bên dưới được thay thế bởi
+[availability-hard-continuity-soft](availability-hard-continuity-soft.md):
+snapshot v0.3.0/schema 2.0 bắt buộc tổng nắng và Earth LOS tối thiểu; các giới hạn
+tối/mất LOS liên tục là mong muốn mềm. Phần còn lại giữ vai trò lịch sử thiết kế.
+
 Phạm vi đã chốt: dùng snapshot v0.2.0, hai điểm P1, phần cứng và nhiệm vụ 72 giờ hiện có. Bổ sung backend so sánh, tìm cửa sổ, xếp hạng bất định, xuất kết quả và nối vào một LLM hai lượt.
 
 ## Ý tưởng tham khảo và cách áp dụng

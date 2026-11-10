@@ -25,9 +25,10 @@ export type SiteAnalysis = {
     start_utc: string;
     end_utc: string;
     decision: "PASS" | "FAIL" | "INDETERMINATE";
-    darkness_constraint: string;
-    earth_constraint: string;
+    sunlight_requirement: string;
+    earth_los_requirement: string;
     total_sun_hours: [number, number];
+    total_earth_los_hours: [number, number];
     longest_dark_hours: [number, number];
     longest_blackout_hours: [number, number];
     longest_joint_hours: [number, number];

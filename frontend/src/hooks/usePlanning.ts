@@ -16,6 +16,7 @@ export type Scenario = {
     max_darkness_hours: number;
     max_earth_blackout_hours: number;
   };
+  example_requirements: { min_sunlit_fraction: number; min_earth_los_fraction: number };
 };
 
 export type PlanningEvent = {
@@ -42,20 +43,24 @@ export type SitePlan = {
   end_utc: string;
   metrics: Record<string, [number, number]>;
   constraint_states: {
-    max_darkness_hours: "PASS" | "FAIL" | "INDETERMINATE";
-    max_earth_blackout_hours: "PASS" | "FAIL" | "INDETERMINATE";
+    min_sunlit_fraction: "PASS" | "FAIL" | "INDETERMINATE";
+    min_earth_los_fraction: "PASS" | "FAIL" | "INDETERMINATE";
   };
+  soft_constraint_states: Partial<Record<"max_darkness_hours" | "max_earth_blackout_hours", "PASS" | "FAIL" | "INDETERMINATE">>;
+  soft_violations: Array<{ constraint: string; limit: number }>;
   decision: "PASS" | "FAIL" | "INDETERMINATE";
   decisive_event: PlanningEvent | null;
   events: PlanningEvent[];
   sensitivity: {
     status: "STABLE_DECISION" | "REVIEW" | "NOT_EVALUATED";
-    angular_sensitive?: boolean;
-    time_sensitive?: boolean;
+    angular_sensitive?: boolean | null;
+    time_sensitive?: boolean | null;
     azimuth_decisions_changed?: number;
     max_horizon_difference_deg?: number;
-    max_duration_difference_minutes?: number;
-    max_event_shift_minutes?: number;
+    max_duration_difference_minutes?: number | null;
+    max_event_shift_minutes?: number | null;
+    soft_preferences_changed?: boolean;
+    scope: { start_utc: string; end_utc: string; min_sunlit_fraction: number; min_earth_los_fraction: number };
     source: string;
   };
 };
@@ -66,9 +71,11 @@ export type PlanningResult = {
     scenario_id: string;
     site_ids: string[];
     start_index: number;
+    min_sunlit_fraction: number;
+    min_earth_los_fraction: number;
     constraints: {
-      max_darkness_hours: number;
-      max_earth_blackout_hours: number;
+      max_darkness_hours: number | null;
+      max_earth_blackout_hours: number | null;
     };
   };
   sites: SitePlan[];
@@ -117,8 +124,10 @@ export function usePlanning() {
 
   const analyze = useCallback(async (
     startIndex: number,
-    maxDarknessHours: number,
-    maxBlackoutHours: number,
+    minSunlitFraction: number,
+    minEarthLosFraction: number,
+    maxDarknessHours: number | null,
+    maxBlackoutHours: number | null,
   ) => {
     if (!scenario) return;
     setLoading(true);
@@ -131,6 +140,8 @@ export function usePlanning() {
           scenario_id: scenario.scenario_id,
           site_ids: scenario.site_ids,
           start_index: startIndex,
+          min_sunlit_fraction: minSunlitFraction,
+          min_earth_los_fraction: minEarthLosFraction,
           constraints: {
             max_darkness_hours: maxDarknessHours,
             max_earth_blackout_hours: maxBlackoutHours,

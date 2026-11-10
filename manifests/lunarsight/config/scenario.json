@@ -12,6 +12,11 @@
     "Site04_P1"
   ],
   "geometry_version": "lunar-sphere-enu-v2",
+  "decision_policy": "availability-hard-continuity-soft-v1",
+  "example_requirements": {
+    "min_sunlit_fraction": 0.8,
+    "min_earth_los_fraction": 0.8
+  },
   "example_constraints": {
     "max_darkness_hours": 12,
     "max_earth_blackout_hours": 6

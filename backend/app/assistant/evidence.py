@@ -14,16 +14,19 @@ def build_evidence(result, spec, run_id, spec_hash):
             facts[f"{key}.availability"] = {"site_id": candidate.site_id, "candidate_id": key, "status": candidate.issue}
             continue
         for suffix, metric, body in (("dark", "longest_dark_hours", "sun"),
-                                     ("earth", "longest_blackout_hours", "earth"),
+                                     ("blackout", "longest_blackout_hours", "earth"),
+                                     ("earth", "total_earth_los_hours", None),
                                      ("sun", "total_sun_hours", None),
                                      ("joint", "longest_joint_hours", None)):
             events = [e for e in candidate.events if e["body"] == body and e["state"] == "B"]
             worst = max(events, key=lambda e: e["duration_hours"], default=None)
             if worst:
                 worst = {**worst, "event_id": digest({"candidate": key, "source": spec.source_hash, "event": worst})[:20]}
-            limit = spec.constraints.max_darkness_hours if suffix == "dark" else spec.constraints.max_earth_blackout_hours if suffix == "earth" else (spec.min_sunlit_fraction*72 if spec.min_sunlit_fraction is not None else None)
+            limit = spec.constraints.max_darkness_hours if suffix == "dark" else spec.constraints.max_earth_blackout_hours if suffix == "blackout" else (
+                spec.min_sunlit_fraction*72 if suffix == "sun" else spec.min_earth_los_fraction*72 if suffix == "earth" else None)
             facts[f"{key}.{suffix}"] = {"site_id": candidate.site_id, "candidate_id": key, "metric": metric,
                 "bounds": candidate.metrics[metric], "limit_hours": limit, "unit": "hours",
+                "requirement_type": "hard" if suffix in ("sun", "earth") else "soft",
                 "worst_interval": worst, "context": candidate.metric_context.get(metric), "source": candidate.provenance}
     chosen = next((c for c in result.candidates if c.candidate_id == result.recommended_candidate_id), None)
     rankings = [r.model_copy(update={"candidate_id": identities[r.candidate_id],

@@ -18,6 +18,7 @@ from app.planning.router import get_planning_service
 from app.planning.service import PlanningService
 from app.services.lunarsight import planning as legacy
 from app.main import app
+from app.mission.snapshot import SnapshotProvider
 
 
 @pytest.fixture
@@ -31,7 +32,8 @@ def planner(tmp_path, monkeypatch):
 @pytest.fixture
 def query():
     return CompareRequest(scenario_id="south_pole_demo_v1", site_ids=["Site01_P1", "Site04_P1"],
-        arrival_utc="2026-11-17T00:00:00Z", constraints=Constraints(max_darkness_hours=12, max_earth_blackout_hours=6))
+        arrival_utc="2026-11-17T00:00:00Z", constraints=Constraints(max_darkness_hours=12, max_earth_blackout_hours=6),
+        min_sunlit_fraction=0.8, min_earth_los_fraction=0.8)
 
 
 def search_query(query, **updates):
@@ -41,10 +43,12 @@ def search_query(query, **updates):
 def test_comparison_uses_same_metrics_and_events_as_legacy(planner, query):
     result = planner.compare(query)
     original = legacy.analyze_request({"scenario_id": query.scenario_id, "site_ids": query.site_ids,
-        "start_index": 288, "constraints": query.constraints.model_dump()})
-    assert result.status == "FEASIBLE" and result.apply_allowed
+        "start_index": 288, "constraints": query.constraints.model_dump(),
+        "min_sunlit_fraction": query.min_sunlit_fraction, "min_earth_los_fraction": query.min_earth_los_fraction})
+    assert result.status == "INSUFFICIENT_DATA" and not result.apply_allowed
     for candidate, source in zip(result.candidates, original["sites"]):
-        assert candidate.metrics == source["metrics"]
+        for metric, pair in source["metrics"].items():
+            assert candidate.metrics[metric] == pytest.approx(pair)
         assert candidate.events == source["events"]
     assert "score" not in result.model_dump()
     assert planner.results.load(result.result_id) == result
@@ -63,53 +67,51 @@ def test_uncertainty_ranking_does_not_claim_a_total_order():
     assert ranks["A"].tied_with == ["B"]  # Overlap is not transitive.
 
 
-def test_search_bulk_reads_and_bounded_detail_calls(planner, query, monkeypatch):
-    calls, loads = [], []
-    original_analyze, original_windows = legacy.analyze_request, planner.repository.windows
-    def analyze(payload):
-        calls.append(payload)
-        return original_analyze(payload)
-    def windows(site_id):
-        loads.append(site_id)
-        return original_windows(site_id)
-    monkeypatch.setattr(legacy, "analyze_request", analyze)
-    monkeypatch.setattr(planner.repository, "windows", windows)
+def test_search_prefilters_failed_validation_without_loading_details(planner, query, monkeypatch):
+    calls = []
+    original = SnapshotProvider.prepare
+    def prepare(self, site_id):
+        if site_id not in self.prepared:
+            calls.append(site_id)
+        return original(self, site_id)
+    monkeypatch.setattr(SnapshotProvider, "prepare", prepare)
+    monkeypatch.setattr(SnapshotProvider, "analyze", lambda *args: pytest.fail("static gate already failed"))
     result = planner.search(search_query(query))
     assert result.coverage["candidate_total"] == 7*96*2
-    assert sum(result.coverage[k] for k in ("pass","fail","indeterminate")) == result.coverage["candidate_total"]
-    assert len(loads) == 2 and len(calls) == len(result.candidates) <= 3
-    assert result.status == "FEASIBLE" and all(c.decision == "PASS" for c in result.candidates)
-    for i, a in enumerate(result.candidates):
-        for b in result.candidates[i+1:]:
-            if a.site_id == b.site_id:
-                assert a.end_utc <= b.start_utc or b.end_utc <= a.start_utc
+    assert result.coverage["indeterminate"] == result.coverage["candidate_total"]
+    assert calls == ["Site01_P1", "Site04_P1"]
+    assert result.status == "INSUFFICIENT_DATA" and not result.candidates
 
 
-def test_no_feasible_search_returns_explicit_near_misses(planner, query):
+def test_nominal_fail_without_validation_is_not_a_confirmed_near_miss(planner, query):
     result = planner.search(search_query(query, arrival_utc="2026-11-14T00:00:00Z", until_utc="2026-11-14T00:15:00Z"))
-    assert result.status == "NO_FEASIBLE_IN_EVALUATED_SET" and not result.apply_allowed
-    assert all(c.decision == "FAIL" and c.violations for c in result.candidates)
-    assert result.recommended_candidate_id.startswith("Site01_P1@")
-    assert result.candidates[0].metric_context["longest_blackout_hours"]["touches_window_edge"]
+    assert result.status == "INSUFFICIENT_DATA" and not result.apply_allowed
+    assert result.coverage['indeterminate'] == 2 and result.candidates == []
+    assert result.recommended_candidate_id is None
 
 
 def test_missing_interval_coverage_does_not_turn_into_a_pass(planner, query, monkeypatch):
-    original = planner.repository.covered_ranges
-    monkeypatch.setattr(planner.repository, "covered_ranges", lambda site: [] if site == "Site04_P1" else original(site))
-    result = planner.search(search_query(query, until_utc="2026-11-17T00:15:00Z"))
-    assert result.coverage["indeterminate"] == 1
-    assert result.status == "FEASIBLE" and all(c.site_id == "Site01_P1" for c in result.candidates)
+    original = SnapshotProvider.prepare
+    def missing(self, site):
+        evidence = original(self, site)
+        if site == 'Site04_P1':
+            evidence['base'] = evidence['base'].iloc[:0]
+        return evidence
+    monkeypatch.setattr(SnapshotProvider, 'prepare', missing)
+    result = planner.compare(query)
+    assert result.candidates[1].issue == 'INCOMPLETE_TIMELINE'
+    assert result.candidates[1].decision == 'INDETERMINATE' and not result.apply_allowed
 
 
 def test_all_unknown_search_has_no_recommendation(planner, query, monkeypatch):
-    monkeypatch.setattr(planner.repository, "covered_ranges", lambda site: [])
+    monkeypatch.setattr(SnapshotProvider, "preflight_failure", lambda *args: "INCOMPLETE_TIMELINE")
     result = planner.search(search_query(query))
     assert result.status == "INSUFFICIENT_DATA" and result.candidates == []
     assert result.recommended_candidate_id is None and not result.apply_allowed
 
 
 @pytest.mark.parametrize("updates,code", [
-    ({"arrival_utc":"2026-11-17T00:07:00Z"}, "OFF_START_GRID"),
+    ({"arrival_utc":"2026-11-17T00:05:00Z"}, "OFF_START_GRID"),
     ({"until_utc":"2026-11-17T00:00:00Z"}, "INVALID_SEARCH_RANGE"),
     ({"until_utc":"2026-11-28T00:15:00Z"}, "OUTSIDE_TIME_COVERAGE"),
     ({"duration_hours":48}, "UNSUPPORTED_DURATION"),
@@ -140,15 +142,15 @@ def test_source_changes_during_evaluation_are_rejected(planner, query, monkeypat
         planner.compare(query)
 
 
-def test_search_detail_must_agree_with_scanned_metrics(planner, query, monkeypatch):
-    original = legacy.analyze_request
-    def mismatch(payload):
-        result = original(payload)
-        result["sites"][0]["metrics"]["longest_dark_hours"] = [1,1]
+def test_provider_metrics_must_agree_with_native_timeline(planner, query, monkeypatch):
+    original = SnapshotProvider.analyze
+    def mismatch(self, target, request):
+        result = original(self, target, request)
+        result['metrics_hours']['longest_dark_hours'] = [1,1]
         return result
-    monkeypatch.setattr(legacy, "analyze_request", mismatch)
-    with pytest.raises(DomainError, match="SEARCH_DETAIL_MISMATCH"):
-        planner.search(search_query(query))
+    monkeypatch.setattr(SnapshotProvider, 'analyze', mismatch)
+    with pytest.raises(DomainError, match='ENGINE_CONTRACT_ERROR'):
+        planner.compare(query)
 
 
 def test_http_endpoints_share_results_and_export(planner, query):

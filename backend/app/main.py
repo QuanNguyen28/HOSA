@@ -5,6 +5,7 @@ from app.api.routes import router
 from app.assistant.router import router as assistant_router
 from app.core.config import settings
 from app.planning.router import router as planning_router
+from app.point_analysis.router import router as point_analysis_router
 
 app = FastAPI(
     title="LunarSight API",
@@ -23,3 +24,4 @@ app.include_router(router, prefix="/api")
 app.include_router(assistant_router, prefix="/api")
 
 app.include_router(planning_router, prefix="/api")
+app.include_router(point_analysis_router, prefix="/api")

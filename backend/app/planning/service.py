@@ -3,6 +3,8 @@ from datetime import timedelta
 
 from app.core.errors import DomainError
 from .analysis import analyze_candidate
+from app.mission.snapshot import SnapshotProvider
+from app.mission.evaluation import EVALUATION_VERSION, VALIDATION_VERSION
 from .finder import scan_windows
 from .metrics import violation_key
 from .models import CompareRequest, PlanningResult, SearchRequest, utc
@@ -23,19 +25,45 @@ def start_index(at: str, scenario: dict, allow_stop=False) -> int:
 
 
 class PlanningService:
-    def __init__(self, repository=None, results=None):
+    def __init__(self, repository=None, results=None, point_pipeline=None):
         self.repository = repository or SnapshotRepository()
         self.results = results or ResultRepository()
+        self.point_pipeline = point_pipeline
 
     def capabilities(self):
         return self.repository.capabilities()
 
+    def source_capabilities(self, query):
+        if query.data_source == "snapshot":
+            return self.capabilities()
+        from app.point_analysis.sources import installed_sources
+        from app.point_analysis.geometry import METHOD_VERSION as GEOMETRY_VERSION
+        from app.services.lunarsight.horizons import ADAPTER_VERSION
+        from app.services.lunarsight.visibility import SENSITIVITY_VERSION
+        from app.services.lunarsight.contact_windows import METHOD_VERSION as CONTACT_VERSION
+        sources = [{key: source[key] for key in ("dataset_id", "sha256", "resolution_m")} for source in installed_sources()]
+        from app.services.lunarsight.catalog import processed_root
+        from app.services.lunarsight.acquire import hashfile
+        catalog = processed_root()/"site_catalog.geojson"
+        return {"scenario": {}, "warnings": ["PROVISIONAL: sampled Sun/Earth centre geometry; no RF, power or thermal model."],
+            "dataset_version": "verified-dem-coordinate", "source_hash": digest({
+            "datasets": sources, "evaluation": EVALUATION_VERSION, "validation": VALIDATION_VERSION,
+            "geometry": GEOMETRY_VERSION, "horizons": ADAPTER_VERSION, "sensitivity": SENSITIVITY_VERSION,
+            "contact": CONTACT_VERSION, "catalog": hashfile(catalog) if any(t.site_id for t in query.mission_targets()) else None})}
+
     def validate(self, query):
-        caps = self.capabilities()
+        caps = self.source_capabilities(query)
         scenario = caps["scenario"]
+        if query.expected_source_hash is not None and query.expected_source_hash != caps["source_hash"]:
+            raise DomainError("STALE_DATASET", 409)
+        if query.data_source == "coordinate":
+            # Resolve catalog identifiers up front; no snapping of explicit coordinates.
+            for target in query.mission_targets():
+                target.resolved()
+            return caps, None
         if query.scenario_id != scenario["scenario_id"]:
             raise DomainError("UNSUPPORTED_SCENARIO")
-        if any(site not in scenario["site_ids"] for site in query.site_ids):
+        if any(target.site_id not in scenario["site_ids"] for target in query.mission_targets()):
             raise DomainError("UNSUPPORTED_SITE_SCOPE")
         if query.current_site_id is not None and query.current_site_id not in scenario["site_ids"]:
             raise DomainError("UNSUPPORTED_BASELINE_SITE")
@@ -43,14 +71,17 @@ class PlanningService:
             raise DomainError("UNSUPPORTED_DURATION")
         if query.hardware is not None and query.hardware.model_dump() != scenario["device_heights_m"]:
             raise DomainError("UNSUPPORTED_HARDWARE")
-        if query.expected_source_hash is not None and query.expected_source_hash != caps["source_hash"]:
-            raise DomainError("STALE_DATASET", 409)
         return caps, start_index(query.arrival_utc, scenario)
+
+    def analyzer(self, snapshot):
+        return lambda query, target, index: analyze_candidate(query, index, target=target,
+            snapshot=snapshot, point_pipeline=self.point_pipeline)
 
     def compare(self, query: CompareRequest) -> PlanningResult:
         caps, index = self.validate(query)
         canonical = query.model_copy(update={"arrival_utc": utc(query.arrival_utc).isoformat().replace("+00:00", "Z")})
-        candidates = [analyze_candidate(canonical.model_copy(update={"site_ids": [site]}), index) for site in query.site_ids]
+        analyze = self.analyzer(SnapshotProvider())
+        candidates = [analyze(canonical, target, index) for target in query.mission_targets()]
         counts = {"candidate_total": len(candidates), "pass": sum(c.decision == "PASS" for c in candidates),
                   "fail": sum(c.decision == "FAIL" for c in candidates),
                   "indeterminate": sum(c.decision == "INDETERMINATE" for c in candidates)}
@@ -58,31 +89,37 @@ class PlanningService:
 
     def search(self, query: SearchRequest) -> PlanningResult:
         caps, first = self.validate(query)
-        stop = start_index(query.until_utc, caps["scenario"], allow_stop=True)
-        if stop <= first:
-            raise DomainError("INVALID_SEARCH_RANGE")
-        selected, counts = scan_windows(query, caps["scenario"], self.repository, first, stop)
-        candidates = []
-        for pick in selected:
-            detail_query = CompareRequest(**query.model_dump(exclude={"until_utc", "max_results", "non_overlapping"}))
-            detail_query = detail_query.model_copy(update={"site_ids": [pick.site_id], "arrival_utc": pick.start_utc})
-            detail = analyze_candidate(detail_query, pick.start_index)
-            if detail.decision != pick.decision or detail.metrics != pick.metrics:
-                raise DomainError("SEARCH_DETAIL_MISMATCH", 502)
-            candidates.append(detail)
-        return self.finish(query, caps, candidates, counts, "window_search")
+        scenario = caps["scenario"]
+        if query.data_source == "coordinate":
+            elapsed = (utc(query.until_utc)-utc(query.arrival_utc)).total_seconds()/60
+            if elapsed <= 0 or elapsed % query.start_step_minutes:
+                raise DomainError("INVALID_SEARCH_RANGE")
+            first, stop = 0, int(elapsed/query.start_step_minutes)
+            if stop*len(query.mission_targets()) > 128:
+                raise DomainError("SEARCH_TOO_LARGE", 422)
+            scenario = {"A_utc": query.arrival_utc, "start_step_minutes": query.start_step_minutes}
+        else:
+            if query.start_step_minutes != scenario["start_step_minutes"]:
+                raise DomainError("OFF_START_GRID")
+            stop = start_index(query.until_utc, scenario, allow_stop=True)
+            if stop <= first:
+                raise DomainError("INVALID_SEARCH_RANGE")
+        snapshot = SnapshotProvider()
+        selected, counts = scan_windows(query, scenario, self.repository, first, stop,
+            analyze=self.analyzer(snapshot), preflight=snapshot.preflight_failure if query.data_source == "snapshot" else None)
+        return self.finish(query, caps, selected, counts, "window_search")
 
     def finish(self, query, caps, candidates, counts, operation):
-        if self.capabilities()["source_hash"] != caps["source_hash"]:
+        if self.source_capabilities(query)["source_hash"] != caps["source_hash"]:
             raise DomainError("STALE_DATASET", 409)
         passing = [c for c in candidates if c.decision == "PASS"]
         failing = [c for c in candidates if c.decision == "FAIL"]
         recommendation = min(passing, key=lambda c: display_key(c, query.rank_by, query.current_site_id)) if passing else (
-            min(failing, key=lambda c: (violation_key(c, query.constraints, query.min_sunlit_fraction, query.duration_hours),
+            min(failing, key=lambda c: (violation_key(c, query.constraints, query.min_sunlit_fraction, query.min_earth_los_fraction, query.duration_hours),
                                        *display_key(c, query.rank_by, query.current_site_id))) if failing else None)
         status = "FEASIBLE" if counts["pass"] else "NO_FEASIBLE_IN_EVALUATED_SET" if counts["fail"] else "INSUFFICIENT_DATA"
         request = query.model_dump(exclude={"expected_source_hash"})
-        request["hardware"] = query.hardware.model_dump() if query.hardware else caps["scenario"]["device_heights_m"]
+        request["hardware"] = query.hardware.model_dump() if query.hardware else {"sun_panel": 1., "earth_antenna": 2.}
         request["arrival_utc"] = utc(query.arrival_utc).isoformat().replace("+00:00", "Z")
         if operation == "window_search":
             request["until_utc"] = utc(query.until_utc).isoformat().replace("+00:00", "Z")
@@ -94,6 +131,8 @@ class PlanningService:
             coverage=counts, request=request, dataset_version=caps["dataset_version"],
             method_version=METHOD_VERSION, source_hash=caps["source_hash"],
             warnings=[*caps["warnings"], "Only selected sites and evaluated starts are covered.",
+                      "Requested availability and contact requirements determine feasibility after the shared validation gate; continuity limits are soft preferences.",
+                      "Soft preferences break primary-metric ties; rank ranges still describe the selected metric only.",
                       "Rank ranges overlap where metric bounds do; display order is an operational tie-break.",
                       "Near-miss recommendations remain FAIL and cannot be applied.",
                       "Event durations are clipped to the mission window; full darkness outside it is not measured.",

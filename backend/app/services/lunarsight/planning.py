@@ -16,14 +16,18 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
+from app.planning.metrics import hard_checks, assess_soft
+from app.planning.models import Constraints
 
 from .catalog import DATASET_VERSION, processed_root, repository_root
+from .sensitivity import summarize as summarize_sensitivity
 
 
-METHOD_VERSION = "planning-api-0.1.0"
+METHOD_VERSION = "planning-api-0.3.0"
 SUPPORTED_SITES = {"Site01_P1": "Site01", "Site04_P1": "Site04"}
 METRIC_FIELDS = (
     "total_sun_hours",
+    "total_earth_los_hours",
     "longest_dark_hours",
     "longest_blackout_hours",
     "longest_joint_hours",
@@ -95,6 +99,9 @@ def scenarios() -> dict[str, Any]:
                     "earth_antenna": geometry["antenna_height_m"],
                 },
                 "constraints_editable": True,
+                "hard_requirement_fields": ["min_sunlit_fraction", "min_earth_los_fraction"],
+                "soft_preference_fields": ["max_darkness_hours", "max_earth_blackout_hours"],
+                "default_rank_by": "total_earth_los_hours",
                 "fixed_fields": [
                     "D_hours",
                     "model_step_minutes",
@@ -235,52 +242,16 @@ def _decision(checks: dict[str, str]) -> str:
     return "INDETERMINATE"
 
 
-def _sensitivity_summary(site_id: str) -> dict[str, Any]:
-    name = "sensitivity.json" if site_id == "Site01_P1" else "Site04_sensitivity.json"
-    path = repository_root() / "docs/validation/lunarsight/v0.2.0/reports" / name
-    if not path.is_file():
-        return {"status": "NOT_EVALUATED", "source": str(path.relative_to(repository_root()))}
-    report = _read_json(path)
-    azimuth = report["azimuth_0.25_vs_0.125"]
-    temporal = report["time_5min_vs_1min"]
-    max_angle = max(
-        float(item.get("max_abs_deg") or 0)
-        for item in azimuth["angles_by_height_m"].values()
-    )
-    max_duration = max(
-        float(value)
-        for pair in temporal["bounds_abs_delta_minutes"].values()
-        for value in pair
-    )
-    max_event_shift = max(
-        [
-            float(item["max_matched_event_shift_minutes"])
-            for item in temporal["temporal"].values()
-            if item.get("max_matched_event_shift_minutes") is not None
-        ],
-        default=0.0,
-    )
-    stable = (
-        int(azimuth["decisions_changed"]) == 0
-        and temporal["decision_5min"] == temporal["decision_1min"]
-    )
-    return {
-        "status": "STABLE_DECISION" if stable else "REVIEW",
-        "angular_sensitive": bool(azimuth.get("sensitive", False)),
-        "time_sensitive": bool(temporal.get("sensitive", False)),
-        "azimuth_decisions_changed": int(azimuth["decisions_changed"]),
-        "max_horizon_difference_deg": max_angle,
-        "max_duration_difference_minutes": max_duration,
-        "max_event_shift_minutes": max_event_shift,
-        "source": str(path.relative_to(repository_root())),
-    }
+def _constraint_checks(metrics, min_sunlit_fraction, min_earth_los_fraction):
+    return hard_checks(metrics, min_sunlit_fraction, min_earth_los_fraction)
 
 
 def _site_result(
     site_id: str,
     start_index: int,
-    darkness: float,
-    blackout: float,
+    preferences: Constraints,
+    min_sunlit_fraction: float,
+    min_earth_los_fraction: float,
 ) -> dict[str, Any]:
     window_path, row = _window_row(site_id, start_index)
     start = _parse_utc(row["start_utc"])
@@ -293,18 +264,21 @@ def _site_result(
     if any(value is None for pair in metrics.values() for value in pair):
         raise ValueError("DATA_NOT_READY: a metric bound is missing")
     typed_metrics = {key: [float(pair[0]), float(pair[1])] for key, pair in metrics.items()}
-    checks = {
-        "max_darkness_hours": _max_rule(typed_metrics["longest_dark_hours"], darkness),
-        "max_earth_blackout_hours": _max_rule(typed_metrics["longest_blackout_hours"], blackout),
-    }
+    evaluate = lambda values: _constraint_checks(values, min_sunlit_fraction, min_earth_los_fraction)
+    checks = evaluate(typed_metrics)
+    soft_checks, soft_violations = assess_soft(typed_metrics, preferences)
+    geometry = _geometry()
+    sensitivity = summarize_sensitivity(processed_root(), site_id, SUPPORTED_SITES[site_id], start, end,
+        typed_metrics, evaluate, dict(site_id=site_id, start_utc=row["start_utc"], end_utc=row["end_utc"],
+            constraints=preferences.model_dump(), min_sunlit_fraction=min_sunlit_fraction,
+            min_earth_los_fraction=min_earth_los_fraction,
+            device_heights_m={"sun_panel": geometry["panel_height_m"], "earth_antenna": geometry["antenna_height_m"]},
+            duration_hours=72, model_step_minutes=5), geometry,
+        soft_evaluate=lambda values: assess_soft(values, preferences)[0])
     events = _events(intervals, "sun", start, end) + _events(intervals, "earth", start, end)
     events.sort(key=lambda event: (-event["duration_hours"], event["start_utc"]))
-    failed_bodies = []
-    if checks["max_darkness_hours"] == "FAIL":
-        failed_bodies.append("sun")
-    if checks["max_earth_blackout_hours"] == "FAIL":
-        failed_bodies.append("earth")
-    decisive = next((event for event in events if event["body"] in failed_bodies and event["state"] == "B"), None)
+    # A total-availability shortfall is explained by aggregate bounds, not a single event.
+    decisive = None
     return {
         "site_id": site_id,
         "scenario_status": row["scenario_status"],
@@ -313,10 +287,12 @@ def _site_result(
         "end_utc": row["end_utc"],
         "metrics": typed_metrics,
         "constraint_states": checks,
+        "soft_constraint_states": soft_checks,
+        "soft_violations": soft_violations,
         "decision": _decision(checks),
         "decisive_event": decisive,
         "events": events,
-        "sensitivity": _sensitivity_summary(site_id),
+        "sensitivity": sensitivity,
         "provenance": {
             "windows": str(window_path.relative_to(repository_root())),
             "intervals": str(interval_path.relative_to(repository_root())),
@@ -324,21 +300,15 @@ def _site_result(
     }
 
 
-def _grid_summary(site_id: str, darkness: float, blackout: float) -> dict[str, Any]:
+def _grid_summary(site_id: str, min_sunlit_fraction, min_earth_los_fraction) -> dict[str, Any]:
     prefix = SUPPORTED_SITES[site_id]
     path = processed_root() / "visibility" / f"{prefix}_windows.csv"
     counts = {"PASS": 0, "FAIL": 0, "INDETERMINATE": 0}
     passing: list[int] = []
     with path.open(newline="", encoding="utf-8") as stream:
         for row in csv.DictReader(stream):
-            dark = [float(row["longest_dark_hours_L"]), float(row["longest_dark_hours_U"])]
-            earth = [float(row["longest_blackout_hours_L"]), float(row["longest_blackout_hours_U"])]
-            decision = _decision(
-                {
-                    "dark": _max_rule(dark, darkness),
-                    "blackout": _max_rule(earth, blackout),
-                }
-            )
+            metrics = {key: [float(row[f"{key}_{bound}"]) for bound in ("L", "U")] for key in METRIC_FIELDS}
+            decision = _decision(_constraint_checks(metrics, min_sunlit_fraction, min_earth_los_fraction))
             counts[decision] += 1
             if decision == "PASS":
                 passing.append(int(row["start_index"]))
@@ -353,7 +323,7 @@ def _grid_summary(site_id: str, darkness: float, blackout: float) -> dict[str, A
 
 def analyze_request(payload: dict[str, Any]) -> dict[str, Any]:
     scenario = _scenario()
-    allowed_fields = {"scenario_id", "site_ids", "start_index", "constraints", "scan_grid"}
+    allowed_fields = {"scenario_id", "site_ids", "start_index", "constraints", "scan_grid", "min_sunlit_fraction", "min_earth_los_fraction"}
     unsupported_fields = sorted(set(payload) - allowed_fields)
     if unsupported_fields:
         raise ValueError(
@@ -370,7 +340,7 @@ def analyze_request(payload: dict[str, Any]) -> dict[str, Any]:
     start_index = payload.get("start_index")
     if isinstance(start_index, bool) or not isinstance(start_index, int) or not 0 <= start_index < 1344:
         raise ValueError("UNSUPPORTED_CONFIG: start_index must be an integer in [0,1344)")
-    constraints = payload.get("constraints")
+    constraints = payload.get("constraints", {})
     if not isinstance(constraints, dict):
         raise ValueError("UNSUPPORTED_CONFIG: constraints are required")
     allowed_constraints = {"max_darkness_hours", "max_earth_blackout_hours"}
@@ -379,23 +349,30 @@ def analyze_request(payload: dict[str, Any]) -> dict[str, Any]:
         raise ValueError(
             "UNSUPPORTED_CONFIG: unknown constraints: " + ", ".join(unsupported_constraints)
         )
-    darkness = _validate_threshold(constraints.get("max_darkness_hours"), "max_darkness_hours")
-    blackout = _validate_threshold(constraints.get("max_earth_blackout_hours"), "max_earth_blackout_hours")
-    results = [_site_result(site_id, start_index, darkness, blackout) for site_id in site_ids]
+    try:
+        preferences = Constraints.model_validate(constraints)
+    except ValueError as error:
+        raise ValueError("UNSUPPORTED_CONFIG: invalid soft preferences") from error
+    min_sun = payload.get("min_sunlit_fraction")
+    min_earth = payload.get("min_earth_los_fraction")
+    for name, value in (("min_sunlit_fraction", min_sun), ("min_earth_los_fraction", min_earth)):
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or not 0 <= value <= 1:
+            raise ValueError(f"UNSUPPORTED_CONFIG: {name} is required and must be within [0,1]")
+    results = [_site_result(site_id, start_index, preferences, min_sun, min_earth) for site_id in site_ids]
     canonical_request = {
         "scenario_id": scenario["scenario_id"],
         "site_ids": site_ids,
         "start_index": start_index,
-        "constraints": {
-            "max_darkness_hours": darkness,
-            "max_earth_blackout_hours": blackout,
-        },
+        "constraints": preferences.model_dump(),
         "scan_grid": bool(payload.get("scan_grid", False)),
+        "min_sunlit_fraction": min_sun,
+        "min_earth_los_fraction": min_earth,
     }
     result_id = hashlib.sha256(
         json.dumps(canonical_request, sort_keys=True, separators=(",", ":")).encode("utf-8")
     ).hexdigest()[:20]
     response: dict[str, Any] = {
+        "schema_version": "2.0",
         "result_id": result_id,
         "request": canonical_request,
         "scenario": {
@@ -418,7 +395,7 @@ def analyze_request(payload: dict[str, Any]) -> dict[str, Any]:
     }
     if canonical_request["scan_grid"]:
         response["grid_summary"] = {
-            site_id: _grid_summary(site_id, darkness, blackout) for site_id in site_ids
+            site_id: _grid_summary(site_id, min_sun, min_earth) for site_id in site_ids
         }
     _persist_result(response)
     return response
@@ -458,10 +435,20 @@ def result_csv(result: dict[str, Any]) -> str:
         "start_utc",
         "end_utc",
         "decision",
-        "darkness_constraint",
-        "earth_constraint",
+        "sunlight_requirement",
+        "earth_los_requirement",
+        "soft_darkness_preference",
+        "soft_earth_blackout_preference",
+        "max_darkness_hours",
+        "max_earth_blackout_hours",
+        "min_sunlit_fraction",
+        "min_earth_los_fraction",
+        "sensitivity_status",
+        "sensitivity_scope_json",
         "total_sun_hours_L",
         "total_sun_hours_U",
+        "total_earth_los_hours_L",
+        "total_earth_los_hours_U",
         "longest_dark_hours_L",
         "longest_dark_hours_U",
         "longest_blackout_hours_L",
@@ -481,8 +468,16 @@ def result_csv(result: dict[str, Any]) -> str:
             "start_utc": site["start_utc"],
             "end_utc": site["end_utc"],
             "decision": site["decision"],
-            "darkness_constraint": site["constraint_states"]["max_darkness_hours"],
-            "earth_constraint": site["constraint_states"]["max_earth_blackout_hours"],
+            "sunlight_requirement": site["constraint_states"]["min_sunlit_fraction"],
+            "earth_los_requirement": site["constraint_states"]["min_earth_los_fraction"],
+            "soft_darkness_preference": site["soft_constraint_states"].get("max_darkness_hours", ""),
+            "soft_earth_blackout_preference": site["soft_constraint_states"].get("max_earth_blackout_hours", ""),
+            "max_darkness_hours": result["request"]["constraints"]["max_darkness_hours"],
+            "max_earth_blackout_hours": result["request"]["constraints"]["max_earth_blackout_hours"],
+            "min_sunlit_fraction": result["request"].get("min_sunlit_fraction"),
+            "min_earth_los_fraction": result["request"]["min_earth_los_fraction"],
+            "sensitivity_status": site["sensitivity"]["status"],
+            "sensitivity_scope_json": json.dumps(site["sensitivity"]["scope"], separators=(",", ":")),
             "dataset_version": result["dataset_version"],
             "method_version": result["method_version"],
         }

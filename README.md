@@ -13,7 +13,7 @@ Bộ khung này tách rõ các lớp dữ liệu, tính toán và giao diện đ
 5. tính visibility, metric và mission windows;
 6. kết nối giao diện Explore và Compare; Plan là backlog sau MVP.
 
-Pipeline dữ liệu đã chạy cho Site01 và Site04 trên Kaggle. Kết quả mẫu dùng kịch bản `PROVISIONAL` bắt đầu ngày 14/11/2026 UTC. Xem [dữ liệu, cách chạy lại và bằng chứng kiểm định](docs/validation/lunarsight/README.md).
+Pipeline hình học đã chạy cho Site01 và Site04 trên Kaggle. Snapshot v0.3.0 kế thừa hình học v0.2.0 và dùng tổng thời gian có nắng/Earth LOS làm yêu cầu cứng; các khoảng tối/mất LOS liên tục là mong muốn mềm. Kịch bản vẫn `PROVISIONAL`. Xem [quyết định về metric](docs/decisions/availability-hard-continuity-soft.md) và [bằng chứng kiểm định hình học](docs/validation/lunarsight/README.md).
 
 ## Cấu trúc
 
@@ -32,7 +32,7 @@ HOSA/
 │   └── package.json
 ├── data/
 │   ├── raw/                  # dữ liệu gốc, bất biến, không commit
-│   ├── processed/            # dữ liệu chuẩn hóa và kết quả phiên bản v0.2.0
+│   ├── processed/            # hình học v0.2.0 và metric/quyết định v0.3.0
 │   └── cache/                # snapshot phản hồi Horizons và thư mục chạy cục bộ
 ├── manifests/                # catalog, checksum, request config
 ├── scripts/                  # runner dữ liệu và notebook Kaggle
@@ -85,11 +85,11 @@ Các chức năng hiện có:
 - Moon globe 3D với ánh sáng và timeline;
 - camera Orbit, South Pole và Surface;
 - chọn tọa độ bất kỳ trên Moon globe, truy vấn DEM tốt nhất đang phủ điểm đó;
-- marker Site01/Site04 từ catalog v0.2.0;
+- marker Site01/Site04 từ catalog hiện tại, giữ nguyên tọa độ đã kiểm định;
 - visibility Sun/Earth và cửa sổ 72 giờ từ dữ liệu xử lý thật;
 - địa hình cục bộ Site01 và Site04, mỗi vùng 16 × 16 km, tạo từ DEM 5 m.
 - sinh mesh địa hình 16 × 16 km quanh điểm tùy chọn khi tọa độ nằm trong coverage DEM.
-- không gian Compare dùng đúng scenario `south_pole_demo_v1`: 1.344 mốc bắt đầu/site trên lưới 15 phút, nhiệm vụ 72 giờ, ngưỡng tối và mất Earth LOS có thể chỉnh;
+- không gian Compare dùng scenario `south_pole_demo_v1`: 1.344 mốc bắt đầu/site trên lưới 15 phút, nhiệm vụ 72 giờ; hai tỷ lệ có nắng/Earth LOS tối thiểu là yêu cầu cứng, giới hạn tối/mất LOS liên tục là mong muốn mềm tùy chọn;
 - so sánh Site01/Site04 bằng cận metric, ba trạng thái `PASS/FAIL/INDETERMINATE`, timeline sự kiện và horizon profile;
 - xuất JSON/CSV kèm cấu hình, nguồn, dataset version và method version.
 
@@ -111,6 +111,8 @@ curl -X POST http://127.0.0.1:8000/api/analyze \
     "scenario_id":"south_pole_demo_v1",
     "site_ids":["Site01_P1","Site04_P1"],
     "start_index":0,
+    "min_sunlit_fraction":0.8,
+    "min_earth_los_fraction":0.8,
     "constraints":{
       "max_darkness_hours":12,
       "max_earth_blackout_hours":6
@@ -119,6 +121,10 @@ curl -X POST http://127.0.0.1:8000/api/analyze \
 ```
 
 `D_hours`, chiều cao thiết bị, bước mô hình và bước lưới là thuộc tính bất biến của scenario. API trả `UNSUPPORTED_CONFIG` thay vì tự làm tròn hoặc thay cấu hình.
+Hai mức tối thiểu là đầu vào bắt buộc. `constraints.max_*` chỉ là mong muốn mềm; vượt chúng không loại phương án. Giá trị 80% trong ví dụ không phải yêu cầu NASA quy định.
+
+Có thể nhập trực tiếp ngày, điểm và ngưỡng bằng `scripts/planning_cli.py compare`
+hoặc `search`, không qua LLM. Xem [CLI headless và ví dụ gọi API](docs/demo/planning-cli.md).
 
 ## Kiểm tra trước demo
 

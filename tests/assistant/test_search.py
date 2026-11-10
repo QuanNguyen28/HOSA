@@ -22,10 +22,11 @@ def test_llm_search_uses_two_calls_and_distinct_window_facts(service, request_pa
     result = asyncio.run(service.evaluate(confirm(parsed, request_payload)))
     assert result.llm_calls == 2 and len(service.llm.calls) == 2
     assert result.explanation_mode == "llm_plan"
-    assert result.evidence.status == "FEASIBLE"
+    assert result.evidence.status == "INSUFFICIENT_DATA"
+    assert result.evidence.coverage["indeterminate"] == result.evidence.coverage["candidate_total"]
     assert len({c.candidate_id for c in result.evidence.candidates}) == len(result.evidence.candidates)
     assert all("@" in key for key in result.evidence.facts)
-    assert result.evidence.recommended_candidate_id
+    assert result.evidence.recommended_candidate_id is None
 
 
 def test_exact_date_does_not_expand_search_scope(service, request_payload):
@@ -59,7 +60,8 @@ def test_explanation_cannot_explain_failure_with_passing_condition(service, requ
     service.llm = FixtureLLM(default_patch(arrival_shift_days=0))
     parsed = asyncio.run(service.parse(ParseRequest.model_validate(request_payload)))
     result = asyncio.run(service.evaluate(confirm(parsed, request_payload)))
-    evidence = result.evidence
+    evidence = result.evidence.model_copy(update={"status": "NO_FEASIBLE_IN_EVALUATED_SET",
+        "candidates": [c.model_copy(update={"decision": c.nominal_sampled_decision}) for c in result.evidence.candidates]})
     plan = ExplainPlan(run_id=evidence.run_id, spec_hash=evidence.spec_hash, lead_code=evidence.status,
         blocks=[{"site_id":c.site_id,"candidate_id":c.candidate_id,"reason_code":"DARKNESS","fact_ids":[c.candidate_id+".dark"]}
                 for c in evidence.candidates])

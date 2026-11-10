@@ -1,7 +1,7 @@
 from typing import Annotated, Literal
 from pydantic import Field, field_validator
 
-from app.planning.models import Candidate, Contract, Constraints, Decision, Hardware, Hours, RankMetric, RankRange, Status, utc
+from app.planning.models import Candidate, Contract, Constraints, Decision, Fraction, Hardware, Hours, RankMetric, RankRange, Status, utc
 
 
 class Baseline(Contract):
@@ -10,6 +10,8 @@ class Baseline(Contract):
     duration_hours: Annotated[float, Field(strict=True, gt=0)]
     hardware: Hardware
     constraints: Constraints
+    min_sunlit_fraction: Fraction
+    min_earth_los_fraction: Fraction
     current_site_id: str
 
     @field_validator("arrival_utc")
@@ -29,11 +31,31 @@ class ClarificationQuestion(Contract):
     question: str = Field(min_length=1, max_length=300)
 
 
+class SiteCoordinates(Contract):
+    lat_deg: float = Field(ge=-90, le=90)
+    lon_e_deg: float = Field(ge=-180, le=360)
+
+
+class PlanningContext(Contract):
+    rank_by: RankMetric = "total_earth_los_hours"
+    search_from_utc: str | None = None
+    search_until_utc: str | None = None
+
+
+class ConversationTurn(Contract):
+    text: str = Field(min_length=1, max_length=4000)
+    clarifications: list[ClarificationTurn] = Field(default_factory=list, max_length=6)
+    outcome: Literal["evaluated", "cancelled", "abandoned"]
+    summary: str = Field(default="", max_length=1500)
+
+
 class ParseRequest(Contract):
     text: str = Field(min_length=1, max_length=4000)
     baseline: Baseline | None = None
     selected_site_ids: list[str] | None = Field(default=None, max_length=2)
     clarifications: list[ClarificationTurn] = Field(default_factory=list, max_length=6)
+    conversation_history: list[ConversationTurn] = Field(default_factory=list, max_length=8)
+    planning_context: PlanningContext = Field(default_factory=PlanningContext)
 
     @field_validator("text")
     @classmethod
@@ -49,9 +71,12 @@ class RequestPatch(Contract):
     duration_hours: Annotated[float, Field(strict=True, gt=0)] | None
     hardware_change: bool = Field(strict=True)
     site_scope: Literal["selected", "keep_current", "unspecified"]
+    site_ids: list[str] | None = Field(default=None, min_length=1, max_length=2)
+    site_coordinates: SiteCoordinates | None = None
     max_darkness_hours: Hours | None
     max_earth_blackout_hours: Hours | None
     min_sunlit_fraction: Annotated[float, Field(strict=True, ge=0, le=1)] | None
+    min_earth_los_fraction: Fraction | None = None
     search_from_utc: str | None = None
     search_until_utc: str | None = None
     rank_by: RankMetric | None = None
@@ -62,7 +87,7 @@ class RequestPatch(Contract):
 
 
 class RequestSpec(Contract):
-    schema_version: Literal["1.0"] = "1.0"
+    schema_version: Literal["2.0"] = "2.0"
     scenario_id: str
     arrival_utc: str
     end_utc: str
@@ -70,13 +95,14 @@ class RequestSpec(Contract):
     site_ids: list[str]
     hardware: Hardware
     constraints: Constraints
-    min_sunlit_fraction: float | None
+    min_sunlit_fraction: Fraction
+    min_earth_los_fraction: Fraction
     current_site_id: str
     baseline_hash: str
     source_hash: str
     search_from_utc: str | None = None
     search_until_utc: str | None = None
-    rank_by: RankMetric = "longest_dark_hours"
+    rank_by: RankMetric = "total_earth_los_hours"
 
 
 class ParseResponse(Contract):
@@ -101,7 +127,7 @@ class EvaluateRequest(Contract):
 class ExplanationBlock(Contract):
     site_id: str
     candidate_id: str | None = None
-    reason_code: Literal["DARKNESS", "EARTH_LOS", "SUNLIGHT", "DATA_MISSING"]
+    reason_code: Literal["DARKNESS", "BLACKOUT", "EARTH_LOS", "SUNLIGHT", "DATA_MISSING"]
     fact_ids: list[str] = Field(min_length=1, max_length=4)
 
 
@@ -113,7 +139,7 @@ class ExplainPlan(Contract):
 
 
 class EvidenceBundle(Contract):
-    schema_version: Literal["1.0"] = "1.0"
+    schema_version: Literal["2.0"] = "2.0"
     run_id: str
     spec_hash: str
     source_hash: str

@@ -35,7 +35,7 @@ class DemoLLM:
             for candidate in evidence["candidates"]:
                 key = candidate["candidate_id"]
                 reason, suffix = ("DATA_MISSING","availability") if candidate["issue"] else (
-                    ("EARTH_LOS","earth") if candidate["constraint_states"].get("max_earth_blackout_hours") == "FAIL" else ("DARKNESS","dark"))
+                    ("EARTH_LOS","earth") if candidate["constraint_states"].get("min_earth_los_fraction") == "FAIL" else ("SUNLIGHT","sun"))
                 blocks.append({"site_id":candidate["site_id"], "candidate_id":key, "reason_code":reason, "fact_ids":[key+"."+suffix]})
             output = ExplainPlan.model_validate({"run_id":evidence["run_id"], "spec_hash":evidence["spec_hash"],
                                                  "lead_code":evidence["status"], "blocks":blocks})

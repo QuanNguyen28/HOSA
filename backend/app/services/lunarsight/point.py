@@ -33,7 +33,7 @@ def has_verified_receipt(path: Path) -> bool:
 
 def terrain_sources() -> list[dict[str, Any]]:
     root = repository_root()
-    return [
+    sources = [
         {
             "dataset_id": "Site01_dem",
             "path": root / "data/raw/Site01/Site01_final_adj_5mpp_surf.tif",
@@ -63,6 +63,16 @@ def terrain_sources() -> list[dict[str, Any]]:
             "coverage_label": "South of 60 degrees latitude",
         },
     ]
+    # Both the original site directories and prepare_point_data.py's flat NASA
+    # directory are supported. Never select an unfinished .part file.
+    for source in sources:
+        for key in ("path", "error_path", "count_path"):
+            if key in source:
+                primary = source[key]
+                alternative = root/"data/raw/nasa"/primary.name
+                if not primary.is_file() and alternative.is_file():
+                    source[key] = alternative
+    return sources
 
 
 def sample_terrain(latitude: float, longitude: float) -> dict[str, Any]:
