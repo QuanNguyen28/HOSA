@@ -1,32 +1,7 @@
-from datetime import datetime, timezone
 from typing import Annotated, Literal
+from pydantic import Field, field_validator
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
-
-Hours = Annotated[float, Field(strict=True, ge=0, le=72)]
-Decision = Literal["PASS", "FAIL", "INDETERMINATE"]
-Status = Literal["FEASIBLE", "NO_FEASIBLE_IN_EVALUATED_SET", "INSUFFICIENT_DATA"]
-
-
-def utc(value: str) -> datetime:
-    parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
-    if parsed.tzinfo is None:
-        raise ValueError("An explicit time zone is required")
-    return parsed.astimezone(timezone.utc)
-
-
-class Contract(BaseModel):
-    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
-
-
-class Constraints(Contract):
-    max_darkness_hours: Hours
-    max_earth_blackout_hours: Hours
-
-
-class Hardware(Contract):
-    sun_panel: Annotated[float, Field(strict=True, ge=0)]
-    earth_antenna: Annotated[float, Field(strict=True, ge=0)]
+from app.planning.models import Candidate, Contract, Constraints, Decision, Hardware, Hours, RankMetric, RankRange, Status, utc
 
 
 class Baseline(Contract):
@@ -66,6 +41,9 @@ class RequestPatch(Contract):
     max_darkness_hours: Hours | None
     max_earth_blackout_hours: Hours | None
     min_sunlit_fraction: Annotated[float, Field(strict=True, ge=0, le=1)] | None
+    search_from_utc: str | None = None
+    search_until_utc: str | None = None
+    rank_by: RankMetric | None = None
     unresolved_fields: list[str] = Field(max_length=12)
     unsupported_requirements: list[str] = Field(max_length=12)
     source_quotes: list[str] = Field(min_length=1, max_length=12)
@@ -84,11 +62,15 @@ class RequestSpec(Contract):
     current_site_id: str
     baseline_hash: str
     source_hash: str
+    search_from_utc: str | None = None
+    search_until_utc: str | None = None
+    rank_by: RankMetric = "longest_dark_hours"
 
 
 class ParseResponse(Contract):
     status: Literal["READY", "NEEDS_INPUT", "UNSUPPORTED_REQUIREMENT"]
     issues: list[str]
+    patch: RequestPatch | None = None
     draft_id: str | None = None
     spec_hash: str | None = None
     baseline_hash: str | None = None
@@ -105,6 +87,7 @@ class EvaluateRequest(Contract):
 
 class ExplanationBlock(Contract):
     site_id: str
+    candidate_id: str | None = None
     reason_code: Literal["DARKNESS", "EARTH_LOS", "SUNLIGHT", "DATA_MISSING"]
     fact_ids: list[str] = Field(min_length=1, max_length=4)
 
@@ -113,17 +96,7 @@ class ExplainPlan(Contract):
     run_id: str
     spec_hash: str
     lead_code: Status
-    blocks: list[ExplanationBlock] = Field(min_length=1, max_length=2)
-
-
-class Candidate(Contract):
-    site_id: str
-    decision: Decision
-    metrics: dict[str, list[float]]
-    constraint_states: dict[str, Decision]
-    decisive_event: dict | None
-    provenance: dict
-    issue: str | None = None
+    blocks: list[ExplanationBlock] = Field(max_length=5)
 
 
 class EvidenceBundle(Contract):
@@ -134,6 +107,8 @@ class EvidenceBundle(Contract):
     request: RequestSpec
     status: Status
     recommended_site_id: str | None
+    recommended_candidate_id: str | None = None
+    ranking: list[RankRange] = Field(default_factory=list)
     apply_allowed: bool
     coverage: dict[str, int]
     candidates: list[Candidate]

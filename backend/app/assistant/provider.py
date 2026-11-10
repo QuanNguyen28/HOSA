@@ -1,5 +1,8 @@
 """One HTTP request per call, no retry/repair/model fallback loop."""
 import math
+import asyncio
+import json
+import logging
 from dataclasses import dataclass
 from time import perf_counter
 from typing import Protocol
@@ -10,11 +13,7 @@ from pydantic import BaseModel, ValidationError
 from .config import AssistantSettings
 
 
-class AssistantError(Exception):
-    def __init__(self, code: str, status_code: int = 400):
-        self.code = code
-        self.status_code = status_code
-        super().__init__(code)
+from app.core.errors import DomainError as AssistantError
 
 
 @dataclass(frozen=True)
@@ -64,24 +63,30 @@ class OpenRouterLLM:
             response_format = {"type": "json_schema", "json_schema": {
                 "name": contract.__name__, "strict": True, "schema": wire_schema(contract),
             }}
+        schema_instruction = {"role": "system", "content": (
+            "Return only the data JSON object matching this schema, not the schema itself: "
+            + json.dumps(wire_schema(contract), separators=(",", ":")))}
+        wire_messages = [messages[0], schema_instruction, *messages[1:]] if messages else [schema_instruction]
         payload = {
             "model": s.openrouter_model,
-            "messages": messages,
+            "messages": wire_messages,
             "response_format": response_format,
             "provider": {"require_parameters": True, "allow_fallbacks": False},
             "max_tokens": s.openrouter_max_tokens,
             "stream": False,
         }
+        if s.openrouter_reasoning_enabled is not None:
+            payload["reasoning"] = {"enabled": s.openrouter_reasoning_enabled}
         started = perf_counter()
         try:
-            async with httpx.AsyncClient(timeout=s.openrouter_timeout_seconds, transport=self.transport) as client:
+            async with asyncio.timeout(s.openrouter_timeout_seconds), httpx.AsyncClient(timeout=s.openrouter_timeout_seconds, transport=self.transport) as client:
                 response = await client.post(
                     "https://openrouter.ai/api/v1/chat/completions",
                     headers={"Authorization": "Bearer " + s.openrouter_api_key.get_secret_value(),
                              "X-OpenRouter-Title": "LunarSight LLM Pilot"},
                     json=payload,
                 )
-        except httpx.TimeoutException as error:
+        except (httpx.TimeoutException, TimeoutError) as error:
             raise AssistantError("OPENROUTER_TIMEOUT", 504) from error
         except httpx.HTTPError as error:
             raise AssistantError("OPENROUTER_UNAVAILABLE", 502) from error
@@ -92,10 +97,16 @@ class OpenRouterLLM:
         try:
             body = response.json()
             choice = body["choices"][0]
+            if choice.get("finish_reason") == "length":
+                raise AssistantError("MODEL_OUTPUT_TRUNCATED", 502)
             if choice.get("finish_reason") != "stop" or choice["message"].get("refusal"):
                 raise ValueError("Incomplete or refused response")
             output = contract.model_validate_json(choice["message"]["content"])
-        except (ValueError, KeyError, IndexError, TypeError, ValidationError) as error:
+        except ValidationError as error:
+            fields = [(item["loc"], item["type"]) for item in error.errors(include_input=False)]
+            logging.getLogger(__name__).warning("Structured output rejected: contract=%s fields=%s", contract.__name__, fields)
+            raise AssistantError("MODEL_OUTPUT_INVALID", 502) from error
+        except (ValueError, KeyError, IndexError, TypeError) as error:
             raise AssistantError("MODEL_OUTPUT_INVALID", 502) from error
         usage = body.get("usage") or {}
         usage = {key: value for key, value in usage.items() if key in

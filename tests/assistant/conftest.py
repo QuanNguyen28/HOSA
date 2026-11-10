@@ -37,8 +37,9 @@ class FixtureLLM:
             evidence = json.loads(messages[-1]["content"])
             payload = {"run_id": evidence["run_id"], "spec_hash": evidence["spec_hash"],
                 "lead_code": evidence["status"], "blocks": [
-                    {"site_id": c["site_id"], "reason_code": "DATA_MISSING" if c["issue"] else "DARKNESS",
-                     "fact_ids": [c["site_id"] + (".availability" if c["issue"] else ".dark")]}
+                    {"site_id": c["site_id"], "candidate_id": c["candidate_id"],
+                     "reason_code": "DATA_MISSING" if c["issue"] else "EARTH_LOS" if c["constraint_states"].get("max_earth_blackout_hours") == "FAIL" else "SUNLIGHT" if c["constraint_states"].get("min_sunlit_fraction") == "FAIL" else "DARKNESS",
+                     "fact_ids": [c["candidate_id"] + (".availability" if c["issue"] else ".earth" if c["constraint_states"].get("max_earth_blackout_hours") == "FAIL" else ".sun" if c["constraint_states"].get("min_sunlit_fraction") == "FAIL" else ".dark")]}
                     for c in evidence["candidates"]]}
             if self.mutate:
                 self.mutate(payload)

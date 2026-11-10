@@ -239,6 +239,7 @@ def test_http_routes_and_existing_health(service, request_payload):
 
 
 CASES = json.loads((Path(__file__).parents[1]/"fixtures/assistant/prompts.json").read_text(encoding="utf-8"))
+CASES += json.loads((Path(__file__).parents[1]/"fixtures/assistant/search_prompts.json").read_text(encoding="utf-8"))
 
 
 @pytest.mark.parametrize("case", CASES, ids=lambda c: c["id"])

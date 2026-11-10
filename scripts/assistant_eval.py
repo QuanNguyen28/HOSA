@@ -16,13 +16,14 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--live", action="store_true", help="Explicitly allow paid OpenRouter requests")
     parser.add_argument("--limit", type=int, default=3)
+    parser.add_argument("--cases", type=Path, default=ROOT / "tests/fixtures/assistant/prompts.json")
     parser.add_argument("--output", type=Path, default=ROOT / "data/cache/assistant/live-eval.json")
     args = parser.parse_args()
     settings = get_assistant_settings()
     if not args.live or not settings.assistant_enabled or not settings.openrouter_model or not settings.openrouter_api_key:
         print("No requests made. Use --live and configure ASSISTANT_ENABLED, OPENROUTER_MODEL, OPENROUTER_API_KEY in root .env.")
         return 2
-    cases = json.loads((ROOT / "tests/fixtures/assistant/prompts.json").read_text(encoding="utf-8"))
+    cases = json.loads(args.cases.read_text(encoding="utf-8"))
     request_template = json.loads((ROOT / "tests/fixtures/assistant/request.json").read_text(encoding="utf-8"))
     records = []
     with TestClient(app) as client:
@@ -33,6 +34,8 @@ def main() -> int:
             if response.status_code == 200:
                 parsed = response.json()
                 record["parse_status"] = parsed["status"]
+                record["issues"] = parsed["issues"]
+                record["extracted_patch"] = parsed.get("patch")
                 match = parsed["status"] == case["expected_parse_status"]
                 if parsed["status"] == "READY" and match:
                     match = all(parsed["spec"][key] == expected for key, expected in case.get("expected_spec", {}).items())

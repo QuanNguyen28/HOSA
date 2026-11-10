@@ -167,3 +167,13 @@ phiên bản. Shot list ảnh/video nằm tại `docs/submission/media-shot-list
 - `main`: bản có thể trình diễn.
 - `feature/<ten-ngan>`: thay đổi đang phát triển.
 - Mỗi thay đổi dữ liệu hoặc thuật toán cần ghi provenance và cập nhật `docs/decisions/` nếu ảnh hưởng kết quả.
+
+## Backend planning và trợ lý LLM
+
+Backend mới có API dùng chung cho so sánh, tìm cửa sổ, xếp hạng bất định và xuất kết quả. Trợ lý gọi cùng service qua một LLM hai lượt.
+
+- `/api/planning/compare`, `/api/planning/windows/search`, `/api/planning/results/{result_id}`.
+- `/api/assistant/parse`, `/api/assistant/evaluate`.
+- [Kiến trúc, module, nguồn tham khảo, ví dụ và kết quả kiểm thử](docs/decisions/backend-planning-services.md).
+
+Phạm vi vẫn là hai điểm P1, phần cứng hiện có và nhiệm vụ 72 giờ; các API planning hoạt động độc lập với LLM. Kết quả kiểm thử LLM thật được ghi riêng với kiểm thử offline.

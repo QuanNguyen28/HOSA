@@ -9,6 +9,7 @@ class AssistantSettings(BaseSettings):
     assistant_enabled: bool = False
     openrouter_api_key: SecretStr | None = None
     openrouter_model: str = ""
+    openrouter_reasoning_enabled: bool | None = None
     openrouter_timeout_seconds: float = Field(default=30, gt=0, le=120)
     openrouter_max_tokens: int = Field(default=1800, ge=128, le=8192)
     openrouter_response_format: str = Field(default="json_schema", pattern="^(json_schema|json_object)$")

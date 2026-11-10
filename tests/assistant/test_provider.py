@@ -45,7 +45,7 @@ def test_upstream_errors_are_sanitized_without_retry(status):
 def test_invalid_or_truncated_outputs_are_rejected(content, finish):
     def handler(request):
         return httpx.Response(200, json={"choices": [{"finish_reason": finish, "message": {"content": content}}]})
-    with pytest.raises(AssistantError, match="MODEL_OUTPUT_INVALID"):
+    with pytest.raises(AssistantError, match="MODEL_OUTPUT_"):
         asyncio.run(OpenRouterLLM(configured(), httpx.MockTransport(handler)).complete(RequestPatch, []))
 
 
@@ -65,3 +65,31 @@ def test_settings_read_env_file_without_exposing_secret(tmp_path):
     assert settings.assistant_enabled and settings.openrouter_model == "vendor/configured-model"
     assert settings.openrouter_api_key.get_secret_value() == "unit-test-secret"
     assert "unit-test-secret" not in repr(settings)
+
+
+def test_json_object_mode_still_supplies_the_schema_and_optional_reasoning():
+    settings = configured().model_copy(update={"openrouter_response_format":"json_object","openrouter_reasoning_enabled":False})
+    def handler(request):
+        payload = json.loads(request.content)
+        assert payload["response_format"] == {"type":"json_object"}
+        assert payload["reasoning"] == {"enabled":False}
+        assert "search_from_utc" in payload["messages"][0]["content"]
+        return httpx.Response(200,json={"choices":[{"finish_reason":"stop","message":{"content":default_patch().model_dump_json()}}]})
+    result = asyncio.run(OpenRouterLLM(settings,httpx.MockTransport(handler)).complete(RequestPatch,[]))
+    assert result.output.arrival_shift_days == 3
+
+
+def test_truncation_is_distinct_from_schema_rejection():
+    def handler(request):
+        return httpx.Response(200,json={"choices":[{"finish_reason":"length","message":{"content":"{}"}}]})
+    with pytest.raises(AssistantError,match="MODEL_OUTPUT_TRUNCATED"):
+        asyncio.run(OpenRouterLLM(configured(),httpx.MockTransport(handler)).complete(RequestPatch,[]))
+
+
+def test_total_deadline_bounds_a_slow_response():
+    settings = configured().model_copy(update={"openrouter_timeout_seconds":0.01})
+    async def handler(request):
+        await asyncio.sleep(0.05)
+        return httpx.Response(200,json={})
+    with pytest.raises(AssistantError,match="OPENROUTER_TIMEOUT"):
+        asyncio.run(OpenRouterLLM(settings,httpx.MockTransport(handler)).complete(RequestPatch,[]))

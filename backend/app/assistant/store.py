@@ -18,6 +18,7 @@ class Draft:
     parse_usage: dict = field(default_factory=dict)
     started: bool = False
     result: EvaluateResponse | None = None
+    failure: tuple[str, int] | None = None
 
 
 class DraftStore:
@@ -46,6 +47,8 @@ class DraftStore:
             draft = self._items.get(identifier)
             if draft is None or draft.expires_at <= monotonic():
                 raise AssistantError("DRAFT_EXPIRED_OR_UNKNOWN", 410)
+            if draft.failure:
+                raise AssistantError(*draft.failure)
             if draft.result is not None:
                 return draft, False
             if draft.started:
@@ -56,6 +59,10 @@ class DraftStore:
     def finish(self, identifier: str, result: EvaluateResponse) -> None:
         with self._lock:
             self._items[identifier].result = result
+
+    def fail(self, identifier: str, code: str, status: int) -> None:
+        with self._lock:
+            self._items[identifier].failure = (code, status)
 
 
 store = DraftStore()

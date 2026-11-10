@@ -15,6 +15,7 @@ import math
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
 from .catalog import DATASET_VERSION, processed_root, repository_root
 
@@ -431,9 +432,12 @@ def _persist_result(result: dict[str, Any]) -> None:
     directory = _result_dir()
     directory.mkdir(parents=True, exist_ok=True)
     target = directory / f"{result['result_id']}.json"
-    temporary = directory / f".{result['result_id']}.tmp"
-    temporary.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
-    temporary.replace(target)
+    temporary = directory / f".{result['result_id']}.{uuid4().hex}.tmp"
+    try:
+        temporary.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+        temporary.replace(target)
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 def load_result(result_id: str) -> dict[str, Any]:

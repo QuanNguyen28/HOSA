@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import router
 from app.assistant.router import router as assistant_router
 from app.core.config import settings
+from app.planning.router import router as planning_router
 
 app = FastAPI(
     title="LunarSight API",
@@ -20,3 +21,5 @@ app.add_middleware(
 app.include_router(router, prefix="/api")
 
 app.include_router(assistant_router, prefix="/api")
+
+app.include_router(planning_router, prefix="/api")

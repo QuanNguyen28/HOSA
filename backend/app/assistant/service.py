@@ -4,52 +4,11 @@ from starlette.concurrency import run_in_threadpool
 
 from .config import AssistantSettings
 from .engine import PlanningAdapter, digest
+from .explanations import valid_plan, render
 from .models import EvaluateRequest, EvaluateResponse, ExplainPlan, ParseRequest, ParseResponse, RequestPatch
 from .prompts import PROMPT_VERSION, explain_messages, parse_messages
 from .provider import AssistantError, JsonLLM
 from .store import Draft, DraftStore
-
-
-def valid_plan(plan: ExplainPlan, evidence) -> bool:
-    if (plan.run_id, plan.spec_hash, plan.lead_code) != (evidence.run_id, evidence.spec_hash, evidence.status):
-        return False
-    if sorted(b.site_id for b in plan.blocks) != sorted(c.site_id for c in evidence.candidates):
-        return False
-    suffix = {"DARKNESS": "dark", "EARTH_LOS": "earth", "SUNLIGHT": "sun", "DATA_MISSING": "availability"}
-    for block in plan.blocks:
-        expected = f"{block.site_id}.{suffix[block.reason_code]}"
-        if expected not in block.fact_ids or any(k not in evidence.facts or evidence.facts[k]["site_id"] != block.site_id for k in block.fact_ids):
-            return False
-    return True
-
-
-def render(evidence, plan=None) -> tuple[list[str], list[str]]:
-    # The LLM selects the explanatory order/evidence; it cannot author numeric
-    # claims. All text, status and quantities are rendered from verified facts.
-    ordering = [b.site_id for b in plan.blocks] if plan else [c.site_id for c in evidence.candidates]
-    by_id = {c.site_id: c for c in evidence.candidates}
-    texts = []
-    fact_ids = []
-    for site_id in ordering:
-        candidate = by_id[site_id]
-        if candidate.issue:
-            texts.append(f"{site_id}: chưa đủ dữ liệu; không dùng để xếp hạng.")
-            fact_ids.append(f"{site_id}.availability")
-            continue
-        dark, earth = candidate.metrics["longest_dark_hours"], candidate.metrics["longest_blackout_hours"]
-        texts.append(f"{site_id}: {candidate.decision}; tối liên tục {dark[0]:.2f}–{dark[1]:.2f} giờ; "
-                     f"ngưỡng {evidence.request.constraints.max_darkness_hours:g} giờ; "
-                     f"mất tầm nhìn Trái Đất {earth[0]:.2f}–{earth[1]:.2f} giờ; "
-                     f"ngưỡng {evidence.request.constraints.max_earth_blackout_hours:g} giờ.")
-        fact_ids.extend((f"{site_id}.dark", f"{site_id}.earth"))
-        if evidence.request.min_sunlit_fraction is not None:
-            low, high = candidate.metrics["total_sun_hours"]
-            texts.append(f"{site_id}: có nắng {low/72*100:.2f}–{high/72*100:.2f}%; "
-                         f"ngưỡng tối thiểu {evidence.request.min_sunlit_fraction*100:g}%.")
-            fact_ids.append(f"{site_id}.sun")
-    if not evidence.apply_allowed:
-        texts.append("Chưa có phương án được xác nhận đạt. Điểm gần đạt nhất vẫn chưa được phép áp dụng; không tự nới ngưỡng.")
-    return texts, fact_ids
 
 
 class AssistantService:
@@ -67,11 +26,11 @@ class AssistantService:
             spec = self.engine.normalize(request, reply.output, caps)
         except AssistantError as error:
             status = "UNSUPPORTED_REQUIREMENT" if error.code.startswith("UNSUPPORTED") else "NEEDS_INPUT"
-            return ParseResponse(status=status, issues=[error.code], llm_calls=1)
+            return ParseResponse(status=status, issues=[error.code], patch=reply.output, llm_calls=1)
         spec_hash = digest(spec.model_dump())
         identifier = self.drafts.create(Draft(spec, spec_hash, monotonic()+self.settings.assistant_draft_ttl_seconds,
             reply.latency_ms, reply.model, parse_usage=reply.usage), self.settings.assistant_max_drafts)
-        return ParseResponse(status="READY", issues=[], draft_id=identifier, spec_hash=spec_hash,
+        return ParseResponse(status="READY", issues=[], patch=reply.output, draft_id=identifier, spec_hash=spec_hash,
             baseline_hash=spec.baseline_hash, spec=spec, llm_calls=1)
 
     async def evaluate(self, request: EvaluateRequest) -> EvaluateResponse:
@@ -89,7 +48,14 @@ class AssistantService:
         if not claimed:
             return draft.result
         started = perf_counter()
-        evidence = await run_in_threadpool(self.engine.evaluate, draft.spec, request.draft_id, draft.spec_hash)
+        try:
+            evidence = await run_in_threadpool(self.engine.evaluate, draft.spec, request.draft_id, draft.spec_hash)
+        except AssistantError as error:
+            self.drafts.fail(request.draft_id, error.code, error.status_code)
+            raise
+        except (OSError, ValueError) as error:
+            self.drafts.fail(request.draft_id, "DATA_NOT_READY", 503)
+            raise AssistantError("DATA_NOT_READY", 503) from error
         engine_ms = (perf_counter()-started)*1000
         plan, explain_usage = None, None
         explain_started = perf_counter()

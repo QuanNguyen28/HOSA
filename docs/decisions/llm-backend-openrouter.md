@@ -1,5 +1,7 @@
 # Backend thử nghiệm LLM — kế hoạch và cách chạy
 
+**Bản mô tả pilot ban đầu.** Backend hiện tại và kết quả xác minh mới nằm tại [planning services](backend-planning-services.md).
+
 Ngày: 10/11/2026. Nhánh: `feature/llm-backend-openrouter`, tách từ `feature/lunarsight-data` tại `63d16b0`. Repo làm việc: `G:\My Drive\H1\HOSA`. Các nhánh `main` và `feature/lunarsight-data` giữ nguyên commit; repo G đang mở nhánh LLM.
 
 ## Cấu trúc và ranh giới thay đổi
@@ -100,3 +102,5 @@ Kho draft hiện lưu trong RAM với TTL/giới hạn và chống chạy trùng
 Kiểm thử cũ `test_coverage_separates_visualization_from_science` yêu cầu DEM Site01 gốc chưa được git quản lý. Nếu chưa cài raw DEM, ca này báo thiếu dữ liệu; ba ca terrain có điều kiện skip. Không tạo raster giả hoặc sửa test để che tình trạng thiếu dữ liệu. Các kiểm thử assistant dùng sản phẩm đã xử lý và không cần tải toàn bộ raw dataset.
 
 Tài liệu API đã đối chiếu: [OpenRouter overview](https://openrouter.ai/docs/api/reference/overview), [structured outputs](https://openrouter.ai/docs/guides/features/structured-outputs). Key ở Authorization header; endpoint cố định `https://openrouter.ai/api/v1/chat/completions`. Không tự retry, bật response-healing hay chuyển model.
+
+Current backend extension: [shared planning services, APIs and module layout](backend-planning-services.md).

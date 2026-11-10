@@ -1,0 +1,31 @@
+[
+  {
+    "id": "A15",
+    "text": "Cho phép đổi ngày hạ cánh trong khoảng 2026-11-17T00:00:00Z đến trước 2026-11-24T00:00:00Z, giữ nguyên phần cứng và đổi điểm trong vùng đang chọn. Nhiệm vụ dài 72 giờ; tối liên tục tối đa 12 giờ, mất tầm nhìn Trái Đất tối đa 6 giờ. Ưu tiên tổng thời gian có nắng.",
+    "patch": {
+      "arrival_shift_days": null,
+      "arrival_utc": null,
+      "duration_hours": 72,
+      "hardware_change": false,
+      "site_scope": "selected",
+      "max_darkness_hours": 12,
+      "max_earth_blackout_hours": 6,
+      "min_sunlit_fraction": null,
+      "search_from_utc": "2026-11-17T00:00:00Z",
+      "search_until_utc": "2026-11-24T00:00:00Z",
+      "rank_by": "total_sun_hours",
+      "unresolved_fields": [],
+      "unsupported_requirements": [],
+      "source_quotes": [
+        "Cho phép đổi ngày hạ cánh"
+      ]
+    },
+    "expected_parse_status": "READY",
+    "expected_result_status": "FEASIBLE",
+    "expected_spec": {
+      "search_from_utc": "2026-11-17T00:00:00Z",
+      "search_until_utc": "2026-11-24T00:00:00Z",
+      "rank_by": "total_sun_hours"
+    }
+  }
+]
