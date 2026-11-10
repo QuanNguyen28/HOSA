@@ -3,6 +3,7 @@ from time import monotonic, perf_counter
 from starlette.concurrency import run_in_threadpool
 
 from .config import AssistantSettings
+from .clarification import questions_for
 from .engine import PlanningAdapter, digest
 from .explanations import valid_plan, render
 from .models import EvaluateRequest, EvaluateResponse, ExplainPlan, ParseRequest, ParseResponse, RequestPatch
@@ -20,13 +21,13 @@ class AssistantService:
         caps = await run_in_threadpool(self.engine.capabilities)
         issue = self.engine.baseline_issue(request, caps)
         if issue:
-            return ParseResponse(status="NEEDS_INPUT", issues=[issue], llm_calls=0)
+            return ParseResponse(status="NEEDS_INPUT", issues=[issue], questions=questions_for(issue), llm_calls=0)
         reply = await self.llm.complete(RequestPatch, parse_messages(request, caps))
         try:
             spec = self.engine.normalize(request, reply.output, caps)
         except AssistantError as error:
             status = "UNSUPPORTED_REQUIREMENT" if error.code.startswith("UNSUPPORTED") else "NEEDS_INPUT"
-            return ParseResponse(status=status, issues=[error.code], patch=reply.output, llm_calls=1)
+            return ParseResponse(status=status, issues=[error.code], questions=questions_for(error.code, reply.output), patch=reply.output, llm_calls=1)
         spec_hash = digest(spec.model_dump())
         identifier = self.drafts.create(Draft(spec, spec_hash, monotonic()+self.settings.assistant_draft_ttl_seconds,
             reply.latency_ms, reply.model, parse_usage=reply.usage), self.settings.assistant_max_drafts)

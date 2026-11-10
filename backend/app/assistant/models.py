@@ -19,10 +19,21 @@ class Baseline(Contract):
         return value
 
 
+class ClarificationTurn(Contract):
+    question: str = Field(min_length=1, max_length=1200)
+    answer: str = Field(min_length=1, max_length=1500)
+
+
+class ClarificationQuestion(Contract):
+    field: Literal["arrival_utc", "year", "time", "timezone", "search_range", "site_scope", "mission_duration", "constraints", "request"]
+    question: str = Field(min_length=1, max_length=300)
+
+
 class ParseRequest(Contract):
     text: str = Field(min_length=1, max_length=4000)
     baseline: Baseline | None = None
     selected_site_ids: list[str] | None = Field(default=None, max_length=2)
+    clarifications: list[ClarificationTurn] = Field(default_factory=list, max_length=6)
 
     @field_validator("text")
     @classmethod
@@ -47,6 +58,7 @@ class RequestPatch(Contract):
     unresolved_fields: list[str] = Field(max_length=12)
     unsupported_requirements: list[str] = Field(max_length=12)
     source_quotes: list[str] = Field(min_length=1, max_length=12)
+    clarification_questions: list[ClarificationQuestion] = Field(default_factory=list, max_length=3)
 
 
 class RequestSpec(Contract):
@@ -70,6 +82,7 @@ class RequestSpec(Contract):
 class ParseResponse(Contract):
     status: Literal["READY", "NEEDS_INPUT", "UNSUPPORTED_REQUIREMENT"]
     issues: list[str]
+    questions: list[ClarificationQuestion] = Field(default_factory=list)
     patch: RequestPatch | None = None
     draft_id: str | None = None
     spec_hash: str | None = None

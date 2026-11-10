@@ -177,3 +177,5 @@ Backend mới có API dùng chung cho so sánh, tìm cửa sổ, xếp hạng b�
 - [Kiến trúc, module, nguồn tham khảo, ví dụ và kết quả kiểm thử](docs/decisions/backend-planning-services.md).
 
 Phạm vi vẫn là hai điểm P1, phần cứng hiện có và nhiệm vụ 72 giờ; các API planning hoạt động độc lập với LLM. Kết quả kiểm thử LLM thật được ghi riêng với kiểm thử offline.
+
+Interactive terminal demo: [live model and scripted rehearsal](docs/demo/assistant-terminal.md).

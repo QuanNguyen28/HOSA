@@ -28,9 +28,10 @@ def normalize_request(request: ParseRequest, patch: RequestPatch, caps: dict) ->
     assert b is not None
     if patch.hardware_change or patch.unsupported_requirements:
         raise AssistantError("UNSUPPORTED_REQUIREMENT")
-    if patch.unresolved_fields:
+    if patch.unresolved_fields or patch.clarification_questions:
         raise AssistantError("UNRESOLVED_FIELDS")
-    if any(not q.strip() or q not in request.text for q in patch.source_quotes):
+    user_sources = [request.text, *(turn.answer for turn in request.clarifications)]
+    if any(not q.strip() or not any(q in source for source in user_sources) for q in patch.source_quotes):
         raise AssistantError("UNSUPPORTED_SOURCE_QUOTE")
     if patch.arrival_shift_days is not None and patch.arrival_utc is not None:
         raise AssistantError("AMBIGUOUS_ARRIVAL")
