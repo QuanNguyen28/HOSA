@@ -1,0 +1,186 @@
+{
+  "data_kind": "derived_versioned_data",
+  "dataset_version": "v0.3.0",
+  "status": "PROVISIONAL",
+  "note": "Six 72-hour windows, not six independent missions or a model training set.",
+  "source_hashes": {
+    "data/processed/lunarsight/v0.3.0/visibility/Site01_windows.csv": "0b202c86e1dce1a7a2ec19ee9fcda0f422c707734fe5c641a469f645cef7771b",
+    "data/processed/lunarsight/v0.3.0/visibility/Site04_windows.csv": "d174d5afc6ba2cf2108678dc32f2366ae2ffa113d10098fe18fd58b49bd0a854"
+  },
+  "windows": [
+    {
+      "site_id": "Site01_P1",
+      "start_index": 0,
+      "start_utc": "2026-11-14T00:00:00Z",
+      "end_utc": "2026-11-17T00:00:00Z",
+      "metrics": {
+        "total_sun_hours": [
+          72.0,
+          72.0
+        ],
+        "total_earth_los_hours": [
+          11.249999999999996,
+          11.249999999999996
+        ],
+        "longest_dark_hours": [
+          0.0,
+          0.0
+        ],
+        "longest_blackout_hours": [
+          60.75000000000063,
+          60.75000000000063
+        ],
+        "longest_joint_hours": [
+          11.249999999999638,
+          11.249999999999638
+        ]
+      },
+      "source": "data/processed/lunarsight/v0.3.0/visibility/Site01_windows.csv"
+    },
+    {
+      "site_id": "Site01_P1",
+      "start_index": 288,
+      "start_utc": "2026-11-17T00:00:00Z",
+      "end_utc": "2026-11-20T00:00:00Z",
+      "metrics": {
+        "total_sun_hours": [
+          72.0,
+          72.0
+        ],
+        "total_earth_los_hours": [
+          72.0,
+          72.0
+        ],
+        "longest_dark_hours": [
+          0.0,
+          0.0
+        ],
+        "longest_blackout_hours": [
+          0.0,
+          0.0
+        ],
+        "longest_joint_hours": [
+          72.00000000000027,
+          72.00000000000027
+        ]
+      },
+      "source": "data/processed/lunarsight/v0.3.0/visibility/Site01_windows.csv"
+    },
+    {
+      "site_id": "Site01_P1",
+      "start_index": 576,
+      "start_utc": "2026-11-20T00:00:00Z",
+      "end_utc": "2026-11-23T00:00:00Z",
+      "metrics": {
+        "total_sun_hours": [
+          72.0,
+          72.0
+        ],
+        "total_earth_los_hours": [
+          72.0,
+          72.0
+        ],
+        "longest_dark_hours": [
+          0.0,
+          0.0
+        ],
+        "longest_blackout_hours": [
+          0.0,
+          0.0
+        ],
+        "longest_joint_hours": [
+          72.00000000000027,
+          72.00000000000027
+        ]
+      },
+      "source": "data/processed/lunarsight/v0.3.0/visibility/Site01_windows.csv"
+    },
+    {
+      "site_id": "Site04_P1",
+      "start_index": 0,
+      "start_utc": "2026-11-14T00:00:00Z",
+      "end_utc": "2026-11-17T00:00:00Z",
+      "metrics": {
+        "total_sun_hours": [
+          72.0,
+          72.0
+        ],
+        "total_earth_los_hours": [
+          0.8333333333333334,
+          0.8333333333333334
+        ],
+        "longest_dark_hours": [
+          0.0,
+          0.0
+        ],
+        "longest_blackout_hours": [
+          71.16666666666698,
+          71.16666666666698
+        ],
+        "longest_joint_hours": [
+          0.833333333333286,
+          0.833333333333286
+        ]
+      },
+      "source": "data/processed/lunarsight/v0.3.0/visibility/Site04_windows.csv"
+    },
+    {
+      "site_id": "Site04_P1",
+      "start_index": 288,
+      "start_utc": "2026-11-17T00:00:00Z",
+      "end_utc": "2026-11-20T00:00:00Z",
+      "metrics": {
+        "total_sun_hours": [
+          72.0,
+          72.0
+        ],
+        "total_earth_los_hours": [
+          72.0,
+          72.0
+        ],
+        "longest_dark_hours": [
+          0.0,
+          0.0
+        ],
+        "longest_blackout_hours": [
+          0.0,
+          0.0
+        ],
+        "longest_joint_hours": [
+          72.00000000000027,
+          72.00000000000027
+        ]
+      },
+      "source": "data/processed/lunarsight/v0.3.0/visibility/Site04_windows.csv"
+    },
+    {
+      "site_id": "Site04_P1",
+      "start_index": 576,
+      "start_utc": "2026-11-20T00:00:00Z",
+      "end_utc": "2026-11-23T00:00:00Z",
+      "metrics": {
+        "total_sun_hours": [
+          72.0,
+          72.0
+        ],
+        "total_earth_los_hours": [
+          72.0,
+          72.0
+        ],
+        "longest_dark_hours": [
+          0.0,
+          0.0
+        ],
+        "longest_blackout_hours": [
+          0.0,
+          0.0
+        ],
+        "longest_joint_hours": [
+          72.00000000000027,
+          72.00000000000027
+        ]
+      },
+      "source": "data/processed/lunarsight/v0.3.0/visibility/Site04_windows.csv"
+    }
+  ]
+}

@@ -1,0 +1,161 @@
+{
+  "sensitivity_version": "ordered-events-1.0",
+  "thresholds_unchanged": true,
+  "cases": [
+    {
+      "result_id": "89209ad57eb7e72752043065183e94601a2284abe2b3fd94b5ed2edc849bfb53",
+      "coordinate": {
+        "latitude_deg": -88.80771296769387,
+        "longitude_e_deg": 123.81313283430084,
+        "dem_elevation_m": 1647.657470703125,
+        "observer_dataset_id": "dem80",
+        "observer_resolution_m": 80,
+        "elevation_sampling": "nearest registered DEM pixel; observer coordinate is not snapped"
+      },
+      "decision": "PASS",
+      "nominal_sampled_decision": "PASS",
+      "constraint_checks": {
+        "min_sunlit_fraction": "PASS",
+        "contact.min_contact_minutes": "PASS",
+        "contact.required_windows": "PASS",
+        "contact.first_contact_deadline_minutes": "PASS"
+      },
+      "soft_constraint_checks": {
+        "max_darkness_hours": "PASS",
+        "max_earth_blackout_hours": "PASS"
+      },
+      "metrics_hours": {
+        "total_sun_hours": [
+          6.0,
+          6.0
+        ],
+        "total_earth_los_hours": [
+          6.0,
+          6.0
+        ],
+        "longest_dark_hours": [
+          0.0,
+          0.0
+        ],
+        "longest_blackout_hours": [
+          0.0,
+          0.0
+        ],
+        "longest_joint_hours": [
+          6.0,
+          6.0
+        ]
+      },
+      "request_file": "docs/examples/point-analysis-outside-pass-request.json",
+      "validation_passed": true,
+      "seams_passed": true,
+      "sensitivity_passed": {
+        "azimuth_0.25_vs_0.125": true,
+        "radius_400km_vs_300km": true,
+        "time_5min_vs_1min": true
+      },
+      "angular_max_difference_deg": {
+        "20.0": {
+          "comparable": 2880,
+          "max_abs_deg": 0.029987898983322436
+        }
+      },
+      "full_result_path": "/home/levantuananh/H1/HOSA/data/cache/point-analysis/outside-cases/selected-pass.json",
+      "distance_to_catalog_points_km": {
+        "Site01_P1": 42.31928088814638,
+        "Site04_P1": 35.597777667978036
+      },
+      "outside_local_dem_footprints": {
+        "Site01_dem": true,
+        "Site04_dem": true
+      }
+    },
+    {
+      "result_id": "ebe86807ecf782dd700049a09a65f49a7b604489eb81cc89003cb680efef8597",
+      "coordinate": {
+        "latitude_deg": -87.0,
+        "longitude_e_deg": 180.0,
+        "dem_elevation_m": -2855.921630859375,
+        "observer_dataset_id": "dem80",
+        "observer_resolution_m": 80,
+        "elevation_sampling": "nearest registered DEM pixel; observer coordinate is not snapped"
+      },
+      "decision": "FAIL",
+      "nominal_sampled_decision": "FAIL",
+      "constraint_checks": {
+        "min_sunlit_fraction": "FAIL",
+        "contact.min_contact_minutes": "FAIL",
+        "contact.required_windows": "FAIL",
+        "contact.first_contact_deadline_minutes": "FAIL"
+      },
+      "soft_constraint_checks": {
+        "max_darkness_hours": "PASS",
+        "max_earth_blackout_hours": "PASS"
+      },
+      "metrics_hours": {
+        "total_sun_hours": [
+          0.0,
+          0.0
+        ],
+        "total_earth_los_hours": [
+          0.0,
+          0.0
+        ],
+        "longest_dark_hours": [
+          6.0,
+          6.0
+        ],
+        "longest_blackout_hours": [
+          6.0,
+          6.0
+        ],
+        "longest_joint_hours": [
+          0.0,
+          0.0
+        ]
+      },
+      "request_file": "docs/examples/point-analysis-outside-fail-request.json",
+      "validation_passed": true,
+      "seams_passed": true,
+      "sensitivity_passed": {
+        "azimuth_0.25_vs_0.125": true,
+        "radius_400km_vs_300km": true,
+        "time_5min_vs_1min": true
+      },
+      "angular_max_difference_deg": {
+        "20.0": {
+          "comparable": 2880,
+          "max_abs_deg": 0.016786745956673066
+        }
+      },
+      "full_result_path": "/home/levantuananh/H1/HOSA/data/cache/point-analysis/outside-cases/selected-fail.json",
+      "distance_to_catalog_points_km": {
+        "Site01_P1": 79.35666827700871,
+        "Site04_P1": 84.90006667836926
+      },
+      "outside_local_dem_footprints": {
+        "Site01_dem": true,
+        "Site04_dem": true
+      }
+    }
+  ],
+  "common_request": {
+    "start_utc": "2026-11-24T00:00:00Z",
+    "duration_hours": 6,
+    "panel_height_m": 20,
+    "antenna_height_m": 20,
+    "min_sunlit_fraction": 0.8,
+    "constraints": {
+      "max_darkness_hours": 12,
+      "max_earth_blackout_hours": 6
+    },
+    "offline": false,
+    "contact_requirements": {
+      "min_contact_minutes": 30,
+      "setup_minutes": 5,
+      "required_windows": 1,
+      "first_contact_deadline_minutes": 120
+    }
+  },
+  "automated_tests_passed": 217
+}

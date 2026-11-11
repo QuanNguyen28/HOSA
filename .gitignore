@@ -26,6 +26,7 @@ data/cache/*
 !data/processed/lunarsight/
 data/processed/lunarsight/*
 !data/processed/lunarsight/v0.2.0/
+!data/processed/lunarsight/v0.3.0/
 !data/cache/lunarsight/
 data/cache/lunarsight/*
 !data/cache/lunarsight/v0.2.0/
@@ -34,6 +35,7 @@ data/cache/lunarsight/*
 *.img
 *.parquet
 *.sqlite
+*-response.json
 
 # OS/editor
 .DS_Store

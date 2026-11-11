@@ -1,0 +1,71 @@
+{
+  "name": "Site04_P1_sun_1min_508bff6120d0",
+  "identity": {
+    "method_version": "0.1.0",
+    "site_id": "Site04_P1",
+    "dataset_sha256": "38ff70dbdf2f066c2cfa94a646c3a59d653ce7f6b4528b15fc1b43ee397ce758",
+    "observer_height_m": 1,
+    "endpoint": "https://ssd.jpl.nasa.gov/api/horizons.api",
+    "params": {
+      "format": "json",
+      "COMMAND": "'10'",
+      "OBJ_DATA": "'NO'",
+      "MAKE_EPHEM": "'YES'",
+      "EPHEM_TYPE": "'OBSERVER'",
+      "CENTER": "'coord@301'",
+      "COORD_TYPE": "'GEODETIC'",
+      "SITE_COORD": "'203.733786260,-89.779799557,1.738992188'",
+      "START_TIME": "'2026-11-14 00:00:00'",
+      "STOP_TIME": "'2026-11-17 00:00:00'",
+      "STEP_SIZE": "'1 min'",
+      "QUANTITIES": "'4'",
+      "TIME_TYPE": "'UT'",
+      "TIME_DIGITS": "'SECONDS'",
+      "CSV_FORMAT": "'YES'",
+      "APPARENT": "'AIRLESS'",
+      "ANG_FORMAT": "'DEG'",
+      "SKIP_DAYLT": "'NO'",
+      "EXTRA_PREC": "'YES'",
+      "CAL_FORMAT": "'CAL'"
+    }
+  },
+  "url": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND=%2710%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40301%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27203.733786260%2C-89.779799557%2C1.738992188%27&START_TIME=%272026-11-14+00%3A00%3A00%27&STOP_TIME=%272026-11-17+00%3A00%3A00%27&STEP_SIZE=%271+min%27&QUANTITIES=%274%27&TIME_TYPE=%27UT%27&TIME_DIGITS=%27SECONDS%27&CSV_FORMAT=%27YES%27&APPARENT=%27AIRLESS%27&ANG_FORMAT=%27DEG%27&SKIP_DAYLT=%27NO%27&EXTRA_PREC=%27YES%27&CAL_FORMAT=%27CAL%27",
+  "accessed_utc": "2026-11-10T08:10:27.158048+00:00",
+  "raw_file": "data/cache/lunarsight/request-sensitivity/horizons/Site04_P1_sun_1min_508bff6120d0.json",
+  "sha256": "e0bf0c27e1e7329d1fdcbf433bf1d3f7cc91b43caab226f3533f8082ce8d2da5",
+  "bytes": 279141,
+  "http_headers": {
+    "Date": "Tue, 10 Nov 2026 08:10:26 GMT",
+    "Content-Type": "application/json",
+    "Content-Length": null
+  },
+  "signature": {
+    "source": "NASA/JPL Horizons API",
+    "version": "1.2"
+  },
+  "target": 10,
+  "observer_lon_e_deg": 203.7337863,
+  "observer_lat_deg": -89.7797996,
+  "observer_alt_km": 1.73899,
+  "observer_frame": "MEAN_ME (high precision)        {East-longitude positive}",
+  "observer_radii_m": [
+    1737400.0,
+    1737400.0,
+    1737400.0
+  ],
+  "angle_units": "degree",
+  "time_scale": "UTC",
+  "step_minutes": 1,
+  "expected_rows": 4321,
+  "received_rows": 4321,
+  "missing_timestamps": 0,
+  "missing_angles": 0,
+  "azimuth_min_deg": 246.338121874,
+  "azimuth_max_deg": 282.877754358,
+  "elevation_min_deg": 1.46493479,
+  "elevation_max_deg": 1.605692236,
+  "parsed_file": "data/processed/lunarsight/v0.2.0/ephemeris/Site04_P1_sun_1min_508bff6120d0.csv",
+  "parsed_sha256": "a76ae1c0317863d16df88f59ca353e7695a30e64a0221bb88a605afb53cff47b",
+  "header_file": "data/cache/lunarsight/request-sensitivity/horizons/Site04_P1_sun_1min_508bff6120d0.header.txt",
+  "coverage_scope": "first supported 72-hour activity only"
+}

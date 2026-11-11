@@ -1,0 +1,218 @@
+{
+  "$defs": {
+    "Constraints": {
+      "additionalProperties": false,
+      "description": "Optional soft preferences; exceeding these never rejects a candidate.",
+      "properties": {
+        "max_darkness_hours": {
+          "anyOf": [
+            {
+              "maximum": 72,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Soft preference: maximum continuous darkness, in hours",
+          "title": "Max Darkness Hours"
+        },
+        "max_earth_blackout_hours": {
+          "anyOf": [
+            {
+              "maximum": 72,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Soft preference: maximum continuous loss of Earth-centre LOS, in hours",
+          "title": "Max Earth Blackout Hours"
+        }
+      },
+      "title": "Constraints",
+      "type": "object"
+    },
+    "ContactRequirements": {
+      "additionalProperties": false,
+      "properties": {
+        "min_contact_minutes": {
+          "description": "Minimum continuous usable Earth-centre LOS after setup",
+          "exclusiveMinimum": 0,
+          "title": "Min Contact Minutes",
+          "type": "number"
+        },
+        "setup_minutes": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Setup Minutes",
+          "type": "number"
+        },
+        "required_windows": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Number of distinct qualifying visibility windows, not sessions packed into one window",
+          "title": "Required Windows"
+        },
+        "first_contact_deadline_minutes": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Minutes since mission start by which setup plus one complete qualifying contact must finish",
+          "title": "First Contact Deadline Minutes"
+        }
+      },
+      "required": [
+        "min_contact_minutes"
+      ],
+      "title": "ContactRequirements",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Compatibility name for the shared mission request.",
+  "properties": {
+    "site_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Site Id"
+    },
+    "latitude_deg": {
+      "anyOf": [
+        {
+          "exclusiveMaximum": 90,
+          "exclusiveMinimum": -90,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Latitude Deg"
+    },
+    "longitude_e_deg": {
+      "anyOf": [
+        {
+          "maximum": 360,
+          "minimum": -180,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Longitude E Deg"
+    },
+    "start_utc": {
+      "description": "Timezone-aware ISO 8601, 2000–2100, on an exact 5-minute UTC grid",
+      "examples": [
+        "2026-11-17T00:00:00Z"
+      ],
+      "format": "date-time",
+      "title": "Start Utc",
+      "type": "string"
+    },
+    "duration_hours": {
+      "default": 72,
+      "maximum": 72,
+      "minimum": 1,
+      "title": "Duration Hours",
+      "type": "integer"
+    },
+    "panel_height_m": {
+      "default": 1.0,
+      "exclusiveMinimum": 0,
+      "maximum": 20,
+      "title": "Panel Height M",
+      "type": "number"
+    },
+    "antenna_height_m": {
+      "default": 2.0,
+      "exclusiveMinimum": 0,
+      "maximum": 20,
+      "title": "Antenna Height M",
+      "type": "number"
+    },
+    "constraints": {
+      "$ref": "#/$defs/Constraints"
+    },
+    "min_sunlit_fraction": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Min Sunlit Fraction"
+    },
+    "min_earth_los_fraction": {
+      "anyOf": [
+        {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Min Earth Los Fraction"
+    },
+    "contact_requirements": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ContactRequirements"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "offline": {
+      "default": false,
+      "title": "Offline",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "start_utc"
+  ],
+  "title": "PointAnalysisRequest",
+  "type": "object"
+}

@@ -15,7 +15,7 @@ from app.services.lunarsight.catalog import (  # noqa: E402
     site_catalog,
     site_timeline,
 )
-from app.services.lunarsight.point import sample_terrain, terrain_window  # noqa: E402
+from app.services.lunarsight.point import sample_terrain, terrain_window, terrain_sources  # noqa: E402
 from app.services.lunarsight.planning import (  # noqa: E402
     analyze_request,
     load_result,
@@ -23,6 +23,10 @@ from app.services.lunarsight.planning import (  # noqa: E402
     scenarios,
     site_profile,
 )
+
+_SOURCES = {source["dataset_id"]: source["path"] for source in terrain_sources()}
+RAW_SITE01 = _SOURCES["Site01_dem"]
+RAW_DEM80 = _SOURCES["dem80"]
 
 
 def test_site_catalog_has_versioned_provenance():
@@ -32,7 +36,7 @@ def test_site_catalog_has_versioned_provenance():
         "Site01_P1",
         "Site04_P1",
     }
-    assert catalog["provenance"]["dataset_version"] == "v0.2.0"
+    assert catalog["provenance"]["dataset_version"] == "v0.3.0"
 
 
 def test_timeline_is_bounded_and_preserves_state_codes():
@@ -58,6 +62,7 @@ def test_site_analysis_uses_native_interval_and_versioned_window():
     assert analysis["instant"]["sun"]["state"] in {"V", "B", "?"}
     assert analysis["instant"]["earth"]["state"] in {"V", "B", "?"}
     assert analysis["window_72h"]["decision"] in {"PASS", "FAIL", "INDETERMINATE"}
+    assert analysis["window_72h"]["requirements"] == {"min_sunlit_fraction": .8, "min_earth_los_fraction": .8}
 
 
 def test_site_analysis_refuses_to_extrapolate():
@@ -134,6 +139,8 @@ def test_exact_analysis_is_reproducible_and_exportable():
         "scenario_id": "south_pole_demo_v1",
         "site_ids": ["Site01_P1", "Site04_P1"],
         "start_index": 0,
+        "min_sunlit_fraction": 0.8,
+        "min_earth_los_fraction": 0.8,
         "constraints": {
             "max_darkness_hours": 12,
             "max_earth_blackout_hours": 6,
@@ -145,7 +152,8 @@ def test_exact_analysis_is_reproducible_and_exportable():
     assert {site["site_id"] for site in result["sites"]} == {"Site01_P1", "Site04_P1"}
     assert all(site["start_utc"] == "2026-11-14T00:00:00Z" for site in result["sites"])
     assert all(site["events"] for site in result["sites"])
-    assert all(site["decisive_event"]["body"] == "earth" for site in result["sites"])
+    assert all(site["constraint_states"]["min_earth_los_fraction"] == "FAIL" for site in result["sites"])
+    assert all(site["decisive_event"] is None for site in result["sites"])
     assert all(site["sensitivity"]["status"] == "STABLE_DECISION" for site in result["sites"])
     assert result["sites"][1]["sensitivity"]["max_duration_difference_minutes"] <= 2.01
     assert sum(result["grid_summary"]["Site01_P1"]["counts"].values()) == 1344

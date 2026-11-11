@@ -96,28 +96,36 @@ function SiteResultCard({ site, name, active, onSelect, onExplain }: {
         <strong className={`decision decision-${site.decision.toLowerCase()}`}>{decisionLabel[site.decision]}</strong>
       </header>
       <div className="constraint-row">
-        <div><Sun size={14} /><span>Tối liên tục</span><strong>{metric(site.metrics.longest_dark_hours)}</strong></div>
-        <b className={`check check-${site.constraint_states.max_darkness_hours.toLowerCase()}`}>{decisionLabel[site.constraint_states.max_darkness_hours]}</b>
+        <div><Sun size={14} /><span>Tổng giờ có nắng · cứng</span><strong>{metric(site.metrics.total_sun_hours)}</strong></div>
+        <b className={`check check-${site.constraint_states.min_sunlit_fraction.toLowerCase()}`}>{decisionLabel[site.constraint_states.min_sunlit_fraction]}</b>
       </div>
       <div className="constraint-row">
-        <div><Radio size={14} /><span>Mất Earth LOS</span><strong>{metric(site.metrics.longest_blackout_hours)}</strong></div>
-        <b className={`check check-${site.constraint_states.max_earth_blackout_hours.toLowerCase()}`}>{decisionLabel[site.constraint_states.max_earth_blackout_hours]}</b>
+        <div><Radio size={14} /><span>Tổng giờ có Earth LOS · cứng</span><strong>{metric(site.metrics.total_earth_los_hours)}</strong></div>
+        <b className={`check check-${site.constraint_states.min_earth_los_fraction.toLowerCase()}`}>{decisionLabel[site.constraint_states.min_earth_los_fraction]}</b>
       </div>
       <Timeline site={site} />
       <div className="metric-strip">
-        <div><span>TỔNG GIỜ SUN</span><strong>{metric(site.metrics.total_sun_hours)}</strong></div>
-        <div><span>ĐỒNG THỜI DÀI NHẤT</span><strong>{metric(site.metrics.longest_joint_hours)}</strong></div>
+        <div><span>TỐI LIÊN TỤC DÀI NHẤT · MỀM</span><strong>{metric(site.metrics.longest_dark_hours)}</strong></div>
+        <div><span>MẤT LOS LIÊN TỤC DÀI NHẤT · MỀM</span><strong>{metric(site.metrics.longest_blackout_hours)}</strong></div>
       </div>
+      {Object.entries(site.soft_constraint_states).map(([name, state]) => (
+        <div className="soft-preference-note" key={name}>
+          {name === "max_darkness_hours" ? "Khoảng tối" : "Khoảng mất Earth LOS"}: {state === "FAIL" ? "vượt mong muốn" : state === "PASS" ? "đáp ứng mong muốn" : "chưa xác định"}. Yêu cầu mềm không làm loại phương án.
+        </div>
+      ))}
       <div className={`sensitivity-strip sensitivity-${site.sensitivity.status.toLowerCase()}`}>
         <span>NUMERICAL SENSITIVITY</span>
-        <strong>{site.sensitivity.status === "STABLE_DECISION" ? "DECISION STABLE" : site.sensitivity.status.replace("_", " ")}</strong>
+        <strong>{site.sensitivity.status === "STABLE_DECISION" ? "ỔN ĐỊNH VỚI ĐẦU VÀO NÀY" : site.sensitivity.status === "REVIEW" ? "CẦN XEM LẠI" : "CHƯA ĐỦ ĐỐI CHIẾU"}</strong>
+        <small>{shortUtc(site.start_utc)}–{shortUtc(site.end_utc)} · nắng ≥ {site.sensitivity.scope.min_sunlit_fraction*100}% · Earth LOS ≥ {site.sensitivity.scope.min_earth_los_fraction*100}%</small>
+        {site.sensitivity.status === "NOT_EVALUATED" && <small>Thiếu dữ liệu đối chiếu cho cửa sổ này.</small>}
         {site.sensitivity.max_duration_difference_minutes != null && (
           <small>
             1-min Δduration ≤ {site.sensitivity.max_duration_difference_minutes.toFixed(1)} min ·
             Δevent ≤ {site.sensitivity.max_event_shift_minutes?.toFixed(1) ?? "—"} min
-            {site.sensitivity.angular_sensitive ? " · angular profile flagged" : ""}
           </small>
         )}
+        {site.sensitivity.angular_sensitive && <small>Profile chân trời nhạy với bước phương vị; kết luận vẫn theo các đối chiếu ở trên.</small>}
+        {site.sensitivity.soft_preferences_changed && <small>Đổi độ phân giải làm thay đổi đánh giá yêu cầu mềm.</small>}
       </div>
       {decisive ? (
         <button
@@ -136,7 +144,7 @@ function SiteResultCard({ site, name, active, onSelect, onExplain }: {
           </p>
         </button>
       ) : (
-        <div className="decisive-event positive"><CheckCircle2 size={14} /><p>Không có sự kiện chặn làm vượt ngưỡng đã chọn.</p></div>
+        <div className={`decisive-event ${site.decision === "PASS" ? "positive" : ""}`}><CheckCircle2 size={14} /><p>{site.decision === "PASS" ? "Đạt cả hai yêu cầu cứng về tổng thời gian." : site.decision === "FAIL" ? "Chưa đủ tổng thời gian theo yêu cầu cứng. Xem các cửa sổ trên timeline." : "Chưa đủ dữ liệu để kết luận các yêu cầu cứng."}</p></div>
       )}
     </article>
   );
@@ -182,16 +190,25 @@ export function CompareWorkspace({ sites }: Props) {
   const [startIndex, setStartIndex] = useState(0);
   const [darkness, setDarkness] = useState(12);
   const [blackout, setBlackout] = useState(6);
+  const [sunPercent, setSunPercent] = useState(80);
+  const [earthPercent, setEarthPercent] = useState(80);
+  const [useDarkness, setUseDarkness] = useState(false);
+  const [useBlackout, setUseBlackout] = useState(false);
   const [activeSiteId, setActiveSiteId] = useState("Site01_P1");
   const [target, setTarget] = useState<"sun" | "earth">("earth");
 
   useEffect(() => {
-    if (scenario && !result && !loading) void analyze(0, 12, 6);
-  }, [scenario, result, loading, analyze]);
+    if (scenario) void analyze(0, 0.8, 0.8, null, null);
+  }, [scenario, analyze]);
 
-  const selectedResult = result?.sites.find((site) => site.site_id === activeSiteId) ?? result?.sites[0] ?? null;
+  const currentResult = result && result.request.start_index === startIndex
+    && result.request.min_sunlit_fraction === sunPercent/100
+    && result.request.min_earth_los_fraction === earthPercent/100
+    && result.request.constraints.max_darkness_hours === (useDarkness ? darkness : null)
+    && result.request.constraints.max_earth_blackout_hours === (useBlackout ? blackout : null) ? result : null;
+  const selectedResult = currentResult?.sites.find((site) => site.site_id === activeSiteId) ?? currentResult?.sites[0] ?? null;
   const startUtc = scenario ? utcAt(scenario.A_utc, startIndex, scenario.start_step_minutes) : null;
-  const run = () => void analyze(startIndex, darkness, blackout);
+  const run = () => void analyze(startIndex, sunPercent/100, earthPercent/100, useDarkness ? darkness : null, useBlackout ? blackout : null);
 
   return (
     <section className="compare-workspace" aria-label="Lunar site comparison workspace">
@@ -215,8 +232,11 @@ export function CompareWorkspace({ sites }: Props) {
           onChange={(event) => setStartIndex(Number(event.target.value))}
         />
         <div className="constraint-inputs">
-          <label><span>TỐI TỐI ĐA</span><div><input type="number" min="0" max="72" step="0.25" value={darkness} onChange={(event) => setDarkness(Number(event.target.value))} /><b>h</b></div></label>
-          <label><span>MẤT EARTH LOS TỐI ĐA</span><div><input type="number" min="0" max="72" step="0.25" value={blackout} onChange={(event) => setBlackout(Number(event.target.value))} /><b>h</b></div></label>
+          <label><span>CỨNG · CÓ NẮNG TỐI THIỂU</span><div><input type="number" min="0" max="100" step="1" value={sunPercent} onChange={(event) => setSunPercent(Number(event.target.value))} /><b>%</b></div></label>
+          <label><span>CỨNG · CÓ EARTH LOS TỐI THIỂU</span><div><input type="number" min="0" max="100" step="1" value={earthPercent} onChange={(event) => setEarthPercent(Number(event.target.value))} /><b>%</b></div></label>
+          <p>80% là ví dụ minh họa; bạn có thể chỉnh theo nhu cầu.</p>
+          <label><span><input type="checkbox" checked={useDarkness} onChange={(event) => setUseDarkness(event.target.checked)} /> MỀM · TỐI LIÊN TỤC TỐI ĐA</span><div><input type="number" min="0" max="72" step="0.25" disabled={!useDarkness} value={darkness} onChange={(event) => setDarkness(Number(event.target.value))} /><b>h</b></div></label>
+          <label><span><input type="checkbox" checked={useBlackout} onChange={(event) => setUseBlackout(event.target.checked)} /> MỀM · MẤT LOS LIÊN TỤC TỐI ĐA</span><div><input type="number" min="0" max="72" step="0.25" disabled={!useBlackout} value={blackout} onChange={(event) => setBlackout(Number(event.target.value))} /><b>h</b></div></label>
         </div>
         <button className="run-analysis" onClick={run} disabled={!scenario || loading}>
           <RefreshCw size={14} className={loading ? "spin" : ""} /> {loading ? "ĐANG PHÂN TÍCH" : "PHÂN TÍCH HAI ĐIỂM"}
@@ -232,15 +252,15 @@ export function CompareWorkspace({ sites }: Props) {
       <div className="comparison-main">
         <header className="comparison-heading">
           <div><span>MISSION WINDOW COMPARISON</span><h1>So sánh điều kiện tại cực nam Mặt Trăng</h1></div>
-          {result && (
+          {currentResult && (
             <div className="export-actions">
-              <a href={`/api/results/${result.result_id}/export?format=json`} download><ArrowDownToLine size={13} /> JSON</a>
-              <a href={`/api/results/${result.result_id}/export?format=csv`} download><ArrowDownToLine size={13} /> CSV</a>
+              <a href={`/api/results/${currentResult.result_id}/export?format=json`} download><ArrowDownToLine size={13} /> JSON</a>
+              <a href={`/api/results/${currentResult.result_id}/export?format=csv`} download><ArrowDownToLine size={13} /> CSV</a>
             </div>
           )}
         </header>
         <div className="site-comparison-grid">
-          {result?.sites.map((site) => (
+          {currentResult?.sites.map((site) => (
             <SiteResultCard
               key={site.site_id}
               site={site}
@@ -253,7 +273,7 @@ export function CompareWorkspace({ sites }: Props) {
                 requestAnimationFrame(() => document.getElementById("horizon-evidence")?.scrollIntoView({ behavior: "smooth", block: "nearest" }));
               }}
             />
-          )) ?? <div className="comparison-loading"><Clock3 size={18} /> Đang đọc dữ liệu đã kiểm định…</div>}
+          )) ?? <div className="comparison-loading"><Clock3 size={18} /> {loading ? "Đang phân tích…" : result ? "Đầu vào đã đổi. Nhấn Phân tích hai điểm để cập nhật kết quả." : "Đang đọc dữ liệu đã kiểm định…"}</div>}
         </div>
         {selectedResult && (
           <div className="evidence-section" id="horizon-evidence">

@@ -4,6 +4,14 @@
 
 Chạy từ thư mục gốc bằng `python scripts/run_lunarsight.py --help`. Xem [hướng dẫn tải nguồn và chạy lại](../docs/validation/lunarsight/README.md) để chuẩn bị môi trường.
 
+`planning_cli.py` nhận tham số hoặc JSON trực tiếp để compare/search/export,
+không qua LLM. Có chế độ gọi service cục bộ và gọi HTTP bằng `--base-url`.
+Xem [ví dụ CLI](../docs/demo/planning-cli.md).
+
+`contact_windows.py` tính cửa sổ nhìn thấy Trái Đất, phiên đủ dài, thời gian chờ
+và khoảng mất LOS từ JSON kết quả backend hoặc CSV interval gốc. Công cụ độc
+lập với phần tính DEM/JPL. Xem [hướng dẫn và giới hạn](../docs/demo/contact-windows.md).
+
 `notebooks/lunarsight-data-pipeline.ipynb` là notebook Kaggle độc lập đã xuất từ bộ bàn giao. Bốn notebook đánh số dùng cây thư mục của ZIP độc lập. Giải nén ZIP rồi đặt `LUNARSIGHT_ROOT` trỏ vào thư mục `lunarsight-data` trước khi chạy chúng.
 # Web terrain derivatives
 

@@ -13,8 +13,8 @@ from pathlib import Path
 from typing import Any
 
 
-DATASET_VERSION = "v0.2.0"
-METHOD_VERSION = "catalog-api-0.1.0"
+DATASET_VERSION = "v0.3.0"
+METHOD_VERSION = "catalog-api-0.2.0"
 
 
 def repository_root() -> Path:
@@ -140,12 +140,24 @@ def site_analysis(site_id: str, at_utc: str) -> dict[str, Any]:
 
     window_result = None
     if exact_window is not None:
+        derivation = json.loads((processed_root()/"derivation.json").read_text(encoding="utf-8"))
         window_result = {
+            "requirements": derivation["requirements"],
+            "soft_preferences": derivation["soft_preferences"],
+            "decision_policy": derivation["policy"],
             "start_utc": exact_window["start_utc"],
             "end_utc": exact_window["end_utc"],
             "decision": exact_window["decision"],
-            "darkness_constraint": exact_window["darkness_constraint"],
-            "earth_constraint": exact_window["earth_constraint"],
+            "sunlight_requirement": exact_window["sunlight_requirement"],
+            "earth_los_requirement": exact_window["earth_los_requirement"],
+            "soft_constraint_states": {
+                "max_darkness_hours": exact_window["soft_darkness_preference"],
+                "max_earth_blackout_hours": exact_window["soft_earth_blackout_preference"],
+            },
+            "total_earth_los_hours": [
+                _numeric(exact_window["total_earth_los_hours_L"]),
+                _numeric(exact_window["total_earth_los_hours_U"]),
+            ],
             "total_sun_hours": [
                 _numeric(exact_window["total_sun_hours_L"]),
                 _numeric(exact_window["total_sun_hours_U"]),
@@ -204,14 +216,9 @@ def site_analysis(site_id: str, at_utc: str) -> dict[str, Any]:
 
 
 def coverage_summary() -> dict[str, Any]:
+    from .point import terrain_sources
     root = processed_root()
-    raw = repository_root() / "data" / "raw"
-    terrain = [
-        ("Site01_dem", raw / "Site01" / "Site01_final_adj_5mpp_surf.tif", 5),
-        ("Site04_dem", raw / "Site04" / "Site04_final_adj_5mpp_surf.tif", 5),
-        ("dem80", raw / "global" / "LDEM_80S_80MPP_ADJ.TIF", 80),
-        ("dem240", raw / "global" / "LDEM_60S_240MPP_ADJ.TIF", 240),
-    ]
+    terrain = [(source["dataset_id"], source["path"], source["resolution_m"]) for source in terrain_sources()]
     return {
         "dataset_version": DATASET_VERSION,
         "method_version": METHOD_VERSION,

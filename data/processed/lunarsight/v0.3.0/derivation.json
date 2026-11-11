@@ -1,0 +1,66 @@
+{
+  "dataset_version": "v0.3.0",
+  "source_dataset_version": "v0.2.0",
+  "policy": "availability-hard-continuity-soft-v1",
+  "requirements": {
+    "min_sunlit_fraction": 0.8,
+    "min_earth_los_fraction": 0.8
+  },
+  "soft_preferences": {
+    "max_darkness_hours": 12.0,
+    "max_earth_blackout_hours": 6.0
+  },
+  "inputs": {
+    "data/processed/lunarsight/v0.2.0/horizon/Site01_h1_az0.125_r400000.csv": "e7b13ed54e6d92c8a58973f4a2128e43ff921ea2bdca4fa0daac579baf3913c5",
+    "data/processed/lunarsight/v0.2.0/horizon/Site01_h1_az0.25_r300000.csv": "36952de9608c8b8b6424808fd6ec7bbd72fe13552ea54c9f5e2d1b0e04bee2f0",
+    "data/processed/lunarsight/v0.2.0/horizon/Site01_h1_az0.25_r400000.csv": "a68e95ff13dff8b404df06eea1fae27f8063c5a5824a9ead7dac6a288189cf46",
+    "data/processed/lunarsight/v0.2.0/horizon/Site01_h2_az0.125_r400000.csv": "cf1f6d19bdf9cd65d34af2ebdb88c84f2c7c352ae39a81f9b672b2cc1ae6328b",
+    "data/processed/lunarsight/v0.2.0/horizon/Site01_h2_az0.25_r300000.csv": "56fdf7401ccf94b373b1cda48de18d014caa5be093886655ff1918f54eaa4812",
+    "data/processed/lunarsight/v0.2.0/horizon/Site01_h2_az0.25_r400000.csv": "8dd35792a877939b96995636cccd069308989de0dc7789d265b9117eb9051cb5",
+    "data/processed/lunarsight/v0.2.0/horizon/Site04_h1_az0.125_r400000.csv": "79ecd21fa13a9e8590b4bf444c3634d6484d651e44505ac29d84eb1e1a76a59a",
+    "data/processed/lunarsight/v0.2.0/horizon/Site04_h1_az0.25_r400000.csv": "26794774b993862722296ac9668c920784369f80b6b0a5e16745640e49189b11",
+    "data/processed/lunarsight/v0.2.0/horizon/Site04_h2_az0.125_r400000.csv": "9ead778c03e719c5a9807e220a9075167c7e8b19da5a47a4e4a3901254eeb4a1",
+    "data/processed/lunarsight/v0.2.0/horizon/Site04_h2_az0.25_r400000.csv": "8c8885844a25d8e9df112221abb54d33b9c0da5909d120c01f6bfd45e5333377",
+    "data/processed/lunarsight/v0.2.0/ephemeris/Site01_P1_earth_1min_0e4b12e27d30.csv": "514bcaf1350a85724e5faeb90fbfe10d32d767df083fe918e7bcf2760137aa89",
+    "data/processed/lunarsight/v0.2.0/ephemeris/Site01_P1_earth_5min_0d1dd7e592f9.csv": "dd308149b00726fc049c59ce18d849c85036c39b9b79d2b8dfa76d117b6f7ca4",
+    "data/processed/lunarsight/v0.2.0/ephemeris/Site01_P1_sun_1min_2b05fa08baa7.csv": "da02e854bf97dfe40dda8c449e1e937f36f07fddb90fb3efb3f29895a9d632d1",
+    "data/processed/lunarsight/v0.2.0/ephemeris/Site01_P1_sun_5min_cf2d5a7a2d1c.csv": "81b4b8352ccb76052347178b45b45021f6379c839e6584218e97cc308566c70a",
+    "data/processed/lunarsight/v0.2.0/ephemeris/Site04_P1_earth_1min_3d03274224c4.csv": "8e2dc5d621dbf0a283e6eb94d31e06a09779f63620d472e0af8d1e10ea8adf51",
+    "data/processed/lunarsight/v0.2.0/ephemeris/Site04_P1_earth_5min_8c1ffb6d6238.csv": "eb0d0ce34884fccc4c6b2eab3f5560e1cfc1120caec09eb1487cc6e764b3251e",
+    "data/processed/lunarsight/v0.2.0/ephemeris/Site04_P1_sun_1min_508bff6120d0.csv": "a76ae1c0317863d16df88f59ca353e7695a30e64a0221bb88a605afb53cff47b",
+    "data/processed/lunarsight/v0.2.0/ephemeris/Site04_P1_sun_5min_a9308b181ba5.csv": "86798102da8db372bf308f8e167f5c3d2defba1b3505b20389241423402f983d",
+    "data/processed/lunarsight/v0.2.0/site_catalog.geojson": "2c72dbf75723c0c528357cda2f641b384567448c97722f65ccb9548ab6a81065",
+    "manifests/lunarsight/config/scenario.json": "b9ec972e26be6f34fa0018e776d9da8ff6c9fd84076117624eecd93c85d10c52",
+    "data/processed/lunarsight/v0.2.0/visibility/Site01_intervals.csv": "ae0416a458449f71f091f8a6ab7d292eeef6d76bb46ef448ba0e9e102373ffef",
+    "data/processed/lunarsight/v0.2.0/visibility/Site04_intervals.csv": "7326a7698ed95c68036b4aa9298aef5007c3f8cf082700a8ef047ddd0f798ed6"
+  },
+  "outputs": {
+    "data/processed/lunarsight/v0.3.0/ephemeris/Site01_P1_earth_1min_0e4b12e27d30.csv": "514bcaf1350a85724e5faeb90fbfe10d32d767df083fe918e7bcf2760137aa89",
+    "data/processed/lunarsight/v0.3.0/ephemeris/Site01_P1_earth_5min_0d1dd7e592f9.csv": "dd308149b00726fc049c59ce18d849c85036c39b9b79d2b8dfa76d117b6f7ca4",
+    "data/processed/lunarsight/v0.3.0/ephemeris/Site01_P1_sun_1min_2b05fa08baa7.csv": "da02e854bf97dfe40dda8c449e1e937f36f07fddb90fb3efb3f29895a9d632d1",
+    "data/processed/lunarsight/v0.3.0/ephemeris/Site01_P1_sun_5min_cf2d5a7a2d1c.csv": "81b4b8352ccb76052347178b45b45021f6379c839e6584218e97cc308566c70a",
+    "data/processed/lunarsight/v0.3.0/ephemeris/Site04_P1_earth_1min_3d03274224c4.csv": "8e2dc5d621dbf0a283e6eb94d31e06a09779f63620d472e0af8d1e10ea8adf51",
+    "data/processed/lunarsight/v0.3.0/ephemeris/Site04_P1_earth_5min_8c1ffb6d6238.csv": "eb0d0ce34884fccc4c6b2eab3f5560e1cfc1120caec09eb1487cc6e764b3251e",
+    "data/processed/lunarsight/v0.3.0/ephemeris/Site04_P1_sun_1min_508bff6120d0.csv": "a76ae1c0317863d16df88f59ca353e7695a30e64a0221bb88a605afb53cff47b",
+    "data/processed/lunarsight/v0.3.0/ephemeris/Site04_P1_sun_5min_a9308b181ba5.csv": "86798102da8db372bf308f8e167f5c3d2defba1b3505b20389241423402f983d",
+    "data/processed/lunarsight/v0.3.0/horizon/Site01_h1_az0.125_r400000.csv": "e7b13ed54e6d92c8a58973f4a2128e43ff921ea2bdca4fa0daac579baf3913c5",
+    "data/processed/lunarsight/v0.3.0/horizon/Site01_h1_az0.25_r300000.csv": "36952de9608c8b8b6424808fd6ec7bbd72fe13552ea54c9f5e2d1b0e04bee2f0",
+    "data/processed/lunarsight/v0.3.0/horizon/Site01_h1_az0.25_r400000.csv": "a68e95ff13dff8b404df06eea1fae27f8063c5a5824a9ead7dac6a288189cf46",
+    "data/processed/lunarsight/v0.3.0/horizon/Site01_h2_az0.125_r400000.csv": "cf1f6d19bdf9cd65d34af2ebdb88c84f2c7c352ae39a81f9b672b2cc1ae6328b",
+    "data/processed/lunarsight/v0.3.0/horizon/Site01_h2_az0.25_r300000.csv": "56fdf7401ccf94b373b1cda48de18d014caa5be093886655ff1918f54eaa4812",
+    "data/processed/lunarsight/v0.3.0/horizon/Site01_h2_az0.25_r400000.csv": "8dd35792a877939b96995636cccd069308989de0dc7789d265b9117eb9051cb5",
+    "data/processed/lunarsight/v0.3.0/horizon/Site04_h1_az0.125_r400000.csv": "79ecd21fa13a9e8590b4bf444c3634d6484d651e44505ac29d84eb1e1a76a59a",
+    "data/processed/lunarsight/v0.3.0/horizon/Site04_h1_az0.25_r400000.csv": "26794774b993862722296ac9668c920784369f80b6b0a5e16745640e49189b11",
+    "data/processed/lunarsight/v0.3.0/horizon/Site04_h2_az0.125_r400000.csv": "9ead778c03e719c5a9807e220a9075167c7e8b19da5a47a4e4a3901254eeb4a1",
+    "data/processed/lunarsight/v0.3.0/horizon/Site04_h2_az0.25_r400000.csv": "8c8885844a25d8e9df112221abb54d33b9c0da5909d120c01f6bfd45e5333377",
+    "data/processed/lunarsight/v0.3.0/site_catalog.geojson": "2c72dbf75723c0c528357cda2f641b384567448c97722f65ccb9548ab6a81065",
+    "data/processed/lunarsight/v0.3.0/visibility/Site01_intervals.csv": "ae0416a458449f71f091f8a6ab7d292eeef6d76bb46ef448ba0e9e102373ffef",
+    "data/processed/lunarsight/v0.3.0/visibility/Site01_windows.csv": "0b202c86e1dce1a7a2ec19ee9fcda0f422c707734fe5c641a469f645cef7771b",
+    "data/processed/lunarsight/v0.3.0/visibility/Site04_intervals.csv": "7326a7698ed95c68036b4aa9298aef5007c3f8cf082700a8ef047ddd0f798ed6",
+    "data/processed/lunarsight/v0.3.0/visibility/Site04_windows.csv": "d174d5afc6ba2cf2108678dc32f2366ae2ffa113d10098fe18fd58b49bd0a854"
+  },
+  "limitations": [
+    "Terrain and ephemeris geometry are inherited unchanged; this release changes metric aggregation and decision policy.",
+    "Demo fractions are editable examples, not NASA mission requirements."
+  ]
+}

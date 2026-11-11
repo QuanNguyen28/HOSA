@@ -1,0 +1,331 @@
+[
+  {
+    "id": "A01",
+    "text": "Lịch hạ cánh bị lùi ba ngày. Giữ phần cứng, đổi điểm trong vùng này, tối liên tục không quá 12 giờ.",
+    "patch": {
+      "arrival_shift_days": 3,
+      "arrival_utc": null,
+      "duration_hours": null,
+      "hardware_change": false,
+      "site_scope": "selected",
+      "max_darkness_hours": 12,
+      "max_earth_blackout_hours": null,
+      "min_sunlit_fraction": null,
+      "unresolved_fields": [],
+      "unsupported_requirements": [],
+      "source_quotes": [
+        "ba ngày"
+      ]
+    },
+    "expected_parse_status": "READY",
+    "expected_result_status": "FEASIBLE",
+    "expected_spec": {
+      "start_index": 288
+    }
+  },
+  {
+    "id": "A02",
+    "text": "Hạ cánh lúc 2026-11-17T07:00:00+07:00, giữ phần cứng, đổi điểm trong vùng này, tối tối đa 12 giờ.",
+    "patch": {
+      "arrival_shift_days": null,
+      "arrival_utc": "2026-11-17T07:00:00+07:00",
+      "duration_hours": null,
+      "hardware_change": false,
+      "site_scope": "selected",
+      "max_darkness_hours": 12,
+      "max_earth_blackout_hours": null,
+      "min_sunlit_fraction": null,
+      "unresolved_fields": [],
+      "unsupported_requirements": [],
+      "source_quotes": [
+        "2026-11-17T07:00:00+07:00"
+      ]
+    },
+    "expected_parse_status": "READY",
+    "expected_result_status": "FEASIBLE",
+    "expected_spec": {
+      "arrival_utc": "2026-11-17T00:00:00Z"
+    }
+  },
+  {
+    "id": "A03",
+    "text": "Hạ cánh ngày 18/11, giữ phần cứng và đổi điểm trong vùng này.",
+    "patch": {
+      "arrival_shift_days": null,
+      "arrival_utc": null,
+      "duration_hours": null,
+      "hardware_change": false,
+      "site_scope": "selected",
+      "max_darkness_hours": 12,
+      "max_earth_blackout_hours": null,
+      "min_sunlit_fraction": null,
+      "unresolved_fields": [
+        "year",
+        "time",
+        "timezone"
+      ],
+      "unsupported_requirements": [],
+      "source_quotes": [
+        "18/11"
+      ]
+    },
+    "expected_parse_status": "NEEDS_INPUT",
+    "expected_issue": "UNRESOLVED_FIELDS"
+  },
+  {
+    "id": "A04",
+    "text": "Lùi ba ngày, giữ phần cứng, đổi điểm trong vùng này; tối liên tục tối đa 720 phút.",
+    "patch": {
+      "arrival_shift_days": 3,
+      "arrival_utc": null,
+      "duration_hours": null,
+      "hardware_change": false,
+      "site_scope": "selected",
+      "max_darkness_hours": 12,
+      "max_earth_blackout_hours": null,
+      "min_sunlit_fraction": null,
+      "unresolved_fields": [],
+      "unsupported_requirements": [],
+      "source_quotes": [
+        "ba ngày"
+      ]
+    },
+    "expected_parse_status": "READY",
+    "expected_result_status": "FEASIBLE",
+    "expected_spec": {
+      "constraints": {
+        "max_darkness_hours": 12,
+        "max_earth_blackout_hours": 6
+      }
+    }
+  },
+  {
+    "id": "A05",
+    "text": "Giữ ngày hạ cánh, giữ phần cứng, đổi điểm trong vùng này; tối tối đa 12 giờ, mất tầm nhìn Trái Đất tối đa 6 giờ.",
+    "patch": {
+      "arrival_shift_days": 0,
+      "arrival_utc": null,
+      "duration_hours": null,
+      "hardware_change": false,
+      "site_scope": "selected",
+      "max_darkness_hours": 12,
+      "max_earth_blackout_hours": 6,
+      "min_sunlit_fraction": null,
+      "unresolved_fields": [],
+      "unsupported_requirements": [],
+      "source_quotes": [
+        "Giữ ngày hạ cánh"
+      ]
+    },
+    "expected_parse_status": "READY",
+    "expected_result_status": "NO_FEASIBLE_IN_EVALUATED_SET",
+    "expected_spec": {
+      "start_index": 0
+    }
+  },
+  {
+    "id": "A06",
+    "text": "Lùi 400 ngày, giữ phần cứng và đổi điểm trong vùng này.",
+    "patch": {
+      "arrival_shift_days": 400,
+      "arrival_utc": null,
+      "duration_hours": null,
+      "hardware_change": false,
+      "site_scope": "selected",
+      "max_darkness_hours": 12,
+      "max_earth_blackout_hours": null,
+      "min_sunlit_fraction": null,
+      "unresolved_fields": [],
+      "unsupported_requirements": [],
+      "source_quotes": [
+        "400 ngày"
+      ]
+    },
+    "expected_parse_status": "NEEDS_INPUT",
+    "expected_issue": "OUTSIDE_TIME_COVERAGE"
+  },
+  {
+    "id": "A07",
+    "text": "Lùi ba ngày, tăng cột thiết bị thêm 2 mét và đổi điểm trong vùng này.",
+    "patch": {
+      "arrival_shift_days": 3,
+      "arrival_utc": null,
+      "duration_hours": null,
+      "hardware_change": true,
+      "site_scope": "selected",
+      "max_darkness_hours": 12,
+      "max_earth_blackout_hours": null,
+      "min_sunlit_fraction": null,
+      "unresolved_fields": [],
+      "unsupported_requirements": [],
+      "source_quotes": [
+        "ba ngày"
+      ]
+    },
+    "expected_parse_status": "UNSUPPORTED_REQUIREMENT",
+    "expected_issue": "UNSUPPORTED_REQUIREMENT"
+  },
+  {
+    "id": "A08",
+    "text": "Lùi ba ngày, giữ phần cứng, đổi điểm trong vùng này; nhiệm vụ chỉ kéo dài 48 giờ.",
+    "patch": {
+      "arrival_shift_days": 3,
+      "arrival_utc": null,
+      "duration_hours": 48,
+      "hardware_change": false,
+      "site_scope": "selected",
+      "max_darkness_hours": 12,
+      "max_earth_blackout_hours": null,
+      "min_sunlit_fraction": null,
+      "unresolved_fields": [],
+      "unsupported_requirements": [],
+      "source_quotes": [
+        "ba ngày"
+      ]
+    },
+    "expected_parse_status": "UNSUPPORTED_REQUIREMENT",
+    "expected_issue": "UNSUPPORTED_DURATION"
+  },
+  {
+    "id": "A09",
+    "text": "Hạ cánh lúc 2026-11-17T00:07:00Z, giữ phần cứng và đổi điểm trong vùng này.",
+    "patch": {
+      "arrival_shift_days": null,
+      "arrival_utc": "2026-11-17T00:07:00Z",
+      "duration_hours": null,
+      "hardware_change": false,
+      "site_scope": "selected",
+      "max_darkness_hours": 12,
+      "max_earth_blackout_hours": null,
+      "min_sunlit_fraction": null,
+      "unresolved_fields": [],
+      "unsupported_requirements": [],
+      "source_quotes": [
+        "2026-11-17T00:07:00Z"
+      ]
+    },
+    "expected_parse_status": "NEEDS_INPUT",
+    "expected_issue": "OFF_START_GRID"
+  },
+  {
+    "id": "A10",
+    "text": "Lùi ba ngày, giữ phần cứng và đổi điểm trong vùng này.",
+    "patch": {
+      "arrival_shift_days": 3,
+      "arrival_utc": null,
+      "duration_hours": null,
+      "hardware_change": false,
+      "site_scope": "selected",
+      "max_darkness_hours": 12,
+      "max_earth_blackout_hours": null,
+      "min_sunlit_fraction": null,
+      "unresolved_fields": [],
+      "unsupported_requirements": [],
+      "source_quotes": [
+        "ba ngày"
+      ]
+    },
+    "expected_parse_status": "NEEDS_INPUT",
+    "expected_issue": "MISSING_BASELINE",
+    "context": {
+      "baseline": null
+    }
+  },
+  {
+    "id": "A11",
+    "text": "Lùi ba ngày, giữ phần cứng và đổi điểm trong vùng này.",
+    "patch": {
+      "arrival_shift_days": 3,
+      "arrival_utc": null,
+      "duration_hours": null,
+      "hardware_change": false,
+      "site_scope": "selected",
+      "max_darkness_hours": 12,
+      "max_earth_blackout_hours": null,
+      "min_sunlit_fraction": null,
+      "unresolved_fields": [],
+      "unsupported_requirements": [],
+      "source_quotes": [
+        "ba ngày"
+      ]
+    },
+    "expected_parse_status": "NEEDS_INPUT",
+    "expected_issue": "MISSING_REGION",
+    "context": {
+      "selected_site_ids": null
+    }
+  },
+  {
+    "id": "A12",
+    "text": "Lùi ba ngày, giữ phần cứng, đổi điểm trong vùng này; tối tối đa 12 giờ và có nắng ít nhất 75%.",
+    "patch": {
+      "arrival_shift_days": 3,
+      "arrival_utc": null,
+      "duration_hours": null,
+      "hardware_change": false,
+      "site_scope": "selected",
+      "max_darkness_hours": 12,
+      "max_earth_blackout_hours": null,
+      "min_sunlit_fraction": 0.75,
+      "unresolved_fields": [],
+      "unsupported_requirements": [],
+      "source_quotes": [
+        "ba ngày"
+      ]
+    },
+    "expected_parse_status": "READY",
+    "expected_result_status": "FEASIBLE",
+    "expected_spec": {
+      "min_sunlit_fraction": 0.75
+    }
+  },
+  {
+    "id": "A13",
+    "text": "Lùi ba ngày, giữ phần cứng và giữ nguyên điểm hạ cánh hiện tại.",
+    "patch": {
+      "arrival_shift_days": 3,
+      "arrival_utc": null,
+      "duration_hours": null,
+      "hardware_change": false,
+      "site_scope": "keep_current",
+      "max_darkness_hours": 12,
+      "max_earth_blackout_hours": null,
+      "min_sunlit_fraction": null,
+      "unresolved_fields": [],
+      "unsupported_requirements": [],
+      "source_quotes": [
+        "ba ngày"
+      ]
+    },
+    "expected_parse_status": "READY",
+    "expected_result_status": "FEASIBLE",
+    "expected_spec": {
+      "site_ids": [
+        "Site01_P1"
+      ]
+    }
+  },
+  {
+    "id": "A14",
+    "text": "Lùi ba ngày, giữ phần cứng, đổi điểm trong vùng này; yêu cầu pin bảo đảm hoạt động 12 giờ trong bóng tối.",
+    "patch": {
+      "arrival_shift_days": 3,
+      "arrival_utc": null,
+      "duration_hours": null,
+      "hardware_change": false,
+      "site_scope": "selected",
+      "max_darkness_hours": 12,
+      "max_earth_blackout_hours": null,
+      "min_sunlit_fraction": null,
+      "unresolved_fields": [],
+      "unsupported_requirements": [
+        "battery_energy_model"
+      ],
+      "source_quotes": [
+        "ba ngày"
+      ]
+    },
+    "expected_parse_status": "UNSUPPORTED_REQUIREMENT",
+    "expected_issue": "UNSUPPORTED_REQUIREMENT"
+  }
+]

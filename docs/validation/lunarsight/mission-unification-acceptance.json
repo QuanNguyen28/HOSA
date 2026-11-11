@@ -1,0 +1,796 @@
+{
+  "source": "real NASA DEM + cached JPL; API HTTP 200",
+  "synthetic": false,
+  "direct": {
+    "pass": {
+      "result_id": "5e1a2c1cf1abbafcf8b9ee67dc0b84194e2da0bfeb450b7fbf3473acafa2ed5b",
+      "decision": "PASS",
+      "metrics_hours": {
+        "total_sun_hours": [
+          6.0,
+          6.0
+        ],
+        "total_earth_los_hours": [
+          6.0,
+          6.0
+        ],
+        "longest_dark_hours": [
+          0.0,
+          0.0
+        ],
+        "longest_blackout_hours": [
+          0.0,
+          0.0
+        ],
+        "longest_joint_hours": [
+          6.0,
+          6.0
+        ]
+      },
+      "validation": {
+        "passed": true,
+        "policy_version": "mission-validation-1.0",
+        "sensitivity_version": "ordered-events-1.0",
+        "tolerance_status": "PROVISIONAL",
+        "tolerances": {
+          "horizon_deg": 0.1,
+          "event_minutes": 5,
+          "duration_minutes": 10
+        },
+        "reason_codes": [],
+        "enu_reference": {
+          "20.0": {
+            "checks": 170,
+            "max_delta_el_deg": 9.2237328885858e-13,
+            "max_delta_az_deg": 2.2453150450019166e-12,
+            "passed": true
+          }
+        },
+        "seams": [
+          {
+            "fine": "dem80",
+            "coarse": "dem240",
+            "phase_deg": 0,
+            "paired_samples": 7920,
+            "median_signed_m": 0.06103515625,
+            "p95_abs_angle_deg": 0.008038849916236967,
+            "passed": true
+          },
+          {
+            "fine": "dem80",
+            "coarse": "dem240",
+            "phase_deg": 0.25,
+            "paired_samples": 7920,
+            "median_signed_m": -0.0087890625,
+            "p95_abs_angle_deg": 0.00811562092825926,
+            "passed": true
+          }
+        ],
+        "evidence_checks": [],
+        "sensitivity": {
+          "azimuth_0.25_vs_0.125": {
+            "duration_delta_minutes": {
+              "total_sun_hours": [
+                0.0,
+                0.0
+              ],
+              "total_earth_los_hours": [
+                0.0,
+                0.0
+              ],
+              "longest_dark_hours": [
+                0.0,
+                0.0
+              ],
+              "longest_blackout_hours": [
+                0.0,
+                0.0
+              ],
+              "longest_joint_hours": [
+                0.0,
+                0.0
+              ]
+            },
+            "temporal": {
+              "sun_state": {
+                "minutes_state_diff": 0.0,
+                "delta_visible_minutes": 0.0,
+                "delta_blocked_minutes": 0.0,
+                "events_first": 0,
+                "events_second": 0,
+                "matched_first_within_15min": 0,
+                "matched_second_within_15min": 0,
+                "unmatched_first": 0,
+                "unmatched_second": 0,
+                "max_matched_event_shift_minutes": null
+              },
+              "earth_state": {
+                "minutes_state_diff": 0.0,
+                "delta_visible_minutes": 0.0,
+                "delta_blocked_minutes": 0.0,
+                "events_first": 0,
+                "events_second": 0,
+                "matched_first_within_15min": 0,
+                "matched_second_within_15min": 0,
+                "unmatched_first": 0,
+                "unmatched_second": 0,
+                "max_matched_event_shift_minutes": null
+              },
+              "joint_state": {
+                "minutes_state_diff": 0.0,
+                "delta_visible_minutes": 0.0,
+                "delta_blocked_minutes": 0.0,
+                "events_first": 0,
+                "events_second": 0,
+                "matched_first_within_15min": 0,
+                "matched_second_within_15min": 0,
+                "unmatched_first": 0,
+                "unmatched_second": 0,
+                "max_matched_event_shift_minutes": null
+              }
+            },
+            "angles_by_height": {
+              "20.0": {
+                "comparable": 2880,
+                "max_abs_deg": 0.029987898983322436
+              }
+            },
+            "constraint_checks": {
+              "min_sunlit_fraction": "PASS",
+              "contact.min_contact_minutes": "PASS",
+              "contact.required_windows": "PASS",
+              "contact.first_contact_deadline_minutes": "PASS"
+            },
+            "metrics_hours": {
+              "total_sun_hours": [
+                6.0,
+                6.0
+              ],
+              "total_earth_los_hours": [
+                6.0,
+                6.0
+              ],
+              "longest_dark_hours": [
+                0.0,
+                0.0
+              ],
+              "longest_blackout_hours": [
+                0.0,
+                0.0
+              ],
+              "longest_joint_hours": [
+                6.0,
+                6.0
+              ]
+            },
+            "soft_constraint_checks": {
+              "max_darkness_hours": "PASS",
+              "max_earth_blackout_hours": "PASS"
+            },
+            "passed": true
+          },
+          "radius_400km_vs_300km": {
+            "duration_delta_minutes": {
+              "total_sun_hours": [
+                0.0,
+                0.0
+              ],
+              "total_earth_los_hours": [
+                0.0,
+                0.0
+              ],
+              "longest_dark_hours": [
+                0.0,
+                0.0
+              ],
+              "longest_blackout_hours": [
+                0.0,
+                0.0
+              ],
+              "longest_joint_hours": [
+                0.0,
+                0.0
+              ]
+            },
+            "temporal": {
+              "sun_state": {
+                "minutes_state_diff": 0.0,
+                "delta_visible_minutes": 0.0,
+                "delta_blocked_minutes": 0.0,
+                "events_first": 0,
+                "events_second": 0,
+                "matched_first_within_15min": 0,
+                "matched_second_within_15min": 0,
+                "unmatched_first": 0,
+                "unmatched_second": 0,
+                "max_matched_event_shift_minutes": null
+              },
+              "earth_state": {
+                "minutes_state_diff": 0.0,
+                "delta_visible_minutes": 0.0,
+                "delta_blocked_minutes": 0.0,
+                "events_first": 0,
+                "events_second": 0,
+                "matched_first_within_15min": 0,
+                "matched_second_within_15min": 0,
+                "unmatched_first": 0,
+                "unmatched_second": 0,
+                "max_matched_event_shift_minutes": null
+              },
+              "joint_state": {
+                "minutes_state_diff": 0.0,
+                "delta_visible_minutes": 0.0,
+                "delta_blocked_minutes": 0.0,
+                "events_first": 0,
+                "events_second": 0,
+                "matched_first_within_15min": 0,
+                "matched_second_within_15min": 0,
+                "unmatched_first": 0,
+                "unmatched_second": 0,
+                "max_matched_event_shift_minutes": null
+              }
+            },
+            "angles_by_height": {
+              "20.0": {
+                "comparable": 1440,
+                "max_abs_deg": 0.0
+              }
+            },
+            "constraint_checks": {
+              "min_sunlit_fraction": "PASS",
+              "contact.min_contact_minutes": "PASS",
+              "contact.required_windows": "PASS",
+              "contact.first_contact_deadline_minutes": "PASS"
+            },
+            "metrics_hours": {
+              "total_sun_hours": [
+                6.0,
+                6.0
+              ],
+              "total_earth_los_hours": [
+                6.0,
+                6.0
+              ],
+              "longest_dark_hours": [
+                0.0,
+                0.0
+              ],
+              "longest_blackout_hours": [
+                0.0,
+                0.0
+              ],
+              "longest_joint_hours": [
+                6.0,
+                6.0
+              ]
+            },
+            "soft_constraint_checks": {
+              "max_darkness_hours": "PASS",
+              "max_earth_blackout_hours": "PASS"
+            },
+            "passed": true
+          },
+          "time_5min_vs_1min": {
+            "duration_delta_minutes": {
+              "total_sun_hours": [
+                0.0,
+                0.0
+              ],
+              "total_earth_los_hours": [
+                0.0,
+                0.0
+              ],
+              "longest_dark_hours": [
+                0.0,
+                0.0
+              ],
+              "longest_blackout_hours": [
+                0.0,
+                0.0
+              ],
+              "longest_joint_hours": [
+                0.0,
+                0.0
+              ]
+            },
+            "temporal": {
+              "sun_state": {
+                "minutes_state_diff": 0.0,
+                "delta_visible_minutes": 0.0,
+                "delta_blocked_minutes": 0.0,
+                "events_first": 0,
+                "events_second": 0,
+                "matched_first_within_15min": 0,
+                "matched_second_within_15min": 0,
+                "unmatched_first": 0,
+                "unmatched_second": 0,
+                "max_matched_event_shift_minutes": null
+              },
+              "earth_state": {
+                "minutes_state_diff": 0.0,
+                "delta_visible_minutes": 0.0,
+                "delta_blocked_minutes": 0.0,
+                "events_first": 0,
+                "events_second": 0,
+                "matched_first_within_15min": 0,
+                "matched_second_within_15min": 0,
+                "unmatched_first": 0,
+                "unmatched_second": 0,
+                "max_matched_event_shift_minutes": null
+              },
+              "joint_state": {
+                "minutes_state_diff": 0.0,
+                "delta_visible_minutes": 0.0,
+                "delta_blocked_minutes": 0.0,
+                "events_first": 0,
+                "events_second": 0,
+                "matched_first_within_15min": 0,
+                "matched_second_within_15min": 0,
+                "unmatched_first": 0,
+                "unmatched_second": 0,
+                "max_matched_event_shift_minutes": null
+              }
+            },
+            "angles_by_height": {},
+            "constraint_checks": {
+              "min_sunlit_fraction": "PASS",
+              "contact.min_contact_minutes": "PASS",
+              "contact.required_windows": "PASS",
+              "contact.first_contact_deadline_minutes": "PASS"
+            },
+            "metrics_hours": {
+              "total_sun_hours": [
+                6.0,
+                6.0
+              ],
+              "total_earth_los_hours": [
+                6.0,
+                6.0
+              ],
+              "longest_dark_hours": [
+                0.0,
+                0.0
+              ],
+              "longest_blackout_hours": [
+                0.0,
+                0.0
+              ],
+              "longest_joint_hours": [
+                6.0,
+                6.0
+              ]
+            },
+            "soft_constraint_checks": {
+              "max_darkness_hours": "PASS",
+              "max_earth_blackout_hours": "PASS"
+            },
+            "passed": true
+          }
+        }
+      }
+    },
+    "fail": {
+      "result_id": "2ed2b963ecea1b1d40d5dc2130084e8e737a949089911c097d890b66e8717fc9",
+      "decision": "FAIL",
+      "metrics_hours": {
+        "total_sun_hours": [
+          0.0,
+          0.0
+        ],
+        "total_earth_los_hours": [
+          0.0,
+          0.0
+        ],
+        "longest_dark_hours": [
+          6.0,
+          6.0
+        ],
+        "longest_blackout_hours": [
+          6.0,
+          6.0
+        ],
+        "longest_joint_hours": [
+          0.0,
+          0.0
+        ]
+      },
+      "validation": {
+        "passed": true,
+        "policy_version": "mission-validation-1.0",
+        "sensitivity_version": "ordered-events-1.0",
+        "tolerance_status": "PROVISIONAL",
+        "tolerances": {
+          "horizon_deg": 0.1,
+          "event_minutes": 5,
+          "duration_minutes": 10
+        },
+        "reason_codes": [],
+        "enu_reference": {
+          "20.0": {
+            "checks": 170,
+            "max_delta_el_deg": 7.576161920042068e-13,
+            "max_delta_az_deg": 1.1368683772161603e-12,
+            "passed": true
+          }
+        },
+        "seams": [
+          {
+            "fine": "dem80",
+            "coarse": "dem240",
+            "phase_deg": 0,
+            "paired_samples": 7920,
+            "median_signed_m": -0.1114501953125,
+            "p95_abs_angle_deg": 0.006791811450188367,
+            "passed": true
+          },
+          {
+            "fine": "dem80",
+            "coarse": "dem240",
+            "phase_deg": 0.25,
+            "paired_samples": 7920,
+            "median_signed_m": -0.04876708984375,
+            "p95_abs_angle_deg": 0.007127541348160092,
+            "passed": true
+          }
+        ],
+        "evidence_checks": [],
+        "sensitivity": {
+          "azimuth_0.25_vs_0.125": {
+            "duration_delta_minutes": {
+              "total_sun_hours": [
+                0.0,
+                0.0
+              ],
+              "total_earth_los_hours": [
+                0.0,
+                0.0
+              ],
+              "longest_dark_hours": [
+                0.0,
+                0.0
+              ],
+              "longest_blackout_hours": [
+                0.0,
+                0.0
+              ],
+              "longest_joint_hours": [
+                0.0,
+                0.0
+              ]
+            },
+            "temporal": {
+              "sun_state": {
+                "minutes_state_diff": 0.0,
+                "delta_visible_minutes": 0.0,
+                "delta_blocked_minutes": 0.0,
+                "events_first": 0,
+                "events_second": 0,
+                "matched_first_within_15min": 0,
+                "matched_second_within_15min": 0,
+                "unmatched_first": 0,
+                "unmatched_second": 0,
+                "max_matched_event_shift_minutes": null
+              },
+              "earth_state": {
+                "minutes_state_diff": 0.0,
+                "delta_visible_minutes": 0.0,
+                "delta_blocked_minutes": 0.0,
+                "events_first": 0,
+                "events_second": 0,
+                "matched_first_within_15min": 0,
+                "matched_second_within_15min": 0,
+                "unmatched_first": 0,
+                "unmatched_second": 0,
+                "max_matched_event_shift_minutes": null
+              },
+              "joint_state": {
+                "minutes_state_diff": 0.0,
+                "delta_visible_minutes": 0.0,
+                "delta_blocked_minutes": 0.0,
+                "events_first": 0,
+                "events_second": 0,
+                "matched_first_within_15min": 0,
+                "matched_second_within_15min": 0,
+                "unmatched_first": 0,
+                "unmatched_second": 0,
+                "max_matched_event_shift_minutes": null
+              }
+            },
+            "angles_by_height": {
+              "20.0": {
+                "comparable": 2880,
+                "max_abs_deg": 0.016786745956673066
+              }
+            },
+            "constraint_checks": {
+              "min_sunlit_fraction": "FAIL",
+              "contact.min_contact_minutes": "FAIL",
+              "contact.required_windows": "FAIL",
+              "contact.first_contact_deadline_minutes": "FAIL"
+            },
+            "metrics_hours": {
+              "total_sun_hours": [
+                0.0,
+                0.0
+              ],
+              "total_earth_los_hours": [
+                0.0,
+                0.0
+              ],
+              "longest_dark_hours": [
+                6.0,
+                6.0
+              ],
+              "longest_blackout_hours": [
+                6.0,
+                6.0
+              ],
+              "longest_joint_hours": [
+                0.0,
+                0.0
+              ]
+            },
+            "soft_constraint_checks": {
+              "max_darkness_hours": "PASS",
+              "max_earth_blackout_hours": "PASS"
+            },
+            "passed": true
+          },
+          "radius_400km_vs_300km": {
+            "duration_delta_minutes": {
+              "total_sun_hours": [
+                0.0,
+                0.0
+              ],
+              "total_earth_los_hours": [
+                0.0,
+                0.0
+              ],
+              "longest_dark_hours": [
+                0.0,
+                0.0
+              ],
+              "longest_blackout_hours": [
+                0.0,
+                0.0
+              ],
+              "longest_joint_hours": [
+                0.0,
+                0.0
+              ]
+            },
+            "temporal": {
+              "sun_state": {
+                "minutes_state_diff": 0.0,
+                "delta_visible_minutes": 0.0,
+                "delta_blocked_minutes": 0.0,
+                "events_first": 0,
+                "events_second": 0,
+                "matched_first_within_15min": 0,
+                "matched_second_within_15min": 0,
+                "unmatched_first": 0,
+                "unmatched_second": 0,
+                "max_matched_event_shift_minutes": null
+              },
+              "earth_state": {
+                "minutes_state_diff": 0.0,
+                "delta_visible_minutes": 0.0,
+                "delta_blocked_minutes": 0.0,
+                "events_first": 0,
+                "events_second": 0,
+                "matched_first_within_15min": 0,
+                "matched_second_within_15min": 0,
+                "unmatched_first": 0,
+                "unmatched_second": 0,
+                "max_matched_event_shift_minutes": null
+              },
+              "joint_state": {
+                "minutes_state_diff": 0.0,
+                "delta_visible_minutes": 0.0,
+                "delta_blocked_minutes": 0.0,
+                "events_first": 0,
+                "events_second": 0,
+                "matched_first_within_15min": 0,
+                "matched_second_within_15min": 0,
+                "unmatched_first": 0,
+                "unmatched_second": 0,
+                "max_matched_event_shift_minutes": null
+              }
+            },
+            "angles_by_height": {
+              "20.0": {
+                "comparable": 1440,
+                "max_abs_deg": 0.0
+              }
+            },
+            "constraint_checks": {
+              "min_sunlit_fraction": "FAIL",
+              "contact.min_contact_minutes": "FAIL",
+              "contact.required_windows": "FAIL",
+              "contact.first_contact_deadline_minutes": "FAIL"
+            },
+            "metrics_hours": {
+              "total_sun_hours": [
+                0.0,
+                0.0
+              ],
+              "total_earth_los_hours": [
+                0.0,
+                0.0
+              ],
+              "longest_dark_hours": [
+                6.0,
+                6.0
+              ],
+              "longest_blackout_hours": [
+                6.0,
+                6.0
+              ],
+              "longest_joint_hours": [
+                0.0,
+                0.0
+              ]
+            },
+            "soft_constraint_checks": {
+              "max_darkness_hours": "PASS",
+              "max_earth_blackout_hours": "PASS"
+            },
+            "passed": true
+          },
+          "time_5min_vs_1min": {
+            "duration_delta_minutes": {
+              "total_sun_hours": [
+                0.0,
+                0.0
+              ],
+              "total_earth_los_hours": [
+                0.0,
+                0.0
+              ],
+              "longest_dark_hours": [
+                0.0,
+                0.0
+              ],
+              "longest_blackout_hours": [
+                0.0,
+                0.0
+              ],
+              "longest_joint_hours": [
+                0.0,
+                0.0
+              ]
+            },
+            "temporal": {
+              "sun_state": {
+                "minutes_state_diff": 0.0,
+                "delta_visible_minutes": 0.0,
+                "delta_blocked_minutes": 0.0,
+                "events_first": 0,
+                "events_second": 0,
+                "matched_first_within_15min": 0,
+                "matched_second_within_15min": 0,
+                "unmatched_first": 0,
+                "unmatched_second": 0,
+                "max_matched_event_shift_minutes": null
+              },
+              "earth_state": {
+                "minutes_state_diff": 0.0,
+                "delta_visible_minutes": 0.0,
+                "delta_blocked_minutes": 0.0,
+                "events_first": 0,
+                "events_second": 0,
+                "matched_first_within_15min": 0,
+                "matched_second_within_15min": 0,
+                "unmatched_first": 0,
+                "unmatched_second": 0,
+                "max_matched_event_shift_minutes": null
+              },
+              "joint_state": {
+                "minutes_state_diff": 0.0,
+                "delta_visible_minutes": 0.0,
+                "delta_blocked_minutes": 0.0,
+                "events_first": 0,
+                "events_second": 0,
+                "matched_first_within_15min": 0,
+                "matched_second_within_15min": 0,
+                "unmatched_first": 0,
+                "unmatched_second": 0,
+                "max_matched_event_shift_minutes": null
+              }
+            },
+            "angles_by_height": {},
+            "constraint_checks": {
+              "min_sunlit_fraction": "FAIL",
+              "contact.min_contact_minutes": "FAIL",
+              "contact.required_windows": "FAIL",
+              "contact.first_contact_deadline_minutes": "FAIL"
+            },
+            "metrics_hours": {
+              "total_sun_hours": [
+                0.0,
+                0.0
+              ],
+              "total_earth_los_hours": [
+                0.0,
+                0.0
+              ],
+              "longest_dark_hours": [
+                6.0,
+                6.0
+              ],
+              "longest_blackout_hours": [
+                6.0,
+                6.0
+              ],
+              "longest_joint_hours": [
+                0.0,
+                0.0
+              ]
+            },
+            "soft_constraint_checks": {
+              "max_darkness_hours": "PASS",
+              "max_earth_blackout_hours": "PASS"
+            },
+            "passed": true
+          }
+        }
+      }
+    }
+  },
+  "planning": {
+    "compare": {
+      "result_id": "91b9d5d822058ec13f65",
+      "coverage": {
+        "candidate_total": 2,
+        "pass": 1,
+        "fail": 1,
+        "indeterminate": 0
+      },
+      "candidates": [
+        {
+          "analysis_result_id": "5e1a2c1cf1abbafcf8b9ee67dc0b84194e2da0bfeb450b7fbf3473acafa2ed5b",
+          "decision": "PASS",
+          "constraint_states": {
+            "min_sunlit_fraction": "PASS",
+            "contact.min_contact_minutes": "PASS",
+            "contact.required_windows": "PASS",
+            "contact.first_contact_deadline_minutes": "PASS"
+          }
+        },
+        {
+          "analysis_result_id": "2ed2b963ecea1b1d40d5dc2130084e8e737a949089911c097d890b66e8717fc9",
+          "decision": "FAIL",
+          "constraint_states": {
+            "min_sunlit_fraction": "FAIL",
+            "contact.min_contact_minutes": "FAIL",
+            "contact.required_windows": "FAIL",
+            "contact.first_contact_deadline_minutes": "FAIL"
+          }
+        }
+      ]
+    },
+    "search": {
+      "result_id": "34925194723f188a516f",
+      "coverage": {
+        "candidate_total": 2,
+        "pass": 1,
+        "fail": 1,
+        "indeterminate": 0,
+        "returned": 1,
+        "not_returned": 1
+      },
+      "candidates": [
+        {
+          "analysis_result_id": "5e1a2c1cf1abbafcf8b9ee67dc0b84194e2da0bfeb450b7fbf3473acafa2ed5b",
+          "decision": "PASS",
+          "constraint_states": {
+            "min_sunlit_fraction": "PASS",
+            "contact.min_contact_minutes": "PASS",
+            "contact.required_windows": "PASS",
+            "contact.first_contact_deadline_minutes": "PASS"
+          }
+        }
+      ]
+    }
+  }
+}

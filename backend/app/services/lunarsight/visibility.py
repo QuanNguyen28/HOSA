@@ -1,17 +1,16 @@
 import math
+from bisect import bisect_left, bisect_right
 import numpy as np
 import pandas as pd
+from .durations import bounds, combine, longest
+
+SENSITIVITY_VERSION = "ordered-events-1.0"
 
 def classify(e,h,complete):
     """Incomplete terrain can prove a blockage at a sampled direction."""
     el,hor,cov=np.broadcast_arrays(e,h,complete)
     valid=np.isfinite(el)&np.isfinite(hor)
     return np.where(valid&(el<=hor),"B",np.where(valid&cov&(el>hor),"V","?"))
-
-def combine(s,e):
-    s,e=np.broadcast_arrays(s,e)
-    if not (np.isin(s,["V","B","?"]).all() and np.isin(e,["V","B","?"]).all()): raise ValueError("Unknown state code")
-    return np.where((s=="B")|(e=="B"),"B",np.where((s=="V")&(e=="V"),"V","?"))
 
 def lookup(p,az):
     if not len(p): raise ValueError("Missing horizon")
@@ -49,23 +48,6 @@ def visibility(sun,earth,ps,pe):
     df["start_utc"]=index; df["end_utc"]=index.to_series().shift(-1)
     return df.iloc[:-1].copy()
 
-def longest(ok,dt):
-    ok=np.asarray(ok,dtype=bool)
-    edges=np.flatnonzero(np.diff(np.r_[False,ok,False]))
-    if not len(edges): return 0.
-    ends=np.r_[0.,np.cumsum(dt)]
-    return float(np.max(ends[edges[1::2]]-ends[edges[::2]]))
-
-def bounds(sun,earth,dt):
-    s,e,dt=np.asarray(sun),np.asarray(earth),np.asarray(dt,dtype=float)
-    if s.ndim!=1 or e.shape!=s.shape or dt.shape!=s.shape or not np.isfinite(dt).all() or (dt<=0).any():
-        raise ValueError("Invalid intervals")
-    j=combine(s,e)
-    return dict(total_sun_hours=[float(dt[s=="V"].sum()),float(dt[s!="B"].sum())],
-        longest_dark_hours=[longest(s=="B",dt),longest(s!="V",dt)],
-        longest_blackout_hours=[longest(e=="B",dt),longest(e!="V",dt)],
-        longest_joint_hours=[longest(j=="V",dt),longest(j!="B",dt)])
-
 def max_rule(v,m):
     if isinstance(m,bool) or not isinstance(m,(int,float)) or not math.isfinite(m) or not 0<=m<=72:
         raise ValueError("Maximum threshold must be finite and between 0 and 72")
@@ -100,6 +82,53 @@ def grid_windows(v,a,b,dark,blackout):
                          **{f"{key}_{bound}":pair[i] for key,pair in vals.items() for i,bound in enumerate(("L","U"))}))
     return pd.DataFrame(rows)
 
+def match_events(first, second, max_shift_minutes=15):
+    """Maximum-cardinality, minimum-total-shift monotone one-to-one matching.
+
+    Each event may be used once, and before/after states must agree. A Fenwick
+    tree keeps the best increasing chain of candidates inside the time band;
+    updating only after each first-series event prevents reusing either side.
+    """
+    def events(series):
+        changed = (series != series.shift()) & series.shift().notna()
+        return [(stamp, series.iloc[series.index.get_loc(stamp)-1], series.loc[stamp])
+                for stamp in series.index[changed]]
+    left, right = events(first), events(second)
+    times = [stamp.value for stamp, _, _ in right]
+    band = int(max_shift_minutes * 60 * 1_000_000_000)
+    # count, summed shift, predecessor, left index, right index, shift
+    nodes = [(0, 0., -1, -1, -1, 0.)]
+    tree = [0] * (len(right)+1)
+    def better(a, b):
+        return a if (nodes[a][0], -nodes[a][1], -a) >= (nodes[b][0], -nodes[b][1], -b) else b
+    def query(stop):
+        best = 0
+        while stop:
+            best = better(best, tree[stop])
+            stop -= stop & -stop
+        return best
+    for i, (stamp, before, after) in enumerate(left):
+        pending = []
+        for j in range(bisect_left(times, stamp.value-band), bisect_right(times, stamp.value+band)):
+            if right[j][1:] != (before, after):
+                continue
+            previous = query(j)
+            shift = abs(times[j]-stamp.value) / 60_000_000_000
+            nodes.append((nodes[previous][0]+1, nodes[previous][1]+shift, previous, i, j, shift))
+            pending.append((j+1, len(nodes)-1))
+        for position, node in pending:
+            while position < len(tree):
+                tree[position] = better(tree[position], node)
+                position += position & -position
+    node = query(len(right))
+    pairs = []
+    while node:
+        _, _, previous, i, j, shift = nodes[node]
+        pairs.append((i, j, shift))
+        node = previous
+    return left, right, list(reversed(pairs))
+
+
 def sensitivity(a,b,columns):
     """Compare states on finest native grid via left hold, and report time differences."""
     if a.start_utc.iloc[0]!=b.start_utc.iloc[0] or a.end_utc.iloc[-1]!=b.end_utc.iloc[-1]:
@@ -109,18 +138,13 @@ def sensitivity(a,b,columns):
     step=(b.end_utc-b.index).dt.total_seconds()/60
     for key in columns:
         aa=a[key].reindex(b.index,method="ffill"); bb=b[key]
-        changes=lambda v: v.index[(v!=v.shift()) & v.shift().notna()]
-        ea,eb=changes(a[key]),changes(bb)
-        pairs=[]
-        for ta in ea:
-            before=a[key].iloc[a.index.get_loc(ta)-1]; after=a[key].loc[ta]
-            possible=[tb for tb in eb if bb.iloc[b.index.get_loc(tb)-1]==before and bb.loc[tb]==after]
-            if possible:
-                delta=min(abs((tb-ta).total_seconds())/60 for tb in possible)
-                if delta<=15: pairs.append(delta)
+        ea,eb,matches=match_events(a[key],bb)
+        pairs=[match[2] for match in matches]
         output[key]=dict(minutes_state_diff=float(step[aa!=bb].sum()),
             delta_visible_minutes=float(step[bb=="V"].sum()-step[aa=="V"].sum()),
             delta_blocked_minutes=float(step[bb=="B"].sum()-step[aa=="B"].sum()),
             events_first=len(ea),events_second=len(eb),matched_first_within_15min=len(pairs),
+            matched_second_within_15min=len(pairs),
+            unmatched_first=len(ea)-len(pairs),unmatched_second=len(eb)-len(pairs),
             max_matched_event_shift_minutes=max(pairs) if pairs else None)
     return output
