@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "skills": {
+    "gh-cli": {
+      "source": "github/awesome-copilot",
+      "sourceType": "github",
+      "skillsPath": "skills/gh-cli",
+      "computedHash": "cbe644b0c6760ae2a1eaafa39133920d889331327065d92a131675a665273e56"
+    },
+    "gitlab-cli-skills": {
+      "source": "vince-winkintel/gitlab-cli-skills",
+      "sourceType": "github",
+      "skillsPath": "skills/gitlab-cli-skills",
+      "computedHash": "6276a0cf385da603760de48795614bc71f821a09b4114227b5043da94512869b"
+    },
+    "ui-color-palette-audit-palette": {
+      "source": "a-ng-d/skills-ui-color-palette",
+      "sourceType": "github",
+      "skillPath": "skills/ui-color-palette-audit-palette/SKILL.md",
+      "computedHash": "5fcbe021589935ad439ac0dfe8994d47811488a6005fae2b6794356661ea7986"
+    },
+    "ui-color-palette-build-color-system": {
+      "source": "a-ng-d/skills-ui-color-palette",
+      "sourceType": "github",
+      "skillPath": "skills/ui-color-palette-build-color-system/SKILL.md",
+      "computedHash": "59379c34fac92e5d462c3f7f0e329f5908365871acbc30360f042ae72f032e8c"
+    },
+    "ui-color-palette-figma": {
+      "source": "a-ng-d/skills-ui-color-palette",
+      "sourceType": "github",
+      "skillPath": "skills/ui-color-palette-figma/SKILL.md",
+      "computedHash": "751a49d30bdd980e88338dee1e634053af74c574ef48b87e5523791fb9b3207f"
+    },
+    "ui-color-palette-framer": {
+      "source": "a-ng-d/skills-ui-color-palette",
+      "sourceType": "github",
+      "skillPath": "skills/ui-color-palette-framer/SKILL.md",
+      "computedHash": "466dc8a1c6ca8493e1720d523ba6720da9e09ff468b4b22bdc7f38a10b6f0cd1"
+    },
+    "ui-color-palette-generate-code": {
+      "source": "a-ng-d/skills-ui-color-palette",
+      "sourceType": "github",
+      "skillPath": "skills/ui-color-palette-generate-code/SKILL.md",
+      "computedHash": "4b8e7de196844038eedeb00573dac7b532111915f748ac03713225b98c545465"
+    },
+    "ui-color-palette-generate-semantic-code": {
+      "source": "a-ng-d/skills-ui-color-palette",
+      "sourceType": "github",
+      "skillPath": "skills/ui-color-palette-generate-semantic-code/SKILL.md",
+      "computedHash": "c9ee8bc58cc86a815fe0aec1dc4697c4bc23b9c911042d12cb07d9531bcc5e47"
+    },
+    "ui-color-palette-generate-source-colors": {
+      "source": "a-ng-d/skills-ui-color-palette",
+      "sourceType": "github",
+      "skillPath": "skills/ui-color-palette-generate-source-colors/SKILL.md",
+      "computedHash": "0e200edda83dc42061ced4719550b2f63e4b2969aa7af4265a06ec4d71cc4fe0"
+    },
+    "ui-color-palette-help": {
+      "source": "a-ng-d/skills-ui-color-palette",
+      "sourceType": "github",
+      "skillPath": "skills/ui-color-palette-help/SKILL.md",
+      "computedHash": "afc4d0b8488bb56a0a2386f95f8d1fb0b494f2cd057802e805a14f05654bae7d"
+    },
+    "ui-color-palette-manage-palettes": {
+      "source": "a-ng-d/skills-ui-color-palette",
+      "sourceType": "github",
+      "skillPath": "skills/ui-color-palette-manage-palettes/SKILL.md",
+      "computedHash": "53ad94b91728f531d90968cfbc1e1139644cf3d024c021cb79a77afdc0fee556"
+    },
+    "ui-color-palette-penpot": {
+      "source": "a-ng-d/skills-ui-color-palette",
+      "sourceType": "github",
+      "skillPath": "skills/ui-color-palette-penpot/SKILL.md",
+      "computedHash": "d6c200cf52cd3f361d4975305468aab97a92e4231fd333c7b2bd9064d60f8abb"
+    },
+    "ui-color-palette-scale-palette": {
+      "source": "a-ng-d/skills-ui-color-palette",
+      "sourceType": "github",
+      "skillPath": "skills/ui-color-palette-scale-palette/SKILL.md",
+      "computedHash": "934fca357c09072d262059000642174cda0e61754b77e61ceb8f6414477f457d"
+    },
+    "ui-color-palette-sketch": {
+      "source": "a-ng-d/skills-ui-color-palette",
+      "sourceType": "github",
+      "skillPath": "skills/ui-color-palette-sketch/SKILL.md",
+      "computedHash": "21efb1d7e576c311e1c1172794ecacb4c790923bda84cb0c61485cd964ced65a"
+    }
+  }
+}

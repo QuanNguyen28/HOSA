@@ -1,0 +1,36 @@
+{
+  "mcpServers": {
+    "ui-color-palette": {
+      "type": "http",
+      "url": "https://mcp.ui-color-palette.com/mcp"
+    },
+    "figma": {
+      "type": "http",
+      "url": "https://mcp.figma.com/mcp"
+    },
+    "figma-desktop": {
+      "type": "http",
+      "url": "http://127.0.0.1:3845/mcp"
+    },
+    "penpot": {
+      "type": "http",
+      "url": "${user_config.penpot_url}/mcp/stream?userToken=${user_config.penpot_token}"
+    },
+    "sketch": {
+      "type": "http",
+      "url": "http://localhost:31126/mcp"
+    },
+    "framer": {
+      "type": "http",
+      "url": "https://mcp.unframer.co/mcp?id=${user_config.framer_mcp_url}"
+    },
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/"
+    },
+    "gitlab": {
+      "type": "http",
+      "url": "${user_config.gitlab_url}/api/v4/mcp"
+    }
+  }
+}

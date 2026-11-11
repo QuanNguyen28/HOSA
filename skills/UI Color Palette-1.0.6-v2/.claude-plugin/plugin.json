@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "ui-color-palette",
+  "version": "1.0.6",
+  "description": "Design color palettes, audit contrast, generate code, and sync to Figma, Penpot, Sketch, and Framer — powered by the UI Color Palette API",
+  "author": {
+    "name": "Aurélien Grimaud",
+    "url": "https://github.com/a-ng-d",
+    "email": "a.grimaud@involt.io"
+  },
+  "homepage": "https://docs.ui-color-palette.com/claude",
+  "repository": "https://github.com/a-ng-d/claude-ui-color-palette",
+  "license": "MIT",
+  "keywords": [
+    "color",
+    "palette",
+    "design-system",
+    "figma",
+    "penpot",
+    "sketch",
+    "framer",
+    "accessibility",
+    "wcag",
+    "tokens"
+  ],
+  "userConfig": {
+    "penpot_url": {
+      "type": "string",
+      "title": "Penpot instance URL",
+      "description": "Your Penpot instance base URL. For Penpot Cloud use https://design.penpot.app. For self-hosted, use your own domain (e.g. https://penpot.company.com).",
+      "sensitive": false,
+      "required": false
+    },
+    "penpot_token": {
+      "type": "string",
+      "title": "Penpot user token",
+      "description": "Your Penpot user token. Find it in Penpot → Account → Integrations → MCP Server.",
+      "sensitive": true,
+      "required": false
+    },
+    "framer_mcp_url": {
+      "type": "string",
+      "title": "Framer MCP URL",
+      "description": "Your Framer MCP URL from the Framer marketplace plugin.",
+      "sensitive": false,
+      "required": false
+    },
+    "gitlab_url": {
+      "type": "string",
+      "title": "GitLab instance URL",
+      "description": "Your GitLab instance URL (e.g. https://gitlab.company.com). Leave empty if not using GitLab.",
+      "sensitive": false,
+      "required": false
+    }
+  }
+}

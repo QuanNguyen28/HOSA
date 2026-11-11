@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# The SessionStart hook: tells a session which skills a job takes, and in what
+# order, by printing the text in session-context.md in the shape the harness
+# reads. Fixed text; it opens nothing in the project and calls nothing.
+#
+# Modelled on superpowers' hooks/session-start (MIT, Jesse Vincent).
+
+set -euo pipefail
+
+HOOK_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+context=$(cat "${HOOK_DIR}/session-context.md" 2>/dev/null) || exit 0
+
+# JSON-escape with bash substitutions: backslash first, then the rest.
+escape_for_json() {
+  local s="$1"
+  s="${s//\\/\\\\}"
+  s="${s//\"/\\\"}"
+  s="${s//$'\n'/\\n}"
+  s="${s//$'\r'/\\r}"
+  s="${s//$'\t'/\\t}"
+  printf '%s' "$s"
+}
+
+escaped=$(escape_for_json "$context")
+
+# One shape only, the one this harness reads. Claude Code reads both
+# additional_context and hookSpecificOutput without deduplicating, so printing
+# both says everything twice. Cursor sets CURSOR_PLUGIN_ROOT, and may also set
+# CLAUDE_PLUGIN_ROOT; Copilot CLI sets CLAUDE_PLUGIN_ROOT and COPILOT_CLI. Codex
+# sets PLUGIN_ROOT and CLAUDE_PLUGIN_ROOT, and reads Claude Code's shape.
+# printf, not a heredoc: a heredoc can hang under bash 5.3.
+if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
+  printf '{"additional_context": "%s"}\n' "$escaped"
+elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -z "${COPILOT_CLI:-}" ]; then
+  printf '{"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": "%s"}}\n' "$escaped"
+else
+  printf '{"additionalContext": "%s"}\n' "$escaped"
+fi
+
+exit 0

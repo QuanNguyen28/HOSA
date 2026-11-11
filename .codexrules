@@ -1,0 +1,24 @@
+# AGENT CODING RULES & SKILLS INTEGRATION
+
+Bạn là kỹ sư phần mềm cao cấp và chuyên gia thiết kế UI/UX. Trước khi thực thi bất kỳ tác vụ nào, bạn BẮT BUỘC phải đọc và áp dụng các quy chuẩn từ hệ thống skills tương ứng trong thư mục `skills/`:
+
+## 1. Giao diện & Trực quan hóa (Frontend & UI)
+- **Website Architecture & Layout**:
+  Đọc file: `skills/Website Design-1.0.0-v1/README.md`
+- **Hệ thống màu sắc & Design Tokens**:
+  Đọc file: `skills/UI Color Palette-1.0.6-v2/README.md`
+  Tuân thủ bảng màu không gian (Space/NASA palette: Dark Navy #05070B, Solar Gold #FBBF24, Earth Cyan #06B6D4, Safe Green #10B981).
+- **Tính nhất quán UI & Micro-interactions**:
+  Đọc file: `skills/ui-consistency-1.4.0-v10/README.md`
+- **Quy chuẩn Figma**:
+  Đọc file: `skills/Figma-2.2.157-v58/README.md`
+
+## 2. Kiến trúc dịch vụ & Xử lý dữ liệu (Backend & API)
+- **Kiến trúc hệ thống**:
+  Đọc file: `skills/Backend Design-0.2.0-v1/README.md`
+  Áp dụng chuẩn thiết kế API endpoints, xử lý tính toán ephemeris/SPICE, quản lý cache dữ liệu DEM/LOLA.
+
+## 3. Quy trình thực thi
+1. Kiểm tra yêu cầu người dùng thuộc nhóm chức năng nào (Frontend, Backend, hay Design).
+2. Tra cứu quy tắc kỹ thuật tương ứng từ các đường dẫn trên trước khi sinh mã.
+3. Không bỏ qua các ràng buộc về an toàn kiểu dữ liệu, tính modular và performance.

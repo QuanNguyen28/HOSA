@@ -1,0 +1,55 @@
+name: A page came out wrong
+description: The agent wrote a page unlike the rest of your project, and you fixed it or would have to
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Nothing from your project goes into a public issue by name. Rename every
+        component, file, path and route to a neutral one of the same shape —
+        `OrdersGrid`, `app-orders-grid`. Numbers are welcome; names are not.
+
+        If your agent drafted this report, paste its parts below and read every
+        line before you submit.
+  - type: textarea
+    id: asked
+    attributes:
+      label: What you asked
+      description: The request as you typed it, names made neutral.
+    validations:
+      required: true
+  - type: textarea
+    id: came-out
+    attributes:
+      label: What came out
+      description: What the page does unlike the other pages, and what the agent said settled it, if it said.
+    validations:
+      required: true
+  - type: textarea
+    id: other-pages
+    attributes:
+      label: What the other pages do
+      description: How the project already writes that part, and in how many pages, roughly.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Plugin version
+      description: The version your harness shows for the plugin, if it shows one.
+    validations:
+      required: false
+  - type: input
+    id: harness
+    attributes:
+      label: Harness and model
+      placeholder: Claude Code 2.x, Opus
+    validations:
+      required: true
+  - type: checkboxes
+    id: names
+    attributes:
+      label: Names
+      options:
+        - label: Every name from my project is replaced by a neutral one.
+          required: true

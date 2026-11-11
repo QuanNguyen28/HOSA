@@ -1,0 +1,54 @@
+{
+  "name": "ui-consistency",
+  "version": "1.4.0",
+  "description": "Keeps new UI consistent with a project's existing pages. Your coding agent reads how they are built and writes new ones the same way.",
+  "author": {
+    "name": "Kamen Kurtev"
+  },
+  "homepage": "https://github.com/kamenkurtev/ui-consistency",
+  "repository": "https://github.com/kamenkurtev/ui-consistency",
+  "license": "MIT",
+  "keywords": [
+    "design-system",
+    "design",
+    "ui",
+    "ux",
+    "frontend",
+    "components",
+    "theme",
+    "design-tokens",
+    "css",
+    "ui-design",
+    "accessibility",
+    "code-quality",
+    "consistency",
+    "react",
+    "vue",
+    "angular"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "ui-consistency",
+    "shortDescription": "Pages built like your others",
+    "longDescription": "ui-consistency makes your project's own design system something the coding agent reads before it writes UI. Ask for a page, a form or a change to one, and the agent first reads how the pages you already have are built: which shared components they use and how, the theme and its tokens, how they validate input and show errors. Then it writes the new page the same way, from a checklist, and has a separate agent compare the result with the page it follows. It works with any UI technology, including plain HTML and CSS, in a single app or a monorepo, and needs no configuration. It reads only your project; it has no server, no network access and no telemetry, and writes nothing into your repository besides the pages you asked for. It needs a project with code to read: in a conversation without one there is nothing for it to follow.",
+    "developerName": "Kamen Kurtev",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Reads how your existing pages are built",
+      "Plans a new page from your own components and theme",
+      "Checks a written page against the page it follows"
+    ],
+    "websiteURL": "https://github.com/kamenkurtev/ui-consistency",
+    "supportURL": "https://github.com/kamenkurtev/ui-consistency/issues",
+    "privacyPolicyURL": "https://github.com/kamenkurtev/ui-consistency/blob/main/PRIVACY.md",
+    "termsOfServiceURL": "https://github.com/kamenkurtev/ui-consistency/blob/main/LICENSE",
+    "defaultPrompt": [
+      "Add a returns page like the orders page",
+      "Check whether our settings pages match each other",
+      "Build the signup form the way our other forms are built"
+    ],
+    "brandColor": "#1F2A44",
+    "composerIcon": "./.claude-plugin/icon.svg",
+    "logo": "./.claude-plugin/icon.svg"
+  }
+}
