@@ -2,6 +2,7 @@
 from contextlib import ExitStack
 from functools import lru_cache
 from pathlib import Path
+import csv
 
 import numpy as np
 
@@ -23,17 +24,31 @@ def verified_source(source):
         return None
     if not receipt.is_file():
         raise DomainError("DEM_RECEIPT_MISSING", 503)
-    record = load(receipt)
-    official = next(item for item in sources() if item["id"] == source["dataset_id"])
+    receipt_record = load(receipt)
+    official = next((item for item in sources() if item["id"] == source["dataset_id"]), None)
+    if official is None:
+        manifest = repository_root() / "manifests/datasets.csv"
+        with manifest.open(newline="", encoding="utf-8") as stream:
+            manifest_record = next(
+                (
+                    row for row in csv.DictReader(stream)
+                    if row.get("dataset_id") == source["dataset_id"]
+                    and row.get("status") == "PASS"
+                ),
+                None,
+            )
+        if manifest_record is None:
+            raise DomainError("DEM_SOURCE_UNREGISTERED", 503)
+        official = {"url": manifest_record["source_url"]}
     stat = path.stat()
     digest = checked_digest(str(path.resolve()), stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns)
-    if (record.get("status") not in {"VERIFIED_BYTES", "PASS"}
-            or record.get("url") != official["url"] or record.get("frame") != "MOON_ME/DE421"
-            or record.get("unit") != "m" or record.get("bytes") != stat.st_size
-            or record.get("sha256") != digest):
+    if (receipt_record.get("status") not in {"VERIFIED_BYTES", "PASS"}
+            or receipt_record.get("url") != official["url"] or receipt_record.get("frame") != "MOON_ME/DE421"
+            or receipt_record.get("unit") != "m" or receipt_record.get("bytes") != stat.st_size
+            or receipt_record.get("sha256") != digest):
         raise DomainError("DEM_INTEGRITY_FAILED", 503)
     return {**source, "sha256": digest, "bytes": stat.st_size, "url": official["url"],
-            "frame": record["frame"], "unit": "m"}
+            "frame": receipt_record["frame"], "unit": "m"}
 
 
 def installed_sources():

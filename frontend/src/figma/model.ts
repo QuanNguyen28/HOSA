@@ -19,11 +19,23 @@ const A = (id: string, name: string, lat: number, lon: number, h: number): Site 
   url: 'https://trek.nasa.gov/moon/trekarcgis2/rest/services/A3_Named_regions_SP/MapServer/0',
 });
 
+const P = (id: string, name: string, lat: number, lon: number, h: number): Site => ({
+  id, name, group: 'illumination', lat, lon, kind: 'exact', height_m: h,
+  point: 'Centre pixel of the verified 5 m/pixel LOLA terrain footprint used by LunarSight',
+  source: 'NASA GSFC PGDA Product 78',
+  url: 'https://pgda.gsfc.nasa.gov/products/78',
+});
+
 export const SITES: Site[] = [
   { id: 'connecting-ridge', name: 'Connecting ridge', group: 'illumination', lat: -89.4398, lon: -137.17, kind: 'exact', height_m: 1958.6,
     point: 'The published highest-illumination point on the ridge joining Shackleton and de Gerlache', source: 'Mazarico et al. 2011, Icarus', url: 'https://doi.org/10.1016/j.icarus.2011.03.007' },
   { id: 'shackleton-rim', name: 'Shackleton rim', group: 'illumination', lat: -89.6866, lon: -162.81, kind: 'exact', height_m: 1729.6,
     point: 'The published highest-illumination point on the rim of Shackleton crater', source: 'Mazarico et al. 2011, Icarus', url: 'https://doi.org/10.1016/j.icarus.2011.03.007' },
+  P('peak-near-shackleton', 'Peak near Shackleton', -88.81101, 123.69007, 1645.5),
+  P('leibnitz-beta-plateau', 'Leibnitz Beta Plateau', -85.42658, 31.74276, 6398.9),
+  P('de-gerlache-kocher', 'de Gerlache–Kocher Massif', -85.82955, -116.32202, 2705.9),
+  P('shoemaker', 'Shoemaker crater', -87.18351, 62.83501, 548.1),
+  P('amundsen-rim', 'Amundsen rim', -84.22874, 69.44395, 399.3),
   { ...A('peak-near-cabeus-b', 'Peak near Cabeus B', -83.58392, -68.46415, 4602.1), notes: 'Region added in 2024.' },
   A('haworth', 'Haworth', -86.36428, -23.20814, 2842.2),
   { ...A('malapert-massif', 'Malapert Massif', -85.98794, 2.06238, 5173.3), notes: 'Intuitive Machines IM-5 plans to land at Mons Malapert (no coordinates published).' },

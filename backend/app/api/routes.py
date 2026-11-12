@@ -10,7 +10,7 @@ from app.services.lunarsight.catalog import (
     site_catalog,
     site_timeline,
 )
-from app.services.lunarsight.point import sample_terrain, terrain_window
+from app.services.lunarsight.point import sample_terrain, south_polar_cap, terrain_window
 from app.services.lunarsight.planning import (
     analyze_request,
     load_result,
@@ -155,12 +155,29 @@ def lunar_point_terrain(
 def lunar_point_terrain_window(
     latitude: float = Query(ge=-90, le=90),
     longitude: float = Query(ge=-180, le=360),
-    radius_km: float = Query(default=8.0, ge=0.5, le=32),
+    radius_km: float = Query(default=8.0, ge=0.5, le=300),
     samples: int = Query(default=129),
+    detail: str = Query(default="best", pattern="^(best|regional)$"),
 ) -> dict:
     """Return a bounded, downsampled terrain grid for interactive rendering."""
     try:
-        return terrain_window(latitude, longitude, radius_km, samples)
+        return terrain_window(latitude, longitude, radius_km, samples, detail)
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    except RuntimeError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+
+
+@router.get("/lunar/terrain/south-polar-cap", tags=["lunar"])
+def lunar_south_polar_cap(
+    response: Response,
+    samples: int = Query(default=513),
+) -> dict:
+    """Return the continuous NASA DEM geometry used by the south-pole globe LOD."""
+    try:
+        result = south_polar_cap(samples)
+        response.headers["Cache-Control"] = "public, max-age=86400, immutable"
+        return result
     except ValueError as error:
         raise HTTPException(status_code=400, detail=str(error)) from error
     except RuntimeError as error:

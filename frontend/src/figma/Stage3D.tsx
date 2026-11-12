@@ -1,14 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { MoonScene } from "../components/MoonScene";
-import { useTerrainWindow } from "../hooks/useTerrainWindow";
+import { MoonScene, type GroundSky } from "../components/MoonScene";
+import { useSiteAnalysis } from "../hooks/useSiteAnalysis";
+import type { PointAnalysisResult } from "../hooks/usePointAnalysis";
+import { useSouthPolarTerrain } from "../hooks/useSouthPolarTerrain";
+import { useTerrainWindow, type TerrainWindow } from "../hooks/useTerrainWindow";
 import type {
   CameraPreset,
   LayerState,
   LunarCoordinate,
   Site as RendererSite,
 } from "../types";
-import { SITES } from "./model";
+import { EARTH_R, SITES, SUN_R, liveState } from "./model";
 
 export type Mode = "orbit" | "pole" | "surface";
 
@@ -18,6 +21,8 @@ type Props = {
   timeMs: number;
   heightM?: number;
   onSelect?: (id: string) => void;
+  onTargetChange?: (coordinate: LunarCoordinate, siteId: string | null) => void;
+  pointAnalysis?: PointAnalysisResult | null;
   className?: string;
   interactive?: boolean;
 };
@@ -25,6 +30,18 @@ type Props = {
 const TEMPLATE_TO_RENDERER_ID: Record<string, string> = {
   "connecting-ridge": "Site01_P1",
   "shackleton-rim": "Site04_P1",
+  "nobile-rim-1": "Site06",
+  "peak-near-shackleton": "Site07",
+  "de-gerlache-rim-2": "Site11",
+  "leibnitz-beta-plateau": "Site20v2",
+  "mons-mouton-plateau": "Site20v2",
+  "mons-mouton": "Site20v2",
+  "malapert-massif": "Site23",
+  "de-gerlache-kocher": "Site42",
+  haworth: "Haworth",
+  shoemaker: "Shoemaker",
+  "amundsen-rim": "DM1",
+  "nobile-rim-2": "DM2",
 };
 
 const RENDERER_TO_TEMPLATE_ID = Object.fromEntries(
@@ -59,11 +76,21 @@ export default function Stage3D({
   mode,
   siteId,
   timeMs,
+  heightM,
   onSelect,
+  onTargetChange,
+  pointAnalysis,
   className = "",
   interactive = true,
 }: Props) {
-  const sites = useMemo(() => SITES.map(toRendererSite), []);
+  const sites = useMemo(() => {
+    const byRendererId = new Map<string, RendererSite>();
+    for (const site of SITES) {
+      const rendererSite = toRendererSite(site);
+      if (!byRendererId.has(rendererSite.id)) byRendererId.set(rendererSite.id, rendererSite);
+    }
+    return [...byRendererId.values()];
+  }, []);
   const activeSite = useMemo(
     () => sites.find((site) => site.id === (TEMPLATE_TO_RENDERER_ID[siteId] ?? siteId)) ?? sites[0],
     [siteId, sites],
@@ -72,24 +99,120 @@ export default function Stage3D({
   const [selectedSiteId, setSelectedSiteId] = useState<string | null>(activeSite.id);
   const [hovered, setHovered] = useState<LunarCoordinate | null>(null);
   const [ready, setReady] = useState(false);
-  const hasFiveMetreDem =
-    selectedSiteId !== null && selectedSiteId in RENDERER_TO_TEMPLATE_ID;
+  const { result: southPolarTerrain, loading: polarTerrainLoading } =
+    useSouthPolarTerrain(mode === "orbit");
   const { result: terrainWindow, loading: terrainLoading } = useTerrainWindow(
     selected,
-    mode === "surface",
-    hasFiveMetreDem
-      ? { radiusKm: 2, samples: 513 }
-      : { radiusKm: 8, samples: 257 },
+    mode === "surface" || mode === "pole",
+    { radiusKm: 1.5, samples: 401 },
   );
+  const { result: midTerrainWindow, loading: midTerrainLoading } = useTerrainWindow(
+    selected,
+    mode === "surface" || mode === "pole",
+    { radiusKm: 6, samples: 401 },
+  );
+  const { result: farTerrainWindow, loading: farTerrainLoading } = useTerrainWindow(
+    selected,
+    mode === "surface" || mode === "pole",
+    { radiusKm: 24, samples: 401, regionalOnly: true },
+  );
+  const { result: contextTerrainWindow, loading: contextTerrainLoading } = useTerrainWindow(
+    selected,
+    mode === "surface" || mode === "pole",
+    { radiusKm: 48, samples: 401, regionalOnly: true },
+  );
+  const { result: regionalTerrainWindow, loading: regionalTerrainLoading } = useTerrainWindow(
+    selected,
+    mode === "surface" || mode === "pole",
+    { radiusKm: 120, samples: 401, regionalOnly: true },
+  );
+  const { result: horizonTerrainWindow, loading: horizonTerrainLoading } = useTerrainWindow(
+    selected,
+    mode === "surface" || mode === "pole",
+    { radiusKm: 300, samples: 401, regionalOnly: true },
+  );
+  const analysisSiteId = selectedSiteId === "Site01_P1" || selectedSiteId === "Site04_P1"
+    ? selectedSiteId
+    : null;
+  const { analysis } = useSiteAnalysis(analysisSiteId, new Date(timeMs));
+  const groundSky = useMemo<GroundSky>(() => {
+    const templateSite = SITES.find((site) => site.id === siteId) ?? SITES[0];
+    const pointSite = {
+      ...templateSite,
+      id: selectedSiteId ?? `custom-${selected.latitude.toFixed(4)}-${selected.longitude.toFixed(4)}`,
+      lat: selected.latitude,
+      lon: selected.longitude,
+    };
+    const model = liveState(pointSite, timeMs, heightM ?? 2);
+    const coordinateExact = selectedSiteId === null
+      ? pointAnalysis?.timeline.find((row) => {
+          const at = timeMs;
+          return Date.parse(row.start_utc) <= at && at < Date.parse(row.end_utc);
+        })
+      : undefined;
+    const exact = analysis?.availability === "AVAILABLE" ? analysis.instant : undefined;
+    if (coordinateExact) {
+      const sunAz = coordinateExact.sun_az_deg;
+      const sunEl = coordinateExact.sun_el_deg;
+      const earthAz = coordinateExact.earth_az_deg;
+      const earthEl = coordinateExact.earth_el_deg;
+      if (sunAz != null && sunEl != null && earthAz != null && earthEl != null) {
+        return {
+          source: "JPL_HORIZONS",
+          observerHeightM: heightM ?? 2,
+          sun: {
+            azimuthDeg: sunAz,
+            elevationDeg: sunEl,
+            angularRadiusDeg: SUN_R,
+            horizonDeg: coordinateExact.sun_horizon_deg,
+            clearanceDeg: coordinateExact.sun_clearance_deg,
+            state: coordinateExact.sun_state,
+          },
+          earth: {
+            azimuthDeg: earthAz,
+            elevationDeg: earthEl,
+            angularRadiusDeg: EARTH_R,
+            horizonDeg: coordinateExact.earth_horizon_deg,
+            clearanceDeg: coordinateExact.earth_clearance_deg,
+            state: coordinateExact.earth_state,
+          },
+        };
+      }
+    }
+    const exactSun = exact?.sun.azimuth_deg != null && exact.sun.elevation_deg != null;
+    const exactEarth = exact?.earth.azimuth_deg != null && exact.earth.elevation_deg != null;
+    return {
+      source: exactSun && exactEarth ? "JPL_HORIZONS" : "MODEL_PREVIEW",
+      observerHeightM: heightM ?? 2,
+      sun: {
+        azimuthDeg: exactSun ? exact!.sun.azimuth_deg! : model.b.sunAz,
+        elevationDeg: exactSun ? exact!.sun.elevation_deg! : model.b.sunEl,
+        angularRadiusDeg: SUN_R,
+        horizonDeg: exactSun ? exact!.sun.horizon_deg : model.b.sunEl - model.sunClear,
+        clearanceDeg: exactSun ? exact!.sun.clearance_deg : model.sunClear,
+        state: exactSun ? exact!.sun.state : model.sun > 0 ? "V" : "B",
+      },
+      earth: {
+        azimuthDeg: exactEarth ? exact!.earth.azimuth_deg! : model.b.earthAz,
+        elevationDeg: exactEarth ? exact!.earth.elevation_deg! : model.b.earthEl,
+        angularRadiusDeg: EARTH_R,
+        horizonDeg: exactEarth ? exact!.earth.horizon_deg : model.b.earthEl - model.earthClear,
+        clearanceDeg: exactEarth ? exact!.earth.clearance_deg : model.earthClear,
+        state: exactEarth ? exact!.earth.state : model.earthUp ? "V" : "B",
+      },
+    };
+  }, [analysis, heightM, pointAnalysis, selected, selectedSiteId, siteId, timeMs]);
 
   useEffect(() => {
     setSelected(activeSite);
     setSelectedSiteId(activeSite.id);
-  }, [activeSite]);
+    onTargetChange?.(activeSite, activeSite.id);
+  }, [activeSite, onTargetChange]);
 
   const handleSelect = (coordinate: LunarCoordinate, rendererSiteId?: string) => {
     setSelected(coordinate);
     setSelectedSiteId(rendererSiteId ?? null);
+    onTargetChange?.(coordinate, rendererSiteId ?? null);
     if (rendererSiteId) {
       onSelect?.(RENDERER_TO_TEMPLATE_ID[rendererSiteId] ?? rendererSiteId);
     }
@@ -110,6 +233,16 @@ export default function Stage3D({
           selected={selected}
           selectedSiteId={selectedSiteId}
           terrainWindow={terrainWindow}
+          terrainLods={[
+            terrainWindow,
+            midTerrainWindow,
+            farTerrainWindow,
+            contextTerrainWindow,
+            regionalTerrainWindow,
+            horizonTerrainWindow,
+          ].filter((item): item is TerrainWindow => item !== null)}
+          southPolarTerrain={southPolarTerrain}
+          groundSky={groundSky}
           onSelect={handleSelect}
           onHover={setHovered}
           onReady={() => setReady(true)}
@@ -122,9 +255,27 @@ export default function Stage3D({
         </div>
       )}
 
-      {mode === "surface" && terrainLoading && (
+      {mode === "surface" && (terrainLoading || midTerrainLoading || farTerrainLoading || contextTerrainLoading || regionalTerrainLoading || horizonTerrainLoading) && (
         <div className="pointer-events-none absolute top-16 left-1/2 -translate-x-1/2 border border-line bg-black/80 px-3 py-1.5 font-mono text-[10px] tracking-wider text-soft">
           PREPARING LOLA TERRAIN…
+        </div>
+      )}
+
+      {mode === "pole" && (terrainLoading || midTerrainLoading || farTerrainLoading || contextTerrainLoading || regionalTerrainLoading || horizonTerrainLoading || polarTerrainLoading) && (
+        <div className="pointer-events-none absolute top-16 left-1/2 -translate-x-1/2 border border-line bg-black/80 px-3 py-1.5 font-mono text-[10px] tracking-wider text-soft">
+          STREAMING NASA SOUTH-POLE TERRAIN…
+        </div>
+      )}
+
+      {mode === "pole" && terrainWindow?.grid && (
+        <div className="pointer-events-none absolute top-16 left-4 border border-line bg-black/80 px-3 py-2 font-mono text-[10px] leading-relaxed tracking-wider text-soft">
+          <div className="text-mint">LOLA NESTED TERRAIN · TRUE RELIEF 1×</div>
+          <div className="text-mute">NASA LOLA · 5 / 80 / 240 m source DEM</div>
+          <div className="text-mute">6 circular LOD rings · south-pole flight view</div>
+          <div className="text-sun">FOCUS LOD · 1.5 / 6 / 24 / 48 / 120 / 300 km</div>
+          <div className="text-mute">SOURCE · {terrainWindow?.dataset_id ?? "regional terrain"}</div>
+          <div className="text-mute">MICRO-RELIEF · SHADING ONLY</div>
+          <div className="mt-1 text-mint">MOUSE · LEFT DRAG MOVE · RIGHT DRAG TILT · WHEEL ZOOM</div>
         </div>
       )}
 
@@ -140,6 +291,19 @@ export default function Stage3D({
           <div className="text-mute">
             {(terrainWindow.radius_km! * 2).toFixed(0)} km field · curvature enabled
           </div>
+          <div className={groundSky.source === "JPL_HORIZONS" ? "text-mint" : "text-sun"}>
+            SKY · {groundSky.source === "JPL_HORIZONS" ? "JPL HORIZONS" : "MODEL PREVIEW"}
+          </div>
+        </div>
+      )}
+
+      {mode === "surface" && terrainWindow?.grid && (
+        <div className="pointer-events-none absolute top-16 right-4 w-48 border border-line bg-black/80 px-3 py-2 font-mono text-[10px] leading-relaxed tracking-wider">
+          <div className="text-sun">☀ SUN · {groundSky.sun.state === "V" ? "VISIBLE" : groundSky.sun.state === "B" ? "HIDDEN" : "UNKNOWN"}</div>
+          <div className="text-mute">AZ {groundSky.sun.azimuthDeg.toFixed(1)}° · EL {groundSky.sun.elevationDeg.toFixed(2)}° · CLR {(groundSky.sun.clearanceDeg ?? 0).toFixed(2)}°</div>
+          <div className="mt-1 text-earth">⊕ EARTH · {groundSky.earth.state === "V" ? "VISIBLE" : groundSky.earth.state === "B" ? "HIDDEN" : "UNKNOWN"}</div>
+          <div className="text-mute">AZ {groundSky.earth.azimuthDeg.toFixed(1)}° · EL {groundSky.earth.elevationDeg.toFixed(2)}° · CLR {(groundSky.earth.clearanceDeg ?? 0).toFixed(2)}°</div>
+          <div className="mt-1 text-mute">DRAG 360° TO INSPECT THE SKY</div>
         </div>
       )}
 

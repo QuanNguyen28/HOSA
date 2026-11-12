@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildTerrainHorizonProfile,
   buildTerrainMeshData,
+  buildSouthPolarCapMeshData,
+  horizonAtAzimuth,
+  skyDirectionToTerrainAxes,
   type TerrainGeometryMetadata,
   type TerrainGrid,
 } from "./terrainGeometry";
@@ -52,5 +56,42 @@ describe("scientific terrain mesh", () => {
   it("builds two triangles for every valid grid cell", () => {
     const mesh = buildTerrainMeshData(grid, metadata);
     expect(mesh.indices).toHaveLength(4 * 2 * 3);
+  });
+
+  it("places celestial directions in the DEM local axes", () => {
+    const east = skyDirectionToTerrainAxes(90, 0, metadata);
+    const zenith = skyDirectionToTerrainAxes(15, 90, metadata);
+
+    expect(east.x).toBeCloseTo(1, 8);
+    expect(east.y).toBeCloseTo(0, 8);
+    expect(east.z).toBeCloseTo(0, 8);
+    expect(zenith.y).toBeCloseTo(1, 8);
+  });
+
+  it("derives a local horizon from actual terrain vertices", () => {
+    const mesh = buildTerrainMeshData(grid, metadata);
+    const profile = buildTerrainHorizonProfile(mesh, metadata, 0, 360);
+
+    expect(horizonAtAzimuth(profile, 90)).toBeGreaterThan(5);
+    expect(Number.isFinite(horizonAtAzimuth(profile, 270))).toBe(true);
+  });
+
+  it("wraps projected south-polar DEM samples onto the lunar reference sphere", () => {
+    const cap = buildSouthPolarCapMeshData(
+      {
+        rows: 5,
+        columns: 5,
+        elevation_m_row_major: Array(25).fill(0),
+      },
+      [-304_000, -304_000, 304_000, 304_000],
+      2,
+    );
+    const centre = (2 * 5 + 2) * 3;
+    expect(cap.positions[centre]).toBeCloseTo(0, 8);
+    expect(cap.positions[centre + 1]).toBeLessThan(-2);
+    expect(cap.positions[centre + 2]).toBeCloseTo(0, 8);
+    expect(cap.indices.length).toBeGreaterThan(0);
+    expect(cap.indices.length).toBeLessThan(16 * 2 * 3);
+    expect(cap.uvs).toHaveLength(25 * 2);
   });
 });

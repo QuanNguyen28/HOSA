@@ -1,6 +1,7 @@
-import { Vector3 } from "three";
+import { Ray, Sphere, Vector3 } from "three";
 
 import type { LunarCoordinate } from "../types";
+import type { TerrainGeometryMetadata } from "./terrainGeometry";
 
 export const MOON_RADIUS_KM = 1737.4;
 export const MOON_SCENE_RADIUS = 2;
@@ -34,13 +35,80 @@ export function vectorToCoordinate(point: Vector3): LunarCoordinate {
 /**
  * Convert a raycast hit on the lunar globe to the application's lunar frame.
  *
- * React Three Fiber exposes `ThreeEvent.point` in world space. The Moon mesh is
- * rotated only to align its equirectangular textures, so applying
- * `mesh.worldToLocal()` before this conversion would rotate the hit by another
- * 180 degrees and place the selection on the opposite side of the globe.
+ * React Three Fiber exposes `ThreeEvent.point` in world space. Interactive
+ * lunar geometry remains in MOON_ME; raster alignment is performed in UV space
+ * so raycasts and markers share this same frame.
  */
 export function surfaceHitToCoordinate(worldPoint: Vector3): LunarCoordinate {
   return vectorToCoordinate(worldPoint);
+}
+
+/**
+ * Resolve a pointer ray against the lunar reference sphere.
+ *
+ * Terrain overlays can contain overlapping LOD meshes, lines and transparent
+ * pixels, so a bubbled R3F event's `point` is not guaranteed to belong to the
+ * surface that visually sits under the pointer. The event ray is camera-derived
+ * and remains authoritative. Intersecting that ray with the reference sphere
+ * keeps custom-point selection screen-aligned while the backend supplies the
+ * precise DEM elevation and suitability values for the resulting coordinate.
+ */
+export function surfaceRayToCoordinate(
+  ray: Ray,
+  radius = MOON_SCENE_RADIUS,
+): LunarCoordinate | null {
+  const hit = ray.intersectSphere(
+    new Sphere(new Vector3(0, 0, 0), radius),
+    new Vector3(),
+  );
+  return hit ? vectorToCoordinate(hit) : null;
+}
+
+/** Convert a world-space hit on a local DEM mesh back to lunar coordinates. */
+export function terrainHitToCoordinate(
+  worldPoint: Vector3,
+  origin: LunarCoordinate,
+  metadata: TerrainGeometryMetadata,
+): LunarCoordinate {
+  if (
+    Number.isFinite(metadata.center_x_m) &&
+    Number.isFinite(metadata.center_y_m) &&
+    metadata.projection === "spherical south polar stereographic"
+  ) {
+    const projectedX = metadata.center_x_m! + worldPoint.x * 1_000;
+    // DEM rows advance toward decreasing projected Y while local mesh Z grows.
+    const projectedY = metadata.center_y_m! - worldPoint.z * 1_000;
+    const rho = Math.hypot(projectedX, projectedY);
+    const latitude = -Math.PI / 2
+      + 2 * Math.atan(rho / (2 * metadata.lunar_reference_radius_m));
+    const longitude = Math.atan2(projectedX, projectedY);
+    return {
+      latitude: latitude / DEG,
+      longitude: longitude / DEG,
+    };
+  }
+
+  // Backward-compatible tangent-frame inverse for older cached responses.
+  const latitude = origin.latitude * DEG;
+  const longitude = origin.longitude * DEG;
+  const up = coordinateToVector(origin, 1).normalize();
+  const east = new Vector3(-Math.sin(longitude), 0, -Math.cos(longitude));
+  const north = new Vector3(
+    -Math.sin(latitude) * Math.cos(longitude),
+    Math.cos(latitude),
+    Math.sin(latitude) * Math.sin(longitude),
+  );
+  const axisAt = (azimuthDeg: number) => east.clone()
+    .multiplyScalar(Math.sin(azimuthDeg * DEG))
+    .add(north.clone().multiplyScalar(Math.cos(azimuthDeg * DEG)))
+    .normalize();
+  const radiusKm = metadata.lunar_reference_radius_m / 1_000;
+  return vectorToCoordinate(
+    up
+      .addScaledVector(axisAt(metadata.column_azimuth_deg), worldPoint.x / radiusKm)
+      .addScaledVector(axisAt(metadata.row_azimuth_deg), worldPoint.z / radiusKm)
+      .normalize(),
+  );
 }
 
 export function isSurfaceSelectionGesture(pointerDeltaPx: number): boolean {

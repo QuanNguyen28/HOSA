@@ -29,6 +29,8 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MANIFEST = ROOT / "manifests/lunarsight/full_product_sources.json"
 TRACKED_RECEIPTS = ROOT / "manifests/lunarsight/full_product_receipts"
 ALLOWED_HOSTS = {
+    # LOLA Science Team archive referenced by the NASA PDS LOLA data page.
+    "imbrium.mit.edu",
     "naif.jpl.nasa.gov",
     "pgda.gsfc.nasa.gov",
     "pds-geosciences.wustl.edu",

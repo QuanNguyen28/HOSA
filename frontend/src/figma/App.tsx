@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   SITES, HEIGHTS, HOUR, DAY, STEP, MIN_MS, MAX_MS, buildSeries, metrics, liveState, fmtDate, fmtDur, fmtTime, fmtPos,
 } from './model';
@@ -6,6 +6,9 @@ import { Logo, SunIcon, EarthIcon, Ring, Seg, StatusPair, SiteRail, TimeDock, Li
 import { Finder } from './views';
 import ChatDock, { ChatPage, useAssistant } from './Chat';
 import type { Mode } from './Stage3D';
+import { usePointTerrain } from '../hooks/usePointTerrain';
+import { usePointAnalysis } from '../hooks/usePointAnalysis';
+import type { LunarCoordinate } from '../types';
 
 const Stage3D = lazy(() => import('./Stage3D'));
 type View = 'explore' | 'compare' | 'dates' | 'chat';
@@ -123,10 +126,67 @@ function Explore({ s, siteId, onSite, ctl, setH, initialSurface }: { s: Shared; 
   const [mode, setMode] = useState<Mode>(initialSurface ? 'surface' : 'pole');
   const [tab, setTab] = useState<'info' | 'sites'>('info');
   const [all, setAll] = useState(false);
+  const [customPoint, setCustomPoint] = useState<LunarCoordinate | null>(null);
+  const [customAnalysisStartMs, setCustomAnalysisStartMs] = useState(s.timeMs);
+  const timeMsRef = useRef(s.timeMs);
+  useEffect(() => { timeMsRef.current = s.timeMs; }, [s.timeMs]);
   const site = SITES.find((x) => x.id === siteId)!;
   const series = useMemo(() => buildSeries(site, HEIGHTS[s.hIdx], s.startMs, s.endMs), [site, s.hIdx, s.startMs, s.endMs]);
   const m = useMemo(() => metrics(series, s.dark, s.margin), [series, s.dark, s.margin]);
-  const wins = all ? m.windows : m.windows.slice(0, 3);
+  const { result: customTerrain, loading: customTerrainLoading } = usePointTerrain(customPoint, customPoint !== null);
+  const customCovered = customTerrain?.coverage_status === 'COVERED';
+  const customAnalysis = usePointAnalysis(
+    customPoint,
+    customAnalysisStartMs,
+    HEIGHTS[s.hIdx],
+    customPoint !== null && customCovered,
+  );
+  const handleTargetChange = useCallback((coordinate: LunarCoordinate, rendererSiteId: string | null) => {
+    if (rendererSiteId) {
+      setCustomPoint(null);
+      return;
+    }
+    setCustomPoint(coordinate);
+    // Anchor the 72 h scientific job to the instant at which the user chose
+    // the point. This makes the Ground Sun/Earth positions exact immediately,
+    // without resubmitting expensive jobs on every animation tick.
+    setCustomAnalysisStartMs(timeMsRef.current);
+    setTab('info');
+  }, []);
+  const customSeries = useMemo(() => {
+    const timeline = customAnalysis.result?.timeline;
+    if (!timeline?.length) return null;
+    return {
+      n: timeline.length,
+      startMs: Date.parse(timeline[0].start_utc),
+      fSun: Float32Array.from(timeline, (row) => row.sun_state === 'V' ? 1 : row.sun_state === 'B' ? 0 : 0.5),
+      earthClear: Float32Array.from(timeline, (row) => row.earth_state === 'V' ? 1 : row.earth_state === 'B' ? -1 : 0),
+    };
+  }, [customAnalysis.result]);
+  const customWindows = useMemo(() => (customAnalysis.result?.events ?? [])
+    .filter((event) => event.target === 'joint' && event.state === 'V')
+    .map((event) => ({
+      startMs: Date.parse(event.start_utc),
+      endMs: Date.parse(event.end_utc),
+      hours: (Date.parse(event.end_utc) - Date.parse(event.start_utc)) / HOUR,
+    })), [customAnalysis.result]);
+  const activeWindows = customPoint ? customWindows : m.windows;
+  const wins = all ? activeWindows : activeWindows.slice(0, 3);
+  const fractionMidpoint = (value?: [number, number]) => value ? (value[0] + value[1]) * 50 : 0;
+  const customJointPct = customAnalysis.result?.timeline.length
+    ? 100 * customAnalysis.result.timeline.filter((row) => row.joint_state === 'V').length / customAnalysis.result.timeline.length
+    : 0;
+  const displayMetrics = customPoint && customAnalysis.result ? {
+    sunMeanPct: fractionMidpoint(customAnalysis.result.availability_fraction.sun),
+    earthPct: fractionMidpoint(customAnalysis.result.availability_fraction.earth),
+    bothPct: customJointPct,
+    longestDark: customAnalysis.result.metrics_hours.longest_dark_hours?.[1] ?? 0,
+  } : {
+    sunMeanPct: m.sunMeanPct,
+    earthPct: m.earthPct,
+    bothPct: m.bothPct,
+    longestDark: m.longestDark,
+  };
   const parse = (v: string) => Date.parse(v + 'T00:00:00Z');
   const inp = 'w-full border border-line bg-ink px-2 py-1.5 font-mono text-xs tabular text-soft';
   const dl = () => {
@@ -148,12 +208,62 @@ function Explore({ s, siteId, onSite, ctl, setH, initialSurface }: { s: Shared; 
         {tab === 'info' ? (
           <div className="min-h-0 flex-1 overflow-y-auto">
             <div className="border-b border-line p-5">
-              <h2 className="text-[26px] leading-none font-bold">{site.name}</h2>
-              <p className="mt-2 font-mono text-xs text-mute tabular">{coords(site.lat, site.lon, 2)}</p>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-[26px] leading-none font-bold">{customPoint ? 'Custom point' : site.name}</h2>
+                  <p className="mt-2 font-mono text-xs text-mute tabular">
+                    {customPoint ? coords(customPoint.latitude, customPoint.longitude, 4) : coords(site.lat, site.lon, 2)}
+                  </p>
+                </div>
+                {customPoint && (
+                  <span className={`border px-2 py-1 font-mono text-[9px] tracking-wider ${customCovered ? 'border-mint/40 text-mint' : 'border-sun/40 text-sun'}`}>
+                    {customTerrainLoading ? 'CHECKING' : customCovered ? 'DEM COVERED' : 'NO COVERAGE'}
+                  </span>
+                )}
+              </div>
             </div>
             <div className="space-y-3 border-b border-line p-5">
-              <p className="eyebrow">Right now</p>
-              <StatusPair siteId={siteId} timeMs={s.timeMs} h={HEIGHTS[s.hIdx]} />
+              <p className="eyebrow">{customPoint ? 'Point assessment' : 'Right now'}</p>
+              {customPoint ? (
+                <div className="space-y-2">
+                  {customTerrainLoading && <p className="text-xs text-mute">Checking verified NASA raster coverage…</p>}
+                  {!customTerrainLoading && !customCovered && (
+                    <p className="border border-sun/35 bg-sun/5 p-3 text-xs text-sun">No validated DEM covers this point. Terrain and mission suitability remain unknown.</p>
+                  )}
+                  {customTerrain?.terrain && (
+                    <dl className="grid grid-cols-2 gap-px border border-line bg-line text-xs">
+                      {[
+                        ['Elevation', `${customTerrain.terrain.elevation_m.toFixed(1)} m`],
+                        ['DEM source', `${customTerrain.terrain.resolution_m} m`],
+                        ['Local slope', customTerrain.terrain.slope_deg == null ? 'Unknown' : `${customTerrain.terrain.slope_deg.toFixed(2)}°`],
+                        ['3×3 roughness', customTerrain.terrain.local_3x3_roughness_m == null ? 'Unknown' : `${customTerrain.terrain.local_3x3_roughness_m.toFixed(2)} m`],
+                        ['Radial error', customTerrain.terrain.quality?.rms_error_m == null ? 'Unknown' : `±${customTerrain.terrain.quality.rms_error_m.toFixed(2)} m`],
+                        ['Effective res.', customTerrain.terrain.quality?.effective_resolution_m == null ? 'Unknown' : `${customTerrain.terrain.quality.effective_resolution_m.toFixed(0)} m`],
+                      ].map(([label, value]) => (
+                        <div key={label} className="bg-panel p-2.5">
+                          <dt className="font-mono text-[9px] tracking-wider text-mute uppercase">{label}</dt>
+                          <dd className="mt-1 font-display text-sm font-semibold text-white">{value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  )}
+                  {customCovered && customAnalysis.status !== 'succeeded' && customAnalysis.status !== 'failed' && (
+                    <p className="border border-earth/30 bg-earth/5 p-3 font-mono text-[10px] leading-relaxed text-earth">
+                      ANALYZING 72 H · DEM HORIZON · SUN · EARTH
+                    </p>
+                  )}
+                  {customAnalysis.status === 'failed' && (
+                    <p className="border border-sun/35 bg-sun/5 p-3 text-xs text-sun">Analysis unavailable: {customAnalysis.errorCode}</p>
+                  )}
+                  {customAnalysis.result && (
+                    <div className={`border p-3 ${customAnalysis.result.decision === 'PASS' ? 'border-mint/45 bg-mint/5 text-mint' : customAnalysis.result.decision === 'FAIL' ? 'border-alert/45 bg-alert/5 text-alert' : 'border-sun/45 bg-sun/5 text-sun'}`}>
+                      <p className="font-mono text-[9px] tracking-wider uppercase">Mission screen · 72 h</p>
+                      <p className="mt-1 font-display text-xl font-semibold">{customAnalysis.result.decision ?? 'INDETERMINATE'}</p>
+                      <p className="mt-1 text-[10px] opacity-80">80% sunlight and 80% Earth-LOS requirements · provisional</p>
+                    </div>
+                  )}
+                </div>
+              ) : <StatusPair siteId={siteId} timeMs={s.timeMs} h={HEIGHTS[s.hIdx]} />}
             </div>
             <div className="space-y-5 border-b border-line p-5">
               <div className="grid grid-cols-2 gap-3">
@@ -162,10 +272,13 @@ function Explore({ s, siteId, onSite, ctl, setH, initialSurface }: { s: Shared; 
                 <label className="block"><span className="eyebrow">To</span>
                   <input type="date" className={`${inp} mt-1`} min={fmtDate(MIN_MS)} max={fmtDate(MAX_MS - DAY)} value={fmtDate(s.endMs - DAY)} onChange={(e) => { const n = parse(e.target.value); if (!Number.isNaN(n)) ctl.setRange(Math.min(s.startMs, n), n + DAY); }} /></label>
               </div>
-              <Bar label="Sunlight" v={m.sunMeanPct} color="#ffc53d" icon={<SunIcon size={14} className="text-sun" />} />
-              <Bar label="Earth in view" v={m.earthPct} color="#5ab4ff" icon={<EarthIcon size={14} className="text-earth" />} />
-              <Bar label="Both at once" v={m.bothPct} color="#7ad99a" />
-              <div className="flex items-center justify-between text-[13px]"><span className="text-soft">Longest dark</span><span className="font-display text-lg font-semibold tabular">{fmtDur(m.longestDark)}</span></div>
+              {customPoint && !customAnalysis.result && (
+                <p className="text-xs leading-relaxed text-mute">Mission metrics appear after the validated terrain-horizon and ephemeris job completes. No fixed-site values are substituted.</p>
+              )}
+              <Bar label="Sunlight" v={displayMetrics.sunMeanPct} color="#ffc53d" icon={<SunIcon size={14} className="text-sun" />} />
+              <Bar label="Earth in view" v={displayMetrics.earthPct} color="#5ab4ff" icon={<EarthIcon size={14} className="text-earth" />} />
+              <Bar label="Both at once" v={displayMetrics.bothPct} color="#7ad99a" />
+              <div className="flex items-center justify-between text-[13px]"><span className="text-soft">Longest dark</span><span className="font-display text-lg font-semibold tabular">{fmtDur(displayMetrics.longestDark)}</span></div>
             </div>
             <div className="border-b border-line p-5">
               <p className="eyebrow mb-3">Viewer height</p>
@@ -173,8 +286,8 @@ function Explore({ s, siteId, onSite, ctl, setH, initialSurface }: { s: Shared; 
             </div>
             <div className="p-5">
               <div className="flex items-center justify-between"><p className="eyebrow">Best times</p>
-                {m.windows.length > 0 && <button type="button" onClick={dl} className="text-xs text-mute underline underline-offset-2 hover:text-white">Download CSV</button>}</div>
-              {m.windows.length === 0 ? <p className="mt-3 text-sm text-mute">Sun and Earth are never both visible in these dates.</p> : (
+                {!customPoint && m.windows.length > 0 && <button type="button" onClick={dl} className="text-xs text-mute underline underline-offset-2 hover:text-white">Download CSV</button>}</div>
+              {activeWindows.length === 0 ? <p className="mt-3 text-sm text-mute">{customPoint && !customAnalysis.result ? 'Waiting for coordinate analysis.' : 'Sun and Earth are never both visible in the analyzed window.'}</p> : (
                 <ul className="mt-2">
                   {wins.map((w) => (
                     <li key={w.startMs} className="border-t border-line first:border-0">
@@ -186,7 +299,7 @@ function Explore({ s, siteId, onSite, ctl, setH, initialSurface }: { s: Shared; 
                   ))}
                 </ul>
               )}
-              {m.windows.length > 3 && <button type="button" onClick={() => setAll(!all)} className="mt-1 text-xs text-mute underline underline-offset-2 hover:text-white">{all ? 'Show fewer' : `Show all ${m.windows.length}`}</button>}
+              {activeWindows.length > 3 && <button type="button" onClick={() => setAll(!all)} className="mt-1 text-xs text-mute underline underline-offset-2 hover:text-white">{all ? 'Show fewer' : `Show all ${activeWindows.length}`}</button>}
             </div>
           </div>
         ) : (
@@ -196,13 +309,30 @@ function Explore({ s, siteId, onSite, ctl, setH, initialSurface }: { s: Shared; 
 
       <div className="relative min-h-[320px] flex-1">
         <Suspense fallback={<StageFallback />}>
-          <Stage3D className="absolute inset-0" mode={mode} siteId={siteId} timeMs={s.timeMs} heightM={HEIGHTS[s.hIdx]} onSelect={(id) => { onSite(id); setTab('info'); }} />
+          <Stage3D
+            className="absolute inset-0"
+            mode={mode}
+            siteId={siteId}
+            timeMs={s.timeMs}
+            heightM={HEIGHTS[s.hIdx]}
+            onSelect={(id) => { setCustomPoint(null); onSite(id); setTab('info'); }}
+            onTargetChange={handleTargetChange}
+            pointAnalysis={customAnalysis.result}
+          />
         </Suspense>
         <div className="absolute top-4 left-1/2 -translate-x-1/2">
           <Seg label="View" value={mode} onChange={setMode} options={[{ v: 'orbit', label: 'Moon' }, { v: 'pole', label: 'Pole' }, { v: 'surface', label: 'Ground' }]} />
         </div>
         <LiveBar s={s} {...ctl}>
-          <Timeline rows={[{ label: site.name, series }]} s={s} setTime={ctl.setTime} />
+          {customPoint ? customSeries ? (
+            <Timeline rows={[{ label: 'Custom point · 72 h', series: customSeries }]} s={s} setTime={ctl.setTime} />
+          ) : (
+            <div className="flex h-12 items-center border-y border-line px-3 font-mono text-[10px] tracking-wider text-mute">
+              CUSTOM TIMELINE · WAITING FOR VALIDATED ANALYSIS
+            </div>
+          ) : (
+            <Timeline rows={[{ label: site.name, series }]} s={s} setTime={ctl.setTime} />
+          )}
         </LiveBar>
       </div>
     </div>

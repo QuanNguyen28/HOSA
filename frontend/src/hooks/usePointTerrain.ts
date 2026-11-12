@@ -12,8 +12,9 @@ export type PointTerrain = {
     slope_deg: number | null;
     local_3x3_roughness_m: number | null;
     quality: null | {
-      rms_error_m: number | null;
-      lola_spot_count: number | null;
+      rms_error_m?: number | null;
+      lola_spot_count?: number | null;
+      effective_resolution_m?: number | null;
     };
   };
   method_version: string;

@@ -10,6 +10,7 @@ export type TerrainWindow = {
   coverage_status: "COVERED" | "UNKNOWN";
   dataset_id?: string;
   native_resolution_m?: number;
+  detail?: "best" | "regional";
   radius_km?: number;
   geometry?: TerrainGeometryMetadata;
   grid: null | TerrainGrid;
@@ -20,7 +21,11 @@ export type TerrainWindow = {
 export function useTerrainWindow(
   coordinate: LunarCoordinate | null,
   enabled: boolean,
-  options: { radiusKm?: number; samples?: 65 | 129 | 257 | 513 } = {},
+  options: {
+    radiusKm?: number;
+    samples?: 65 | 129 | 257 | 401 | 513;
+    regionalOnly?: boolean;
+  } = {},
 ) {
   const [result, setResult] = useState<TerrainWindow | null>(null);
   const [loading, setLoading] = useState(false);
@@ -36,6 +41,7 @@ export function useTerrainWindow(
       longitude: coordinate.longitude.toString(),
       radius_km: (options.radiusKm ?? 8).toString(),
       samples: (options.samples ?? 257).toString(),
+      detail: options.regionalOnly ? "regional" : "best",
     });
     setLoading(true);
     fetch(`/api/lunar/point/terrain-window?${query}`, { signal: controller.signal })
@@ -50,7 +56,7 @@ export function useTerrainWindow(
       })
       .finally(() => setLoading(false));
     return () => controller.abort();
-  }, [coordinate, enabled, options.radiusKm, options.samples]);
+  }, [coordinate, enabled, options.radiusKm, options.samples, options.regionalOnly]);
 
   return { result, loading };
 }

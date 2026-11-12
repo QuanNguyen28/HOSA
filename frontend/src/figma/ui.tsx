@@ -1,4 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useSiteAnalysis } from '../hooks/useSiteAnalysis';
 import {
   SITES, GROUPS, GROUP_ORDER, SPEEDS, HOUR, DAY, STEP, MIN_MS, MAX_MS, liveState, fmtDate, fmtTime, fmtLat, fmtLon, type Series,
 } from './model';
@@ -77,6 +78,16 @@ export function Seg<T extends string | number>({ value, options, onChange, label
 export function StatusPair({ siteId, timeMs, h = 2 }: { siteId: string; timeMs: number; h?: number }) {
   const site = SITES.find((s) => s.id === siteId)!;
   const l = liveState(site, timeMs, h);
+  const analysisSiteId = siteId === 'connecting-ridge'
+    ? 'Site01_P1'
+    : siteId === 'shackleton-rim'
+      ? 'Site04_P1'
+      : null;
+  const { analysis } = useSiteAnalysis(analysisSiteId, new Date(timeMs));
+  const exact = analysis?.availability === 'AVAILABLE' ? analysis.instant : undefined;
+  const clearance = (value: number | null | undefined) => value == null
+    ? 'unknown clearance'
+    : `${value >= 0 ? '+' : ''}${value.toFixed(2)}° clearance`;
   const Chip = ({ icon, on, title, sub }: { icon: ReactNode; on: boolean; title: string; sub: string }) => (
     <div className={`flex flex-1 items-center gap-3 rounded-none border px-3 py-2.5 ${on ? 'border-mint/30 bg-mint/[0.06]' : 'border-rose/25 bg-rose/[0.05]'}`}>
       <span className={on ? 'text-mint' : 'text-rose'}>{icon}</span>
@@ -88,8 +99,18 @@ export function StatusPair({ siteId, timeMs, h = 2 }: { siteId: string; timeMs: 
   );
   return (
     <div className="flex gap-2">
-      <Chip icon={<SunIcon size={20} />} on={l.sun > 0} title={l.sun >= 1 ? 'Sun lit' : l.sun > 0 ? `Sun ${Math.round(l.sun * 100)}%` : 'Sun hidden'} sub={`${l.sunClear >= 0 ? '+' : ''}${l.sunClear.toFixed(2)}° clearance`} />
-      <Chip icon={<EarthIcon size={20} />} on={l.earthUp} title={l.earthUp ? 'Earth link' : 'Earth blocked'} sub={`${l.earthClear >= 0 ? '+' : ''}${l.earthClear.toFixed(2)}° clearance`} />
+      <Chip
+        icon={<SunIcon size={20} />}
+        on={exact ? exact.sun.state === 'V' : l.sun > 0}
+        title={exact ? exact.sun.state === 'V' ? 'Sun lit' : exact.sun.state === 'B' ? 'Sun hidden' : 'Sun unknown' : l.sun >= 1 ? 'Sun lit' : l.sun > 0 ? `Sun ${Math.round(l.sun * 100)}%` : 'Sun hidden'}
+        sub={exact ? clearance(exact.sun.clearance_deg) : clearance(l.sunClear)}
+      />
+      <Chip
+        icon={<EarthIcon size={20} />}
+        on={exact ? exact.earth.state === 'V' : l.earthUp}
+        title={exact ? exact.earth.state === 'V' ? 'Earth link' : exact.earth.state === 'B' ? 'Earth blocked' : 'Earth unknown' : l.earthUp ? 'Earth link' : 'Earth blocked'}
+        sub={exact ? clearance(exact.earth.clearance_deg) : clearance(l.earthClear)}
+      />
     </div>
   );
 }

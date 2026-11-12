@@ -10,7 +10,7 @@ import rasterio
 from rasterio.transform import from_origin
 from backend.app.services.lunarsight.terrain import DEM, R
 from backend.app.services.lunarsight.horizon import angles_enu, ray_positions, ray_elevation, ranges, profile, reference_check
-from backend.app.services.lunarsight.horizons import parse, request_params
+from backend.app.services.lunarsight.horizons import parse, request_params, timestamp
 from backend.app.services.lunarsight.visibility import classify, combine, lookup, bounds, max_rule, valid_start, visibility, analyze
 
 CASES=json.loads((Path(__file__).parent/"fixtures/synthetic_cases.json").read_text())
@@ -88,6 +88,9 @@ def test_t06_t07_horizons_parser_and_missing():
     with pytest.raises(ValueError,match="duplicate"): parse(fixture(dup),kw,a,b,5,R)
     with pytest.raises(ValueError,match="shape"): parse(fixture(good),kw,a,b,5,R+1000)
     assert request_params(10,220,-89.5,1000,1,R,R-100,a,b,5)["SITE_COORD"].endswith(",1.101000000'")
+
+def test_horizons_timestamp_accepts_minute_precision_from_live_api():
+    assert timestamp(" 2026-Apr-02 02:20") == pd.Timestamp("2026-04-02T02:20:00Z")
 
 def test_t08_t13_last_start_and_terminal_boundary():
     a=pd.Timestamp("2026-11-14T00:00:00Z");b=a+pd.Timedelta(days=14)
