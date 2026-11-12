@@ -1,6 +1,7 @@
 from time import monotonic, perf_counter
 
 from starlette.concurrency import run_in_threadpool
+from app.core.errors import DomainError
 
 from .config import AssistantSettings
 from .clarification import questions_for
@@ -56,6 +57,9 @@ class AssistantService:
         except AssistantError as error:
             self.drafts.fail(request.draft_id, error.code, error.status_code)
             raise
+        except DomainError as error:
+            self.drafts.fail(request.draft_id, error.code, error.status_code)
+            raise AssistantError(error.code, error.status_code) from error
         except (OSError, ValueError) as error:
             self.drafts.fail(request.draft_id, "DATA_NOT_READY", 503)
             raise AssistantError("DATA_NOT_READY", 503) from error

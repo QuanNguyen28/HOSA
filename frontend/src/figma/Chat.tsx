@@ -4,7 +4,7 @@ import { DecisionBadge } from "../mvp/DecisionBadge";
 export { useAssistant };
 export type Assistant = ReturnType<typeof useAssistant>;
 const SUGGEST = [
-  "Compare Site01_P1 and Site04_P1 on 2026-11-17T00:00:00Z, keep the hardware.",
+  "So sánh Haworth và Nobile Rim 1.",
   "Chỉ chọn Site04_P1, giữ nguyên lịch và phần cứng.",
   "Set minimum sunlight to 90%, keep the site and arrival.",
 ];
@@ -45,7 +45,7 @@ export function ChatThread({
         <p className="text-xs leading-relaxed text-mute">
           {general
             ? "Ask what HOSA can do, how to interpret results, or where its data comes from."
-            : "Backend snapshot: Site01/Site04, 72 hours, panel 1 m / antenna 2 m. Review any changes before evaluation."}
+            : "Choose any site from Compare, up to two per request. The default mission is 72 hours with a 1 m panel and 2 m antenna. Review before evaluation."}
         </p>
         {!general && baseline && (
           <p className="break-words font-mono text-[10px] text-mute">
@@ -238,7 +238,7 @@ export function ChatThread({
 }
 export function ChatPage({ a }: { a: Assistant }) {
   const topics = [
-    ["Ask", "Describe a change to the snapshot mission."],
+    ["Ask", "Name a site from Compare or describe a change to your mission."],
     ["Review", "Confirm the interpreted requirements before computation."],
     ["Evidence", "Read backend decisions and unknown evidence."],
     ["Continue", "Follow-up turns retain the evaluated site and date."],

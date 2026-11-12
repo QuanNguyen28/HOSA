@@ -25,7 +25,7 @@ Giữ entry point gốc `frontend/src/figma/App.tsx` của nhánh frontend: head
 
 Mọi endpoint trong bảng có prefix `/api`. Frontend không nhận khóa OpenRouter. Khi backend tắt assistant, UI hiện trạng thái disabled, không giả lập câu trả lời.
 
-Assistant hiện giữ hợp đồng snapshot Site01/Site04, 72 giờ, panel/antenna 1/2 m; phạm vi này được ghi rõ trên màn chat và không trộn với form nhiệm vụ tọa độ. Mở rộng hợp đồng chat tới pipeline coordinate/contact là công việc tiếp theo, không được giả định đã hoàn thành.
+Assistant nhận tên hoặc mã của các điểm trên Compare, tối đa hai điểm mỗi lượt, với cấu hình demo 72 giờ và panel/antenna 1/2 m. Site01_P1 và Site04_P1 dùng snapshot nếu không có điểm ngoài snapshot trong lựa chọn. Khi có điểm ngoài snapshot, cả lượt dùng pipeline theo tọa độ, phụ thuộc DEM và JPL Horizons tại vị trí và thời gian yêu cầu. Chat giữ bước xác nhận trước khi tính.
 
 ## Chạy từ repo root
 

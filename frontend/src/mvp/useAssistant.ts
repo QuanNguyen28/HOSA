@@ -54,6 +54,7 @@ type Draft = {
   draft_id: string;
   spec_hash: string;
   spec: Baseline & {
+    data_source?: "snapshot" | "coordinate";
     site_ids: string[];
     rank_by: string;
     search_from_utc: string | null;
@@ -232,8 +233,7 @@ export function useAssistant() {
         constraints: spec.constraints,
         min_sunlit_fraction: spec.min_sunlit_fraction,
         min_earth_los_fraction: spec.min_earth_los_fraction,
-        current_site_id:
-          spec.site_ids.length === 1 ? spec.site_ids[0] : spec.current_site_id,
+        current_site_id: spec.site_ids.length === 1 ? spec.site_ids[0] : spec.current_site_id,
       });
       setContext({
         rank_by: spec.rank_by,

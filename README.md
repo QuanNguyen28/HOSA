@@ -31,7 +31,7 @@ make verify
 make mvp-smoke
 ```
 
-Assistant cần cấu hình `.env` từ `.env.example`; khóa OpenRouter chỉ nằm ở backend. Assistant hiện dùng snapshot Site01/Site04, còn phân tích tọa độ/compare/search dùng pipeline chung. Các giới hạn và hướng dẫn đầy đủ: [MVP tích hợp](docs/demo/fe-be-mvp.md), [frontend](frontend/README.md).
+Assistant cần cấu hình `.env` từ `.env.example`; khóa OpenRouter chỉ nằm ở backend. Assistant nhận tên hoặc mã điểm từ cùng danh mục với Compare, tối đa hai điểm mỗi lượt. Nếu chỉ chọn Site01_P1 hoặc Site04_P1 thì dùng snapshot; khi chọn thêm một điểm ngoài snapshot, backend tính theo tọa độ của toàn bộ lựa chọn. Các giới hạn và hướng dẫn đầy đủ: [MVP tích hợp](docs/demo/fe-be-mvp.md), [frontend](frontend/README.md).
 
 Các phần dưới mô tả thêm pipeline dữ liệu và API snapshot legacy, không phải toàn bộ phạm vi của giao diện MVP mới.
 

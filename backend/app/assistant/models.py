@@ -92,7 +92,8 @@ class RequestSpec(Contract):
     scenario_id: str
     arrival_utc: str
     end_utc: str
-    start_index: int
+    start_index: int | None
+    data_source: Literal["snapshot", "coordinate"] = "snapshot"
     site_ids: list[str]
     hardware: Hardware
     constraints: Constraints

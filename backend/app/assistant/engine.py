@@ -20,10 +20,11 @@ class PlanningAdapter:
 
     def evaluate(self, spec, run_id, spec_hash):
         query = {"scenario_id": spec.scenario_id, "site_ids": spec.site_ids,
+                 "data_source": spec.data_source,
                  "arrival_utc": spec.arrival_utc, "constraints": spec.constraints,
                  "hardware": spec.hardware, "current_site_id": spec.current_site_id,
                  "min_sunlit_fraction": spec.min_sunlit_fraction, "min_earth_los_fraction": spec.min_earth_los_fraction, "rank_by": spec.rank_by,
-                 "expected_source_hash": spec.source_hash}
+                 "expected_source_hash": spec.source_hash if spec.data_source == "snapshot" else None}
         if spec.search_from_utc:
             result = self.planner.search(SearchRequest(**{**query, "arrival_utc": spec.search_from_utc},
                 until_utc=spec.search_until_utc, max_results=3, non_overlapping=True))

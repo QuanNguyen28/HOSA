@@ -2,9 +2,9 @@ import json
 
 from .models import EvidenceBundle, ParseRequest
 from .explanations import explanation_options
-from .sites import available_sites
+from .sites import available_sites, coordinate_sites_for_prompt
 
-PROMPT_VERSION = "assistant-2.1"
+PROMPT_VERSION = "assistant-2.2"
 
 
 def parse_messages(request: ParseRequest, capabilities: dict) -> list[dict]:
@@ -21,6 +21,10 @@ def parse_messages(request: ParseRequest, capabilities: dict) -> list[dict]:
             "For a site explicitly named now, set site_ids (Site01/site 01/điểm 01 => Site01_P1, "
             "Site04/site 04/điểm 04 => Site04_P1; '2 điểm 04 và 01' means both). Otherwise leave site_ids null and inherit selected_site_ids "
             "with site_scope unspecified; use keep_current only when explicitly requested. "
+            "All coordinate_sites are supported by name, ID or listed alias. Use the exact site_id, do not substitute a snapshot point. "
+            "For example Connecting Ridge and Site01_P1 are distinct points. Mons Mouton and Mons Mouton Plateau are distinct. "
+            "For a comparison of known sites, keep both IDs and ask only for missing inputs. "
+            "This chat compares up to two points per request. "
             "For explicit latitude/east longitude, set site_coordinates with lat_deg and lon_e_deg; "
             "never guess coordinate order or choose a nearest site yourself. Backend only identifies "
             "processed P1 coordinates within 1 metre; arbitrary-coordinate science is unsupported. "
@@ -61,7 +65,8 @@ def parse_messages(request: ParseRequest, capabilities: dict) -> list[dict]:
             "rank_by may select total_earth_los_hours (default), total_sun_hours, longest_dark_hours, longest_blackout_hours or longest_joint_hours. "
             "No guessing new sites, dates, regions, physical battery limits or measurements."
         )},
-        {"role": "user", "content": json.dumps({"request": request.model_dump(), "available_sites": available_sites(), "capabilities": {
+        {"role": "user", "content": json.dumps({"request": request.model_dump(), "available_sites": available_sites(),
+            "coordinate_sites": coordinate_sites_for_prompt(), "capabilities": {
             key: capabilities[key] for key in ("scenario", "supported_constraints", "supported_soft_constraints", "warnings", "supported_operations", "ranking_metrics")}}, ensure_ascii=False)},
     ]
 

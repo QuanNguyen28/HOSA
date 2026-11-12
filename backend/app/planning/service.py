@@ -37,6 +37,7 @@ class PlanningService:
         if query.data_source == "snapshot":
             return self.capabilities()
         from app.point_analysis.sources import installed_sources
+        from app.mission.targets import compare_sites
         from app.point_analysis.geometry import METHOD_VERSION as GEOMETRY_VERSION
         from app.services.lunarsight.horizons import ADAPTER_VERSION
         from app.services.lunarsight.visibility import SENSITIVITY_VERSION
@@ -45,12 +46,16 @@ class PlanningService:
         from app.services.lunarsight.catalog import processed_root
         from app.services.lunarsight.acquire import hashfile
         catalog = processed_root()/"site_catalog.geojson"
+        sites = compare_sites()
+        named_targets = {t.site_id: {"latitude_deg": sites[t.site_id]["lat"], "longitude_e_deg": sites[t.site_id]["lon"]}
+                         for t in query.mission_targets() if t.site_id in sites}
         return {"scenario": {}, "warnings": ["PROVISIONAL: sampled Sun/Earth centre geometry; no RF, power or thermal model."],
             "dataset_version": "verified-dem-coordinate", "source_hash": digest({
             "datasets": sources, "evaluation": EVALUATION_VERSION, "validation": VALIDATION_VERSION,
             "planning": METHOD_VERSION,
             "geometry": GEOMETRY_VERSION, "horizons": ADAPTER_VERSION, "sensitivity": SENSITIVITY_VERSION,
-            "contact": CONTACT_VERSION, "catalog": hashfile(catalog) if any(t.site_id for t in query.mission_targets()) else None})}
+            "contact": CONTACT_VERSION, "catalog": hashfile(catalog) if any(t.site_id for t in query.mission_targets()) else None,
+            **({"named_targets": named_targets} if named_targets else {})})}
 
     def validate(self, query):
         caps = self.source_capabilities(query)

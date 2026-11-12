@@ -7,16 +7,17 @@ TEMPLATES = {
     "time": "Bạn muốn hạ cánh lúc mấy giờ?",
     "timezone": "Thời gian bạn vừa nêu theo múi giờ nào? Ví dụ UTC hoặc +07:00.",
     "search_range": "Bạn cho phép đổi ngày trong khoảng nào? Nêu đủ hai mốc ISO có múi giờ; mốc cuối không bao gồm.",
-    "site_scope": "Bạn muốn giữ điểm hiện tại hay chọn Site01_P1, Site04_P1 hoặc cả hai?",
+    "site_scope": "Bạn muốn phân tích hoặc so sánh điểm nào? Hãy dùng tên hoặc mã trong danh mục Compare.",
     "mission_duration": "Thời lượng nhiệm vụ là bao nhiêu? Dữ liệu demo hiện hỗ trợ 72 giờ.",
     "constraints": "Bạn cần tối thiểu bao nhiêu % thời gian có nắng và có Earth LOS? Có muốn đặt thêm mong muốn mềm về khoảng tối hoặc mất LOS liên tục không?",
     "request": "Bạn hãy nêu lại phần cần thay đổi cụ thể hơn.",
 }
 ISSUE_FIELDS = {
     "MISSING_BASELINE": ["request"], "INVALID_BASELINE_TIME": ["arrival_utc"],
-    "MISSING_REGION": ["site_scope"], "UNSUPPORTED_SITE_SCOPE": ["site_scope"],
+    "TOO_MANY_SITES": ["site_scope"], "MISSING_REGION": ["site_scope"], "UNSUPPORTED_SITE_SCOPE": ["site_scope"],
     "UNSUPPORTED_SITE_COORDINATES": ["site_scope"], "AMBIGUOUS_SITE_SELECTION": ["site_scope"],
     "AMBIGUOUS_ARRIVAL": ["arrival_utc"], "UNRESOLVED_ARRIVAL": ["arrival_utc"],
+    "INVALID_COORDINATE_ARRIVAL": ["arrival_utc"],
     "INCOMPLETE_SEARCH_RANGE": ["search_range"], "UNRESOLVED_SEARCH_RANGE": ["search_range"],
     "INVALID_SEARCH_RANGE": ["search_range"], "OUTSIDE_TIME_COVERAGE": ["arrival_utc"],
     "OFF_START_GRID": ["arrival_utc"], "UNSUPPORTED_DURATION": ["mission_duration"],
@@ -44,6 +45,10 @@ def questions_for(issue: str, patch=None):
             text = "Dữ liệu demo chỉ nhận ngày bắt đầu từ 14/11 đến trước 28/11/2026 UTC. Bạn muốn chọn mốc nào?"
         elif issue == "OFF_START_GRID":
             text = "Mốc bắt đầu cần đúng lưới 15 phút. Bạn chọn thời điểm nào có phút 00, 15, 30 hoặc 45? Hệ thống không tự làm tròn."
+        elif issue == "TOO_MANY_SITES":
+            text = "Chat hiện so sánh tối đa hai điểm mỗi lượt. Bạn muốn chọn hai điểm nào trong danh mục Compare?"
+        elif issue == "INVALID_COORDINATE_ARRIVAL":
+            text = "Bạn chọn ngày giờ bắt đầu có múi giờ trong khoảng 2000–2100 và đúng mốc 5 phút nhé."
         elif issue == "MISSING_BASELINE":
             text = "Bạn cần cung cấp kế hoạch gốc gồm ngày giờ, thời lượng, điểm và cấu hình phần cứng trước khi thay lịch."
         elif issue == "UNSUPPORTED_SITE_COORDINATES":

@@ -1,3 +1,5 @@
+import compareSites from "../../../manifests/compare-sites.json";
+
 export type Site = {
   id: string;
   name: string;
@@ -25,135 +27,9 @@ export const GROUP_ORDER: Site["group"][] = [
   "contrast",
 ];
 
-const A = (
-  id: string,
-  name: string,
-  lat: number,
-  lon: number,
-  h: number,
-): Site => ({
-  id,
-  name,
-  group: "artemis",
-  lat,
-  lon,
-  kind: "approx",
-  height_m: h,
-  point:
-    "Highest LOLA point inside the region footprint (2022 list, served by NASA Moon Trek). lat/lon below is the footprint centroid",
-  source: "NASA Moon Trek, A3_Named_regions_SP",
-  url: "https://trek.nasa.gov/moon/trekarcgis2/rest/services/A3_Named_regions_SP/MapServer/0",
-});
-
-const P = (id: string, name: string, lat: number, lon: number, height_m: number): Site => ({
-  id, name, lat, lon, height_m, group: "illumination", kind: "exact",
-  point: "Centre pixel of the verified 5 m/pixel LOLA terrain footprint used by HOSA",
-  source: "NASA GSFC PGDA Product 78",
-  url: "https://pgda.gsfc.nasa.gov/products/78",
-});
-
-export const SITES: Site[] = [
-  {
-    id: "connecting-ridge",
-    name: "Connecting ridge",
-    group: "illumination",
-    lat: -89.4398,
-    lon: -137.17,
-    kind: "exact",
-    height_m: 1958.6,
-    point:
-      "The published highest-illumination point on the ridge joining Shackleton and de Gerlache",
-    source: "Mazarico et al. 2011, Icarus",
-    url: "https://doi.org/10.1016/j.icarus.2011.03.007",
-  },
-  {
-    id: "shackleton-rim",
-    name: "Shackleton rim",
-    group: "illumination",
-    lat: -89.6866,
-    lon: -162.81,
-    kind: "exact",
-    height_m: 1729.6,
-    point:
-      "The published highest-illumination point on the rim of Shackleton crater",
-    source: "Mazarico et al. 2011, Icarus",
-    url: "https://doi.org/10.1016/j.icarus.2011.03.007",
-  },
-  {
-    ...A(
-      "peak-near-cabeus-b",
-      "Peak near Cabeus B",
-      -83.58392,
-      -68.46415,
-      4602.1,
-    ),
-    notes: "Region added in 2024.",
-  },
-  A("haworth", "Haworth", -86.36428, -23.20814, 2842.2),
-  {
-    ...A("malapert-massif", "Malapert Massif", -85.98794, 2.06238, 5173.3),
-    notes:
-      "Intuitive Machines IM-5 plans to land at Mons Malapert (no coordinates published).",
-  },
-  A("mons-mouton-plateau", "Mons Mouton Plateau", -84.37473, 32.00484, 5605.6),
-  A("mons-mouton", "Mons Mouton", -85.40381, 31.70225, 6463.6),
-  A("nobile-rim-1", "Nobile Rim 1", -85.23291, 36.59181, 6800),
-  A("nobile-rim-2", "Nobile Rim 2", -84.07924, 54.89488, 1817.4),
-  A("de-gerlache-rim-2", "de Gerlache Rim 2", -88.58734, -67.89559, 1764.9),
-  {
-    id: "im1-odysseus",
-    name: "IM-1 Odysseus landing site",
-    group: "clps",
-    lat: -80.13,
-    lon: 1.44,
-    kind: "exact",
-    height_m: 2592,
-    point: "Landing point reported after touchdown on 22 February 2024",
-    source: "NASA: LRO images Odysseus",
-    url: "https://www.nasa.gov/",
-  },
-  {
-    id: "im2-athena",
-    name: "IM-2 Athena landing site",
-    group: "clps",
-    lat: -84.7906,
-    lon: 29.1957,
-    kind: "exact",
-    height_m: 5321.7,
-    point: "Landing point reported after touchdown on 6 March 2025",
-    source: "LROC image 1408",
-    url: "https://www.nasa.gov/",
-  },
-  {
-    id: "viper",
-    name: "VIPER mission area",
-    group: "clps",
-    lat: -85.42088,
-    lon: 31.6218,
-    kind: "exact",
-    height_m: 6417.6,
-    point: "Centre of the planned VIPER traverse area on Nobile",
-    source: "NASA VIPER",
-    url: "https://www.nasa.gov/",
-  },
-  {
-    id: "shackleton-floor",
-    name: "Shackleton crater floor",
-    group: "contrast",
-    lat: -89.62511,
-    lon: 118.60583,
-    kind: "approx",
-    height_m: -2872.3,
-    point: "Lowest LOLA point inside the permanently shadowed floor",
-    source: "NASA Moon Trek, A3_Named_regions_SP",
-    url: "https://trek.nasa.gov/",
-  },
-  P("peak-near-shackleton", "Peak near Shackleton", -88.81101, 123.69007, 1645.5),
-  P("leibnitz-beta-plateau", "Leibnitz Beta Plateau", -85.42658, 31.74276, 6398.9),
-  P("de-gerlache-kocher", "de Gerlache–Kocher Massif", -85.82955, -116.32202, 2705.9),
-  P("shoemaker", "Shoemaker crater", -87.18351, 62.83501, 548.1),
-  P("amundsen-rim", "Amundsen rim", -84.22874, 69.44395, 399.3),
-];
+export const SITES = compareSites
+  .filter((site) => !site.id.startsWith("example-"))
+  .map((site) => ({ ...site, height_m: site.height_m ?? NaN })) as Site[];
 
 export const HEIGHTS = [2, 10, 20, 30];
 export const SPEEDS = [1, 6, 24, 72];
