@@ -1,0 +1,20 @@
+{
+  "latitude_deg": -88.80771296769387,
+  "longitude_e_deg": 123.81313283430084,
+  "start_utc": "2026-11-24T00:00:00Z",
+  "duration_hours": 6,
+  "panel_height_m": 20,
+  "antenna_height_m": 20,
+  "min_sunlit_fraction": 0.8,
+  "constraints": {
+    "max_darkness_hours": 12,
+    "max_earth_blackout_hours": 6
+  },
+  "offline": false,
+  "contact_requirements": {
+    "min_contact_minutes": 30,
+    "setup_minutes": 5,
+    "required_windows": 1,
+    "first_contact_deadline_minutes": 120
+  }
+}

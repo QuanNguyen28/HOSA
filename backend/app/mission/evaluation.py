@@ -10,7 +10,7 @@ from app.services.lunarsight.durations import bounds
 from app.services.lunarsight.visibility import sensitivity, lookup, SENSITIVITY_VERSION
 from .metrics import hard_checks, assess_soft, validate_metrics
 
-EVALUATION_VERSION = "mission-evaluation-1.0"
+EVALUATION_VERSION = "mission-evaluation-1.0.1"
 VALIDATION_VERSION = "mission-validation-1.0"
 REQUIRED_COMPARISONS = ("azimuth_0.25_vs_0.125", "radius_400km_vs_300km", "time_5min_vs_1min")
 TOLERANCES = {"horizon_deg": .1, "event_minutes": 5, "duration_minutes": 10}

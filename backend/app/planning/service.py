@@ -48,6 +48,7 @@ class PlanningService:
         return {"scenario": {}, "warnings": ["PROVISIONAL: sampled Sun/Earth centre geometry; no RF, power or thermal model."],
             "dataset_version": "verified-dem-coordinate", "source_hash": digest({
             "datasets": sources, "evaluation": EVALUATION_VERSION, "validation": VALIDATION_VERSION,
+            "planning": METHOD_VERSION,
             "geometry": GEOMETRY_VERSION, "horizons": ADAPTER_VERSION, "sensitivity": SENSITIVITY_VERSION,
             "contact": CONTACT_VERSION, "catalog": hashfile(catalog) if any(t.site_id for t in query.mission_targets()) else None})}
 
@@ -97,6 +98,12 @@ class PlanningService:
             first, stop = 0, int(elapsed/query.start_step_minutes)
             if stop*len(query.mission_targets()) > 128:
                 raise DomainError("SEARCH_TOO_LARGE", 422)
+            last_start = (utc(query.arrival_utc) + timedelta(minutes=(stop-1)*query.start_step_minutes)).isoformat()
+            try:
+                for target in query.mission_targets():
+                    query.mission(target, start_utc=last_start)
+            except ValueError as error:
+                raise DomainError("INVALID_SEARCH_RANGE", 422) from error
             scenario = {"A_utc": query.arrival_utc, "start_step_minutes": query.start_step_minutes}
         else:
             if query.start_step_minutes != scenario["start_step_minutes"]:

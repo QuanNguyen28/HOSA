@@ -57,11 +57,13 @@ Search có thể loại nhanh toàn bộ các thời điểm của một target 
 
 Candidate thêm `nominal_sampled_decision`, `validation`, `contact_analysis`, `coordinate`, `analysis_result_id`. Chỉ PASS sau gate được xem khả thi. FAIL có thể là phương án gần đạt nhưng `apply_allowed=false`; INDETERMINATE không được đề xuất áp dụng.
 
+Với nguồn coordinate, `candidate_id` dùng target và thời điểm UTC thực tế, thống nhất giữa compare và search; `start_index=null`. Chỉ snapshot dùng chỉ số trên lưới scenario. Search kiểm tra cả nhiệm vụ cuối còn trong miền thời gian hỗ trợ trước khi tính nhiệm vụ đầu tiên.
+
 Identity kết quả bao gồm phiên bản evaluation/validation/sensitivity. Cache quyết định cũ không được dùng thay kết quả theo policy mới; cache DEM/horizon/JPL vẫn được giữ khi đầu vào hình học không đổi.
 
 ## Chạy hai trường hợp ngoài Site01/Site04
 
-Hai request mẫu cùng cấu hình đã kiểm chứng trước đó (24/11/2026 UTC, 6 giờ, panel/antenna 20 m):
+Hai request mẫu cùng cấu hình đã kiểm chứng trước đó (24/11/2026 UTC, 72 giờ, panel/antenna 20 m):
 
 ```bash
 curl --fail-with-body -sS http://127.0.0.1:8000/api/planning/compare \
@@ -75,9 +77,9 @@ curl --fail-with-body -sS http://127.0.0.1:8000/api/planning/windows/search \
   -o /tmp/planning-search-response.json
 ```
 
-Compare trả một PASS và một FAIL, cả hai validation đạt. Search mẫu chỉ xét một thời điểm bắt đầu cho hai target, đếm PASS=1/FAIL=1 và trả phương án PASS. Đây là kiểm tra tích hợp, không phải bằng chứng tối ưu toàn bộ miền địa lý/thời gian.
+Compare trả một PASS và một FAIL, cả hai validation đạt. Search mẫu hiện xét 4 thời điểm bắt đầu cách nhau 6 giờ trong ngày 24/11 cho hai target (8 phương án). Trong đợt kiểm tra offline, hai phương án lúc 00:00 có đủ cache và cho PASS=1/FAIL=1; 6 phương án còn lại thiếu cache JPL nên được đếm INDETERMINATE. Search trả phương án PASS và giữ cùng `candidate_id` như compare. Chạy request mặc định `offline=false` sẽ thử lấy ephemeris còn thiếu. Đây là kiểm tra tích hợp, không phải bằng chứng tối ưu toàn bộ miền địa lý/thời gian.
 
-[Bằng chứng API thật](../validation/lunarsight/mission-unification-acceptance.json) lưu result ID, metric và validation để đối chiếu. Kết quả đầy đủ nằm trong `data/cache/point-analysis/unified-acceptance.json`. Dữ liệu khoa học là NASA DEM và cache JPL thật; fixture tổng hợp chỉ được dùng trong test tạm.
+[Bằng chứng kiểm tra API](../validation/lunarsight/mission-unification-acceptance.json) lưu result ID, metric và validation để đối chiếu. Đợt rà soát 12/11/2026 gọi các route hiện tại qua FastAPI TestClient, dùng NASA DEM và cache JPL thật ở chế độ offline; request point/compare/search đều là 72 giờ. Kết quả đầy đủ nằm trong `data/cache/point-analysis/review-acceptance.json`. Fixture tổng hợp chỉ được dùng trong test tạm.
 
 ## Phần còn lại sau mục 4
 

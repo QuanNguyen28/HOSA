@@ -46,7 +46,7 @@
           6.0
         ]
       },
-      "request_file": "docs/examples/point-analysis-outside-pass-request.json",
+      "request_file": "docs/examples/point-analysis-outside-6h-pass-request.json",
       "validation_passed": true,
       "seams_passed": true,
       "sensitivity_passed": {
@@ -114,7 +114,7 @@
           0.0
         ]
       },
-      "request_file": "docs/examples/point-analysis-outside-fail-request.json",
+      "request_file": "docs/examples/point-analysis-outside-6h-fail-request.json",
       "validation_passed": true,
       "seams_passed": true,
       "sensitivity_passed": {

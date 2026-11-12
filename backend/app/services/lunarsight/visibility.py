@@ -39,8 +39,9 @@ def visibility(sun,earth,ps,pe):
         h,cov=lookup(p,ep.az_deg)
         df[f"{label}_horizon_deg"]=h; df[f"{label}_terrain_complete"]=cov
         df[f"{label}_clearance_deg"]=ep.el_deg-h
-        df[f"{label}_state"]=classify(ep.el_deg,h,cov)
-        df[f"{label}_ephem_valid"]=ep.row_present & ep[["az_deg","el_deg"]].notna().all(axis=1)
+        valid = ep.row_present.fillna(False).eq(True) & np.isfinite(ep[["az_deg", "el_deg"]]).all(axis=1)
+        df[f"{label}_ephem_valid"]=valid
+        df[f"{label}_state"]=np.where(valid, classify(ep.el_deg,h,cov), "?")
         df[f"{label}_coverage_flag"]=np.select(
             [~df[f"{label}_ephem_valid"],~cov],["missing_ephemeris","incomplete_terrain"],default="covered")
     df["joint_state"]=combine(df.sun_state,df.earth_state)
