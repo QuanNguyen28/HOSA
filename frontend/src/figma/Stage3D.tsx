@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { MoonScene, type GroundSky } from "../components/MoonScene";
 import { useSiteAnalysis } from "../hooks/useSiteAnalysis";
-import type { PointAnalysisResult } from "../hooks/usePointAnalysis";
+import type { PointResult } from "../mvp/contracts";
 import { useSouthPolarTerrain } from "../hooks/useSouthPolarTerrain";
 import { useTerrainWindow, type TerrainWindow } from "../hooks/useTerrainWindow";
 import type {
@@ -11,42 +11,22 @@ import type {
   LunarCoordinate,
   Site as RendererSite,
 } from "../types";
-import { EARTH_R, SITES, SUN_R, liveState } from "./model";
+import { EARTH_R, SUN_R, liveState, type Site } from "./model";
 
 export type Mode = "orbit" | "pole" | "surface";
 
 type Props = {
   mode: Mode;
+  sites: Site[];
+  onCoordinateSelect?: (coordinate: LunarCoordinate) => void;
   siteId: string;
   timeMs: number;
   heightM?: number;
   onSelect?: (id: string) => void;
-  onTargetChange?: (coordinate: LunarCoordinate, siteId: string | null) => void;
-  pointAnalysis?: PointAnalysisResult | null;
+  pointAnalysis?: PointResult | null;
   className?: string;
   interactive?: boolean;
 };
-
-const TEMPLATE_TO_RENDERER_ID: Record<string, string> = {
-  "connecting-ridge": "Site01_P1",
-  "shackleton-rim": "Site04_P1",
-  "nobile-rim-1": "Site06",
-  "peak-near-shackleton": "Site07",
-  "de-gerlache-rim-2": "Site11",
-  "leibnitz-beta-plateau": "Site20v2",
-  "mons-mouton-plateau": "Site20v2",
-  "mons-mouton": "Site20v2",
-  "malapert-massif": "Site23",
-  "de-gerlache-kocher": "Site42",
-  haworth: "Haworth",
-  shoemaker: "Shoemaker",
-  "amundsen-rim": "DM1",
-  "nobile-rim-2": "DM2",
-};
-
-const RENDERER_TO_TEMPLATE_ID = Object.fromEntries(
-  Object.entries(TEMPLATE_TO_RENDERER_ID).map(([templateId, rendererId]) => [rendererId, templateId]),
-);
 
 const LAYERS: LayerState = {
   labels: true,
@@ -55,9 +35,9 @@ const LAYERS: LayerState = {
   enhancedLight: true,
 };
 
-function toRendererSite(site: (typeof SITES)[number]): RendererSite {
+function toRendererSite(site: Site): RendererSite {
   return {
-    id: TEMPLATE_TO_RENDERER_ID[site.id] ?? site.id,
+    id: site.id,
     name: site.name,
     latitude: site.lat,
     longitude: site.lon,
@@ -74,29 +54,23 @@ function modeToPreset(mode: Mode): CameraPreset {
 
 export default function Stage3D({
   mode,
+  sites: catalog,
+  onCoordinateSelect,
   siteId,
   timeMs,
   heightM,
   onSelect,
-  onTargetChange,
   pointAnalysis,
   className = "",
   interactive = true,
 }: Props) {
-  const sites = useMemo(() => {
-    const byRendererId = new Map<string, RendererSite>();
-    for (const site of SITES) {
-      const rendererSite = toRendererSite(site);
-      if (!byRendererId.has(rendererSite.id)) byRendererId.set(rendererSite.id, rendererSite);
-    }
-    return [...byRendererId.values()];
-  }, []);
+  const sites = useMemo(() => catalog.map(toRendererSite), [catalog]);
   const activeSite = useMemo(
-    () => sites.find((site) => site.id === (TEMPLATE_TO_RENDERER_ID[siteId] ?? siteId)) ?? sites[0],
+    () => sites.find((site) => site.id === siteId) ?? sites[0],
     [siteId, sites],
   );
-  const [selected, setSelected] = useState<LunarCoordinate>(activeSite);
-  const [selectedSiteId, setSelectedSiteId] = useState<string | null>(activeSite.id);
+  const selected = activeSite;
+  const selectedSiteId = activeSite.id === "custom" ? null : activeSite.id;
   const [hovered, setHovered] = useState<LunarCoordinate | null>(null);
   const [ready, setReady] = useState(false);
   const { result: southPolarTerrain, loading: polarTerrainLoading } =
@@ -131,12 +105,13 @@ export default function Stage3D({
     mode === "surface" || mode === "pole",
     { radiusKm: 300, samples: 401, regionalOnly: true },
   );
-  const analysisSiteId = selectedSiteId === "Site01_P1" || selectedSiteId === "Site04_P1"
-    ? selectedSiteId
+  const analysisSiteId =
+    selectedSiteId === "Site01_P1" || selectedSiteId === "connecting-ridge" ? "Site01_P1"
+    : selectedSiteId === "Site04_P1" || selectedSiteId === "shackleton-rim" ? "Site04_P1"
     : null;
   const { analysis } = useSiteAnalysis(analysisSiteId, new Date(timeMs));
   const groundSky = useMemo<GroundSky>(() => {
-    const templateSite = SITES.find((site) => site.id === siteId) ?? SITES[0];
+    const templateSite = catalog.find((site) => site.id === siteId) ?? catalog[0];
     const pointSite = {
       ...templateSite,
       id: selectedSiteId ?? `custom-${selected.latitude.toFixed(4)}-${selected.longitude.toFixed(4)}`,
@@ -144,7 +119,7 @@ export default function Stage3D({
       lon: selected.longitude,
     };
     const model = liveState(pointSite, timeMs, heightM ?? 2);
-    const coordinateExact = selectedSiteId === null
+    const coordinateExact = pointAnalysis?.request.panel_height_m === pointAnalysis?.request.antenna_height_m
       ? pointAnalysis?.timeline.find((row) => {
           const at = timeMs;
           return Date.parse(row.start_utc) <= at && at < Date.parse(row.end_utc);
@@ -201,20 +176,15 @@ export default function Stage3D({
         state: exactEarth ? exact!.earth.state : model.earthUp ? "V" : "B",
       },
     };
-  }, [analysis, heightM, pointAnalysis, selected, selectedSiteId, siteId, timeMs]);
+  }, [analysis, catalog, heightM, pointAnalysis, selected, selectedSiteId, siteId, timeMs]);
 
-  useEffect(() => {
-    setSelected(activeSite);
-    setSelectedSiteId(activeSite.id);
-    onTargetChange?.(activeSite, activeSite.id);
-  }, [activeSite, onTargetChange]);
-
-  const handleSelect = (coordinate: LunarCoordinate, rendererSiteId?: string) => {
-    setSelected(coordinate);
-    setSelectedSiteId(rendererSiteId ?? null);
-    onTargetChange?.(coordinate, rendererSiteId ?? null);
+  const handleSelect = (
+    coordinate: LunarCoordinate,
+    rendererSiteId?: string,
+  ) => {
+    if (!rendererSiteId) onCoordinateSelect?.(coordinate);
     if (rendererSiteId) {
-      onSelect?.(RENDERER_TO_TEMPLATE_ID[rendererSiteId] ?? rendererSiteId);
+      onSelect?.(rendererSiteId);
     }
   };
 
@@ -283,13 +253,16 @@ export default function Stage3D({
         <div className="pointer-events-none absolute top-16 left-4 border border-line bg-black/80 px-3 py-2 font-mono text-[10px] leading-relaxed tracking-wider text-soft">
           <div className="text-mint">LOLA TERRAIN · TRUE SCALE 1×</div>
           <div className="text-mute">
-            {terrainWindow.dataset_id} · source {terrainWindow.native_resolution_m} m
+            {terrainWindow.dataset_id} · source{" "}
+            {terrainWindow.native_resolution_m} m
           </div>
           <div className="text-mute">
-            mesh {terrainWindow.grid.spacing_m.toFixed(1)} m · {terrainWindow.grid.rows}² vertices
+            mesh {terrainWindow.grid.spacing_m.toFixed(1)} m ·{" "}
+            {terrainWindow.grid.rows}² vertices
           </div>
           <div className="text-mute">
-            {(terrainWindow.radius_km! * 2).toFixed(0)} km field · curvature enabled
+            {(terrainWindow.radius_km! * 2).toFixed(0)} km field · curvature
+            enabled
           </div>
           <div className={groundSky.source === "JPL_HORIZONS" ? "text-mint" : "text-sun"}>
             SKY · {groundSky.source === "JPL_HORIZONS" ? "JPL HORIZONS" : "MODEL PREVIEW"}
@@ -309,7 +282,10 @@ export default function Stage3D({
 
       {hovered && mode !== "surface" && (
         <div className="pointer-events-none absolute right-4 bottom-4 border border-line bg-black/75 px-2.5 py-1.5 font-mono text-[10px] text-soft tabular">
-          {Math.abs(hovered.latitude).toFixed(4)}°{hovered.latitude < 0 ? "S" : "N"} · {Math.abs(hovered.longitude).toFixed(4)}°{hovered.longitude < 0 ? "W" : "E"}
+          {Math.abs(hovered.latitude).toFixed(4)}°
+          {hovered.latitude < 0 ? "S" : "N"} ·{" "}
+          {Math.abs(hovered.longitude).toFixed(4)}°
+          {hovered.longitude < 0 ? "W" : "E"}
         </div>
       )}
     </div>

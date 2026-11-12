@@ -11,7 +11,7 @@
     }
   ],
   "arrival_utc": "2026-11-24T00:00:00Z",
-  "duration_hours": 6,
+  "duration_hours": 72,
   "hardware": {
     "sun_panel": 20,
     "earth_antenna": 20

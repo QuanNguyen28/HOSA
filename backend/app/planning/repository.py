@@ -14,7 +14,7 @@ from app.services.lunarsight import planning as legacy
 from .metrics import METRICS
 from .models import PlanningResult, utc
 
-METHOD_VERSION = "planning-services-3.0"
+METHOD_VERSION = "planning-services-3.0.1"
 
 
 class SnapshotRepository:
@@ -23,7 +23,8 @@ class SnapshotRepository:
         scenario = payload["scenarios"][0]
         root = legacy.repository_root()
         paths = [root/"manifests/lunarsight/config/scenario.json", root/"manifests/lunarsight/config/geometry_config.json",
-                 root/"manifests/lunarsight/source_manifest.json", legacy.processed_root()/"derivation.json"]
+                 root/"manifests/lunarsight/source_manifest.json", legacy.processed_root()/"derivation.json",
+                 legacy.processed_root()/"site_catalog.geojson"]
         for prefix in legacy.SUPPORTED_SITES.values():
             paths.extend(legacy.processed_root()/"visibility"/f"{prefix}_{kind}.csv" for kind in ("windows", "intervals"))
         paths.extend(sorted((legacy.processed_root()/"horizon").glob("*.csv")))

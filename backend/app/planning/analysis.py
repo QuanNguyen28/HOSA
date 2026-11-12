@@ -33,6 +33,8 @@ def verify_result(result, request, frame):
 def analyze_candidate(query, index=None, *, target=None, snapshot=None, point_pipeline=None):
     target = target or query.mission_targets()[0]
     request = query.mission(target)
+    if query.data_source == 'coordinate':
+        index = None  # Search offsets are not globally meaningful snapshot indices.
     identity = target_id(target)
     try:
         if query.data_source == 'coordinate':

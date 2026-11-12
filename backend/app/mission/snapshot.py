@@ -138,7 +138,10 @@ class SnapshotProvider:
         These candidates can never pass the shared gate, irrespective of their
         nominal metrics. Unknown candidates are counted, never recommended.
         """
-        evidence = self.prepare(target.site_id)
+        try:
+            evidence = self.prepare(target.site_id)
+        except FileNotFoundError:
+            return "DATA_NOT_READY"
         if not self.integrity:
             return "SNAPSHOT_INTEGRITY_FAILED"
         if not all(p is not None for p in evidence["profiles"].values()):

@@ -1,11 +1,13 @@
 # Hai request ngoài Site01/Site04: PASS và FAIL
 
+Báo cáo lịch sử cho nhiệm vụ 6 giờ; các file `point-analysis-outside-pass/fail-request.json` hiện là nhiệm vụ 72 giờ, nên báo cáo này trỏ tới bản 6 giờ riêng để tái lập đúng phép thử.
+
 Đã gọi trực tiếp `POST /api/lunar/point/analyze` bằng hai file request dưới đây. Cả hai trả HTTP 200 và `validation.passed=true`.
 
 | Request | Tọa độ (vĩ độ, kinh độ Đông) | `decision` | Sun / Earth LOS | DEM |
 |---|---|---|---|---|
-| [PASS](../../examples/point-analysis-outside-pass-request.json) | (-88.80771296769387, 123.81313283430084) | PASS | 6 / 6 giờ | 80 m |
-| [FAIL](../../examples/point-analysis-outside-fail-request.json) | (-87, 180) | FAIL | 0 / 0 giờ | 80 m |
+| [PASS](../../examples/point-analysis-outside-6h-pass-request.json) | (-88.80771296769387, 123.81313283430084) | PASS | 6 / 6 giờ | 80 m |
+| [FAIL](../../examples/point-analysis-outside-6h-fail-request.json) | (-87, 180) | FAIL | 0 / 0 giờ | 80 m |
 
 Hai điểm đều ngoài footprint của cả hai DEM cục bộ Site01 và Site04. Điểm PASS cách hai điểm danh mục lần lượt khoảng 42,32 và 35,60 km; điểm FAIL cách khoảng 79,36 và 84,90 km. Đây là cặp được chọn sau khi thử nhiều điểm để kiểm chứng hai kết quả, không phải mẫu ngẫu nhiên đại diện cho toàn vùng.
 
@@ -20,12 +22,12 @@ Chạy từ thư mục gốc repository khi backend đang mở ở cổng 8000:
 ```bash
 curl --fail-with-body -sS http://127.0.0.1:8000/api/lunar/point/analyze \
   -H 'Content-Type: application/json' \
-  --data-binary @docs/examples/point-analysis-outside-pass-request.json \
+  --data-binary @docs/examples/point-analysis-outside-6h-pass-request.json \
   -o /tmp/point-pass-response.json
 
 curl --fail-with-body -sS http://127.0.0.1:8000/api/lunar/point/analyze \
   -H 'Content-Type: application/json' \
-  --data-binary @docs/examples/point-analysis-outside-fail-request.json \
+  --data-binary @docs/examples/point-analysis-outside-6h-fail-request.json \
   -o /tmp/point-fail-response.json
 ```
 

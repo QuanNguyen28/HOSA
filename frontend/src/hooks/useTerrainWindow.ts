@@ -28,11 +28,21 @@ export function useTerrainWindow(
   } = {},
 ) {
   const [result, setResult] = useState<TerrainWindow | null>(null);
+  const [resultKey, setResultKey] = useState("");
   const [loading, setLoading] = useState(false);
+  const key = JSON.stringify([
+    coordinate?.latitude,
+    coordinate?.longitude,
+    enabled,
+    options.radiusKm ?? 8,
+    options.samples ?? 257,
+    options.regionalOnly ?? false,
+  ]);
 
   useEffect(() => {
     if (!coordinate || !enabled) {
       setResult(null);
+      setLoading(false);
       return;
     }
     const controller = new AbortController();
@@ -44,19 +54,30 @@ export function useTerrainWindow(
       detail: options.regionalOnly ? "regional" : "best",
     });
     setLoading(true);
-    fetch(`/api/lunar/point/terrain-window?${query}`, { signal: controller.signal })
+    setResult(null);
+    fetch(`/api/lunar/point/terrain-window?${query}`, {
+      signal: controller.signal,
+    })
       .then((response) => {
         if (!response.ok) throw new Error("Terrain window unavailable");
         return response.json();
       })
-      .then(setResult)
-      .catch((error: unknown) => {
-        if (error instanceof DOMException && error.name === "AbortError") return;
-        setResult(null);
+      .then((value) => {
+        if (!controller.signal.aborted) {
+          setResult(value);
+          setResultKey(key);
+        }
       })
-      .finally(() => setLoading(false));
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError")
+          return;
+        if (!controller.signal.aborted) setResult(null);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
     return () => controller.abort();
-  }, [coordinate, enabled, options.radiusKm, options.samples, options.regionalOnly]);
+  }, [coordinate, enabled, options.radiusKm, options.samples, options.regionalOnly, key]);
 
-  return { result, loading };
+  return { result: resultKey === key ? result : null, loading };
 }

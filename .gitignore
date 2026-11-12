@@ -44,3 +44,6 @@ data/cache/lunarsight/*
 
 # frontend template
 frontend_template/*
+# Local browser acceptance artifacts
+output/playwright/
+.playwright-cli/

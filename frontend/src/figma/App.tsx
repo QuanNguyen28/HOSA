@@ -1,389 +1,765 @@
-import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useState } from "react";
+import { SITES, HEIGHTS, HOUR, STEP, fmtTime, type Site } from "./model";
 import {
-  SITES, HEIGHTS, HOUR, DAY, STEP, MIN_MS, MAX_MS, buildSeries, metrics, liveState, fmtDate, fmtDur, fmtTime, fmtPos,
-} from './model';
-import { Logo, SunIcon, EarthIcon, Ring, Seg, StatusPair, SiteRail, TimeDock, LiveBar, Timeline, clamp, coords, type Shared } from './ui';
-import { Finder } from './views';
-import ChatDock, { ChatPage, useAssistant } from './Chat';
-import type { Mode } from './Stage3D';
-import { usePointTerrain } from '../hooks/usePointTerrain';
-import { usePointAnalysis } from '../hooks/usePointAnalysis';
-import type { LunarCoordinate } from '../types';
+  Logo,
+  SunIcon,
+  EarthIcon,
+  Seg,
+  LiveBar,
+  clamp,
+  coords,
+  type Shared,
+} from "./ui";
+import { Finder } from "./views";
+import ChatDock, { ChatPage, useAssistant } from "./Chat";
+import type { Mode } from "./Stage3D";
+import { usePointTerrain } from "../hooks/usePointTerrain";
+import { analyzePoint, api, downloadJson, useOperation } from "../mvp/api";
+import {
+  DEFAULT_MISSION,
+  boundsText,
+  missionIssue,
+  missionRequest,
+  planningRequest,
+  type Candidate,
+  type Mission,
+  type PlanningResult,
+  type PointResult,
+} from "../mvp/contracts";
+import { DecisionBadge } from "../mvp/DecisionBadge";
+import {
+  BackendTimeline,
+  CandidateCard,
+  CurrentStatus,
+  MetricBar,
+  MissionFields,
+  NumberField,
+  PlanningSummary,
+  RequestStatus,
+  ValidationInfo,
+  actionClass,
+  inputClass,
+  jointBounds,
+  matches,
+  toTarget,
+  useCatalog,
+} from "./backend";
 
-const Stage3D = lazy(() => import('./Stage3D'));
-type View = 'explore' | 'compare' | 'dates' | 'chat';
-const TABS: [View, string][] = [['explore', 'Explore'], ['compare', 'Compare'], ['dates', 'Best dates'], ['chat', 'Assistant']];
-
-function readParams() {
-  const p = new URLSearchParams(window.location.search);
-  const parse = (s: string | null, d: number) => { const v = s ? Date.parse(/^\d{4}-\d{2}-\d{2}$/.test(s) ? s + 'T00:00:00Z' : s) : NaN; return Number.isNaN(v) ? d : v; };
-  const from = clamp(parse(p.get('from'), Date.UTC(2027, 0, 1)), MIN_MS, MAX_MS - DAY);
-  const to = clamp(parse(p.get('to'), from + 29 * DAY) + DAY, from + DAY, MAX_MS);
-  const h = HEIGHTS.indexOf(Number(p.get('h')));
-  const v = p.get('view');
-  const view: View = TABS.some(([t]) => t === v) ? (v as View) : 'explore';
-  return { from, to, t: clamp(parse(p.get('t'), from), from, to), site: SITES.find((s) => s.id === p.get('site'))?.id ?? 'connecting-ridge', h: h < 0 ? 0 : h, view };
+const Stage3D = lazy(() => import("./Stage3D"));
+type View = "explore" | "compare" | "dates" | "chat";
+const TABS: [View, string][] = [
+  ["explore", "Explore"],
+  ["compare", "Compare"],
+  ["dates", "Best dates"],
+  ["chat", "Assistant"],
+];
+function initialView(): View {
+  const v = new URLSearchParams(location.search).get("view");
+  return TABS.some(([key]) => key === v) ? (v as View) : "explore";
 }
-
 export default function App() {
-  const init = useMemo(readParams, []);
-  const [view, setView] = useState<View>(init.view);
-  const [siteId, setSiteId] = useState(init.site);
-  const [startMs, setStart] = useState(init.from);
-  const [endMs, setEnd] = useState(init.to);
-  const [timeMs, setTime] = useState(init.t);
-  const [hIdx, setH] = useState(init.h);
-  const [dark, setDark] = useState(0);
-  const [margin, setMargin] = useState(0);
-  const [playing, setPlaying] = useState(false);
-  const [speed, setSpeed] = useState(24);
-  const [compare, setCompare] = useState(['connecting-ridge', 'shackleton-rim', 'malapert-massif']);
-  const s: Shared = { startMs, endMs, timeMs, playing, speed, dark, margin, hIdx };
-
-  useEffect(() => {
-    const p = new URLSearchParams();
-    if (view !== 'explore') p.set('view', view);
-    p.set('site', siteId); p.set('from', fmtDate(startMs)); p.set('to', fmtDate(endMs - DAY));
-    p.set('t', new Date(timeMs).toISOString().slice(0, 16) + 'Z'); p.set('h', String(HEIGHTS[hIdx]));
-    if (view === 'compare') p.set('cmp', compare.join(','));
-    const id = window.setTimeout(() => window.history.replaceState(null, '', '?' + p.toString()), playing ? 400 : 0);
-    return () => clearTimeout(id);
-  }, [view, siteId, startMs, endMs, timeMs, hIdx, compare, playing]);
-
+  const [view, setView] = useState<View>(initialView);
+  const [mission, setMission] = useState<Mission>(DEFAULT_MISSION);
+  const { sites: catalog, error: catalogError } = useCatalog();
+  const [siteId, setSiteId] = useState(
+    () => new URLSearchParams(location.search).get("site") ?? SITES[0].id,
+  );
+  const [custom, setCustom] = useState<Site>({
+    ...SITES[0],
+    id: "custom",
+    name: "Custom coordinate",
+    kind: "approx",
+    height_m: NaN,
+    source: "User coordinate",
+    point:
+      "Coordinates entered directly; elevation is obtained from the backend DEM.",
+    url: "",
+  });
+  const sites = useMemo(() => [...catalog, custom], [catalog, custom]);
+  const site = sites.find((x) => x.id === siteId) ?? sites[0];
+  const start = Date.parse(mission.start + "Z"),
+    end = start + mission.hours * HOUR;
+  const [cursor, setCursor] = useState(Date.parse(DEFAULT_MISSION.start + "Z"));
+  const time =
+    Number.isFinite(start) && Number.isFinite(end)
+      ? clamp(cursor, start, Math.max(start, end - STEP))
+      : Date.parse(DEFAULT_MISSION.start + "Z");
+  const [playing, setPlaying] = useState(false),
+    [speed, setSpeed] = useState(24);
+  const [selected, setSelected] = useState(["example-a", "example-b"]);
+  const targets = useMemo(
+    () =>
+      selected
+        .map((id) => sites.find((x) => x.id === id))
+        .filter((x): x is Site => !!x)
+        .map(toTarget),
+    [selected, sites],
+  );
+  const point = useOperation<PointResult>(
+    JSON.stringify([mission, site.lat, site.lon]),
+  );
+  const compared = useOperation<PlanningResult>(
+    JSON.stringify([mission, targets]),
+  );
+  const busy = point.busy || compared.busy;
+  const coordinateIssue =
+    !Number.isFinite(site.lat) ||
+    site.lat <= -90 ||
+    site.lat >= 90 ||
+    !Number.isFinite(site.lon) ||
+    site.lon < -180 ||
+    site.lon > 360
+      ? "Use latitude between −90 and 90 (excluding poles), and longitude between −180 and 360."
+      : null;
+  const issue =
+    missionIssue(mission) ??
+    (view === "explore"
+      ? coordinateIssue
+      : targets.some(
+            (t) =>
+              !Number.isFinite(t.latitude) ||
+              t.latitude <= -90 ||
+              t.latitude >= 90 ||
+              !Number.isFinite(t.longitude) ||
+              t.longitude < -180 ||
+              t.longitude > 360,
+          )
+        ? "Choose valid candidate coordinates."
+        : null);
+  const s: Shared = {
+    startMs: Number.isFinite(start) ? start : time,
+    endMs: Number.isFinite(end) && end > start ? end : time + HOUR,
+    timeMs: time,
+    playing,
+    speed,
+    dark: 0,
+    margin: 0,
+    hIdx: HEIGHTS.indexOf(mission.panel),
+  };
+  const assistant = useAssistant();
+  const go = (v: View) => {
+    setView(v);
+    setPlaying(false);
+    window.scrollTo(0, 0);
+  };
+  const onMission = (m: Mission) => {
+    setMission(m);
+    setPlaying(false);
+  };
+  const setH = (i: number) =>
+    onMission({ ...mission, panel: HEIGHTS[i], antenna: HEIGHTS[i] });
+  const coordinate = (latitude: number, longitude: number) => {
+    setCustom((old) => ({ ...old, lat: latitude, lon: longitude }));
+    setSiteId("custom");
+  };
+  const open = (c: Candidate) => {
+    if (!c.coordinate) return;
+    const known = sites.find((t) => matches(t, c));
+    if (known) setSiteId(known.id);
+    else coordinate(c.coordinate.latitude_deg, c.coordinate.longitude_e_deg);
+    onMission({ ...mission, start: c.start_utc.slice(0, 16) });
+    setCursor(Date.parse(c.start_utc));
+    go("explore");
+  };
   useEffect(() => {
     if (!playing) return;
-    let raf = 0, last = performance.now();
+    let raf = 0,
+      last = performance.now();
     const tick = (now: number) => {
-      const dt = Math.min(0.25, (now - last) / 1000); last = now;
-      setTime((t) => { const n = t + dt * speed * HOUR; if (n >= endMs) { setPlaying(false); return endMs; } return n; });
+      const dt = Math.min(0.25, (now - last) / 1000);
+      last = now;
+      setCursor((old) => {
+        const next = Math.max(start, old) + dt * speed * HOUR;
+        if (next >= end - STEP) {
+          setPlaying(false);
+          return end - STEP;
+        }
+        return next;
+      });
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [playing, speed, endMs]);
-
-  const setRange = (a: number, b: number) => {
-    const st = clamp(Math.round(a / STEP) * STEP, MIN_MS, MAX_MS - DAY), e = clamp(Math.round(b / STEP) * STEP, st + DAY, MAX_MS);
-    setStart(st); setEnd(e); setTime((t) => clamp(t, st, e));
+  }, [playing, speed, start, end]);
+  const ctl = {
+    setTime: setCursor,
+    setPlaying,
+    setSpeed,
+    setRange: (a: number, b: number) => {
+      const hours = (b - a) / HOUR;
+      if (Number.isInteger(hours) && hours >= 1 && hours <= 72)
+        onMission({
+          ...mission,
+          start: new Date(a).toISOString().slice(0, 16),
+          hours,
+        });
+    },
   };
-  const ctl = { setRange, setTime, setPlaying, setSpeed };
-  const go = (v: View) => { setView(v); setPlaying(false); window.scrollTo(0, 0); };
-
-  const assistant = useAssistant({
-    s, siteId,
-    onSite: (id) => { setSiteId(id); setView('explore'); },
-    onCompare: (ids) => { setCompare(ids); go('compare'); },
-    onRange: (from, days) => { setRange(from, from + days * DAY); setTime(from); setView('explore'); },
-  });
-
   return (
     <div className="min-h-svh bg-ink">
       <header className="sticky top-0 z-40 border-b border-line bg-ink">
         <div className="flex h-14 items-center gap-4 px-4 lg:px-6">
-          <button type="button" onClick={() => go('explore')} className="flex items-center gap-3" aria-label="LunarSight, explore">
+          <button
+            type="button"
+            onClick={() => go("explore")}
+            className="flex items-center gap-3"
+            aria-label="LunarSight, explore"
+          >
             <Logo size={30} />
-            <span className="font-display text-[15px] font-bold tracking-[0.12em]">LunarSight</span>
+            <span className="font-display text-[15px] font-bold tracking-[0.12em] max-sm:hidden">
+              LunarSight
+            </span>
           </button>
           <p className="flex items-center gap-2 font-display text-[15px] font-semibold tracking-[0.06em] text-mute max-md:hidden">
-            <span aria-hidden>›</span><span>South Pole</span><span aria-hidden>›</span><span className="text-white">{TABS.find(([v]) => v === view)![1]}</span>
+            <span aria-hidden>›</span>
+            <span>South Pole</span>
+            <span aria-hidden>›</span>
+            <span className="text-white">
+              {TABS.find(([v]) => v === view)![1]}
+            </span>
           </p>
           <nav aria-label="Views" className="ml-auto flex h-full items-stretch">
             {TABS.map(([v, l]) => (
-              <button key={v} type="button" aria-current={view === v ? 'page' : undefined} onClick={() => go(v)}
-                className={`relative px-3 font-display text-[13px] font-semibold tracking-[0.14em] uppercase transition sm:px-5 ${view === v ? 'text-white' : 'text-mute hover:text-white'}`}>
-                {l}{view === v && <span className="absolute inset-x-3 bottom-0 h-[3px] bg-white sm:inset-x-5" />}
+              <button
+                key={v}
+                type="button"
+                aria-current={view === v ? "page" : undefined}
+                onClick={() => go(v)}
+                className={`relative px-2 font-display text-[11px] font-semibold tracking-[0.1em] uppercase transition sm:px-5 sm:text-[13px] ${view === v ? "text-white" : "text-mute hover:text-white"}`}
+              >
+                {l}
+                {view === v && (
+                  <span className="absolute inset-x-3 bottom-0 h-[3px] bg-white sm:inset-x-5" />
+                )}
               </button>
             ))}
           </nav>
         </div>
       </header>
-
-      {view === 'explore' && <Explore s={s} siteId={siteId} onSite={setSiteId} ctl={ctl} setH={setH} initialSurface={new URLSearchParams(window.location.search).has('site')} />}
-      {view === 'compare' && <Compare s={s} ids={compare} setIds={setCompare} ctl={ctl} setH={setH} onOpen={(id) => { setSiteId(id); go('explore'); }} />}
-      {view === 'chat' && <ChatPage a={assistant} />}
-      <ChatDock a={assistant} hidden={view === 'chat'} />
-      {view === 'dates' && <Finder hIdx={hIdx} onOpen={(id, from, days) => { setSiteId(id); setRange(from, from + days * DAY); setTime(from); go('explore'); }} />}
+      {view === "explore" && (
+        <Explore
+          {...{
+            s,
+            site,
+            sites,
+            mission,
+            busy,
+            issue,
+            point,
+            catalogError,
+            ctl,
+            setH,
+            onMission,
+          }}
+          onSite={setSiteId}
+          onCoordinate={coordinate}
+          onAnalyze={() =>
+            void point.run((signal, progress) =>
+              analyzePoint(
+                missionRequest(mission, toTarget(site)),
+                signal,
+                progress,
+              ),
+            )
+          }
+        />
+      )}
+      {view === "compare" && (
+        <main className="mx-auto max-w-[1400px] space-y-4 px-4 py-6 lg:px-8">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <h2 className="font-display text-3xl font-semibold">
+              Compare sites
+            </h2>
+            <button
+              className={actionClass}
+              disabled={busy || !!issue || !targets.length}
+              onClick={() =>
+                void compared.run((signal) =>
+                  api<PlanningResult>(
+                    "/planning/compare",
+                    signal,
+                    planningRequest(mission, targets),
+                  ),
+                )
+              }
+            >
+              Compare sites
+            </button>
+          </div>
+          <section className="glass space-y-3 p-4">
+            <MissionFields
+              mission={mission}
+              onChange={onMission}
+              disabled={busy}
+            />
+            <p className="text-xs text-mute">
+              Same mission, requirements and hardware for every candidate. Only
+              validated PASS candidates can be recommended.
+            </p>
+            {issue && (
+              <p role="alert" className="text-xs text-rose">
+                {issue}
+              </p>
+            )}
+          </section>
+          <section className="grid gap-4 md:grid-cols-3">
+            {Array.from(
+              { length: Math.min(3, selected.length + 1) },
+              (_, i) => (
+                <label key={i} className="glass p-5">
+                  <span className="eyebrow">Site {i + 1}</span>
+                  <select
+                    className={`${inputClass} mt-2`}
+                    aria-label={`Site ${i + 1}`}
+                    value={selected[i] ?? ""}
+                    disabled={busy}
+                    onChange={(e) => {
+                      const n = [...selected];
+                      if (e.target.value) n[i] = e.target.value;
+                      else n.splice(i, 1);
+                      setSelected([...new Set(n)]);
+                    }}
+                  >
+                    <option value="">— Add a site —</option>
+                    {sites.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ),
+            )}
+          </section>
+          <RequestStatus
+            busy={compared.busy}
+            stage="Calculating and validating candidates"
+            error={compared.error}
+          />
+          {compared.result && (
+            <>
+              <PlanningSummary result={compared.result} />
+              <div className="grid gap-4 md:grid-cols-3">
+                {compared.result.candidates.map((c) => (
+                  <CandidateCard
+                    key={c.candidate_id}
+                    candidate={c}
+                    name={sites.find((t) => matches(t, c))?.name ?? c.site_id}
+                    hours={mission.hours}
+                    onOpen={() => open(c)}
+                    recommended={
+                      compared.result!.recommended_candidate_id ===
+                      c.candidate_id
+                    }
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </main>
+      )}
+      {view === "dates" && (
+        <Finder
+          {...{ mission, sites, selected }}
+          onMission={onMission}
+          onSelected={setSelected}
+          onOpen={open}
+        />
+      )}
+      {view === "chat" && <ChatPage a={assistant} />}
+      <ChatDock a={assistant} hidden={view === "chat"} />
     </div>
   );
 }
-
-type Ctl = ReturnType<typeof Object>;
-function StageFallback() {
-  return <div className="absolute inset-0 grid place-items-center font-mono text-[11px] tracking-widest text-mute">LOADING MOON…</div>;
-}
-
-/* ---------- Explore ---------- */
-function Bar({ label, v, color, icon }: { label: string; v: number; color: string; icon?: React.ReactNode }) {
-  return (
-    <div>
-      <div className="flex items-center justify-between text-[13px]"><span className="flex items-center gap-2 text-soft">{icon}{label}</span><span className="font-display text-lg font-semibold tabular">{v.toFixed(0)}%</span></div>
-      <div className="mt-1.5 h-[3px] bg-line"><div className="h-full" style={{ width: `${v}%`, background: color }} /></div>
-    </div>
-  );
-}
-
-function Explore({ s, siteId, onSite, ctl, setH, initialSurface }: { s: Shared; siteId: string; onSite: (id: string) => void; ctl: any; setH: (n: number) => void; initialSurface: boolean }) {
-  const [mode, setMode] = useState<Mode>(initialSurface ? 'surface' : 'pole');
-  const [tab, setTab] = useState<'info' | 'sites'>('info');
-  const [all, setAll] = useState(false);
-  const [customPoint, setCustomPoint] = useState<LunarCoordinate | null>(null);
-  const [customAnalysisStartMs, setCustomAnalysisStartMs] = useState(s.timeMs);
-  const timeMsRef = useRef(s.timeMs);
-  useEffect(() => { timeMsRef.current = s.timeMs; }, [s.timeMs]);
-  const site = SITES.find((x) => x.id === siteId)!;
-  const series = useMemo(() => buildSeries(site, HEIGHTS[s.hIdx], s.startMs, s.endMs), [site, s.hIdx, s.startMs, s.endMs]);
-  const m = useMemo(() => metrics(series, s.dark, s.margin), [series, s.dark, s.margin]);
-  const { result: customTerrain, loading: customTerrainLoading } = usePointTerrain(customPoint, customPoint !== null);
-  const customCovered = customTerrain?.coverage_status === 'COVERED';
-  const customAnalysis = usePointAnalysis(
-    customPoint,
-    customAnalysisStartMs,
-    HEIGHTS[s.hIdx],
-    customPoint !== null && customCovered,
-  );
-  const handleTargetChange = useCallback((coordinate: LunarCoordinate, rendererSiteId: string | null) => {
-    if (rendererSiteId) {
-      setCustomPoint(null);
-      return;
-    }
-    setCustomPoint(coordinate);
-    // Anchor the 72 h scientific job to the instant at which the user chose
-    // the point. This makes the Ground Sun/Earth positions exact immediately,
-    // without resubmitting expensive jobs on every animation tick.
-    setCustomAnalysisStartMs(timeMsRef.current);
-    setTab('info');
-  }, []);
-  const customSeries = useMemo(() => {
-    const timeline = customAnalysis.result?.timeline;
-    if (!timeline?.length) return null;
-    return {
-      n: timeline.length,
-      startMs: Date.parse(timeline[0].start_utc),
-      fSun: Float32Array.from(timeline, (row) => row.sun_state === 'V' ? 1 : row.sun_state === 'B' ? 0 : 0.5),
-      earthClear: Float32Array.from(timeline, (row) => row.earth_state === 'V' ? 1 : row.earth_state === 'B' ? -1 : 0),
-    };
-  }, [customAnalysis.result]);
-  const customWindows = useMemo(() => (customAnalysis.result?.events ?? [])
-    .filter((event) => event.target === 'joint' && event.state === 'V')
-    .map((event) => ({
-      startMs: Date.parse(event.start_utc),
-      endMs: Date.parse(event.end_utc),
-      hours: (Date.parse(event.end_utc) - Date.parse(event.start_utc)) / HOUR,
-    })), [customAnalysis.result]);
-  const activeWindows = customPoint ? customWindows : m.windows;
-  const wins = all ? activeWindows : activeWindows.slice(0, 3);
-  const fractionMidpoint = (value?: [number, number]) => value ? (value[0] + value[1]) * 50 : 0;
-  const customJointPct = customAnalysis.result?.timeline.length
-    ? 100 * customAnalysis.result.timeline.filter((row) => row.joint_state === 'V').length / customAnalysis.result.timeline.length
-    : 0;
-  const displayMetrics = customPoint && customAnalysis.result ? {
-    sunMeanPct: fractionMidpoint(customAnalysis.result.availability_fraction.sun),
-    earthPct: fractionMidpoint(customAnalysis.result.availability_fraction.earth),
-    bothPct: customJointPct,
-    longestDark: customAnalysis.result.metrics_hours.longest_dark_hours?.[1] ?? 0,
-  } : {
-    sunMeanPct: m.sunMeanPct,
-    earthPct: m.earthPct,
-    bothPct: m.bothPct,
-    longestDark: m.longestDark,
+type Operation = ReturnType<typeof useOperation<PointResult>>;
+function Explore({
+  s,
+  site,
+  sites,
+  mission,
+  busy,
+  issue,
+  point,
+  catalogError,
+  ctl,
+  setH,
+  onMission,
+  onSite,
+  onCoordinate,
+  onAnalyze,
+}: {
+  s: Shared;
+  site: Site;
+  sites: Site[];
+  mission: Mission;
+  busy: boolean;
+  issue: string | null;
+  point: Operation;
+  catalogError: string;
+  ctl: {
+    setTime: (v: number | ((n: number) => number)) => void;
+    setPlaying: (v: boolean) => void;
+    setSpeed: (n: number) => void;
+    setRange: (a: number, b: number) => void;
   };
-  const parse = (v: string) => Date.parse(v + 'T00:00:00Z');
-  const inp = 'w-full border border-line bg-ink px-2 py-1.5 font-mono text-xs tabular text-soft';
-  const dl = () => {
-    const iso = (t: number) => new Date(t).toISOString().slice(0, 16) + 'Z';
-    const rows = ['site,observer_height_m,start_utc,end_utc,duration_h', ...m.windows.map((w) => [site.id, HEIGHTS[s.hIdx], iso(w.startMs), iso(w.endMs), w.hours.toFixed(2)].join(','))];
-    const url = URL.createObjectURL(new Blob([rows.join('\n') + '\n'], { type: 'text/csv' }));
-    const a = document.createElement('a'); a.href = url; a.download = `${site.id}-${fmtDate(s.startMs)}-to-${fmtDate(s.endMs - DAY)}.csv`;
-    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
-  };
+  setH: (n: number) => void;
+  onMission: (m: Mission) => void;
+  onSite: (id: string) => void;
+  onCoordinate: (lat: number, lon: number) => void;
+  onAnalyze: () => void;
+}) {
+  const [mode, setMode] = useState<Mode>("pole");
+  const [tab, setTab] = useState<"info" | "sites">("info");
+  const r = point.result,
+    end = s.endMs;
+  const customCoordinate = useMemo(
+    () => site.id === "custom" && Number.isFinite(site.lat) && Number.isFinite(site.lon)
+      ? { latitude: site.lat, longitude: site.lon }
+      : null,
+    [site.id, site.lat, site.lon],
+  );
+  const { result: customTerrain, loading: terrainLoading } =
+    usePointTerrain(customCoordinate, customCoordinate !== null);
+  const terrain = customTerrain?.terrain;
   return (
-    <div className="flex h-[calc(100svh-3.5rem)] min-h-[640px] flex-col lg:flex-row">
-      <aside className="flex max-h-[50%] w-full shrink-0 flex-col border-b border-line bg-panel lg:max-h-none lg:w-[340px] lg:border-r lg:border-b-0">
+    <div className="flex min-h-[640px] flex-col lg:h-[calc(100svh-3.5rem)] lg:flex-row">
+      <aside className="flex w-full shrink-0 flex-col border-b border-line bg-panel lg:w-[340px] lg:border-r lg:border-b-0">
         <div className="flex border-b border-line" role="tablist">
-          {(['info', 'sites'] as const).map((t) => (
-            <button key={t} type="button" role="tab" aria-selected={tab === t} onClick={() => setTab(t)}
-              className={`px-5 py-3 font-display text-[13px] font-semibold tracking-[0.12em] uppercase ${tab === t ? 'bg-ink text-white shadow-[inset_0_2px_0_#fff]' : 'text-mute hover:text-white'}`}>{t === 'info' ? 'Site' : `All sites`}</button>
+          {(["info", "sites"] as const).map((t) => (
+            <button
+              key={t}
+              type="button"
+              role="tab"
+              aria-selected={tab === t}
+              onClick={() => setTab(t)}
+              className={`px-5 py-3 font-display text-[13px] font-semibold tracking-[0.12em] uppercase ${tab === t ? "bg-ink text-white shadow-[inset_0_2px_0_#fff]" : "text-mute hover:text-white"}`}
+            >
+              {t === "info" ? "Site" : "All sites"}
+            </button>
           ))}
         </div>
-        {tab === 'info' ? (
-          <div className="min-h-0 flex-1 overflow-y-auto">
-            <div className="border-b border-line p-5">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h2 className="text-[26px] leading-none font-bold">{customPoint ? 'Custom point' : site.name}</h2>
-                  <p className="mt-2 font-mono text-xs text-mute tabular">
-                    {customPoint ? coords(customPoint.latitude, customPoint.longitude, 4) : coords(site.lat, site.lon, 2)}
-                  </p>
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          {tab === "sites" ? (
+            <div className="px-2 pb-4">
+              <p className="eyebrow px-3 py-3">Sites · {sites.length}</p>
+              {sites.map((t) => (
+                <button
+                  key={t.id}
+                  disabled={busy}
+                  onClick={() => {
+                    onSite(t.id);
+                    setTab("info");
+                  }}
+                  aria-pressed={t.id === site.id}
+                  className={`flex w-full items-center gap-3 px-3 py-2.5 text-left text-[13px] ${t.id === site.id ? "bg-white/[0.07] text-white" : "text-soft hover:bg-white/[0.04]"}`}
+                >
+                  <i className="size-1.5 shrink-0 rounded-full bg-mute/60" />
+                  <span>{t.name}</span>
+                </button>
+              ))}
+              <p className="px-3 pt-3 text-[10px] text-mute">
+                Location catalog only. Visibility is calculated on demand.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="border-b border-line p-5">
+                <h2 className="text-[26px] leading-none font-bold">
+                  {site.name}
+                </h2>
+                <p className="mt-2 font-mono text-xs text-mute tabular">
+                  {coords(site.lat, site.lon, 4)}
+                </p>
+                <details className="mt-3">
+                  <summary className="cursor-pointer text-xs text-mute">
+                    Choose / enter coordinates
+                  </summary>
+                  <div className="mt-3 space-y-3">
+                    <label>
+                      <span className="eyebrow">Location</span>
+                      <select
+                        aria-label="Location"
+                        className={`${inputClass} mt-1`}
+                        disabled={busy}
+                        value={site.id}
+                        onChange={(e) => {
+                          if (e.target.value === "custom")
+                            onCoordinate(site.lat, site.lon);
+                          else onSite(e.target.value);
+                        }}
+                      >
+                        {sites.map((t) => (
+                          <option key={t.id} value={t.id}>
+                            {t.name}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <NumberField
+                      label="Latitude · degrees"
+                      value={site.lat}
+                      min={-89.99999999}
+                      max={89.99999999}
+                      disabled={busy}
+                      onChange={(v) => onCoordinate(v, site.lon)}
+                    />
+                    <NumberField
+                      label="East longitude · degrees"
+                      value={site.lon}
+                      min={-180}
+                      max={360}
+                      disabled={busy}
+                      onChange={(v) => onCoordinate(site.lat, v)}
+                    />
+                  </div>
+                </details>
+              </div>
+              <div className="space-y-3 border-b border-line p-5">
+                <p className="eyebrow">Right now · backend intervals</p>
+                <CurrentStatus result={r} time={s.timeMs} />
+              </div>
+              {customCoordinate && (
+                <div className="space-y-1 border-b border-line p-5 text-xs text-soft">
+                  <p className="eyebrow">Point terrain</p>
+                  {terrainLoading ? <p>Checking DEM coverage…</p> : terrain ? (
+                    <>
+                      <p>Elevation {terrain.elevation_m.toFixed(1)} m · {terrain.resolution_m} m DEM</p>
+                      {terrain.slope_deg != null && <p>Local slope {terrain.slope_deg.toFixed(2)}°</p>}
+                      {terrain.local_3x3_roughness_m != null && <p>Roughness {terrain.local_3x3_roughness_m.toFixed(2)} m</p>}
+                    </>
+                  ) : customTerrain ? <p>No validated DEM covers this point.</p> : <p>DEM coverage unavailable.</p>}
                 </div>
-                {customPoint && (
-                  <span className={`border px-2 py-1 font-mono text-[9px] tracking-wider ${customCovered ? 'border-mint/40 text-mint' : 'border-sun/40 text-sun'}`}>
-                    {customTerrainLoading ? 'CHECKING' : customCovered ? 'DEM COVERED' : 'NO COVERAGE'}
-                  </span>
+              )}
+              <div className="space-y-5 border-b border-line p-5">
+                <MissionFields
+                  mission={mission}
+                  onChange={onMission}
+                  disabled={busy}
+                />
+                {issue && (
+                  <p role="alert" className="text-xs text-rose">
+                    {issue}
+                  </p>
+                )}
+                <button
+                  className={`${actionClass} w-full`}
+                  disabled={busy || !!issue}
+                  onClick={onAnalyze}
+                >
+                  {point.busy ? "Analyzing…" : "Analyze point"}
+                </button>
+                <RequestStatus
+                  busy={point.busy}
+                  stage={point.stage}
+                  error={point.error}
+                />
+                {!r && !point.busy && !point.error && (
+                  <p className="text-xs text-mute">
+                    Run Analyze point to calculate. First-time terrain/JPL
+                    processing can take several minutes.
+                  </p>
+                )}
+                {r && (
+                  <div data-testid="point-result" className="space-y-3">
+                    <DecisionBadge value={r.decision} />
+                    <ValidationInfo result={r} />
+                    <button
+                      className="text-xs text-mute underline underline-offset-2 hover:text-white"
+                      onClick={() =>
+                        downloadJson(r, `point-${r.result_id}.json`)
+                      }
+                    >
+                      Download JSON
+                    </button>
+                  </div>
+                )}
+                <MetricBar
+                  label="Sunlight"
+                  pair={r?.metrics_hours.total_sun_hours}
+                  hours={mission.hours}
+                  color="#FBBF24"
+                  icon={<SunIcon size={14} className="text-sun" />}
+                />
+                <MetricBar
+                  label="Earth in view"
+                  pair={r?.metrics_hours.total_earth_los_hours}
+                  hours={mission.hours}
+                  color="#06B6D4"
+                  icon={<EarthIcon size={14} className="text-earth" />}
+                />
+                <MetricBar
+                  label="Both at once"
+                  pair={r ? jointBounds(r) : undefined}
+                  hours={mission.hours}
+                  color="#10B981"
+                />
+                {(
+                  ["longest_dark_hours", "longest_blackout_hours"] as const
+                ).map((key, i) => (
+                  <div
+                    key={key}
+                    className="flex items-center justify-between text-[13px]"
+                  >
+                    <span className="text-soft">
+                      {i ? "Longest blackout" : "Longest dark"}
+                    </span>
+                    <span className="font-display text-lg font-semibold tabular">
+                      {boundsText(r?.metrics_hours[key])}
+                      {r ? " h" : ""}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className="border-b border-line p-5">
+                <p className="eyebrow mb-3">Viewer height</p>
+                <Seg
+                  label="Observer height"
+                  value={s.hIdx}
+                  onChange={(v) => {
+                    if (!busy) setH(v);
+                  }}
+                  options={HEIGHTS.map((h, i) => ({
+                    v: i,
+                    label: i === 0 ? "Lander" : `${h} m`,
+                  }))}
+                />
+                <p className="mt-2 text-[10px] text-mute">
+                  Sets panel and antenna together. Exact inputs are in Mission
+                  requirements.
+                </p>
+              </div>
+              <div className="space-y-3 p-5">
+                <p className="eyebrow">Earth contact windows</p>
+                {r?.contact_analysis?.visible_windows.length ? (
+                  r.contact_analysis.visible_windows.map((w, i) => (
+                    <button
+                      key={i}
+                      className="block w-full border-t border-line py-2 text-left text-xs text-soft"
+                      onClick={() => ctl.setTime(Date.parse(w.start_utc))}
+                    >
+                      {fmtTime(Date.parse(w.start_utc))}
+                      <span className="mt-1 block text-mute">
+                        {w.usable_duration_minutes.toFixed(1)} usable min ·{" "}
+                        {w.qualifies ? "Qualifies" : "Too short"}
+                      </span>
+                    </button>
+                  ))
+                ) : (
+                  <p className="text-xs text-mute">
+                    {r
+                      ? "No confirmed visibility windows in this mission."
+                      : "Analyze to load confirmed windows."}
+                  </p>
+                )}
+                {r && (
+                  <details>
+                    <summary className="cursor-pointer text-xs text-mute">
+                      Requirements, sources & limitations
+                    </summary>
+                    <div className="mt-3 space-y-2 text-[11px] leading-relaxed text-mute">
+                      {Object.entries(r.constraint_checks).map(([k, v]) => (
+                        <p key={k}>
+                          {k.replaceAll("_", " ")}: <DecisionBadge value={v} />
+                        </p>
+                      ))}
+                      <p>Secondary preferences</p>
+                      {Object.entries(r.soft_constraint_checks).map(
+                        ([k, v]) => (
+                          <p key={k}>
+                            {k.replaceAll("_", " ")}:{" "}
+                            <DecisionBadge value={v} />
+                          </p>
+                        ),
+                      )}
+                      <p>
+                        Method {r.method_version} ·{" "}
+                        {r.coordinate.observer_dataset_id} ·{" "}
+                        {r.coordinate.observer_resolution_m} m DEM
+                      </p>
+                      {r.warnings.map((w) => (
+                        <p key={w}>{w}</p>
+                      ))}
+                    </div>
+                  </details>
+                )}
+                <p className="text-[10px] leading-relaxed text-mute">
+                  NASA LOLA + JPL · sampled Sun/Earth-centre visibility ·
+                  PROVISIONAL. No RF link or landing-safety certification.
+                </p>
+                {catalogError && (
+                  <p role="alert" className="text-xs text-rose">
+                    Catalog: {catalogError}
+                  </p>
                 )}
               </div>
-            </div>
-            <div className="space-y-3 border-b border-line p-5">
-              <p className="eyebrow">{customPoint ? 'Point assessment' : 'Right now'}</p>
-              {customPoint ? (
-                <div className="space-y-2">
-                  {customTerrainLoading && <p className="text-xs text-mute">Checking verified NASA raster coverage…</p>}
-                  {!customTerrainLoading && !customCovered && (
-                    <p className="border border-sun/35 bg-sun/5 p-3 text-xs text-sun">No validated DEM covers this point. Terrain and mission suitability remain unknown.</p>
-                  )}
-                  {customTerrain?.terrain && (
-                    <dl className="grid grid-cols-2 gap-px border border-line bg-line text-xs">
-                      {[
-                        ['Elevation', `${customTerrain.terrain.elevation_m.toFixed(1)} m`],
-                        ['DEM source', `${customTerrain.terrain.resolution_m} m`],
-                        ['Local slope', customTerrain.terrain.slope_deg == null ? 'Unknown' : `${customTerrain.terrain.slope_deg.toFixed(2)}°`],
-                        ['3×3 roughness', customTerrain.terrain.local_3x3_roughness_m == null ? 'Unknown' : `${customTerrain.terrain.local_3x3_roughness_m.toFixed(2)} m`],
-                        ['Radial error', customTerrain.terrain.quality?.rms_error_m == null ? 'Unknown' : `±${customTerrain.terrain.quality.rms_error_m.toFixed(2)} m`],
-                        ['Effective res.', customTerrain.terrain.quality?.effective_resolution_m == null ? 'Unknown' : `${customTerrain.terrain.quality.effective_resolution_m.toFixed(0)} m`],
-                      ].map(([label, value]) => (
-                        <div key={label} className="bg-panel p-2.5">
-                          <dt className="font-mono text-[9px] tracking-wider text-mute uppercase">{label}</dt>
-                          <dd className="mt-1 font-display text-sm font-semibold text-white">{value}</dd>
-                        </div>
-                      ))}
-                    </dl>
-                  )}
-                  {customCovered && customAnalysis.status !== 'succeeded' && customAnalysis.status !== 'failed' && (
-                    <p className="border border-earth/30 bg-earth/5 p-3 font-mono text-[10px] leading-relaxed text-earth">
-                      ANALYZING 72 H · DEM HORIZON · SUN · EARTH
-                    </p>
-                  )}
-                  {customAnalysis.status === 'failed' && (
-                    <p className="border border-sun/35 bg-sun/5 p-3 text-xs text-sun">Analysis unavailable: {customAnalysis.errorCode}</p>
-                  )}
-                  {customAnalysis.result && (
-                    <div className={`border p-3 ${customAnalysis.result.decision === 'PASS' ? 'border-mint/45 bg-mint/5 text-mint' : customAnalysis.result.decision === 'FAIL' ? 'border-alert/45 bg-alert/5 text-alert' : 'border-sun/45 bg-sun/5 text-sun'}`}>
-                      <p className="font-mono text-[9px] tracking-wider uppercase">Mission screen · 72 h</p>
-                      <p className="mt-1 font-display text-xl font-semibold">{customAnalysis.result.decision ?? 'INDETERMINATE'}</p>
-                      <p className="mt-1 text-[10px] opacity-80">80% sunlight and 80% Earth-LOS requirements · provisional</p>
-                    </div>
-                  )}
-                </div>
-              ) : <StatusPair siteId={siteId} timeMs={s.timeMs} h={HEIGHTS[s.hIdx]} />}
-            </div>
-            <div className="space-y-5 border-b border-line p-5">
-              <div className="grid grid-cols-2 gap-3">
-                <label className="block"><span className="eyebrow">From</span>
-                  <input type="date" className={`${inp} mt-1`} min={fmtDate(MIN_MS)} max={fmtDate(MAX_MS - DAY)} value={fmtDate(s.startMs)} onChange={(e) => { const n = parse(e.target.value); if (!Number.isNaN(n)) ctl.setRange(n, Math.max(s.endMs, n + DAY)); }} /></label>
-                <label className="block"><span className="eyebrow">To</span>
-                  <input type="date" className={`${inp} mt-1`} min={fmtDate(MIN_MS)} max={fmtDate(MAX_MS - DAY)} value={fmtDate(s.endMs - DAY)} onChange={(e) => { const n = parse(e.target.value); if (!Number.isNaN(n)) ctl.setRange(Math.min(s.startMs, n), n + DAY); }} /></label>
-              </div>
-              {customPoint && !customAnalysis.result && (
-                <p className="text-xs leading-relaxed text-mute">Mission metrics appear after the validated terrain-horizon and ephemeris job completes. No fixed-site values are substituted.</p>
-              )}
-              <Bar label="Sunlight" v={displayMetrics.sunMeanPct} color="#ffc53d" icon={<SunIcon size={14} className="text-sun" />} />
-              <Bar label="Earth in view" v={displayMetrics.earthPct} color="#5ab4ff" icon={<EarthIcon size={14} className="text-earth" />} />
-              <Bar label="Both at once" v={displayMetrics.bothPct} color="#7ad99a" />
-              <div className="flex items-center justify-between text-[13px]"><span className="text-soft">Longest dark</span><span className="font-display text-lg font-semibold tabular">{fmtDur(displayMetrics.longestDark)}</span></div>
-            </div>
-            <div className="border-b border-line p-5">
-              <p className="eyebrow mb-3">Viewer height</p>
-              <Seg label="Observer height" value={s.hIdx} onChange={setH} options={HEIGHTS.map((h, i) => ({ v: i, label: i === 0 ? 'Lander' : `${h} m` }))} />
-            </div>
-            <div className="p-5">
-              <div className="flex items-center justify-between"><p className="eyebrow">Best times</p>
-                {!customPoint && m.windows.length > 0 && <button type="button" onClick={dl} className="text-xs text-mute underline underline-offset-2 hover:text-white">Download CSV</button>}</div>
-              {activeWindows.length === 0 ? <p className="mt-3 text-sm text-mute">{customPoint && !customAnalysis.result ? 'Waiting for coordinate analysis.' : 'Sun and Earth are never both visible in the analyzed window.'}</p> : (
-                <ul className="mt-2">
-                  {wins.map((w) => (
-                    <li key={w.startMs} className="border-t border-line first:border-0">
-                      <button type="button" onClick={() => ctl.setTime(w.startMs)} className="flex w-full items-center justify-between py-2.5 text-left hover:text-white">
-                        <span className="text-sm text-soft tabular">{new Date(w.startMs).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })}</span>
-                        <span className="font-display text-base font-semibold tabular">{fmtDur(w.hours)}</span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {activeWindows.length > 3 && <button type="button" onClick={() => setAll(!all)} className="mt-1 text-xs text-mute underline underline-offset-2 hover:text-white">{all ? 'Show fewer' : `Show all ${activeWindows.length}`}</button>}
-            </div>
-          </div>
-        ) : (
-          <SiteRail siteId={siteId} onSite={(id) => { onSite(id); setTab('info'); }} timeMs={s.timeMs} className="min-h-0 flex-1 !border-0 !bg-transparent" />
-        )}
+            </>
+          )}
+        </div>
       </aside>
-
-      <div className="relative min-h-[320px] flex-1">
-        <Suspense fallback={<StageFallback />}>
-          <Stage3D
-            className="absolute inset-0"
-            mode={mode}
-            siteId={siteId}
-            timeMs={s.timeMs}
-            heightM={HEIGHTS[s.hIdx]}
-            onSelect={(id) => { setCustomPoint(null); onSite(id); setTab('info'); }}
-            onTargetChange={handleTargetChange}
-            pointAnalysis={customAnalysis.result}
-          />
+      <div className="relative min-h-[560px] flex-1">
+        <Suspense
+          fallback={
+            <div className="absolute inset-0 grid place-items-center font-mono text-[11px] tracking-widest text-mute">
+              LOADING MOON…
+            </div>
+          }
+        >
+          {Number.isFinite(site.lat) &&
+            site.lat > -90 &&
+            site.lat < 90 &&
+            Number.isFinite(site.lon) &&
+            site.lon >= -180 &&
+            site.lon <= 360 &&
+            Number.isFinite(s.timeMs) && (
+              <Stage3D
+                className="absolute inset-0"
+                mode={mode}
+                sites={sites}
+                siteId={site.id}
+                timeMs={s.timeMs}
+                heightM={mission.panel}
+                pointAnalysis={r}
+                onSelect={(id) => {
+                  if (!busy) {
+                    onSite(id);
+                    setTab("info");
+                  }
+                }}
+                onCoordinateSelect={(c) => {
+                  if (!busy) {
+                    onCoordinate(c.latitude, c.longitude);
+                    setTab("info");
+                  }
+                }}
+              />
+            )}
         </Suspense>
         <div className="absolute top-4 left-1/2 -translate-x-1/2">
-          <Seg label="View" value={mode} onChange={setMode} options={[{ v: 'orbit', label: 'Moon' }, { v: 'pole', label: 'Pole' }, { v: 'surface', label: 'Ground' }]} />
+          <Seg
+            label="View"
+            value={mode}
+            onChange={setMode}
+            options={[
+              { v: "orbit", label: "Moon" },
+              { v: "pole", label: "Pole" },
+              { v: "surface", label: "Ground" },
+            ]}
+          />
         </div>
+        <p className="pointer-events-none absolute top-16 right-4 max-w-[240px] text-right text-[10px] text-mute">
+          3D lighting is a visual preview. Metric evidence comes from backend
+          intervals.
+        </p>
         <LiveBar s={s} {...ctl}>
-          {customPoint ? customSeries ? (
-            <Timeline rows={[{ label: 'Custom point · 72 h', series: customSeries }]} s={s} setTime={ctl.setTime} />
-          ) : (
-            <div className="flex h-12 items-center border-y border-line px-3 font-mono text-[10px] tracking-wider text-mute">
-              CUSTOM TIMELINE · WAITING FOR VALIDATED ANALYSIS
-            </div>
-          ) : (
-            <Timeline rows={[{ label: site.name, series }]} s={s} setTime={ctl.setTime} />
-          )}
+          <BackendTimeline
+            result={r}
+            start={s.startMs}
+            end={end}
+            time={s.timeMs}
+            onTime={ctl.setTime}
+          />
         </LiveBar>
       </div>
     </div>
-  );
-}
-
-/* ---------- Compare ---------- */
-function Compare({ s, ids, setIds, ctl, setH, onOpen }: { s: Shared; ids: string[]; setIds: (v: string[]) => void; ctl: any; setH: (n: number) => void; onOpen: (id: string) => void }) {
-  const sites = ids.map((i) => SITES.find((x) => x.id === i)!).filter(Boolean);
-  const data = useMemo(() => sites.map((x) => ({ site: x, series: buildSeries(x, HEIGHTS[s.hIdx], s.startMs, s.endMs) })), [ids, s.hIdx, s.startMs, s.endMs]);
-  const ms = useMemo(() => data.map((d) => metrics(d.series, s.dark, s.margin)), [data, s.dark, s.margin]);
-  const set = (i: number, v: string) => { const n = [...ids]; if (v) n[i] = v; else n.splice(i, 1); setIds([...new Set(n)]); };
-  const top = (f: (m: ReturnType<typeof metrics>) => number, low = false) => { if (ms.length < 2) return -1; const v = ms.map(f); const b = low ? Math.min(...v) : Math.max(...v); return v.indexOf(b); };
-  const bestBoth = top((m) => m.bothPct), bestSun = top((m) => m.sunMeanPct), bestEarth = top((m) => m.earthPct);
-  const bestDark = top((m) => m.longestDark, true), bestBlack = top((m) => m.longestBlackout, true);
-  return (
-    <main className="mx-auto max-w-[1400px] space-y-4 px-4 py-6 lg:px-8">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div><h2 className="font-display text-3xl font-semibold">Compare sites</h2></div>
-        <Seg label="Observer height" value={s.hIdx} onChange={setH} options={HEIGHTS.map((h, i) => ({ v: i, label: i === 0 ? 'Lander' : `${h} m` }))} />
-      </div>
-      <TimeDock s={s} {...ctl} />
-      <div className="grid gap-4 md:grid-cols-3">
-        {Array.from({ length: Math.min(3, sites.length + 1) }, (_, i) => {
-          const d = data[i], m = ms[i];
-          return (
-            <section key={i} className={`glass rounded-none p-5 ${d && bestBoth === i ? 'border-mint/40 ' : ''}`} aria-label={`Site ${i + 1}`}>
-              <select aria-label={`Site ${i + 1}`} value={ids[i] ?? ''} onChange={(e) => set(i, e.target.value)} className="w-full rounded-none border border-line bg-ink/70 px-3 py-2 font-display text-sm font-semibold">
-                {i > 0 && <option value="">— Add a site —</option>}{SITES.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
-              </select>
-              {d && m && (<>
-                <p className="mt-2 flex items-center justify-between font-mono text-[11px] text-mute tabular"><span>{fmtPos(d.site, 1)}</span>{bestBoth === i && <span className="text-mint">★ Best</span>}</p>
-                <div className="mt-5 space-y-4">
-                  <Bar label="Sunlight" v={m.sunMeanPct} color="#ffc53d" icon={<SunIcon size={14} className="text-sun" />} />
-                  <Bar label="Earth in view" v={m.earthPct} color="#5ab4ff" icon={<EarthIcon size={14} className="text-earth" />} />
-                  <Bar label="Both at once" v={m.bothPct} color="#7ad99a" />
-                </div>
-                <dl className="mt-5 space-y-2 text-sm">
-                  {[['Longest dark', fmtDur(m.longestDark), bestDark === i], ['Longest blackout', fmtDur(m.longestBlackout), bestBlack === i]].map(([k, v, b]) => (
-                    <div key={k as string} className="flex items-center justify-between border-t border-line pt-2"><dt className="text-mute">{k as string}</dt><dd className={`font-mono text-xs tabular ${b ? 'text-white' : ''}`}>{v as string}{b ? ' ★' : ''}</dd></div>
-                  ))}
-                </dl>
-                <button type="button" onClick={() => onOpen(d.site.id)} className="mt-4 w-full rounded-none border border-line py-2 font-mono text-[10px] tracking-[0.16em] text-soft uppercase hover:border-white/40 hover:text-white">View on Moon →</button>
-              </>)}
-            </section>
-          );
-        })}
-      </div>
-      <section aria-label="Timelines" className="glass rounded-none p-4">
-        <Timeline rows={data.map((d) => ({ label: d.site.name, series: d.series }))} s={s} setTime={ctl.setTime} />
-      </section>
-    </main>
   );
 }
