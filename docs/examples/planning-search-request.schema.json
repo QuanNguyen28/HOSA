@@ -7,7 +7,6 @@
         "max_darkness_hours": {
           "anyOf": [
             {
-              "maximum": 72,
               "minimum": 0,
               "type": "number"
             },
@@ -22,7 +21,6 @@
         "max_earth_blackout_hours": {
           "anyOf": [
             {
-              "maximum": 72,
               "minimum": 0,
               "type": "number"
             },
@@ -240,6 +238,11 @@
       "title": "Offline",
       "type": "boolean"
     },
+    "resolve_indeterminate": {
+      "default": false,
+      "title": "Resolve Indeterminate",
+      "type": "boolean"
+    },
     "hardware": {
       "anyOf": [
         {
@@ -252,10 +255,22 @@
       "default": null
     },
     "duration_hours": {
-      "default": 72,
-      "exclusiveMinimum": 0,
+      "default": 72.0,
+      "minimum": 1,
       "title": "Duration Hours",
       "type": "number"
+    },
+    "end_utc": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "End Utc"
     },
     "current_site_id": {
       "anyOf": [

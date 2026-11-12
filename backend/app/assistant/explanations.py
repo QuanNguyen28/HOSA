@@ -62,6 +62,22 @@ def render(evidence, plan=None):
         decision = "chưa đủ căn cứ để kết luận (INDETERMINATE)" if c.decision == "INDETERMINATE" else c.decision
         texts.append(f"{label}: {decision} theo yêu cầu cứng; {'; '.join(ordered_metrics)}.")
         fact_ids.extend((f"{key}.sun", f"{key}.earth"))
+        if not c.validation.get("passed"):
+            if c.validation.get("mission_path", {}).get("passed"):
+                texts.append(f"{label}: kiểm chứng đường đi của nhiệm vụ đạt; kiểm chứng horizon toàn vòng vẫn chưa đạt. Ngưỡng còn PROVISIONAL.")
+            elif c.decision == "FAIL":
+                texts.append(f"{label}: không đạt yêu cầu cứng; vẫn trả FAIL dù kiểm chứng dữ liệu/số học chưa đạt: " + ", ".join(c.validation.get("reason_codes", [])) + ".")
+            fact_ids.append(f"{key}.validation")
+        if c.resolution.get("enabled"):
+            status = c.resolution.get("status")
+            if status == "resolved":
+                texts.append(f"{label}: đã hoàn tất kiểm chứng bổ sung; {c.resolution.get('initial_decision')} → {c.decision}; giữ nguyên yêu cầu và ngưỡng kiểm chứng.")
+            elif c.decision == "INDETERMINATE":
+                reasons = ", ".join(c.validation.get("reason_codes", []))
+                error = c.resolution.get("error_code")
+                texts.append(f"{label}: kết quả theo mẫu là {c.nominal_sampled_decision}; kiểm chứng bổ sung chưa hoàn tất: {reasons}" + (f"; {error}." if error else "."))
+            fact_ids.append(f"{key}.validation")
+
         for name, metric, suffix, title in (("max_darkness_hours", "longest_dark_hours", "dark", "tối liên tục"),
                                            ("max_earth_blackout_hours", "longest_blackout_hours", "blackout", "mất Earth LOS liên tục")):
             if name not in c.soft_constraint_states:

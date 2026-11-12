@@ -12,7 +12,9 @@ def scan_windows(query, scenario, repository, first, stop, *, analyze, preflight
     candidates = []
     step = scenario['start_step_minutes']
     epoch = utc(scenario['A_utc'])
-    unavailable = {i for i, target in enumerate(targets) if preflight and preflight(target, query.mission(target))}
+    latest_end = epoch + timedelta(minutes=(stop-1)*step, hours=query.duration_hours)
+    unavailable = {i for i, target in enumerate(targets) if preflight and
+                   preflight(target, query.mission(target), latest_end)}
     for index in range(first, stop):
         start = (epoch+timedelta(minutes=index*step)).isoformat().replace('+00:00', 'Z')
         current = query.model_copy(update={'arrival_utc': start})

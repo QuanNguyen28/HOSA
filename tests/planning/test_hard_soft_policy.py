@@ -76,7 +76,8 @@ def test_main_failure_cannot_be_rescued_by_relaxing_soft_preferences(planner):
     result = planner.compare(CompareRequest(**base))
     candidate = result.candidates[0]
     assert not result.apply_allowed and candidate.nominal_sampled_decision == "FAIL"
-    assert candidate.decision == "INDETERMINATE"
+    assert candidate.decision == "FAIL"
+    assert candidate.validation["passed"] is False
     assert candidate.soft_constraint_states["max_earth_blackout_hours"] == "PASS"
     assert [v["constraint"] for v in candidate.violations] == ["min_earth_los_fraction"]
 

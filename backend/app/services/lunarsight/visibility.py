@@ -41,10 +41,10 @@ def visibility(sun,earth,ps,pe):
         df[f"{label}_clearance_deg"]=ep.el_deg-h
         valid = ep.row_present.fillna(False).eq(True) & np.isfinite(ep[["az_deg", "el_deg"]]).all(axis=1)
         df[f"{label}_ephem_valid"]=valid
-        df[f"{label}_state"]=np.where(valid, classify(ep.el_deg,h,cov), "?")
-        df[f"{label}_coverage_flag"]=np.select(
-            [~df[f"{label}_ephem_valid"],~cov],["missing_ephemeris","incomplete_terrain"],default="covered")
-    df["joint_state"]=combine(df.sun_state,df.earth_state)
+        df[f"{label}_state"]=pd.Categorical(np.where(valid, classify(ep.el_deg,h,cov), "?"), categories=["V","B","?"])
+        df[f"{label}_coverage_flag"]=pd.Categorical(np.select(
+            [~df[f"{label}_ephem_valid"],~cov],["missing_ephemeris","incomplete_terrain"],default="covered"))
+    df["joint_state"]=pd.Categorical(combine(df.sun_state,df.earth_state), categories=["V","B","?"])
     # Final timestamp is a boundary only, not an extra interval.
     df["start_utc"]=index; df["end_utc"]=index.to_series().shift(-1)
     return df.iloc[:-1].copy()

@@ -73,7 +73,13 @@ export async function analyzePoint(
       error_code?: string;
       result_url?: string;
     }>(`/lunar/point/analyses/${job.job_id}`, signal);
-    progress(state.stage.replaceAll("_", " "));
+    progress(
+      state.stage.startsWith("refining_horizon_") ||
+        state.stage.startsWith("revalidating_")
+        ? "Completing scientific validation · " +
+            state.stage.replaceAll("_", " ")
+        : state.stage.replaceAll("_", " "),
+    );
     if (state.status === "failed")
       throw new Error(state.error_code ?? "Point analysis failed.");
     if (state.status === "succeeded")

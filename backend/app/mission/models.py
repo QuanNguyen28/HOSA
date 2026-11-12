@@ -1,9 +1,10 @@
 from datetime import datetime, timezone, timedelta
+import math
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-Hours = Annotated[float, Field(strict=True, ge=0, le=72)]
+Hours = Annotated[float, Field(strict=True, ge=0)]
 Fraction = Annotated[float, Field(strict=True, ge=0, le=1)]
 Decision = Literal["PASS", "FAIL", "INDETERMINATE"]
 Status = Literal["FEASIBLE", "NO_FEASIBLE_IN_EVALUATED_SET", "INSUFFICIENT_DATA"]
@@ -83,9 +84,12 @@ class ContactRequirements(Contract):
 
 
 class MissionRequest(MissionTarget):
-    start_utc: str = Field(description="Timezone-aware ISO 8601, 2000–2100, on an exact 5-minute UTC grid",
+    start_utc: str = Field(description="Timezone-aware ISO 8601 on an exact 5-minute UTC grid",
                            json_schema_extra={"format": "date-time", "examples": ["2026-11-17T00:00:00Z"]})
-    duration_hours: int = Field(default=72, strict=True, ge=1, le=72)
+    duration_hours: float = Field(default=72.0, strict=True, ge=1,
+        description="At least 1 hour, in 5-minute increments; no application maximum; may be omitted with end_utc")
+    end_utc: str | None = Field(default=None, description="Alternative UTC end date; must agree with duration_hours if both are supplied",
+                               json_schema_extra={"format": "date-time"})
     panel_height_m: float = Field(default=1.0, gt=0, le=20)
     antenna_height_m: float = Field(default=2.0, gt=0, le=20)
     constraints: Constraints = Field(default_factory=Constraints)
@@ -93,6 +97,7 @@ class MissionRequest(MissionTarget):
     min_earth_los_fraction: float | None = Field(default=None, ge=0, le=1)
     contact_requirements: ContactRequirements | None = None
     offline: bool = False
+    resolve_indeterminate: bool = Field(default=False, strict=True, description="Complete missing validation, refine horizon at most twice, and check robust sampled mission paths; full-circle warnings and mission thresholds are retained")
 
     @field_validator("latitude_deg", "longitude_e_deg", "panel_height_m", "antenna_height_m",
                      "min_sunlit_fraction", "min_earth_los_fraction", mode="before")
@@ -107,26 +112,38 @@ class MissionRequest(MissionTarget):
     def east_longitude(cls, value):
         return value % 360 if value is not None else None
 
-    @field_validator("start_utc")
+    @field_validator("start_utc", "end_utc")
     @classmethod
     def start_time(cls, value):
+        if value is None:
+            return None
         stamp = utc(value)
-        if not 2000 <= stamp.year <= 2100 or stamp.minute % 5 or stamp.second or stamp.microsecond:
-            raise ValueError("Use 2000–2100 and an exact 5-minute UTC grid")
+        if stamp.minute % 5 or stamp.second or stamp.microsecond:
+            raise ValueError("Use an exact 5-minute UTC grid")
         return stamp.isoformat().replace("+00:00", "Z")
 
     @model_validator(mode="after")
     def stop_time(self):
-        if (utc(self.start_utc) + timedelta(hours=self.duration_hours)).year > 2100:
-            raise ValueError("End must be within 2100")
+        if self.end_utc is not None:
+            hours = (utc(self.end_utc) - utc(self.start_utc)).total_seconds() / 3600
+            if hours < 1:
+                raise ValueError("Mission must last at least 1 hour")
+            if "duration_hours" in self.model_fields_set and not math.isclose(self.duration_hours, hours, abs_tol=1e-8, rel_tol=0):
+                raise ValueError("end_utc and duration_hours describe different mission windows")
+            self.duration_hours = hours
+        ticks = self.duration_hours * 12
+        if not math.isfinite(ticks):
+            raise ValueError("Duration must produce a representable UTC end date")
+        if not math.isclose(ticks, round(ticks), abs_tol=1e-7, rel_tol=0):
+            raise ValueError("Duration must be in exact 5-minute increments")
+        self.duration_hours = round(ticks) / 12
+        try:
+            end = utc(self.start_utc) + timedelta(minutes=round(ticks)*5)
+        except (OverflowError, ValueError) as error:
+            raise ValueError("Duration must produce a representable UTC end date") from error
+        self.end_utc = end.isoformat().replace("+00:00", "Z")
         if (self.contact_requirements is not None
                 and self.contact_requirements.first_contact_deadline_minutes is not None
                 and self.contact_requirements.first_contact_deadline_minutes > self.duration_hours * 60):
             raise ValueError("First-contact deadline must be within mission duration")
         return self
-
-    @property
-    def end_utc(self):
-        return (utc(self.start_utc) + timedelta(hours=self.duration_hours)).isoformat().replace("+00:00", "Z")
-
-

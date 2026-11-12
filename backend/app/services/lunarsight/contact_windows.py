@@ -3,8 +3,9 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 import math
+from .decision_policy import gated_decision, decision_validated
 
-METHOD_VERSION = "earth-contact-postprocess-1.0"
+METHOD_VERSION = "earth-contact-postprocess-1.1"
 STATES = {"V", "B", "?"}
 
 
@@ -106,7 +107,7 @@ def normalize(payload, start_utc=None, end_utc=None):
 
 def analyze_contacts(payload, *, start_utc=None, end_utc=None, min_contact_minutes=None,
                      setup_minutes=0, required_windows=None, first_contact_deadline_minutes=None,
-                     max_gap_minutes=None):
+                     max_gap_minutes=None, _normalized=None):
     """Compute geometry-only windows and separately gated mission requirements.
 
     Duration bounds vary only missing evidence in this sampled model. Unknown
@@ -123,7 +124,7 @@ def analyze_contacts(payload, *, start_utc=None, end_utc=None, min_contact_minut
             raise ValueError("required_windows must be a positive integer")
     if minimum is None and (required_windows is not None or deadline is not None or setup):
         raise ValueError("min_contact_minutes is required with setup, window count or first-contact deadline")
-    intervals, start, end, step = normalize(payload, start_utc, end_utc)
+    intervals, start, end, step = normalize(payload, start_utc, end_utc) if _normalized is None else _normalized
     duration = minutes(start, end)
     if deadline is not None and deadline > duration:
         raise ValueError("First-contact deadline must be within the analysis window")
@@ -170,6 +171,7 @@ def analyze_contacts(payload, *, start_utc=None, end_utc=None, min_contact_minut
                    "dataset_version": payload.get("dataset_version"), "decision": payload.get("decision"),
                    "coordinate": payload.get("coordinate"), "request": payload.get("request"),
                    "validation_passed": validated, "validation": validation,
+                   "decision_validation_passed": decision_validated(validation),
                    "coverage": payload.get("coverage"), "warnings": payload.get("warnings", [])},
         "sampling": {"max_source_interval_minutes": step,
                      "unknown_minutes_including_gaps": unknown,
@@ -190,13 +192,13 @@ def analyze_contacts(payload, *, start_utc=None, end_utc=None, min_contact_minut
                          "required_windows": required_windows,
                          "first_contact_deadline_minutes": deadline, "max_gap_minutes": gap_limit,
                          "sampled_checks": checks, "nominal_sampled_decision": nominal,
-                         "decision": nominal if validated is True or nominal is None else "INDETERMINATE"},
+                         "decision": gated_decision(nominal, validation)},
         "limitations": [
             "Geometric visibility of the Earth centre; no ground-station schedule or RF link budget.",
             "Half-open sampled intervals; bounds do not include unsampled events or DEM uncertainty.",
             "Initial and final no-contact periods count toward max_gap; windows are clipped to the analysis domain.",
             "A deadline requires setup plus the requested continuous contact to FINISH before that deadline.",
-            "Source validation is retained; missing or failed validation gates requirement decisions to INDETERMINATE.",
+            "Hard requirement failures return FAIL with source quality warnings; PASS requires full or mission-path validation.",
         ],
     }
 

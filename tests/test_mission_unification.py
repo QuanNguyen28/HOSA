@@ -32,6 +32,8 @@ def mission(**updates):
 
 def comparison(request, **updates):
     data = request.model_dump()
+    if "duration_hours" in updates and "end_utc" not in updates:
+        data.pop("end_utc", None)
     point = {key: data.pop(key) for key in ('site_id', 'latitude_deg', 'longitude_e_deg')}
     point = {k: v for k, v in point.items() if v is not None}
     start = data.pop('start_utc')

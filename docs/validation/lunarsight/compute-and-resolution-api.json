@@ -1,0 +1,136 @@
+{
+  "cases": [
+    {
+      "case": "point-revalidation-pass-request.json",
+      "seconds": 0.6828935679986898,
+      "decision": "PASS",
+      "cache_hit": true,
+      "result_id": "a10c9f3a223ed926e1158223640051e1c1e485f684447c68d52445a2002afdeb"
+    },
+    {
+      "case": "point-analysis-bounded-site04-request.json",
+      "seconds": 0.3178930409994791,
+      "decision": "PASS",
+      "cache_hit": true,
+      "result_id": "3f540fc59cdc662b2f71cdd8a5d651ac4eb898aa000b4727afb3f0dba7c5013c"
+    },
+    {
+      "case": "point-revalidation-fail-request.json",
+      "seconds": 0.2759324069993454,
+      "decision": "FAIL",
+      "cache_hit": true,
+      "result_id": "dc5642b58ae37a2dddbb886b26a3a40b30f940c55fb0bd3d6692437bf800eebf"
+    },
+    {
+      "case": "Site04-strict-100pct-Earth",
+      "seconds": 0.381465684997238,
+      "decision": "INDETERMINATE",
+      "cache_hit": true,
+      "result_id": "df4affd6df7e0af36824ed0d36f103941ea2e6ff557cc76ed90b78d3978c3b27"
+    }
+  ],
+  "job_statuses": {
+    "b927eeca08254dba8943751090e702fa": {
+      "job_id": "b927eeca08254dba8943751090e702fa",
+      "status": "running",
+      "stage": "horizons_5min_sun_batch_90_of_555",
+      "error_code": null,
+      "result_url": null
+    },
+    "50cf4e0eb5154876a892e90e3aa0147e": {
+      "job_id": "50cf4e0eb5154876a892e90e3aa0147e",
+      "status": "succeeded",
+      "stage": "complete",
+      "error_code": null,
+      "result_url": "/api/lunar/point/analyses/50cf4e0eb5154876a892e90e3aa0147e/result"
+    },
+    "ad5eaec4187c4f82964aea433059fead": {
+      "job_id": "ad5eaec4187c4f82964aea433059fead",
+      "status": "running",
+      "stage": "radius_sensitivity",
+      "error_code": null,
+      "result_url": null
+    }
+  },
+  "ui_connecting_ridge_repeat": {
+    "seconds": 0.562055218997557,
+    "decision": "PASS",
+    "full_validation_passed": true,
+    "result_cache_hit": true,
+    "result_id": "d224b3d3a156c5053322f600a454cac64a9b278200c94c020789de0560941b99"
+  },
+  "additional_user_coordinate": {
+    "request": {
+      "site_id": null,
+      "latitude_deg": -80.0846888434414,
+      "longitude_e_deg": 319.3011701463225,
+      "start_utc": "2026-11-24T00:00:00Z",
+      "duration_hours": 72.0,
+      "end_utc": "2026-11-27T00:00:00Z",
+      "panel_height_m": 20.0,
+      "antenna_height_m": 20.0,
+      "constraints": {
+        "max_darkness_hours": 12.0,
+        "max_earth_blackout_hours": 6.0
+      },
+      "min_sunlit_fraction": 0.8,
+      "min_earth_los_fraction": null,
+      "contact_requirements": {
+        "min_contact_minutes": 30.0,
+        "setup_minutes": 5.0,
+        "required_windows": 1,
+        "first_contact_deadline_minutes": 120.0
+      },
+      "offline": false,
+      "resolve_indeterminate": true
+    },
+    "result_id": "6901ad88236cfa72095ea156908146d44f627ae17bc8c57a4085c757c612bf16",
+    "decision": "INDETERMINATE",
+    "reason_codes": [
+      "azimuth_0.25_vs_0.125:SENSITIVITY_FAILED",
+      "DEM_SEAM_FAILED"
+    ],
+    "seams": [
+      {
+        "fine": "dem80",
+        "coarse": "dem240",
+        "phase_deg": 0,
+        "paired_samples": 3190,
+        "median_signed_m": -0.156494140625,
+        "p95_abs_angle_deg": 0.008798866316576736,
+        "passed": false
+      },
+      {
+        "fine": "dem80",
+        "coarse": "dem240",
+        "phase_deg": 0.25,
+        "paired_samples": 3180,
+        "median_signed_m": -0.252197265625,
+        "p95_abs_angle_deg": 0.008885601885431237,
+        "passed": false
+      }
+    ],
+    "metrics_hours": {
+      "total_sun_hours": [
+        72.0,
+        72.0
+      ],
+      "total_earth_los_hours": [
+        72.0,
+        72.0
+      ],
+      "longest_dark_hours": [
+        0.0,
+        0.0
+      ],
+      "longest_blackout_hours": [
+        0.0,
+        0.0
+      ],
+      "longest_joint_hours": [
+        72.0,
+        72.0
+      ]
+    }
+  }
+}

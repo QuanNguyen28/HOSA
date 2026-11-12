@@ -4,6 +4,7 @@ import pandas as pd
 from app.core.errors import DomainError
 from app.mission.evaluation import events, evaluate, VALIDATION_VERSION
 from app.mission.metrics import validate_metrics
+from app.mission.resolution import VERSION as RESOLUTION_VERSION, can_recompute, snapshot_origin
 from app.mission.snapshot import SnapshotProvider, sensitivity_summary
 from .models import Candidate
 from .repository import digest
@@ -36,6 +37,7 @@ def analyze_candidate(query, index=None, *, target=None, snapshot=None, point_pi
     if query.data_source == 'coordinate':
         index = None  # Search offsets are not globally meaningful snapshot indices.
     identity = target_id(target)
+    resolution = {}
     try:
         if query.data_source == 'coordinate':
             from app.point_analysis.service import calculate, get_point_pipeline
@@ -48,6 +50,29 @@ def analyze_candidate(query, index=None, *, target=None, snapshot=None, point_pi
             result = (snapshot or SnapshotProvider()).analyze(target, request)
             frame = result['timeline_frame']
             summary = result['sensitivity']
+            if request.resolve_indeterminate and result['decision'] == 'INDETERMINATE':
+                origin = snapshot_origin(result)
+                resolution = {'enabled': True, 'policy_version': RESOLUTION_VERSION, 'status': 'not_retryable',
+                    'origin': origin, 'initial_decision': result['decision'], 'final_decision': result['decision'],
+                    'remaining_reason_codes': list(result['validation'].get('reason_codes', []))}
+                if can_recompute(result['validation']):
+                    from app.point_analysis.service import calculate, get_point_pipeline
+                    try:
+                        result = calculate(request, point_pipeline or get_point_pipeline())
+                    except DomainError as error:
+                        if error.code not in {'HORIZONS_CACHE_MISS', 'HORIZONS_UNAVAILABLE', 'POINT_ANALYSIS_BUSY', 'DEM_NOT_INSTALLED', 'OUTSIDE_DEM_COVERAGE'}:
+                            raise
+                        resolution.update(status='unresolved', error_code=error.code)
+                    else:
+                        frame = pd.DataFrame(result['timeline'])
+                        for key in ('start_utc', 'end_utc'):
+                            frame[key] = pd.to_datetime(frame[key], utc=True)
+                        summary = sensitivity_summary(request, result)
+                        resolution = {**result.get('resolution', {}), 'origin': origin,
+                            'initial_decision': origin['decision'], 'initial_reason_codes': origin['reason_codes'],
+                            'status': 'resolved' if result['decision'] != 'INDETERMINATE' else 'unresolved'}
+        if not resolution:
+            resolution = result.get('resolution', {})
         verify_result(result, request, frame)
         metric = result['metrics_hours']
         violations = []
@@ -93,7 +118,7 @@ def analyze_candidate(query, index=None, *, target=None, snapshot=None, point_pi
             soft_constraint_states=result['soft_constraint_checks'], soft_violations=result.get('soft_violations', []),
             violations=violations, events=event_rows, metric_context=context, decisive_event=None,
             sensitivity=summary, contact_analysis=result.get('contact_analysis'), coordinate=result.get('coordinate'),
-            analysis_result_id=result.get('result_id'), provenance=result['provenance'])
+            analysis_result_id=result.get('result_id'), provenance=result['provenance'], resolution=resolution)
     except DomainError as error:
         if error.code not in {'INCOMPLETE_TIMELINE', 'OUTSIDE_DEM_COVERAGE', 'HORIZONS_CACHE_MISS'}:
             raise

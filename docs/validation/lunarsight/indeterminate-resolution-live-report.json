@@ -1,0 +1,152 @@
+{
+  "passed": true,
+  "tolerances": {
+    "horizon_deg": 0.1,
+    "event_minutes": 5,
+    "duration_minutes": 10
+  },
+  "cases": [
+    {
+      "request_file": "docs/examples/point-revalidation-pass-request.json",
+      "before": "INDETERMINATE",
+      "after": "PASS",
+      "result_id": "bd3dc17e87868f3cd59ab88f82fd30b1ee83f382582a9cf509f53d50cd41ba31",
+      "validation_passed": false,
+      "mission_path": {
+        "passed": true,
+        "policy_version": "sampled-mission-path-envelope-1.0",
+        "scope": "requested_sampled_sun_and_earth_paths_only",
+        "tolerance_status": "PROVISIONAL",
+        "targets": {
+          "sun": {
+            "passed": true,
+            "height_m": 1.0,
+            "state": "V",
+            "native_sample_counts_5min_1min": [
+              865,
+              4321
+            ],
+            "max_path_horizon_spread_deg": 0.056471777567610015,
+            "global_discrepancy_deg": 0.5597935022975423,
+            "envelope_padding_deg": 0.6597935022975423,
+            "min_clearance_beyond_envelope_deg": 0.7592327671519059
+          },
+          "earth": {
+            "passed": true,
+            "height_m": 2.0,
+            "state": "V",
+            "native_sample_counts_5min_1min": [
+              865,
+              4321
+            ],
+            "max_path_horizon_spread_deg": 0.003077574546852535,
+            "global_discrepancy_deg": 0.09359855530391714,
+            "envelope_padding_deg": 0.19359855530391715,
+            "min_clearance_beyond_envelope_deg": 0.4807886722248901
+          }
+        },
+        "limitations": [
+          "Empirical numerical envelope; not a bound on physical DEM uncertainty or unsampled events.",
+          "Full-circle horizon validation remains unchanged."
+        ],
+        "reason": "ROBUST_CONSTANT_STATES"
+      },
+      "reason_codes": [
+        "azimuth_0.125_vs_0.0625:SENSITIVITY_FAILED"
+      ],
+      "refinement_rounds": 1,
+      "cross_routes": [
+        "point",
+        "compare",
+        "search",
+        "csv"
+      ],
+      "metrics_hours": {
+        "total_sun_hours": [
+          72.0,
+          72.0
+        ],
+        "total_earth_los_hours": [
+          72.0,
+          72.0
+        ],
+        "longest_dark_hours": [
+          0.0,
+          0.0
+        ],
+        "longest_blackout_hours": [
+          0.0,
+          0.0
+        ],
+        "longest_joint_hours": [
+          72.0,
+          72.0
+        ]
+      },
+      "configuration": {
+        "coarse_az_step_deg": 0.125,
+        "fine_az_step_deg": 0.0625,
+        "scan_radii_m": [
+          400000,
+          300000
+        ],
+        "time_steps_minutes": [
+          5,
+          1
+        ]
+      }
+    },
+    {
+      "request_file": "docs/examples/point-revalidation-fail-request.json",
+      "before": "FAIL",
+      "after": "FAIL",
+      "result_id": "72fe0a9d21aa3c0a567b40909a90d4c77afc7456c0e0fd72f4fb159f1902b57f",
+      "validation_passed": false,
+      "mission_path": null,
+      "reason_codes": [
+        "azimuth_0.25_vs_0.125:SENSITIVITY_FAILED"
+      ],
+      "refinement_rounds": 0,
+      "cross_routes": [
+        "point",
+        "compare",
+        "search",
+        "csv"
+      ],
+      "metrics_hours": {
+        "total_sun_hours": [
+          0.0,
+          0.0
+        ],
+        "total_earth_los_hours": [
+          0.0,
+          0.0
+        ],
+        "longest_dark_hours": [
+          72.0,
+          72.0
+        ],
+        "longest_blackout_hours": [
+          72.0,
+          72.0
+        ],
+        "longest_joint_hours": [
+          0.0,
+          0.0
+        ]
+      },
+      "configuration": {
+        "coarse_az_step_deg": 0.25,
+        "fine_az_step_deg": 0.125,
+        "scan_radii_m": [
+          400000,
+          300000
+        ],
+        "time_steps_minutes": [
+          5,
+          1
+        ]
+      }
+    }
+  ]
+}

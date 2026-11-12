@@ -2,6 +2,7 @@
 from datetime import timedelta
 
 from app.core.errors import DomainError
+from app.mission.resolution import VERSION as RESOLUTION_VERSION
 from .analysis import analyze_candidate
 from app.mission.snapshot import SnapshotProvider
 from app.mission.evaluation import EVALUATION_VERSION, VALIDATION_VERSION
@@ -30,12 +31,23 @@ class PlanningService:
         self.results = results or ResultRepository()
         self.point_pipeline = point_pipeline
 
-    def capabilities(self):
-        return self.repository.capabilities()
+    def capabilities(self, resolve_indeterminate=False):
+        caps = self.repository.capabilities()
+        if not resolve_indeterminate:
+            return caps
+        scenario = caps['scenario']
+        query = CompareRequest(site_ids=[scenario['site_ids'][0]], arrival_utc=scenario['A_utc'],
+            min_sunlit_fraction=0., resolve_indeterminate=True)
+        return self.source_capabilities(query)
 
     def source_capabilities(self, query):
         if query.data_source == "snapshot":
-            return self.capabilities()
+            caps = self.capabilities()
+            if not query.resolve_indeterminate:
+                return caps
+            coordinate = self.source_capabilities(query.model_copy(update={"data_source": "coordinate"}))
+            return {**caps, "source_hash": digest({"snapshot": caps["source_hash"], "coordinate": coordinate["source_hash"],
+                "resolution": RESOLUTION_VERSION}), "resolution_policy": RESOLUTION_VERSION}
         from app.point_analysis.sources import installed_sources
         from app.mission.targets import compare_sites
         from app.point_analysis.geometry import METHOD_VERSION as GEOMETRY_VERSION
@@ -54,7 +66,8 @@ class PlanningService:
             "datasets": sources, "evaluation": EVALUATION_VERSION, "validation": VALIDATION_VERSION,
             "planning": METHOD_VERSION,
             "geometry": GEOMETRY_VERSION, "horizons": ADAPTER_VERSION, "sensitivity": SENSITIVITY_VERSION,
-            "contact": CONTACT_VERSION, "catalog": hashfile(catalog) if any(t.site_id for t in query.mission_targets()) else None,
+            "contact": CONTACT_VERSION, "resolution": RESOLUTION_VERSION if query.resolve_indeterminate else None,
+            "catalog": hashfile(catalog) if any(t.site_id for t in query.mission_targets()) else None,
             **({"named_targets": named_targets} if named_targets else {})})}
 
     def validate(self, query):
@@ -84,6 +97,8 @@ class PlanningService:
             snapshot=snapshot, point_pipeline=self.point_pipeline)
 
     def compare(self, query: CompareRequest) -> PlanningResult:
+        if query.data_source == "snapshot" and query.duration_hours != 72:
+            query = query.model_copy(update={"data_source": "coordinate"})
         caps, index = self.validate(query)
         canonical = query.model_copy(update={"arrival_utc": utc(query.arrival_utc).isoformat().replace("+00:00", "Z")})
         analyze = self.analyzer(SnapshotProvider())
@@ -94,6 +109,8 @@ class PlanningService:
         return self.finish(canonical, caps, candidates, counts, "compare")
 
     def search(self, query: SearchRequest) -> PlanningResult:
+        if query.data_source == "snapshot" and query.duration_hours != 72:
+            query = query.model_copy(update={"data_source": "coordinate"})
         caps, first = self.validate(query)
         scenario = caps["scenario"]
         if query.data_source == "coordinate":
@@ -116,9 +133,11 @@ class PlanningService:
             stop = start_index(query.until_utc, scenario, allow_stop=True)
             if stop <= first:
                 raise DomainError("INVALID_SEARCH_RANGE")
+        if query.resolve_indeterminate and (stop-first)*len(query.mission_targets()) > 128:
+            raise DomainError("SEARCH_TOO_LARGE", 422)
         snapshot = SnapshotProvider()
         selected, counts = scan_windows(query, scenario, self.repository, first, stop,
-            analyze=self.analyzer(snapshot), preflight=snapshot.preflight_failure if query.data_source == "snapshot" else None)
+            analyze=self.analyzer(snapshot), preflight=snapshot.preflight_failure if query.data_source == "snapshot" and not query.resolve_indeterminate else None)
         return self.finish(query, caps, selected, counts, "window_search")
 
     def finish(self, query, caps, candidates, counts, operation):
@@ -143,7 +162,7 @@ class PlanningService:
             coverage=counts, request=request, dataset_version=caps["dataset_version"],
             method_version=METHOD_VERSION, source_hash=caps["source_hash"],
             warnings=[*caps["warnings"], "Only selected sites and evaluated starts are covered.",
-                      "Requested availability and contact requirements determine feasibility after the shared validation gate; continuity limits are soft preferences.",
+                      "A failed hard availability or contact requirement returns FAIL with quality warnings; PASS requires full or sampled mission-path validation. Continuity limits are soft preferences.",
                       "Soft preferences break primary-metric ties; rank ranges still describe the selected metric only.",
                       "Rank ranges overlap where metric bounds do; display order is an operational tie-break.",
                       "Near-miss recommendations remain FAIL and cannot be applied.",

@@ -1,6 +1,7 @@
 import csv, hashlib, io, json, math, re, time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from filelock import FileLock
 import numpy as np
 import pandas as pd
 from .acquire import JPL, JPL_DOC, dump, load, hashfile, utc_now
@@ -9,6 +10,7 @@ MANUAL="https://ssd.jpl.nasa.gov/horizons/manual.html"
 MONTHS="Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split()
 LIMIT=8_000_000
 ADAPTER_VERSION="0.1.0"
+PARSER_VERSION="utc-calendar-1.1"
 
 def expected_grid(start,stop,minutes):
     start,stop=pd.Timestamp(start),pd.Timestamp(stop)
@@ -36,9 +38,7 @@ def header_value(header,label):
     return m.group(1).strip()
 
 def timestamp(field):
-    # Horizons may omit the seconds column for minute-aligned tables even when
-    # TIME_DIGITS=SECONDS was requested.  Both forms are lossless for our 1/5
-    # minute grids; expected_grid() below still rejects off-grid timestamps.
+    # Minute-aligned Horizons responses can omit seconds even when requested.
     m=re.fullmatch(r"(?:A\.D\.\s+)?(\d{4})-([A-Za-z]{3})-(\d\d) (\d\d):(\d\d)(?::(\d\d)(?:\.0+)?)?",field.strip())
     if not m: raise ValueError(f"Unexpected JPL timestamp: {field!r}")
     y,mo,d,hh,mm,ss=m.groups()
@@ -102,7 +102,7 @@ def parse(payload,params,start,stop,step,r_jpl):
     df=df.reindex(grid)
     df["row_present"]=df["row_present"].eq(True)
     df.index.name="utc"
-    meta=dict(signature=signature,target=target,observer_lon_e_deg=lon,observer_lat_deg=lat,observer_alt_km=alt,
+    meta=dict(signature=signature,parser_version=PARSER_VERSION,target=target,observer_lon_e_deg=lon,observer_lat_deg=lat,observer_alt_km=alt,
         observer_frame=frame,observer_radii_m=radii,angle_units="degree",time_scale="UTC",step_minutes=step,
         expected_rows=len(grid),received_rows=len(rows),missing_timestamps=missing,
         missing_angles=int(df[["az_deg","el_deg"]].isna().any(axis=1).sum()),
@@ -122,6 +122,11 @@ def fetch(root,site,target,h,start,stop,step,r_dem,r_jpl,offline=False):
     raw=root/"raw/horizons"/f"{name}.json"
     receipt=raw.with_suffix(".receipt.json")
     raw.parent.mkdir(parents=True,exist_ok=True)
+    with FileLock(str(raw.with_suffix(".lock"))):
+        return _fetch_locked(root, params, identity, name, raw, receipt, start, stop, step, r_jpl, offline)
+
+def _fetch_locked(root,params,identity,name,raw,receipt,start,stop,step,r_jpl,offline):
+    import requests
     if raw.exists():
         record=load(receipt)
         if record["identity"]!=identity or record["sha256"]!=hashfile(raw):

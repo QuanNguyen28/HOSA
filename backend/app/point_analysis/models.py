@@ -44,4 +44,5 @@ class PointAnalysisResult(Contract):
     events: list[dict]
     horizons: dict[str, list[dict]]
     provenance: dict
+    resolution: dict = Field(default_factory=dict)
     warnings: list[str]

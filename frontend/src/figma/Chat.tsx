@@ -45,7 +45,7 @@ export function ChatThread({
         <p className="text-xs leading-relaxed text-mute">
           {general
             ? "Ask what HOSA can do, how to interpret results, or where its data comes from."
-            : "Choose any site from Compare, up to two per request. The default mission is 72 hours with a 1 m panel and 2 m antenna. Review before evaluation."}
+            : "Choose any site from Compare, up to two per request. The default mission is 72 hours with a 1 m panel and 2 m antenna. For longer missions, specify a duration or UTC end date. Review before evaluation."}
         </p>
         {!general && baseline && (
           <p className="break-words font-mono text-[10px] text-mute">
@@ -65,6 +65,16 @@ export function ChatThread({
             server. Other views work without an LLM.
           </p>
         )}
+        <label className="flex items-start gap-2 text-xs text-mute">
+          <input
+            type="checkbox"
+            checked={a.resolveIndeterminate}
+            disabled={busy || !!review || a.hasPending}
+            onChange={(e) => a.setResolveIndeterminate(e.target.checked)}
+          />
+          Complete inconclusive validation automatically (can take several
+          minutes).
+        </label>
         {!messages.length && (
           <div>
             <p

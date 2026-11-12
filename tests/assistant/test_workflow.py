@@ -92,7 +92,7 @@ def test_clps_chat_handoff_keeps_both_names_and_uses_coordinate_planner(service,
 
     def compare(query):
         assert query.site_ids == ready.spec.site_ids
-        assert query.data_source == "coordinate" and query.expected_source_hash is None
+        assert query.data_source == "coordinate" and query.expected_source_hash == ready.spec.source_hash
         raise PlannerReached
 
     monkeypatch.setattr(service.engine.planner, "compare", compare)
@@ -127,6 +127,25 @@ def test_chat_keeps_distinct_names_and_mixed_snapshot_target(service, request_pa
         ready = run(service.parse(ParseRequest.model_validate(request_payload)))
         assert ready.status == "READY"
         assert ready.spec.site_ids == expected and ready.spec.data_source == "coordinate"
+
+
+def test_named_comparison_accepts_end_date_and_revalidation(service, request_payload):
+    start = "2026-11-17T00:05:00Z"
+    end = "2026-11-21T00:05:00Z"
+    request_payload.update(text=f"So sánh Haworth và Nobile Rim 1 từ {start} tới {end}",
+                           require_explicit_start=True, resolve_indeterminate=True)
+    service.llm = FixtureLLM(default_patch(
+        arrival_shift_days=None, arrival_utc=start, mission_end_utc=end,
+        site_ids=["Haworth", "Nobile Rim 1"], source_quotes=[start, end],
+    ))
+    ready = run(service.parse(ParseRequest.model_validate(request_payload)))
+    assert ready.status == "READY"
+    assert ready.spec.site_ids == ["haworth", "nobile-rim-1"]
+    assert ready.spec.data_source == "coordinate"
+    assert ready.spec.duration_hours == 96 and ready.spec.end_utc == end
+    query = service.engine.query(ready.spec)
+    assert query["resolve_indeterminate"] is True
+    assert query["expected_source_hash"] == service.engine.coordinate_source_hash(ready.spec)
 
 
 def test_second_call_timeout_preserves_engine_result(service, request_payload):
@@ -177,10 +196,10 @@ def test_no_feasible_never_becomes_pass(service, request_payload):
     service.llm = FixtureLLM(default_patch(arrival_shift_days=0))
     parsed = run(service.parse(ParseRequest.model_validate(request_payload)))
     result = run(service.evaluate(confirmation(parsed, request_payload)))
-    assert result.evidence.status == "INSUFFICIENT_DATA"
-    assert result.evidence.recommended_site_id is None
+    assert result.evidence.status == "NO_FEASIBLE_IN_EVALUATED_SET"
     assert result.evidence.apply_allowed is False
-    assert all(c.decision == "INDETERMINATE" and c.nominal_sampled_decision == "FAIL" for c in result.evidence.candidates)
+    assert all(c.decision == "FAIL" and c.nominal_sampled_decision == "FAIL" for c in result.evidence.candidates)
+    assert all(c.validation["passed"] is False for c in result.evidence.candidates)
 
 
 @pytest.mark.parametrize("mutation", [
@@ -371,7 +390,7 @@ CASES += json.loads((Path(__file__).parents[1]/"fixtures/assistant/search_prompt
 
 
 @pytest.mark.parametrize("case", CASES, ids=lambda c: c["id"])
-def test_offline_prompt_contract_cases(service, request_payload, case):
+def test_offline_prompt_contract_cases(service, request_payload, case, monkeypatch):
     payload = deepcopy(request_payload)
     payload["text"] = case["text"]
     payload.update(case.get("context", {}))
@@ -381,8 +400,34 @@ def test_offline_prompt_contract_cases(service, request_payload, case):
     if parsed.status == "READY":
         for key, expected in case.get("expected_spec", {}).items():
             assert parsed.spec.model_dump()[key] == expected
+        if parsed.spec.data_source == "coordinate":
+            from app.core.errors import DomainError
+            def unavailable(*args): raise DomainError('HORIZONS_CACHE_MISS', 503)
+            monkeypatch.setattr('app.point_analysis.service.calculate', unavailable)
         result = run(service.evaluate(confirmation(parsed, payload)))
-        assert result.evidence.status == "INSUFFICIENT_DATA"
+        expected = "NO_FEASIBLE_IN_EVALUATED_SET" if case["id"] == "A05" else "INSUFFICIENT_DATA"
+        assert result.evidence.status == expected
         assert all(c.validation.get("passed") is False for c in result.evidence.candidates)
     else:
         assert case["expected_issue"] in parsed.issues
+
+
+def test_revalidation_is_sealed_in_draft_and_missing_network_stays_unknown(service, request_payload, monkeypatch):
+    from app.core.errors import DomainError
+    request_payload['resolve_indeterminate'] = True
+    def unavailable(*args):
+        raise DomainError('HORIZONS_UNAVAILABLE', 502)
+    monkeypatch.setattr('app.point_analysis.service.calculate', unavailable)
+    parsed = run(service.parse(ParseRequest.model_validate(request_payload)))
+    assert parsed.status == 'READY' and parsed.spec.resolve_indeterminate is True
+    assert parsed.spec.source_hash == service.engine.capabilities(resolve_indeterminate=True)['source_hash']
+    result = run(service.evaluate(confirmation(parsed, request_payload)))
+    assert len(service.llm.calls) == 2 and result.llm_calls == 2
+    assert not result.evidence.apply_allowed
+    for candidate in result.evidence.candidates:
+        assert candidate.decision == 'INDETERMINATE'
+        assert candidate.resolution['status'] == 'unresolved'
+        assert candidate.resolution['error_code'] == 'HORIZONS_UNAVAILABLE'
+        assert candidate.resolution['origin']['provider'] == 'snapshot'
+    assert any('kiểm chứng bổ sung' in text for text in result.explanation)
+    assert any(key.endswith('.validation') for key in result.explanation_fact_ids)

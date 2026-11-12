@@ -13,6 +13,9 @@ def build_evidence(result, spec, run_id, spec_hash):
         if candidate.issue:
             facts[f"{key}.availability"] = {"site_id": candidate.site_id, "candidate_id": key, "status": candidate.issue}
             continue
+        facts[f"{key}.validation"] = {"site_id": candidate.site_id, "candidate_id": key,
+            "nominal_sampled_decision": candidate.nominal_sampled_decision,
+            "validation": candidate.validation, "resolution": candidate.resolution}
         for suffix, metric, body in (("dark", "longest_dark_hours", "sun"),
                                      ("blackout", "longest_blackout_hours", "earth"),
                                      ("earth", "total_earth_los_hours", None),
@@ -23,7 +26,7 @@ def build_evidence(result, spec, run_id, spec_hash):
             if worst:
                 worst = {**worst, "event_id": digest({"candidate": key, "source": spec.source_hash, "event": worst})[:20]}
             limit = spec.constraints.max_darkness_hours if suffix == "dark" else spec.constraints.max_earth_blackout_hours if suffix == "blackout" else (
-                spec.min_sunlit_fraction*72 if suffix == "sun" else spec.min_earth_los_fraction*72 if suffix == "earth" else None)
+                spec.min_sunlit_fraction*spec.duration_hours if suffix == "sun" else spec.min_earth_los_fraction*spec.duration_hours if suffix == "earth" else None)
             facts[f"{key}.{suffix}"] = {"site_id": candidate.site_id, "candidate_id": key, "metric": metric,
                 "bounds": candidate.metrics[metric], "limit_hours": limit, "unit": "hours",
                 "requirement_type": "hard" if suffix in ("sun", "earth") else "soft",

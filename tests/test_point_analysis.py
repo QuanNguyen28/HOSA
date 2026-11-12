@@ -34,7 +34,7 @@ def query(**changes):
     {'latitude_deg': 90}, {'latitude_deg': float('nan')}, {'longitude_e_deg': 361},
     {'start_utc': '2026-11-17T00:01:00Z'}, {'start_utc': '2026-11-17T00:00:00'},
     {'duration_hours': 0}, {'duration_hours': True}, {'panel_height_m': 0},
-    {'duration_hours': 73}, {'min_sunlit_fraction': 1.1}])
+    {'duration_hours': 1.01}, {'min_sunlit_fraction': 1.1}])
 def test_request_validation(changes):
     with pytest.raises(ValidationError):
         query(**changes)
@@ -240,7 +240,7 @@ def test_job_queue_bound_and_failure(tmp_path):
     try:
         job = jobs.submit(query())
         with pytest.raises(DomainError, match='POINT_ANALYSIS_BUSY'):
-            jobs.submit(query())
+            jobs.submit(query(min_sunlit_fraction=.5))
         with pytest.raises(DomainError, match='POINT_RESULT_NOT_READY'):
             jobs.result(job.job_id)
     finally:
@@ -305,7 +305,7 @@ def test_direct_api_returns_numbers_in_one_request(pipeline):
             assert 'job_id' not in result
             assert len(result['timeline']) == 12
             assert client.post('/api/lunar/point/analyze', json=query(latitude_deg=0).model_dump()
-                | {'duration_hours': 73}).status_code == 422
+                | {'duration_hours': 1.01}).status_code == 422
             schema = client.get('/openapi.json').json()
             assert schema['paths']['/api/lunar/point/analyze']['post']['requestBody']['content']['application/json']['schema']['$ref'].endswith('/PointAnalysisRequest')
     finally:
@@ -314,11 +314,15 @@ def test_direct_api_returns_numbers_in_one_request(pipeline):
 
 def test_direct_api_busy_and_data_error_are_explicit(pipeline, monkeypatch):
     from filelock import FileLock
+    from app.mission.identity import digest
     from app.point_analysis.service import get_point_pipeline
     app.dependency_overrides[get_point_pipeline] = lambda: pipeline
     try:
         with TestClient(app) as client:
-            with FileLock(str(pipeline.root / 'pipeline.lock')):
+            locks = pipeline.root / 'request-locks'
+            locks.mkdir(exist_ok=True)
+            key = digest(query().resolved().model_dump(exclude={'offline'}))
+            with FileLock(str(locks / f'{key}.lock')):
                 response = client.post('/api/lunar/point/analyze', json=query().model_dump())
                 assert response.status_code == 429
                 assert response.json()['detail']['code'] == 'POINT_ANALYSIS_BUSY'
@@ -409,8 +413,8 @@ def test_contact_deadline_is_included_in_sensitivity_gate(pipeline, monkeypatch)
     assert result['constraint_checks']['contact.first_contact_deadline_minutes'] == 'FAIL'
     assert diagnostics['constraint_checks']['contact.first_contact_deadline_minutes'] == 'PASS'
     assert diagnostics['passed'] is False
-    assert result['decision'] == 'INDETERMINATE'
-    assert result['contact_analysis']['requirements']['decision'] == 'INDETERMINATE'
+    assert result['decision'] == 'FAIL'  # Hard rejection is retained despite numerical disagreement.
+    assert result['contact_analysis']['requirements']['decision'] == 'FAIL'
 
 
 @pytest.mark.parametrize('contact', [

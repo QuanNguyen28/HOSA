@@ -37,6 +37,7 @@ class Candidate(Contract):
     contact_analysis: dict | None = None
     coordinate: dict | None = None
     analysis_result_id: str | None = None
+    resolution: dict = Field(default_factory=dict)
 
 
 
@@ -51,8 +52,10 @@ class CompareRequest(Contract):
     min_earth_los_fraction: Fraction | None = None
     contact_requirements: ContactRequirements | None = None
     offline: bool = False
+    resolve_indeterminate: bool = Field(default=False, strict=True)
     hardware: Hardware | None = None
-    duration_hours: Annotated[float, Field(strict=True, gt=0)] = 72
+    duration_hours: Annotated[float, Field(strict=True, ge=1)] = 72.0
+    end_utc: str | None = None
     current_site_id: str | None = None
     rank_by: RankMetric = "total_earth_los_hours"
     expected_source_hash: str | None = None
@@ -67,6 +70,10 @@ class CompareRequest(Contract):
                 raise ValueError("Duplicate targets are not allowed")
         if self.min_sunlit_fraction is None and self.min_earth_los_fraction is None and self.contact_requirements is None:
             raise ValueError("Supply min_sunlit_fraction, min_earth_los_fraction or contact_requirements")
+        window = {"duration_hours": self.duration_hours} if "duration_hours" in self.model_fields_set or self.end_utc is None else {}
+        resolved = MissionRequest(**self.mission_targets()[0].model_dump(), start_utc=self.arrival_utc,
+                                 end_utc=self.end_utc, **window)
+        self.duration_hours, self.end_utc = resolved.duration_hours, resolved.end_utc
         for target in self.mission_targets():
             self.mission(target)
         return self
@@ -75,14 +82,12 @@ class CompareRequest(Contract):
         return self.targets or [MissionTarget(site_id=site) for site in self.site_ids]
 
     def mission(self, target, start_utc=None):
-        if not float(self.duration_hours).is_integer():
-            raise ValueError("duration_hours must be a whole number of hours")
         hardware = self.hardware or Hardware(sun_panel=1., earth_antenna=2.)
         return MissionRequest(**target.model_dump(), start_utc=start_utc or self.arrival_utc,
-            duration_hours=int(self.duration_hours), panel_height_m=hardware.sun_panel,
+            duration_hours=self.duration_hours, panel_height_m=hardware.sun_panel,
             antenna_height_m=hardware.earth_antenna, min_sunlit_fraction=self.min_sunlit_fraction,
             min_earth_los_fraction=self.min_earth_los_fraction, constraints=self.constraints,
-            contact_requirements=self.contact_requirements, offline=self.offline)
+            contact_requirements=self.contact_requirements, offline=self.offline, resolve_indeterminate=self.resolve_indeterminate)
 
     @field_validator("arrival_utc")
     @classmethod

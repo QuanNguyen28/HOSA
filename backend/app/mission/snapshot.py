@@ -132,16 +132,24 @@ class SnapshotProvider:
         result["sensitivity"] = sensitivity_summary(request, result)
         return result
 
-    def preflight_failure(self, target, request):
-        """Cheap, conclusive validation failures for bulk search only.
+    def preflight_failure(self, target, request, latest_end_utc=None):
+        """Skip gated candidates only if no later start can fail a hard check.
 
-        These candidates can never pass the shared gate, irrespective of their
-        nominal metrics. Unknown candidates are counted, never recommended.
+        A validation warning no longer hides a hard rejection. A fully visible
+        suffix can still be pruned when fractions are the only hard requirements.
         """
         try:
             evidence = self.prepare(target.site_id)
         except FileNotFoundError:
             return "DATA_NOT_READY"
+        suffix = evidence["base"].loc[evidence["base"].start_utc >= pd.Timestamp(request.start_utc)]
+        if latest_end_utc is not None:
+            suffix = suffix.loc[suffix.end_utc <= pd.Timestamp(latest_end_utc)]
+        if request.contact_requirements is not None or any(
+                (getattr(request, requirement) or 0) > 0 and not suffix[column].eq("V").all()
+                for requirement, column in (("min_sunlit_fraction", "sun_state"),
+                                            ("min_earth_los_fraction", "earth_state"))):
+            return None
         if not self.integrity:
             return "SNAPSHOT_INTEGRITY_FAILED"
         if not all(p is not None for p in evidence["profiles"].values()):

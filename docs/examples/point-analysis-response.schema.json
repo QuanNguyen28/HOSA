@@ -7,7 +7,6 @@
         "max_darkness_hours": {
           "anyOf": [
             {
-              "maximum": 72,
               "minimum": 0,
               "type": "number"
             },
@@ -22,7 +21,6 @@
         "max_earth_blackout_hours": {
           "anyOf": [
             {
-              "maximum": 72,
               "minimum": 0,
               "type": "number"
             },
@@ -133,7 +131,7 @@
           "title": "Longitude E Deg"
         },
         "start_utc": {
-          "description": "Timezone-aware ISO 8601, 2000–2100, on an exact 5-minute UTC grid",
+          "description": "Timezone-aware ISO 8601 on an exact 5-minute UTC grid",
           "examples": [
             "2026-11-17T00:00:00Z"
           ],
@@ -142,11 +140,25 @@
           "type": "string"
         },
         "duration_hours": {
-          "default": 72,
-          "maximum": 72,
+          "default": 72.0,
+          "description": "At least 1 hour, in 5-minute increments; no application maximum; may be omitted with end_utc",
           "minimum": 1,
           "title": "Duration Hours",
-          "type": "integer"
+          "type": "number"
+        },
+        "end_utc": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Alternative UTC end date; must agree with duration_hours if both are supplied",
+          "format": "date-time",
+          "title": "End Utc"
         },
         "panel_height_m": {
           "default": 1.0,
@@ -207,6 +219,12 @@
         "offline": {
           "default": false,
           "title": "Offline",
+          "type": "boolean"
+        },
+        "resolve_indeterminate": {
+          "default": false,
+          "description": "Complete missing validation, refine horizon at most twice, and check robust sampled mission paths; full-circle warnings and mission thresholds are retained",
+          "title": "Resolve Indeterminate",
           "type": "boolean"
         }
       },
@@ -395,6 +413,11 @@
     "provenance": {
       "additionalProperties": true,
       "title": "Provenance",
+      "type": "object"
+    },
+    "resolution": {
+      "additionalProperties": true,
+      "title": "Resolution",
       "type": "object"
     },
     "warnings": {

@@ -271,14 +271,21 @@ def test_project_knowledge_indexes_sources_and_returns_valid_source_ids(tmp_path
 def test_coordinate_calculation_can_cancel_while_waiting_for_process_lock(tmp_path):
     root=tmp_path/"pipeline"
     root.mkdir()
-    lock=FileLock(str(root/"pipeline.lock"))
+    from app.mission.identity import digest
+    from app.mission.models import MissionRequest
+
+    request=MissionRequest(site_id="Site01_P1", start_utc="2026-11-17T00:00:00Z")
+    lock_dir=root/"request-locks"
+    lock_dir.mkdir()
+    key=digest(request.resolved().model_dump(exclude={"offline"}))
+    lock=FileLock(str(lock_dir/f"{key}.lock"))
     lock.acquire(timeout=0)
     cancelled=threading.Event()
     errors=[]
     class Pipeline:
         def __init__(self): self.root=root
         def run(self,request,progress): raise AssertionError("cancelled lock waiter must not enter the pipeline")
-    thread=threading.Thread(target=lambda: _capture_error(errors,calculate,None,Pipeline(),cancel_event=cancelled))
+    thread=threading.Thread(target=lambda: _capture_error(errors,calculate,request,Pipeline(),cancel_event=cancelled))
     thread.start()
     time.sleep(.05)
     cancelled.set()
