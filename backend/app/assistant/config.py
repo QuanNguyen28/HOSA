@@ -9,7 +9,7 @@ class AssistantSettings(BaseSettings):
     assistant_enabled: bool = False
     assistant_provider: str = Field(default="nvidia", pattern="^(nvidia|gemini|openrouter)$")
     nvidia_api_key: SecretStr | None = None
-    nvidia_model: str = "z-ai/glm-5.3-flash"
+    nvidia_model: str = "deepseek-ai/deepseek-v4.1-flash"
     nvidia_base_url: str = "https://integrate.api.nvidia.com/v1"
     nvidia_max_output_tokens: int = Field(default=1048576, ge=1024, le=1048576)
     gemini_api_key: SecretStr | None = None

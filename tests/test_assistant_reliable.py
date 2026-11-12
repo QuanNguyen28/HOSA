@@ -66,7 +66,7 @@ def test_nvidia_native_stream_uses_model_reasoning_and_generation_cap():
             {"choices":[{"delta":{"content":content[:32]},"finish_reason":None}]},
             {"choices":[{"delta":{"content":content[32:]},"finish_reason":"stop"}]},
             {"choices":[],"usage":{"prompt_tokens":10,"completion_tokens":20}}]))
-    result=asyncio.run(NativeLLM("nvidia",configured(),httpx.MockTransport(handler)).complete(ChatTurn,[]))
+    result=asyncio.run(NativeLLM("nvidia",configured(nvidia_model="z-ai/glm-5.3-flash"),httpx.MockTransport(handler)).complete(ChatTurn,[]))
     assert len(seen)==1 and result.output.intent=="knowledge"
     assert result.usage=={"prompt_tokens":10,"completion_tokens":20}
 
@@ -87,7 +87,7 @@ def test_deepseek_v41_flash_disables_thinking_without_glm_template_fields():
             {"choices":[{"delta":{"content":content[:40]},"finish_reason":None}]},
             {"choices":[{"delta":{"content":content[40:]},"finish_reason":"stop"}]},
             {"choices":[],"usage":{"prompt_tokens":15,"completion_tokens":24,"total_tokens":39}}]))
-    settings=configured(nvidia_model="deepseek-ai/deepseek-v4.1-flash")
+    settings=configured()
     result=asyncio.run(NativeLLM("nvidia",settings,httpx.MockTransport(handler)).complete(ChatTurn,[
         {"role":"user","content":"Explain LunarSight briefly."}]))
     assert len(seen)==1 and result.output.intent=="knowledge"
