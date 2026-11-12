@@ -160,7 +160,7 @@ def disc_pipeline(pipeline, monkeypatch):
 
 
 def test_new_default_disc_point_compare_search_csv_agree(disc_pipeline, tmp_path, monkeypatch):
-    request = query(illumination_model="solar_disc", min_sunlit_fraction=.8)
+    request = query(evaluation_policy="hard_first", illumination_model="solar_disc", min_sunlit_fraction=.8)
     result = disc_pipeline.run(request)
     assert result["decision"] == "FAIL" and result["metrics_hours"]["total_sun_hours"] == pytest.approx([.5, .5])
     assert result["illumination"]["mean_visible_fraction_bounds"] == pytest.approx([.5, .5])

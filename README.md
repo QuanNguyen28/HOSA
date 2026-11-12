@@ -44,6 +44,12 @@ Chi tiết và kiểm thử: [quyết định mô hình](docs/decisions/solar-di
 
 Gói `data/processed/site-precompute/v1/` đi cùng repo chứa horizon cho **23 tọa độ mặc định**, chiều cao **1/2/10/20 m**, đủ các mức refinement hiện có, và **255 mesh hiển thị** (11 cấu hình mỗi tọa độ + 2 mesh toàn vùng cực nam). Backend đọc artifact có checksum; đổi ngày, thời lượng hay yêu cầu không cần scan lại DEM cho các cấu hình này. GET mesh dùng gzip/ETag, frontend tái sử dụng dữ liệu khi đổi điểm. Tọa độ khác hoặc chiều cao khác vẫn dùng DEM và cache runtime. Khi cập nhật DEM/thuật toán, tạo lại gói bằng `make precompute-catalog`. Hướng dẫn deploy và giới hạn: [precompute catalog](docs/decisions/catalog-precompute.md).
 
+Explore hiển thị số liệu Sun/Earth/Joint ban đầu ngay sau lưới 5 phút, với nhãn `EVALUATING`; validation, requirement và refinement tiếp tục ở worker nền. Kết luận cuối chỉ xuất hiện khi hoàn tất đánh giá. Nhiệm vụ dài hạn dùng tối đa 800 cột timeline cho hiển thị; khi kéo thời gian, trạng thái hiện tại lấy mẫu gốc qua API riêng. Không giảm số mẫu tính toán và không thêm giới hạn thời lượng. Xem [API progressive và kiểm thử 10 năm](docs/decisions/progressive-point-analysis.md).
+
+Mặc định `evaluation_policy: "hard_first"`: kiểm tra hard requirements trước, dừng tại hard FAIL đã được chứng minh trên giới hạn trên của mô hình lấy mẫu, trả `hard_failure` cùng các khoảng thời gian hỗ trợ; validation và soft preferences ghi rõ bị bỏ qua. Nếu chưa có hard fail, backend chạy validation rồi soft preferences. Dùng `evaluation_policy: "complete"` khi cần toàn bộ chẩn đoán. Chuỗi vật lý được cache bền vững, độc lập với requirement và hỗ trợ đọc khoảng con; `make physics-prepare` chuẩn bị 23 điểm, thiết bị 20 m, trong 2026–2028 trước deploy. Khoảng khác vẫn tính bình thường. CSV native chỉ sinh khi gọi `/api/lunar/point/analyses/{job_id}/intervals.csv`. Xem [cách thực thi, deploy và benchmark](docs/decisions/hard-first-physical-series.md).
+
+Explore tự lấy metrics và chart Sun/Earth/Joint đã chuẩn bị qua `POST /api/lunar/point/metrics` khi chọn điểm hoặc đổi ngày, hiển thị `METRICS READY` mà không chờ validation. Chỉ mục theo ngày giữ nguyên bounds và các khoảng tối dài qua nửa đêm; `make metrics-prepare` tạo chỉ mục cho chuỗi vật lý đã có. `make metrics-century-prepare` chuẩn bị gọn 23 tọa độ mặc định, thiết bị 20 m, từ đầu năm 2000 đến hết năm 2100; cần mang cả cache đã tạo lên môi trường deploy. Bấm Analyze để đánh giá requirements và kết luận. Phạm vi chưa có chỉ mục vẫn tính qua Analyze bình thường. Xem [metrics-first](docs/decisions/metrics-first.md) và [phạm vi 2000–2100, cách deploy và bằng chứng](docs/decisions/century-metrics.md).
+
 ## Mục tiêu của bộ khung
 
 Bộ khung này tách rõ các lớp dữ liệu, tính toán và giao diện để nhóm có thể phát triển theo trình tự:
@@ -135,7 +141,7 @@ Các chức năng hiện có:
 - so sánh Site01/Site04 bằng cận metric, ba trạng thái `PASS/FAIL/INDETERMINATE`, timeline sự kiện và horizon profile;
 - xuất JSON/CSV kèm cấu hình, nguồn, dataset version và method version.
 
-Ranh giới hiện tại: global texture/bump map và mesh điểm tùy ý chỉ phục vụ hiển thị/khảo sát địa hình. Phân tích Sun/Earth khoa học chỉ hỗ trợ hai candidate site đã xử lý. Ứng dụng không ngoại suy kết quả ra ngoài ephemeris 14/11–01/12/2026 UTC. Earth LOS không phải link budget; Sun visibility không phải mô hình điện hoặc nhiệt.
+Scenario `south_pole_demo_v1` giữ hai candidate site và ephemeris demo 14/11–01/12/2026 UTC. API phân tích tọa độ `/api/lunar/point/*` ở phần đầu README dùng pipeline riêng, có metrics chuẩn bị cho 23 điểm trong 2000–2100 và tính theo yêu cầu trong coverage nguồn thực tế. Global texture/bump map và mesh chỉ phục vụ hiển thị/khảo sát địa hình. Earth LOS không phải link budget; Sun visibility không phải mô hình điện hoặc nhiệt.
 
 ## API của MVP
 

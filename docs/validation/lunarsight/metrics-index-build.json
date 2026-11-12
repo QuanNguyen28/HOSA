@@ -1,0 +1,293 @@
+{
+  "passed": true,
+  "records": [
+    {
+      "site_ids": [
+        "Site01_P1"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 20065,
+      "build_seconds": 0.000936432999878889,
+      "metrics_query_seconds": 0.0022982869995757937
+    },
+    {
+      "site_ids": [
+        "Site04_P1"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 24966,
+      "build_seconds": 0.0005642139985866379,
+      "metrics_query_seconds": 0.001746959998854436
+    },
+    {
+      "site_ids": [
+        "Site04_P1"
+      ],
+      "start_utc": "2026-11-24T00:00:00+00:00",
+      "end_utc": "2056-11-27T00:00:00+00:00",
+      "source_intervals": 3156768,
+      "index_bytes": 376514,
+      "build_seconds": 0.0010863520001294091,
+      "metrics_query_seconds": 0.010110523999173893
+    },
+    {
+      "site_ids": [
+        "Site04_P1"
+      ],
+      "start_utc": "2026-11-24T00:00:00+00:00",
+      "end_utc": "2036-11-24T00:00:00+00:00",
+      "source_intervals": 1052064,
+      "index_bytes": 124463,
+      "build_seconds": 0.0009481230008532293,
+      "metrics_query_seconds": 0.004854692997469101
+    },
+    {
+      "site_ids": [
+        "Site04_P1"
+      ],
+      "start_utc": "2026-11-24T00:00:00+00:00",
+      "end_utc": "2036-11-27T00:00:00+00:00",
+      "source_intervals": 1052928,
+      "index_bytes": 124543,
+      "build_seconds": 1.2321531440029503,
+      "metrics_query_seconds": 0.004061984000145458
+    },
+    {
+      "site_ids": [
+        "connecting-ridge"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 19986,
+      "build_seconds": 0.2961689559997467,
+      "metrics_query_seconds": 0.002163709999877028
+    },
+    {
+      "site_ids": [
+        "shackleton-rim"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 24700,
+      "build_seconds": 0.378563161000784,
+      "metrics_query_seconds": 0.003058670998143498
+    },
+    {
+      "site_ids": [
+        "peak-near-cabeus-b"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 22650,
+      "build_seconds": 0.4680601239997486,
+      "metrics_query_seconds": 0.002512104001652915
+    },
+    {
+      "site_ids": [
+        "haworth"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 24964,
+      "build_seconds": 0.4620419819984818,
+      "metrics_query_seconds": 0.0026498820006963797
+    },
+    {
+      "site_ids": [
+        "malapert-massif"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 15480,
+      "build_seconds": 0.4874170849980146,
+      "metrics_query_seconds": 0.0022361400006047916
+    },
+    {
+      "site_ids": [
+        "mons-mouton-plateau"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 18087,
+      "build_seconds": 0.49101636200066423,
+      "metrics_query_seconds": 0.002543611997680273
+    },
+    {
+      "site_ids": [
+        "mons-mouton"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 18600,
+      "build_seconds": 0.47655839399885735,
+      "metrics_query_seconds": 0.002519784997275565
+    },
+    {
+      "site_ids": [
+        "nobile-rim-1"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 23342,
+      "build_seconds": 0.5721641960008128,
+      "metrics_query_seconds": 0.0029161760030547157
+    },
+    {
+      "site_ids": [
+        "nobile-rim-2"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 22728,
+      "build_seconds": 0.4781762679995154,
+      "metrics_query_seconds": 0.0026304810016881675
+    },
+    {
+      "site_ids": [
+        "de-gerlache-rim-2"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 23838,
+      "build_seconds": 0.5480618910005433,
+      "metrics_query_seconds": 0.003233857001760043
+    },
+    {
+      "site_ids": [
+        "im1-odysseus"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 17727,
+      "build_seconds": 0.5113541690006969,
+      "metrics_query_seconds": 0.003168009003275074
+    },
+    {
+      "site_ids": [
+        "im2-athena"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 22573,
+      "build_seconds": 0.4658518329997605,
+      "metrics_query_seconds": 0.002641217000928009
+    },
+    {
+      "site_ids": [
+        "viper"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 23544,
+      "build_seconds": 0.4700403950009786,
+      "metrics_query_seconds": 0.0030911329995433334
+    },
+    {
+      "site_ids": [
+        "shackleton-floor"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 7334,
+      "build_seconds": 0.46210969900130294,
+      "metrics_query_seconds": 0.002667371001734864
+    },
+    {
+      "site_ids": [
+        "peak-near-shackleton"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 22155,
+      "build_seconds": 0.45318225200026063,
+      "metrics_query_seconds": 0.003379793000931386
+    },
+    {
+      "site_ids": [
+        "leibnitz-beta-plateau"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 25564,
+      "build_seconds": 0.4871310570015339,
+      "metrics_query_seconds": 0.003167869999742834
+    },
+    {
+      "site_ids": [
+        "de-gerlache-kocher"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 23203,
+      "build_seconds": 0.4625588369999605,
+      "metrics_query_seconds": 0.0031924819995765574
+    },
+    {
+      "site_ids": [
+        "shoemaker"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 22118,
+      "build_seconds": 0.4689206170005491,
+      "metrics_query_seconds": 0.0035995050020574126
+    },
+    {
+      "site_ids": [
+        "amundsen-rim"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 22347,
+      "build_seconds": 0.4893097829990438,
+      "metrics_query_seconds": 0.0033142350002890453
+    },
+    {
+      "site_ids": [
+        "example-a"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 22190,
+      "build_seconds": 0.4499955030005367,
+      "metrics_query_seconds": 0.002446713002427714
+    },
+    {
+      "site_ids": [
+        "example-b"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 14323,
+      "build_seconds": 0.4473142150018248,
+      "metrics_query_seconds": 0.0026112749983440153
+    }
+  ],
+  "live_llm_calls": 0,
+  "scope": "Indexed existing verified nominal physical series only. Indexed metrics are provisional; no request validation or decisions are preapproved. Timings measure index lookup, not end-to-end HTTP latency."
+}

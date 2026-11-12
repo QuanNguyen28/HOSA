@@ -58,6 +58,7 @@ export type Resolution = {
   error_code?: string;
 };
 export type Validation = {
+  status?: string;
   passed: boolean;
   mission_path?: {
     passed: boolean;
@@ -70,6 +71,11 @@ export type Validation = {
   policy_version?: string;
 };
 export type Interval = {
+  aggregated?: boolean;
+  earth_visible_fraction_lower?: number;
+  earth_visible_fraction_upper?: number;
+  joint_visible_fraction_lower?: number;
+  joint_visible_fraction_upper?: number;
   sun_visible_fraction?: number | null;
   sun_visible_fraction_lower?: number;
   sun_visible_fraction_upper?: number;
@@ -106,22 +112,27 @@ export function timelineBins(rows: Interval[], start: number, end: number, colum
       covered += dt;
       for (const body of ["sun", "earth", "joint"] as const) {
         const state = row[`${body}_state`];
-        const lo = body === "sun" ? (row.sun_visible_fraction_lower ?? row.sun_visible_fraction ?? (state === "V" ? 1 : 0)) : state === "V" ? 1 : 0;
-        const hi = body === "sun" ? (row.sun_visible_fraction_upper ?? row.sun_visible_fraction ?? (state === "B" ? 0 : 1)) : state === "B" ? 0 : 1;
+        const lo = row[`${body}_visible_fraction_lower`] ?? (body === "sun" ? row.sun_visible_fraction : undefined) ?? (state === "V" ? 1 : 0);
+        const hi = row[`${body}_visible_fraction_upper`] ?? (body === "sun" ? row.sun_visible_fraction : undefined) ?? (state === "B" ? 0 : 1);
         totals[body][0] += lo * dt;
         totals[body][1] += hi * dt;
       }
     }
     const state = (body: "sun" | "earth" | "joint"): Interval["sun_state"] => {
       const [lo, hi] = totals[body];
-      if (covered < width - 1 || hi - lo > 1) return "?";
+      if (covered < width - 1 || hi - lo > 1 || (body !== "sun" && lo > 0 && hi < width - 1)) return "?";
       return hi > 0 ? "V" : "B";
     };
     bins.push({ start_utc: new Date(a).toISOString(), end_utc: new Date(b).toISOString(),
+      aggregated: true,
       sun_state: state("sun"), earth_state: state("earth"), joint_state: state("joint"),
       sun_visible_fraction: state("sun") !== "?" ? totals.sun[0] / width : null,
       sun_visible_fraction_lower: totals.sun[0] / width,
-      sun_visible_fraction_upper: (totals.sun[1] + Math.max(0, width - covered)) / width });
+      sun_visible_fraction_upper: (totals.sun[1] + Math.max(0, width - covered)) / width,
+      earth_visible_fraction_lower: totals.earth[0] / width,
+      earth_visible_fraction_upper: (totals.earth[1] + Math.max(0, width - covered)) / width,
+      joint_visible_fraction_lower: totals.joint[0] / width,
+      joint_visible_fraction_upper: (totals.joint[1] + Math.max(0, width - covered)) / width });
   }
   return bins;
 }
@@ -136,6 +147,23 @@ export type Contact = {
   metrics: { qualified_windows_count: number; visible_windows_count: number };
 };
 export type PointResult = {
+  evaluation_stages?: Record<string, string>;
+  hard_failure?: {
+    constraint: string;
+    limit: number | Record<string, unknown>;
+    observed_bounds?: Bounds;
+    shortfall_hours_bounds?: Bounds;
+    window: { start_utc: string; end_utc: string };
+    coordinate: { latitude_deg: number; longitude_e_deg: number };
+    explanation: string;
+    deadline_utc?: string;
+    evidence_intervals: Array<{ target: string; start_utc: string; end_utc: string; at_utc?: string }>;
+  } | null;
+  joint_hours?: Bounds;
+  evaluation_status?: "pending" | "complete";
+  timeline_transport?: { mode: "native" | "aggregated" | "pending"; source_intervals: number; display_intervals: number; exact_intervals_ready?: boolean };
+  interval_url?: string;
+  instant?: Interval;
   illumination?: { model: string; mean_visible_fraction_bounds: Bounds };
   result_id: string;
   request: MissionRequest;
@@ -158,6 +186,8 @@ export type PointResult = {
   };
 };
 export type Candidate = {
+  evaluation_stages?: Record<string, string>;
+  hard_failure?: PointResult["hard_failure"];
   candidate_id: string;
   site_id: string;
   start_utc: string;
@@ -313,7 +343,13 @@ export function intervalAt(
   rows: Interval[],
   time: number,
 ): Interval | undefined {
-  return rows.find(
-    (r) => Date.parse(r.start_utc) <= time && time < Date.parse(r.end_utc),
-  );
+  // Do not treat a display average across days as an exact current state.
+  let low = 0, high = rows.length;
+  while (low < high) {
+    const mid = (low + high) >>> 1;
+    if (Date.parse(rows[mid].start_utc) <= time) low = mid + 1;
+    else high = mid;
+  }
+  const row = rows[low - 1];
+  return row && !row.aggregated && time < Date.parse(row.end_utc) ? row : undefined;
 }

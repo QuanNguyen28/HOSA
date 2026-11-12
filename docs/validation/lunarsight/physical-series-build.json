@@ -1,0 +1,195 @@
+{
+  "passed": true,
+  "start_utc": "2026-01-01T00:00:00Z",
+  "end_utc": "2028-01-01T00:00:00Z",
+  "panel_m": 20.0,
+  "antenna_m": 20.0,
+  "records": [
+    {
+      "site_ids": [
+        "Site04_P1"
+      ],
+      "native_intervals": 210240,
+      "build_seconds": 3.3203856039999664,
+      "cached_read_seconds": 0.13311312200130487
+    },
+    {
+      "site_ids": [
+        "Site01_P1"
+      ],
+      "native_intervals": 210240,
+      "build_seconds": 4.5947398349999276,
+      "cached_read_seconds": 0.17011806600021373
+    },
+    {
+      "site_ids": [
+        "connecting-ridge"
+      ],
+      "native_intervals": 210240,
+      "build_seconds": 1.8238618060004228,
+      "cached_read_seconds": 0.12632391000079224
+    },
+    {
+      "site_ids": [
+        "shackleton-rim"
+      ],
+      "native_intervals": 210240,
+      "build_seconds": 2.4003981549994933,
+      "cached_read_seconds": 0.18905739699948754
+    },
+    {
+      "site_ids": [
+        "peak-near-cabeus-b"
+      ],
+      "native_intervals": 210240,
+      "build_seconds": 1.9472767240004032,
+      "cached_read_seconds": 0.13742952899883676
+    },
+    {
+      "site_ids": [
+        "haworth"
+      ],
+      "native_intervals": 210240,
+      "build_seconds": 2.329874087999997,
+      "cached_read_seconds": 0.19862988099885115
+    },
+    {
+      "site_ids": [
+        "malapert-massif"
+      ],
+      "native_intervals": 210240,
+      "build_seconds": 2.35759038300057,
+      "cached_read_seconds": 0.18147391799902834
+    },
+    {
+      "site_ids": [
+        "mons-mouton-plateau"
+      ],
+      "native_intervals": 210240,
+      "build_seconds": 2.7366605839997646,
+      "cached_read_seconds": 0.16654394100078207
+    },
+    {
+      "site_ids": [
+        "mons-mouton"
+      ],
+      "native_intervals": 210240,
+      "build_seconds": 2.8358525530002225,
+      "cached_read_seconds": 0.12931995899998583
+    },
+    {
+      "site_ids": [
+        "nobile-rim-1"
+      ],
+      "native_intervals": 210240,
+      "build_seconds": 1.8849140069996793,
+      "cached_read_seconds": 0.4050334460007434
+    },
+    {
+      "site_ids": [
+        "nobile-rim-2"
+      ],
+      "native_intervals": 210240,
+      "build_seconds": 2.748049705000085,
+      "cached_read_seconds": 0.13404709399947023
+    },
+    {
+      "site_ids": [
+        "de-gerlache-rim-2"
+      ],
+      "native_intervals": 210240,
+      "build_seconds": 2.084118220998789,
+      "cached_read_seconds": 0.12535125400063407
+    },
+    {
+      "site_ids": [
+        "im1-odysseus"
+      ],
+      "native_intervals": 210240,
+      "build_seconds": 3.1839960570014227,
+      "cached_read_seconds": 0.30674950100001297
+    },
+    {
+      "site_ids": [
+        "im2-athena"
+      ],
+      "native_intervals": 210240,
+      "build_seconds": 2.198044774000664,
+      "cached_read_seconds": 0.12177399699976377
+    },
+    {
+      "site_ids": [
+        "viper"
+      ],
+      "native_intervals": 210240,
+      "build_seconds": 2.9295677629997954,
+      "cached_read_seconds": 0.13578836399938154
+    },
+    {
+      "site_ids": [
+        "shackleton-floor"
+      ],
+      "native_intervals": 210240,
+      "build_seconds": 2.8156247990009433,
+      "cached_read_seconds": 0.15773557399916172
+    },
+    {
+      "site_ids": [
+        "peak-near-shackleton"
+      ],
+      "native_intervals": 210240,
+      "build_seconds": 2.896031366999523,
+      "cached_read_seconds": 0.13348900900018634
+    },
+    {
+      "site_ids": [
+        "leibnitz-beta-plateau"
+      ],
+      "native_intervals": 210240,
+      "build_seconds": 2.8696346060005453,
+      "cached_read_seconds": 0.1259332359986729
+    },
+    {
+      "site_ids": [
+        "shoemaker"
+      ],
+      "native_intervals": 210240,
+      "build_seconds": 2.157797248000861,
+      "cached_read_seconds": 0.13437815699944622
+    },
+    {
+      "site_ids": [
+        "de-gerlache-kocher"
+      ],
+      "native_intervals": 210240,
+      "build_seconds": 3.3588782679998985,
+      "cached_read_seconds": 0.2826273940008832
+    },
+    {
+      "site_ids": [
+        "amundsen-rim"
+      ],
+      "native_intervals": 210240,
+      "build_seconds": 2.0979985789999773,
+      "cached_read_seconds": 0.1373027320005349
+    },
+    {
+      "site_ids": [
+        "example-a"
+      ],
+      "native_intervals": 210240,
+      "build_seconds": 2.96642078900004,
+      "cached_read_seconds": 0.1740773290002835
+    },
+    {
+      "site_ids": [
+        "example-b"
+      ],
+      "native_intervals": 210240,
+      "build_seconds": 1.7870748389996152,
+      "cached_read_seconds": 0.3794164160008222
+    }
+  ],
+  "live_llm_calls": 0,
+  "scope": "Prepared nominal physical samples; no requirements or scientific validation results are preapproved."
+}

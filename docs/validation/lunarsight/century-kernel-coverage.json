@@ -1,0 +1,192 @@
+{
+  "passed": true,
+  "requested_start_utc": "2000-01-01T00:00:00+00:00",
+  "requested_end_utc": "2101-01-01T00:00:00+00:00",
+  "exact_month_boundary_probes": 1213,
+  "shape": [
+    1213,
+    6
+  ],
+  "identity": {
+    "method_version": "shared-spice-hourly-1.0",
+    "kernels": [
+      {
+        "name": "naif0012.tls",
+        "sha256": "678e32bdb5a744117a467cd9601cd6b373f0e9bc9bbde1371d5eee39600a039b"
+      },
+      {
+        "name": "pck00011.tpc",
+        "sha256": "3dff7b1dbeceaa01f25467767d3fa25816051c85d162d1edf04acb310ee28bb1"
+      },
+      {
+        "name": "de440s.bsp",
+        "sha256": "c1c7feeab882263fc493a9d5a5b2ddd71b54826cdf65d8d17a76126b260a49f2"
+      },
+      {
+        "name": "moon_pa_de440_200625.bpc",
+        "sha256": "60cd55aa401ea2ea97360636f567554bfe4e37bb829f901b4460a455dfaf783f"
+      },
+      {
+        "name": "moon_de440_250416.tf",
+        "sha256": "a47c71e9c9f33796bdafb2c9d69a7ee447b6016ecad80f71cd6f3e479f9cf768"
+      }
+    ],
+    "frame": "MOON_ME",
+    "correction": "LT+S",
+    "step_seconds": 3600,
+    "units": "km",
+    "storage": "float64"
+  },
+  "coverage": [
+    {
+      "kernel": "de440s.bsp",
+      "object_or_frame": 1,
+      "intervals_utc": [
+        [
+          "1849-12-25T23:59:19",
+          "2150-01-21T23:58:51"
+        ]
+      ]
+    },
+    {
+      "kernel": "de440s.bsp",
+      "object_or_frame": 2,
+      "intervals_utc": [
+        [
+          "1849-12-25T23:59:19",
+          "2150-01-21T23:58:51"
+        ]
+      ]
+    },
+    {
+      "kernel": "de440s.bsp",
+      "object_or_frame": 3,
+      "intervals_utc": [
+        [
+          "1849-12-25T23:59:19",
+          "2150-01-21T23:58:51"
+        ]
+      ]
+    },
+    {
+      "kernel": "de440s.bsp",
+      "object_or_frame": 4,
+      "intervals_utc": [
+        [
+          "1849-12-25T23:59:19",
+          "2150-01-21T23:58:51"
+        ]
+      ]
+    },
+    {
+      "kernel": "de440s.bsp",
+      "object_or_frame": 5,
+      "intervals_utc": [
+        [
+          "1849-12-25T23:59:19",
+          "2150-01-21T23:58:51"
+        ]
+      ]
+    },
+    {
+      "kernel": "de440s.bsp",
+      "object_or_frame": 6,
+      "intervals_utc": [
+        [
+          "1849-12-25T23:59:19",
+          "2150-01-21T23:58:51"
+        ]
+      ]
+    },
+    {
+      "kernel": "de440s.bsp",
+      "object_or_frame": 7,
+      "intervals_utc": [
+        [
+          "1849-12-25T23:59:19",
+          "2150-01-21T23:58:51"
+        ]
+      ]
+    },
+    {
+      "kernel": "de440s.bsp",
+      "object_or_frame": 8,
+      "intervals_utc": [
+        [
+          "1849-12-25T23:59:19",
+          "2150-01-21T23:58:51"
+        ]
+      ]
+    },
+    {
+      "kernel": "de440s.bsp",
+      "object_or_frame": 9,
+      "intervals_utc": [
+        [
+          "1849-12-25T23:59:19",
+          "2150-01-21T23:58:51"
+        ]
+      ]
+    },
+    {
+      "kernel": "de440s.bsp",
+      "object_or_frame": 10,
+      "intervals_utc": [
+        [
+          "1849-12-25T23:59:19",
+          "2150-01-21T23:58:51"
+        ]
+      ]
+    },
+    {
+      "kernel": "de440s.bsp",
+      "object_or_frame": 199,
+      "intervals_utc": [
+        [
+          "1849-12-25T23:59:19",
+          "2150-01-21T23:58:51"
+        ]
+      ]
+    },
+    {
+      "kernel": "de440s.bsp",
+      "object_or_frame": 299,
+      "intervals_utc": [
+        [
+          "1849-12-25T23:59:19",
+          "2150-01-21T23:58:51"
+        ]
+      ]
+    },
+    {
+      "kernel": "de440s.bsp",
+      "object_or_frame": 301,
+      "intervals_utc": [
+        [
+          "1849-12-25T23:59:19",
+          "2150-01-21T23:58:51"
+        ]
+      ]
+    },
+    {
+      "kernel": "de440s.bsp",
+      "object_or_frame": 399,
+      "intervals_utc": [
+        [
+          "1849-12-25T23:59:19",
+          "2150-01-21T23:58:51"
+        ]
+      ]
+    },
+    {
+      "kernel": "moon_pa_de440_200625.bpc",
+      "object_or_frame": 31008,
+      "intervals_utc": [
+        [
+          "1549-12-30T23:59:19",
+          "2650-01-24T23:58:51"
+        ]
+      ]
+    }
+  ]
+}

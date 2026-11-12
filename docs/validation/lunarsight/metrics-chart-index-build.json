@@ -1,0 +1,304 @@
+{
+  "passed": true,
+  "records": [
+    {
+      "site_ids": [
+        "Site01_P1"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 258281,
+      "build_seconds": 0.7183552349997626,
+      "metrics_query_seconds": 0.05265745100041386
+    },
+    {
+      "site_ids": [
+        "Site04_P1"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 261752,
+      "build_seconds": 0.7568867369991494,
+      "metrics_query_seconds": 0.037365585998486495
+    },
+    {
+      "site_ids": [
+        "Site04_P1"
+      ],
+      "start_utc": "2026-11-24T00:00:00+00:00",
+      "end_utc": "2056-11-27T00:00:00+00:00",
+      "source_intervals": 3156768,
+      "index_bytes": 4043241,
+      "build_seconds": 7.766921927999647,
+      "metrics_query_seconds": 0.11452474499674281
+    },
+    {
+      "site_ids": [
+        "Site04_P1"
+      ],
+      "start_utc": "2026-11-24T00:00:00+00:00",
+      "end_utc": "2036-11-24T00:00:00+00:00",
+      "source_intervals": 1052064,
+      "index_bytes": 1339812,
+      "build_seconds": 2.5198706419978407,
+      "metrics_query_seconds": 0.06004980199941201
+    },
+    {
+      "site_ids": [
+        "Site04_P1"
+      ],
+      "start_utc": "2026-11-24T00:00:00+00:00",
+      "end_utc": "2036-11-27T00:00:00+00:00",
+      "source_intervals": 1052928,
+      "index_bytes": 1340734,
+      "build_seconds": 2.361224681000749,
+      "metrics_query_seconds": 0.05262283199772355
+    },
+    {
+      "site_ids": [
+        "Site04_P1"
+      ],
+      "start_utc": "2026-11-24T00:00:00+00:00",
+      "end_utc": "2027-11-27T00:00:00+00:00",
+      "source_intervals": 105984,
+      "index_bytes": 128182,
+      "build_seconds": 0.2563469630003965,
+      "metrics_query_seconds": 0.03094021400102065
+    },
+    {
+      "site_ids": [
+        "connecting-ridge"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 257314,
+      "build_seconds": 0.5268199460006144,
+      "metrics_query_seconds": 0.03430840000146418
+    },
+    {
+      "site_ids": [
+        "shackleton-rim"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 256963,
+      "build_seconds": 0.5151507080008741,
+      "metrics_query_seconds": 0.03275379299884662
+    },
+    {
+      "site_ids": [
+        "peak-near-cabeus-b"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 265315,
+      "build_seconds": 0.5399490279996826,
+      "metrics_query_seconds": 0.03477588699752232
+    },
+    {
+      "site_ids": [
+        "haworth"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 268863,
+      "build_seconds": 0.5303696160008258,
+      "metrics_query_seconds": 0.03513047100204858
+    },
+    {
+      "site_ids": [
+        "malapert-massif"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 293294,
+      "build_seconds": 0.5337232210004004,
+      "metrics_query_seconds": 0.03081644199846778
+    },
+    {
+      "site_ids": [
+        "mons-mouton-plateau"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 258968,
+      "build_seconds": 0.5195788429991808,
+      "metrics_query_seconds": 0.03193975699832663
+    },
+    {
+      "site_ids": [
+        "mons-mouton"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 286681,
+      "build_seconds": 0.5172055820003152,
+      "metrics_query_seconds": 0.033674088001134805
+    },
+    {
+      "site_ids": [
+        "nobile-rim-1"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 270900,
+      "build_seconds": 0.5116765669990855,
+      "metrics_query_seconds": 0.03328515199973481
+    },
+    {
+      "site_ids": [
+        "nobile-rim-2"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 244461,
+      "build_seconds": 0.4860974729999725,
+      "metrics_query_seconds": 0.03328929499912192
+    },
+    {
+      "site_ids": [
+        "de-gerlache-rim-2"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 257888,
+      "build_seconds": 0.5012536920003186,
+      "metrics_query_seconds": 0.032282486998155946
+    },
+    {
+      "site_ids": [
+        "im1-odysseus"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 242542,
+      "build_seconds": 0.4985361830003967,
+      "metrics_query_seconds": 0.030788455002038972
+    },
+    {
+      "site_ids": [
+        "im2-athena"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 242933,
+      "build_seconds": 0.5016468100002385,
+      "metrics_query_seconds": 0.027782344997831387
+    },
+    {
+      "site_ids": [
+        "viper"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 271608,
+      "build_seconds": 0.5111228950008808,
+      "metrics_query_seconds": 0.031329102002928266
+    },
+    {
+      "site_ids": [
+        "shackleton-floor"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 110897,
+      "build_seconds": 0.44609702299931087,
+      "metrics_query_seconds": 0.028007205997710116
+    },
+    {
+      "site_ids": [
+        "peak-near-shackleton"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 260147,
+      "build_seconds": 0.5081925390004471,
+      "metrics_query_seconds": 0.032011696999688866
+    },
+    {
+      "site_ids": [
+        "leibnitz-beta-plateau"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 230328,
+      "build_seconds": 0.5048996689984051,
+      "metrics_query_seconds": 0.03442911800084403
+    },
+    {
+      "site_ids": [
+        "de-gerlache-kocher"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 253673,
+      "build_seconds": 0.5862064900029509,
+      "metrics_query_seconds": 0.0345959859987488
+    },
+    {
+      "site_ids": [
+        "shoemaker"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 194855,
+      "build_seconds": 0.5088611890023458,
+      "metrics_query_seconds": 0.03380639000170049
+    },
+    {
+      "site_ids": [
+        "amundsen-rim"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 209578,
+      "build_seconds": 0.5342734959995141,
+      "metrics_query_seconds": 0.03323088400065899
+    },
+    {
+      "site_ids": [
+        "example-a"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 260257,
+      "build_seconds": 0.5016519290002179,
+      "metrics_query_seconds": 0.0345732739988307
+    },
+    {
+      "site_ids": [
+        "example-b"
+      ],
+      "start_utc": "2026-01-01T00:00:00+00:00",
+      "end_utc": "2028-01-01T00:00:00+00:00",
+      "source_intervals": 210240,
+      "index_bytes": 152458,
+      "build_seconds": 0.4734213119991182,
+      "metrics_query_seconds": 0.02888575199904153
+    }
+  ],
+  "live_llm_calls": 0,
+  "scope": "Indexed existing verified nominal physical series only. Indexed metrics are provisional; no request validation or decisions are preapproved. Timings measure index lookup, not end-to-end HTTP latency."
+}

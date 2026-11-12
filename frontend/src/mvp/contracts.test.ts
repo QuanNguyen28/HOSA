@@ -29,6 +29,20 @@ describe("shared backend mission contracts", () => {
     expect(missing.sun_visible_fraction_lower).toBe(.75);
     expect(missing.sun_visible_fraction_upper).toBe(1);
   });
+  it("preserves Earth and joint time fractions when rebinning prepared charts", () => {
+    const start = Date.parse("2026-11-17T00:00:00Z");
+    const row = (a: number, b: number, state: "V" | "B"): Interval => ({
+      start_utc: new Date(start+a*60000).toISOString(), end_utc: new Date(start+b*60000).toISOString(),
+      sun_state: "V", earth_state: state, joint_state: state,
+    });
+    const bin = timelineBins([row(0, 15, "B"), row(15, 60, "V")], start, start+3600000, 1)[0];
+    expect(bin.aggregated).toBe(true);
+    expect(bin.earth_state).toBe("?");
+    expect(bin.earth_visible_fraction_lower).toBe(.75);
+    expect(bin.earth_visible_fraction_upper).toBe(.75);
+    expect(bin.joint_visible_fraction_lower).toBe(.75);
+    expect(intervalAt([bin], start+1800000)).toBeUndefined();
+  });
   it("uses identical mission requirements for direct analysis and comparison", () => {
     const direct = missionRequest(DEFAULT_MISSION, EXAMPLES[0]);
     const compare = planningRequest(DEFAULT_MISSION, EXAMPLES);

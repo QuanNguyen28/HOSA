@@ -1,0 +1,296 @@
+{
+  "passed": true,
+  "cases": [
+    {
+      "years": 10,
+      "http_seconds": [
+        0.36689936599941575,
+        0.07038939499761909,
+        0.07704441700116149
+      ],
+      "response_bytes": 367671,
+      "source_intervals": 1052064,
+      "metrics_hours": {
+        "total_sun_hours": [
+          76434.03398044725,
+          76434.03398044725
+        ],
+        "total_earth_los_hours": [
+          46276.916666666664,
+          46276.916666666664
+        ],
+        "longest_dark_hours": [
+          62.0,
+          62.0
+        ],
+        "longest_blackout_hours": [
+          333.75,
+          333.75
+        ],
+        "longest_joint_hours": [
+          383.25,
+          383.25
+        ]
+      },
+      "joint_hours": [
+        42487.08333333333,
+        42487.08333333333
+      ],
+      "native_metric_abs_delta_hours": {
+        "total_sun_hours": 0.0,
+        "total_earth_los_hours": 7.275957614183426e-12,
+        "longest_dark_hours": 3.609002874327416e-09,
+        "longest_blackout_hours": 9.713005511002848e-09,
+        "longest_joint_hours": 2.2307972358248662e-08
+      },
+      "chart_display_intervals": 800,
+      "chart_integral_abs_delta_hours": {
+        "sun": 2.473825588822365e-10,
+        "earth": 0.0,
+        "joint": 0.0
+      }
+    },
+    {
+      "years": 20,
+      "http_seconds": [
+        0.13479473700135713,
+        0.12087755500033381,
+        0.10930778799956897
+      ],
+      "response_bytes": 385422,
+      "source_intervals": 2103840,
+      "metrics_hours": {
+        "total_sun_hours": [
+          152916.47238683258,
+          152916.47238683258
+        ],
+        "total_earth_los_hours": [
+          91579.16666666666,
+          91579.16666666666
+        ],
+        "longest_dark_hours": [
+          62.0,
+          62.0
+        ],
+        "longest_blackout_hours": [
+          334.333333333333,
+          334.333333333333
+        ],
+        "longest_joint_hours": [
+          386.916666666667,
+          386.916666666667
+        ]
+      },
+      "joint_hours": [
+        84123.5,
+        84123.5
+      ],
+      "native_metric_abs_delta_hours": {
+        "total_sun_hours": 0.0,
+        "total_earth_los_hours": 0.0,
+        "longest_dark_hours": 3.609002874327416e-09,
+        "longest_blackout_hours": 1.9459946543065598e-08,
+        "longest_joint_hours": 2.2522044673678465e-08
+      },
+      "chart_display_intervals": 800,
+      "chart_integral_abs_delta_hours": {
+        "sun": 4.3655745685100555e-10,
+        "earth": 2.9103830456733704e-11,
+        "joint": 2.9103830456733704e-11
+      }
+    },
+    {
+      "years": 30,
+      "http_seconds": [
+        0.09838532800131361,
+        0.16957709399866872,
+        0.09503007800230989
+      ],
+      "response_bytes": 400521,
+      "source_intervals": 3155904,
+      "metrics_hours": {
+        "total_sun_hours": [
+          229146.98549023553,
+          229146.98549023553
+        ],
+        "total_earth_los_hours": [
+          137222.91666666666,
+          137222.91666666666
+        ],
+        "longest_dark_hours": [
+          62.0,
+          62.0
+        ],
+        "longest_blackout_hours": [
+          334.333333333333,
+          334.333333333333
+        ],
+        "longest_joint_hours": [
+          386.916666666667,
+          386.916666666667
+        ]
+      },
+      "joint_hours": [
+        126019.5,
+        126019.5
+      ],
+      "native_metric_abs_delta_hours": {
+        "total_sun_hours": 2.9103830456733704e-11,
+        "total_earth_los_hours": 0.0,
+        "longest_dark_hours": 3.609002874327416e-09,
+        "longest_blackout_hours": 1.9459946543065598e-08,
+        "longest_joint_hours": 2.2522044673678465e-08
+      },
+      "chart_display_intervals": 800,
+      "chart_integral_abs_delta_hours": {
+        "sun": 1.7462298274040222e-10,
+        "earth": 5.820766091346741e-11,
+        "joint": 4.3655745685100555e-11
+      }
+    }
+  ],
+  "catalog": [
+    {
+      "site_ids": [
+        "Site01_P1"
+      ],
+      "http_seconds": 0.0952575560004334
+    },
+    {
+      "site_ids": [
+        "Site04_P1"
+      ],
+      "http_seconds": 0.04805823399874498
+    },
+    {
+      "site_ids": [
+        "connecting-ridge"
+      ],
+      "http_seconds": 0.047886120999464765
+    },
+    {
+      "site_ids": [
+        "shackleton-rim"
+      ],
+      "http_seconds": 0.04630815500058816
+    },
+    {
+      "site_ids": [
+        "peak-near-cabeus-b"
+      ],
+      "http_seconds": 0.04463650400066399
+    },
+    {
+      "site_ids": [
+        "haworth"
+      ],
+      "http_seconds": 0.062251780000224244
+    },
+    {
+      "site_ids": [
+        "malapert-massif"
+      ],
+      "http_seconds": 0.04746017999787
+    },
+    {
+      "site_ids": [
+        "mons-mouton-plateau"
+      ],
+      "http_seconds": 0.042922099000861635
+    },
+    {
+      "site_ids": [
+        "mons-mouton"
+      ],
+      "http_seconds": 0.05559916499987594
+    },
+    {
+      "site_ids": [
+        "nobile-rim-1"
+      ],
+      "http_seconds": 0.04354588899877854
+    },
+    {
+      "site_ids": [
+        "nobile-rim-2"
+      ],
+      "http_seconds": 0.04612974200063036
+    },
+    {
+      "site_ids": [
+        "de-gerlache-rim-2"
+      ],
+      "http_seconds": 0.04498349300047266
+    },
+    {
+      "site_ids": [
+        "im1-odysseus"
+      ],
+      "http_seconds": 0.046269954000308644
+    },
+    {
+      "site_ids": [
+        "im2-athena"
+      ],
+      "http_seconds": 0.05471409999881871
+    },
+    {
+      "site_ids": [
+        "viper"
+      ],
+      "http_seconds": 0.047092181997868465
+    },
+    {
+      "site_ids": [
+        "shackleton-floor"
+      ],
+      "http_seconds": 0.04773983099948964
+    },
+    {
+      "site_ids": [
+        "peak-near-shackleton"
+      ],
+      "http_seconds": 0.0999511829977564
+    },
+    {
+      "site_ids": [
+        "leibnitz-beta-plateau"
+      ],
+      "http_seconds": 0.07014743199761142
+    },
+    {
+      "site_ids": [
+        "de-gerlache-kocher"
+      ],
+      "http_seconds": 0.09024057100032223
+    },
+    {
+      "site_ids": [
+        "shoemaker"
+      ],
+      "http_seconds": 0.052690286000142805
+    },
+    {
+      "site_ids": [
+        "amundsen-rim"
+      ],
+      "http_seconds": 0.08788522900067619
+    },
+    {
+      "site_ids": [
+        "example-a"
+      ],
+      "http_seconds": 0.14001417200051947
+    },
+    {
+      "site_ids": [
+        "example-b"
+      ],
+      "http_seconds": 0.09521818600114784
+    }
+  ],
+  "live_llm_calls": 0,
+  "scope": "Real HTTP prepared metrics and bounded preview charts; local timings, no new analysis jobs. Initial/provisional metrics are compared with native nominal samples after timing. Unprepared coverage must not clamp or invent values.",
+  "no_jobs_created": true,
+  "unprepared_50_years": "409 METRICS_NOT_PREPARED"
+}

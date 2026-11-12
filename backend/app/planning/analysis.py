@@ -18,7 +18,14 @@ def verify_result(result, request, frame):
     """Reject a provider/cache contract mismatch before ranking or explaining."""
     validate_metrics(result['metrics_hours'], request.duration_hours)
     try:
-        expected = evaluate(request, frame, result['validation'])
+        skipped = result['validation'].get('status') == 'skipped_hard_failure'
+        expected = evaluate(request, frame, result['validation'], include_soft=not skipped)
+        if skipped:
+            from app.point_analysis.hard_first import check
+            checks, failure, _ = check(request, expected['metrics_hours'], frame)
+            if failure is None or (result.get('hard_failure') or {}).get('constraint') != failure['constraint']:
+                raise DomainError('ENGINE_CONTRACT_ERROR', 502)
+            expected['constraint_checks'] = checks
     except DomainError as error:
         raise DomainError('ENGINE_CONTRACT_ERROR', 502) from error
     for key in ('metrics_hours', 'constraint_checks', 'nominal_sampled_decision', 'decision', 'soft_constraint_checks'):
@@ -122,6 +129,7 @@ def analyze_candidate(query, index=None, *, target=None, snapshot=None, point_pi
             violations=violations, events=event_rows, metric_context=context, decisive_event=None,
             sensitivity=summary, contact_analysis=result.get('contact_analysis'), coordinate=result.get('coordinate'),
             analysis_result_id=result.get('result_id'), provenance=result['provenance'], resolution=resolution,
+            evaluation_stages=result.get('evaluation_stages', {}), hard_failure=result.get('hard_failure'),
             illumination=result.get('illumination', {'model': request.illumination_model}))
     except DomainError as error:
         if error.code not in {'INCOMPLETE_TIMELINE', 'OUTSIDE_DEM_COVERAGE', 'HORIZONS_CACHE_MISS'}:

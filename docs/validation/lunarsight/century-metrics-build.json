@@ -1,0 +1,401 @@
+{
+  "passed": true,
+  "records": [
+    {
+      "site_ids": [
+        "Site01_P1"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13799713,
+      "source_identity_sha256": "135a1423c2925ac59f0f9ed2539db3d2be2b2c03348a54d8115d6f4d88d82c39",
+      "index_sha256": "f7b7f98c8289837659b03eda539ac385df2c97f3c7dfee8e499850e2bfe7daea",
+      "build_seconds": 169.86668159499823,
+      "first_query_seconds": 0.4334352920013771,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "Site04_P1"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13728506,
+      "source_identity_sha256": "bebc66e6d10029ca2a743fe968605248d8c3095eef1e8a5f19b451272d04017b",
+      "index_sha256": "516a13034c3461ce067c59dd318620e9095ddcf97dd5c71af8ba6a3d3f9f7197",
+      "build_seconds": 169.94704573999843,
+      "first_query_seconds": 0.4939324629995099,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "connecting-ridge"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13826964,
+      "source_identity_sha256": "f3e787ef1ea3366fa1f3f46e0511c56947971b89e8cf1ffad5694a9b2e250279",
+      "index_sha256": "295c00db9ac75cd62979c7539ed75132fc854de8d604c07f87334ba561c250b9",
+      "build_seconds": 170.35817272499844,
+      "first_query_seconds": 0.526193712001259,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "peak-near-cabeus-b"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 14043680,
+      "source_identity_sha256": "e8a7842dfc0b8874ee284ee472c38278e97eeac8c0d815fa336c5f828811de7f",
+      "index_sha256": "13740ecaa9f0ebecd29679fba398ec844a3a8e96cf026cb131a0cf04e808f284",
+      "build_seconds": 106.00261352999951,
+      "first_query_seconds": 0.48955028999989736,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "shackleton-rim"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13565542,
+      "source_identity_sha256": "2ebedfe6e2d0b4c5f2f0c36feba308a1cdb06340671f81a342b68df21f2a5588",
+      "index_sha256": "fe069507c11547240201eb3b3bcfb8a7238a0d277ada06520f21dfd12fd48e22",
+      "build_seconds": 112.95056315300099,
+      "first_query_seconds": 0.4067534700006945,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "haworth"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 14083431,
+      "source_identity_sha256": "0d17f50a14b0c193d215903614699cfac2678f5af7e7233c13826ce38cfa9639",
+      "index_sha256": "63751aeb54c1f8ebac86573de1dfb4e0cb4807df51885190059c9177164b896a",
+      "build_seconds": 112.69196966000163,
+      "first_query_seconds": 0.44262264499775483,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "malapert-massif"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 15299652,
+      "source_identity_sha256": "6d6941e9ba0feb06c8b09572971eacb855852acb125e9d8d6ee5b31876ff791d",
+      "index_sha256": "b39b079c7b8694ac54447f8c82c0b104b2603aec77d890eb275b566c4c423734",
+      "build_seconds": 111.09912622500269,
+      "first_query_seconds": 0.4669754339993233,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "mons-mouton-plateau"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13591692,
+      "source_identity_sha256": "465dcfa0482aac6ee8b59e3b42c3deabae6f371dd489043e0ea6978c55c0e3c9",
+      "index_sha256": "3a757c93a182518e5afa3ceac3e7517d21527c5cf070bb812b751e8948aee948",
+      "build_seconds": 106.13126148900119,
+      "first_query_seconds": 0.5018364639981883,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "mons-mouton"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 15031097,
+      "source_identity_sha256": "2e15480832bde7952ee05727926740d2b2a3c89a95d6950d3a37b42edc3f6999",
+      "index_sha256": "bbec4da9e54f731e43d9daa715e8859b1a74c0924a124289e0a3457a6024f4da",
+      "build_seconds": 113.16113903299993,
+      "first_query_seconds": 0.5172042420017533,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "nobile-rim-2"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 12583230,
+      "source_identity_sha256": "4458d43657e6661370f4a1b3757b6b5e52cbabde2f710224bf8452004400a40f",
+      "index_sha256": "c3137f1d3e9976da6d33a35744c2641f26c63b0f2941c3ddce9300787927c222",
+      "build_seconds": 111.20849592800005,
+      "first_query_seconds": 0.40055866399779916,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "nobile-rim-1"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 14181386,
+      "source_identity_sha256": "e86f576e4570036a75d60a47140b05e76d956003999ae89d529e6b67475bd121",
+      "index_sha256": "2fa8d63b7968605953898abf3c43cb0b738e08bb7d1b05a79e47de15dac5e571",
+      "build_seconds": 113.3259592530012,
+      "first_query_seconds": 0.43320164599936106,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "de-gerlache-rim-2"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13520883,
+      "source_identity_sha256": "769a5e0fc73df32ec084d42f00fa5b5c040a2750eede6f8cc607f8581b36757e",
+      "index_sha256": "d723bb62ce44e2c8e511ada042882f2a9a1a524fa009e97b293ea06272e8331f",
+      "build_seconds": 114.03375019000305,
+      "first_query_seconds": 0.5020053019979969,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "im1-odysseus"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 12698194,
+      "source_identity_sha256": "737136d9da8cd36b074a8073363d62d3e107ff33fe0bb736b7f40471ab8841c9",
+      "index_sha256": "40e2144b2ff99ed9ea785805dd9b909102fda05fdeac82eaad9e270eb04d634d",
+      "build_seconds": 115.88800981299937,
+      "first_query_seconds": 0.42196065400275984,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "im2-athena"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 12668716,
+      "source_identity_sha256": "ca2dd629b5df3ad5f247ce131a2286afb0b648c75f86d1619c07aa72da831e42",
+      "index_sha256": "94a709d0b745b6893ac5ef2952d3006eea9d9023a960bea4ad42d5d8bc3f5863",
+      "build_seconds": 123.05298442599815,
+      "first_query_seconds": 0.6734161410022352,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "viper"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 14416079,
+      "source_identity_sha256": "1537a8993852e2b283ce26fd4a941268df664e4edb9f7365350d8c94930a0cf1",
+      "index_sha256": "ba2e845ca0f03a2ce6e9430e8b784390fbf38050866e5cfb29337070f84c9a3e",
+      "build_seconds": 120.12587673999951,
+      "first_query_seconds": 0.39770638100162614,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "shackleton-floor"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 5507846,
+      "source_identity_sha256": "121fbbd8329e6bf85f841651a35491658b8e3a7d7b9f78c90371512bca23550c",
+      "index_sha256": "08aaf0c48f7cb9ebf64b8058fd2b8806d86b1df0c47868155e813a54645e7d39",
+      "build_seconds": 132.1758608759992,
+      "first_query_seconds": 0.31933355599903734,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "peak-near-shackleton"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13564178,
+      "source_identity_sha256": "8956867ea86de11026e6f2d231ad35e3fd7e96a0139fd81a93858e13062542a1",
+      "index_sha256": "a7e9b8df29fc8f17ed74993ddfa8a2a6b7f881738691d2dd78d603b83e4e9705",
+      "build_seconds": 156.14086131400109,
+      "first_query_seconds": 1.352690204999817,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "leibnitz-beta-plateau"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 11944958,
+      "source_identity_sha256": "5dd8e634eb16254c6578f01e5654c28910f4eaf16bc744d0fa941a29fc70c511",
+      "index_sha256": "657a03b71647cba003fa2e8d14f243ca1fc8ebb79b4039e0ec3731f310c8ee0e",
+      "build_seconds": 173.90183449199685,
+      "first_query_seconds": 0.5291731920005986,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "de-gerlache-kocher"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13306639,
+      "source_identity_sha256": "d6feb00ef1aa0b9296d4e674ec266fea7d63b1d66e1f02a2273fe5d2dd8e7a0c",
+      "index_sha256": "7ff895fe6173b523388fff5f7ef5cb5b1932f9f345177ad87c230389795e8ecb",
+      "build_seconds": 132.14312049400178,
+      "first_query_seconds": 0.5331974079999782,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "shoemaker"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 10142693,
+      "source_identity_sha256": "80c684d24816015481928bc1fd6c7ba0388de086ae02a3a490761365f9d81a36",
+      "index_sha256": "eab2471c28d7ba8ee87f29d811466bd4824a7d3fb46d75424cc232ebf4cc3f4a",
+      "build_seconds": 128.82322798699897,
+      "first_query_seconds": 0.5208758230000967,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "amundsen-rim"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 10967469,
+      "source_identity_sha256": "870ea5e21b6992d3f6c98ee6cdda8a7c1ec575649d64476504a61826f37e8369",
+      "index_sha256": "565fc8a82b237ff0e43623dad0458aa0a9778ab3d7473dc908865a9bf5e33fa3",
+      "build_seconds": 112.87387017299989,
+      "first_query_seconds": 0.48007639900242793,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "example-a"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13540959,
+      "source_identity_sha256": "58896bf94c9a6691034461c316ec0423cc441f1ad8b52078f2a351e064f6cfb0",
+      "index_sha256": "ba174ef2c24b8afe98606ffc0a89b419df949cc031ee57b390c098fb2d0106c3",
+      "build_seconds": 108.58786212600171,
+      "first_query_seconds": 0.305743219996657,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "example-b"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 7564027,
+      "source_identity_sha256": "8a0f920008c505a649529c0f060ae20b36d26bec9289517d7bfbc39e9da82cae",
+      "index_sha256": "14549d2c3765690f233670b7a4764d0861780189f78b9c006197ec846c20c4ae",
+      "build_seconds": 85.34541780100335,
+      "first_query_seconds": 0.10892988900013734,
+      "display_intervals": 800
+    }
+  ],
+  "sites_total": 23,
+  "start_utc": "2000-01-01T00:00:00Z",
+  "end_utc": "2101-01-01T00:00:00Z",
+  "live_llm_calls": 0,
+  "scope": "Compact nominal five-minute metrics/charts only; yearly source hashes and interpolation checks retained. Full native timelines and mission validation are computed on demand."
+}

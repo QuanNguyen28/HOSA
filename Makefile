@@ -36,6 +36,18 @@ ephemeris-prepare:
 precompute-catalog:
 	PYTHONPATH=backend backend/.venv/bin/python scripts/precompute_catalog.py --workers 2 --report docs/validation/lunarsight/catalog-precompute-build.json
 
+.PHONY: physics-prepare
+physics-prepare:
+	PYTHONPATH=backend backend/.venv/bin/python scripts/prepare_physical_series.py --report docs/validation/lunarsight/physical-series-build.json
+
+.PHONY: metrics-prepare
+metrics-prepare:
+	PYTHONPATH=backend backend/.venv/bin/python scripts/prepare_metric_indexes.py --report docs/validation/lunarsight/metrics-index-build.json
+
+.PHONY: metrics-century-prepare
+metrics-century-prepare:
+	OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONPATH=backend backend/.venv/bin/python scripts/prepare_long_range_metrics.py --workers 3 --report docs/validation/lunarsight/century-metrics-build.json
+
 data-windows-plan:
 	backend/.venv/bin/python scripts/materialize_dem_windows.py --dry-run
 

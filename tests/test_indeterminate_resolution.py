@@ -240,7 +240,7 @@ def test_resolved_result_is_identical_through_direct_compare_search_and_export(p
     results = ResultRepository()
     monkeypatch.setattr(results, 'directory', lambda: tmp_path/'planning')
     planner = PlanningService(results=results, point_pipeline=pipeline)
-    q = CompareRequest(illumination_model='sun_center', targets=[{'latitude_deg': request.latitude_deg, 'longitude_e_deg': request.longitude_e_deg}],
+    q = CompareRequest(evaluation_policy=request.evaluation_policy, illumination_model='sun_center', targets=[{'latitude_deg': request.latitude_deg, 'longitude_e_deg': request.longitude_e_deg}],
         data_source='coordinate', arrival_utc=request.start_utc, duration_hours=1,
         min_sunlit_fraction=.8, resolve_indeterminate=True)
     compared = planner.compare(q)

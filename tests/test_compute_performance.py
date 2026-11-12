@@ -44,12 +44,12 @@ def test_short_mission_completes_while_multiyear_job_is_running(pipeline, monkey
     import time
     entered, release = Event(), Event()
     original = pipeline.run
-    def run(request, progress):
+    def run(request, progress, **kwargs):
         if request.duration_hours > 168:
             entered.set()
             assert release.wait(10)
             return {'result_id': 'synthetic-bulk-job'}
-        return original(request, progress)
+        return original(request, progress, **kwargs)
     monkeypatch.setattr(pipeline, 'run', run)
     jobs = PointAnalysisJobs(root=pipeline.root, pipeline=pipeline)
     try:
@@ -163,10 +163,10 @@ def test_identical_pending_jobs_are_coalesced_and_keep_exact_request(pipeline, m
     from threading import Event
     entered, release = Event(), Event()
     original = pipeline.run
-    def slow(request, progress):
+    def slow(request, progress, **kwargs):
         entered.set()
         assert release.wait(timeout=10)
-        return original(request, progress)
+        return original(request, progress, **kwargs)
     monkeypatch.setattr(pipeline, 'run', slow)
     jobs = PointAnalysisJobs(root=pipeline.root, pipeline=pipeline, max_pending=1)
     request = query(min_sunlit_fraction=.8)

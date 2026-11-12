@@ -56,6 +56,7 @@ class PlanningService:
         from app.services.lunarsight.horizons import ADAPTER_VERSION
         from app.services.lunarsight.visibility import SENSITIVITY_VERSION
         from app.services.lunarsight.contact_windows import METHOD_VERSION as CONTACT_VERSION
+        from app.point_analysis.hard_first import VERSION as HARD_FIRST_VERSION
         sources = [{key: source[key] for key in ("dataset_id", "sha256", "resolution_m")} for source in installed_sources()]
         if not sources:
             from app.precompute.store import Store
@@ -74,6 +75,7 @@ class PlanningService:
         return {"scenario": {}, "warnings": ["PROVISIONAL: sampled solar-disc illumination and Earth-centre LOS; no RF, power or thermal model."],
             "dataset_version": "verified-dem-coordinate", "source_hash": digest({
             "datasets": sources, "evaluation": EVALUATION_VERSION, "validation": VALIDATION_VERSION,
+            "execution_policy_version": HARD_FIRST_VERSION,
             "planning": METHOD_VERSION,
             "illumination_model": query.illumination_model,
             "solar_disc_method": SOLAR_DISC_VERSION if query.illumination_model == "solar_disc" else None,

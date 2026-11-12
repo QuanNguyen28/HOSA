@@ -105,6 +105,7 @@ def test_blackout_constraint_is_longest_continuous_event_not_total():
 
 def flags():
     return ["compare", "--sites", "Site04_P1", "--arrival", "2026-11-14T00:00:00Z",
+            "--evaluation-policy", "complete",
             "--min-sunlit-fraction", "0.8", "--min-earth-los-fraction", str((72-71.15)/72),
             "--max-darkness-hours", "12", "--max-earth-blackout-hours", "71.15"]
 

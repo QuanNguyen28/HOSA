@@ -26,7 +26,7 @@ from app.services.lunarsight.horizon import ray_elevation
 
 
 def query(**changes):
-    return PointAnalysisRequest(**{'illumination_model': 'sun_center', 'latitude_deg': -89.5, 'longitude_e_deg': 220,
+    return PointAnalysisRequest(**{'evaluation_policy': 'complete', 'illumination_model': 'sun_center', 'latitude_deg': -89.5, 'longitude_e_deg': 220,
         'start_utc': '2026-11-17T00:00:00Z', 'duration_hours': 1, **changes})
 
 

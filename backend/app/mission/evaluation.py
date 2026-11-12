@@ -111,7 +111,7 @@ def angle_difference(base, alternative):
 
 def validate(request, frame, alternatives, angles, *, terrain_complete,
              ephemeris_complete, seams, references, evidence_checks=(),
-             azimuth_comparison_name="azimuth_0.25_vs_0.125"):
+             azimuth_comparison_name="azimuth_0.25_vs_0.125", include_soft=True):
     """Missing comparisons fail closed, regardless of nominal feasibility."""
     metric = metrics(frame)
     checks = constraint_checks(metric, request, frame)
@@ -140,7 +140,7 @@ def validate(request, frame, alternatives, angles, *, terrain_complete,
         passed = nonangular_passed and angle_pass
         diagnostics[name] = {"duration_delta_minutes": deltas, "temporal": temporal,
             "angles_by_height": angle, "constraint_checks": variant_checks,
-            "metrics_hours": other, "soft_constraint_checks": assess_soft(other, request.constraints)[0],
+            "metrics_hours": other, "soft_constraint_checks": assess_soft(other, request.constraints)[0] if include_soft else {},
             "nonangular_passed": bool(nonangular_passed), "passed": bool(passed)}
         if not passed:
             reasons.append(name + ":SENSITIVITY_FAILED")
@@ -161,7 +161,7 @@ def validate(request, frame, alternatives, angles, *, terrain_complete,
         "seams": seams, "evidence_checks": list(evidence_checks), "sensitivity": diagnostics}
 
 
-def evaluate(request, frame, validation):
+def evaluate(request, frame, validation, *, include_soft=True):
     """One decision policy; soft preferences never override hard requirements."""
     if frame.empty or (frame.start_utc.iloc[0] != pd.Timestamp(request.start_utc)
             or frame.end_utc.iloc[-1] != pd.Timestamp(request.end_utc)):
@@ -172,7 +172,7 @@ def evaluate(request, frame, validation):
     checks = constraint_checks(metric, request, frame)
     nominal = decision(checks.values()) if checks else None
     final = gated_decision(nominal, validation)
-    soft, soft_violations = assess_soft(metric, request.constraints)
+    soft, soft_violations = assess_soft(metric, request.constraints) if include_soft else ({}, [])
     result = {"metrics_hours": metric, "constraint_checks": checks,
         "nominal_sampled_decision": nominal, "decision": final,
         "soft_constraint_checks": soft, "soft_violations": soft_violations,

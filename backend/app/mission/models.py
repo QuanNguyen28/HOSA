@@ -84,6 +84,8 @@ class ContactRequirements(Contract):
 
 
 class MissionRequest(MissionTarget):
+    evaluation_policy: Literal["hard_first", "complete"] = Field(default="hard_first",
+        description="hard_first stops on a proven sampled hard failure; complete retains all diagnostics for comparison")
     illumination_model: Literal["solar_disc", "sun_center"] = Field(default="solar_disc",
         description="solar_disc: time-mean visible solar-disc area including Earth occultation; sun_center: explicit legacy geometric centre model")
     start_utc: str = Field(description="Timezone-aware ISO 8601 on an exact 5-minute UTC grid",

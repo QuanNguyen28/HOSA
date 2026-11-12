@@ -37,6 +37,7 @@ def parser():
         sub.add_argument("--max-earth-blackout-hours", type=float, help="Optional soft preference: maximum continuous loss of Earth LOS")
         sub.add_argument("--min-sunlit-fraction", type=float, help="Hard minimum time-mean visible solar-disc area, in [0,1]")
         sub.add_argument("--illumination-model", choices=("solar_disc", "sun_center"), help="Default solar_disc; sun_center explicitly selects legacy centre-only semantics")
+        sub.add_argument("--evaluation-policy", choices=("hard_first", "complete"), help="Stop at a sampled hard failure (default), or retain complete diagnostics")
         sub.add_argument("--min-earth-los-fraction", type=float, help="Required hard minimum Earth-LOS fraction, in [0,1]")
         sub.add_argument("--duration-hours", type=float)
         sub.add_argument("--sun-panel-height-m", type=float)

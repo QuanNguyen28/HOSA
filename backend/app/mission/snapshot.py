@@ -170,7 +170,7 @@ def sensitivity_summary(request, result):
     """Keep the existing planning diagnostic fields, derived from shared checks."""
     comparisons = {}
     metric, checks = result["metrics_hours"], result["constraint_checks"]
-    for name, diagnostic in result["validation"]["sensitivity"].items():
+    for name, diagnostic in result["validation"].get("sensitivity", {}).items():
         if "metrics_hours" not in diagnostic:
             comparisons[name] = {"status": "NOT_EVALUATED", "reason": "COMPARISON_WINDOW_NOT_COVERED"}
             continue
@@ -183,12 +183,12 @@ def sensitivity_summary(request, result):
             "bounds_abs_delta_minutes": diagnostic["duration_delta_minutes"],
             "soft_preferences_changed": diagnostic["soft_constraint_checks"] != result["soft_constraint_checks"]}
     statuses = [v["status"] for v in comparisons.values()]
-    temporal = result["validation"]["sensitivity"].get("time_5min_vs_1min", {})
+    temporal = result["validation"].get("sensitivity", {}).get("time_5min_vs_1min", {})
     time_items = list(temporal.get("temporal", {}).values())
     max_shift = max((v["max_matched_event_shift_minutes"] or 0 for v in time_items), default=None)
-    max_angle = max((v["max_abs_deg"] for d in result["validation"]["sensitivity"].values()
+    max_angle = max((v["max_abs_deg"] for d in result["validation"].get("sensitivity", {}).values()
                      for v in d.get("angles_by_height", {}).values() if v["max_abs_deg"] is not None), default=None)
-    return {"status": "REVIEW" if "REVIEW" in statuses else "NOT_EVALUATED" if "NOT_EVALUATED" in statuses else "STABLE_DECISION",
+    return {"status": "REVIEW" if "REVIEW" in statuses else "NOT_EVALUATED" if not statuses or "NOT_EVALUATED" in statuses else "STABLE_DECISION",
         "scope": {"site_id": request.site_id, "start_utc": request.start_utc, "end_utc": request.end_utc,
             "contact_requirements": request.contact_requirements.model_dump() if request.contact_requirements else None,
             "constraints": request.constraints.model_dump(), "min_sunlit_fraction": request.min_sunlit_fraction,

@@ -378,7 +378,7 @@ export function CurrentStatus({
   result?: PointResult;
   time: number;
 }) {
-  const row = result && intervalAt(result.timeline, time);
+  const row = result && (result.instant ?? intervalAt(result.timeline, time));
   return (
     <div className="flex gap-2">
       {(["sun", "earth"] as const).map((body) => {
@@ -411,6 +411,7 @@ export function CurrentStatus({
   );
 }
 export function jointBounds(result: PointResult): Bounds {
+  if (result.joint_hours) return result.joint_hours;
   let lo = 0,
     hi = 0;
   for (const row of result.timeline) {
@@ -462,27 +463,23 @@ export function BackendTimeline({
               );
             }}
           >
-            {bins.map((r, i) => (
-              <span
+            {bins.map((r, i) => {
+              const lo = r[`${body}_visible_fraction_lower`] ?? 0;
+              const hi = r[`${body}_visible_fraction_upper`] ?? 1;
+              const uncertain = hi-lo > 1e-9;
+              return <span
                 aria-hidden="true"
                 key={i}
-                title={`${fmtTime(Date.parse(r.start_utc))}: ${body === "sun" && r.sun_visible_fraction != null ? `${(r.sun_visible_fraction * 100).toFixed(1)}% of Sun disc` : r[`${body}_state`]}`}
+                title={`${fmtTime(Date.parse(r.start_utc))}: ${(lo * 100).toFixed(1)}${uncertain ? `–${(hi * 100).toFixed(1)}` : ""}% ${body === "sun" ? "mean Sun disc" : "visible time"} in display bin`}
                 style={{
                   alignSelf: "flex-end",
-                  height: body === "sun" && r.sun_visible_fraction != null
-                    ? `${Math.max(0, r.sun_visible_fraction) * 100}%` : "100%",
+                  height: uncertain ? "100%" : `${Math.max(0, lo) * 100}%`,
                   flexGrow: Date.parse(r.end_utc) - Date.parse(r.start_utc),
-                  background:
-                    r[`${body}_state`] === "V"
-                      ? { sun: "#FBBF24", earth: "#06B6D4", joint: "#10B981" }[
-                          body
-                        ]
-                      : r[`${body}_state`] === "B"
-                        ? "#222"
-                        : "repeating-linear-gradient(45deg,#666 0 2px,#333 2px 5px)",
+                  background: uncertain ? "repeating-linear-gradient(45deg,#666 0 2px,#333 2px 5px)"
+                    : hi > 0 ? { sun: "#FBBF24", earth: "#06B6D4", joint: "#10B981" }[body] : "#222",
                 }}
-              />
-            ))}
+              />;
+            })}
             <i
               className="pointer-events-none absolute inset-y-0 w-px bg-white"
               style={{ left: `${((time - start) / (end - start)) * 100}%` }}
@@ -491,17 +488,51 @@ export function BackendTimeline({
         </div>
       ))}
       <p className="text-right font-mono text-[9px] text-mute">
-        SUN HEIGHT = VISIBLE DISC FRACTION · EARTH/BOTH = VISIBLE · HATCHED = UNKNOWN
+        HEIGHT = MEAN SUN DISC / EARTH & JOINT VISIBLE TIME · HATCHED = UNCERTAIN · DISPLAY BIN AVERAGES
+        {result?.timeline_transport?.exact_intervals_ready === false && " · Preview chart; exact instants available after Analyze"}
+        {result?.timeline_transport?.mode === "aggregated" && result.timeline_transport.exact_intervals_ready !== false && " · Current status uses exact native intervals"}
         {!result && " · Run Analyze to load evidence"}
+        {result?.timeline_transport?.mode === "pending" && (result.evaluation_stages?.validation === "not_started"
+          ? " · Metrics ready · Analyze point to prepare timeline and evaluate"
+          : " · Metrics ready · timeline and evaluation are being prepared")}
       </p>
     </div>
   );
 }
 export function ValidationInfo({
   result,
+  pendingError,
+  onTime,
 }: {
   result: PointResult | Candidate;
+  pendingError?: string;
+  onTime?: (value: number) => void;
 }) {
+  if ("hard_failure" in result && result.hard_failure) {
+    const failure = result.hard_failure;
+    return <div className="space-y-1 text-[11px] leading-relaxed text-rose" role="alert">
+      <p>Hard requirement failed: {failure.constraint.replaceAll("_", " ")}.</p>
+      {typeof failure.limit === "number" && failure.observed_bounds && <p>
+        Required {(failure.limit * 100).toFixed(2)}%; upper bound {(failure.observed_bounds[1] * 100).toFixed(2)}%.
+        {failure.shortfall_hours_bounds && ` At least ${boundsText(failure.shortfall_hours_bounds)} h short.`}
+      </p>}
+      <p>Validation and soft preferences skipped. Sampled model · PROVISIONAL.</p>
+      <p>Window: {failure.window.start_utc.replace("T", " ")} → {failure.window.end_utc.replace("T", " ")}</p>
+      {failure.deadline_utc && <p>Contact must finish by {failure.deadline_utc.replace("T", " ")}.</p>}
+      <p className="text-mute">{failure.explanation}</p>
+      {failure.evidence_intervals.map((row) => <button key={row.start_utc} className="block text-left underline underline-offset-2"
+        disabled={!onTime} onClick={() => onTime?.(Date.parse(row.at_utc ?? row.start_utc))}>
+        {row.target}: {row.start_utc.replace("T", " ")} → {row.end_utc.replace("T", " ")}
+        {row.at_utc && <span className="block">Worst sample: {row.at_utc.replace("T", " ")}</span>}
+      </button>)}
+    </div>;
+  }
+  if ("evaluation_status" in result && result.evaluation_status === "pending") {
+    return <div role="status" className="text-[11px] leading-relaxed text-amber">
+      <p>{pendingError ? "Evaluation stopped. Initial metrics remain available." : result.evaluation_stages?.validation === "not_started" ? "Prepared metrics ready. Analyze point to evaluate requirements and scientific validation." : "Evaluating requirements and scientific validation…"}</p>
+      <p>Initial Sun/Earth/Joint metrics are available. Values may change after refinement; no final decision yet.</p>
+    </div>;
+  }
   return (
     <div className="text-[11px] leading-relaxed text-mute">
       <p

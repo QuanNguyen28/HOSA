@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { MoonScene, type GroundSky } from "../components/MoonScene";
 import { useSiteAnalysis } from "../hooks/useSiteAnalysis";
-import type { PointResult } from "../mvp/contracts";
+import { intervalAt, type PointResult } from "../mvp/contracts";
 import { useSouthPolarTerrain } from "../hooks/useSouthPolarTerrain";
 import { useTerrainWindow, type TerrainWindow } from "../hooks/useTerrainWindow";
 import type {
@@ -127,10 +127,7 @@ export default function Stage3D({
     };
     const model = liveState(pointSite, timeMs, heightM ?? 2);
     const coordinateExact = pointAnalysis?.request.panel_height_m === pointAnalysis?.request.antenna_height_m
-      ? pointAnalysis?.timeline.find((row) => {
-          const at = timeMs;
-          return Date.parse(row.start_utc) <= at && at < Date.parse(row.end_utc);
-        })
+      ? pointAnalysis?.instant ?? (pointAnalysis && intervalAt(pointAnalysis.timeline, timeMs))
       : undefined;
     const exact = analysis?.availability === "AVAILABLE" ? analysis.instant : undefined;
     if (coordinateExact) {

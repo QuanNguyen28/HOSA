@@ -15,6 +15,8 @@ from app.mission.identity import digest
 from app.services.lunarsight.point import repository_root
 from .models import JobStatus
 from .pipeline import PointAnalysisPipeline, atomic_json
+from .transport import write_frame, exact_interval, read_array, frame_from_array, display_timeline
+from app.mission.evaluation import serialization_frame
 
 
 @lru_cache
@@ -22,12 +24,14 @@ def get_point_pipeline():
     return PointAnalysisPipeline(repository_root() / "data/cache/point-analysis")
 
 
-def calculate(request, pipeline, progress=lambda stage: None, timeout=0, cancel_event: Event | None = None):
+def calculate(request, pipeline, progress=lambda stage: None, timeout=0, cancel_event: Event | None = None,
+              *, preview=None, display=False):
     """Serialize identical calculations; shared terrain/raw caches lock their own writes."""
     pipeline.root.mkdir(parents=True, exist_ok=True)
     if cancel_event is not None and cancel_event.is_set():
         raise DomainError("POINT_ANALYSIS_CANCELLED", 409)
-    cached = pipeline.lookup_cached(request) if hasattr(pipeline, 'lookup_cached') else None
+    options = {"display": display} if isinstance(pipeline, PointAnalysisPipeline) else {}
+    cached = pipeline.lookup_cached(request, **options) if hasattr(pipeline, 'lookup_cached') else None
     if cached is not None:
         progress("cached")
         return cached
@@ -48,11 +52,11 @@ def calculate(request, pipeline, progress=lambda stage: None, timeout=0, cancel_
             try:
                 if cancel_event.is_set():
                     raise DomainError("POINT_ANALYSIS_CANCELLED", 409)
-                return pipeline.run(request, progress)
+                return pipeline.run(request, progress, **({"preview": preview, **options} if isinstance(pipeline, PointAnalysisPipeline) else {}))
             finally:
                 lock.release()
         with FileLock(str(locks / f"{key}.lock"), timeout=timeout):
-            return pipeline.run(request, progress)
+            return pipeline.run(request, progress, **({"preview": preview, **options} if isinstance(pipeline, PointAnalysisPipeline) else {}))
     except Timeout as error:
         raise DomainError("POINT_ANALYSIS_BUSY", 429) from error
 
@@ -74,7 +78,8 @@ class PointAnalysisJobs:
         self.owner_lock.acquire(timeout=0)
 
     def submit(self, request):
-        cached = self.pipeline.lookup_cached(request) if hasattr(self.pipeline, 'lookup_cached') else None
+        options = {"display": True} if isinstance(self.pipeline, PointAnalysisPipeline) else {}
+        cached = self.pipeline.lookup_cached(request, **options) if hasattr(self.pipeline, 'lookup_cached') else None
         if cached is not None:
             identifier = uuid4().hex
             status = JobStatus(job_id=identifier, status="succeeded", stage="cached",
@@ -107,21 +112,36 @@ class PointAnalysisJobs:
         executor.submit(self.work, identifier, request, request_key)
 
     def work(self, identifier, request, request_key=None):
+        preview_url = None
         def progress(stage):
-            self.write(JobStatus(job_id=identifier, status="running", stage=stage), request=request.model_dump())
+            self.write(JobStatus(job_id=identifier, status="running", stage=stage, preview_url=preview_url), request=request.model_dump())
+        def publish_preview(result, frame):
+            nonlocal preview_url
+            directory = self.root/"previews"/identifier
+            atomic_json(directory/"preview.json", result)
+            preview_url = f"/api/lunar/point/analyses/{identifier}/preview"
+            progress("metrics_ready_preparing_details")
+            if frame is not None:
+                timeline, transport = display_timeline(frame)
+                result = {**result, "timeline": timeline, "timeline_transport": {**transport, "exact_intervals_ready": False}}
+                atomic_json(directory/"preview.json", result)
+                reference = write_frame(directory/"preview.npy", frame)
+                result = {**result, "provenance": {**result["provenance"], "timeline_artifact": reference},
+                    "timeline_transport": {**result["timeline_transport"], "exact_intervals_ready": True}}
+                atomic_json(directory/"preview.json", result)
         try:
             progress("waiting_for_worker")
             # Duplicate calculations serialize across processes. Geometry and
             # JPL writes have separate resource locks for concurrent observers.
-            result = calculate(request, self.pipeline, progress, timeout=-1)
+            result = calculate(request, self.pipeline, progress, timeout=-1, preview=publish_preview, display=True)
             self.write(JobStatus(job_id=identifier, status="succeeded", stage="complete",
                 result_url=f"/api/lunar/point/analyses/{identifier}/result"), result_id=result["result_id"],
                 execution=result.get("execution"), request=result.get("request"))
         except DomainError as error:
-            self.write(JobStatus(job_id=identifier, status="failed", stage="failed", error_code=error.code), request=request.model_dump())
+            self.write(JobStatus(job_id=identifier, status="failed", stage="failed", error_code=error.code, preview_url=preview_url), request=request.model_dump())
         except Exception:
             logging.getLogger(__name__).exception("Coordinate pipeline failed: job=%s", identifier)
-            self.write(JobStatus(job_id=identifier, status="failed", stage="failed", error_code="POINT_ANALYSIS_FAILED"), request=request.model_dump())
+            self.write(JobStatus(job_id=identifier, status="failed", stage="failed", error_code="POINT_ANALYSIS_FAILED", preview_url=preview_url), request=request.model_dump())
         finally:
             with self.lock:
                 self.active.discard(identifier)
@@ -154,7 +174,7 @@ class PointAnalysisJobs:
                     pass  # A live process still owns the queued/running job.
         return JobStatus.model_validate({k: v for k, v in record.items() if k in JobStatus.model_fields})
 
-    def result(self, identifier):
+    def result(self, identifier, *, display=False):
         status = self.status(identifier)
         if status.status != "succeeded":
             raise DomainError(status.error_code or "POINT_RESULT_NOT_READY", 409)
@@ -162,13 +182,45 @@ class PointAnalysisJobs:
         directory = self.root / "results" / record["result_id"]
         try:
             receipt = json.loads((directory / "receipt.json").read_text())
-            result = self.pipeline.cached_result(directory, receipt["identity"])
+            result = self.pipeline.cached_result(directory, receipt["identity"], display=display)
         except (OSError, ValueError, KeyError) as error:
             raise DomainError("POINT_RESULT_MISSING", 503) from error
         if result is None:
             raise DomainError("POINT_RESULT_MISSING", 503)
         return {**result, "execution": record.get("execution") or result.get("execution"),
                 "request": record.get("request") or result.get("request")}
+
+    def preview(self, identifier):
+        self.read(identifier)  # Validate the opaque ID before constructing paths.
+        path = self.root/"previews"/identifier/"preview.json"
+        if not path.is_file():
+            raise DomainError("POINT_PREVIEW_NOT_READY", 409)
+        return json.loads(path.read_text())
+
+    def interval(self, identifier, at_utc):
+        status = self.status(identifier)
+        if status.status == "succeeded":
+            record = self.read(identifier)
+            directory = self.root/"results"/record["result_id"]
+            result = self.result(identifier, display=True)
+        else:
+            directory = self.root/"previews"/identifier
+            result = self.preview(identifier)
+        reference = result["provenance"].get("timeline_artifact")
+        if reference is None:
+            raise DomainError("POINT_INTERVAL_NOT_READY", 409)
+        return exact_interval(directory, reference, at_utc)
+
+    def interval_csv(self, identifier):
+        result = self.result(identifier, display=True)
+        directory = self.root/"results"/result["result_id"]
+        reference = result["provenance"]["timeline_artifact"]
+        array = read_array(directory, reference)
+        def chunks():
+            for start in range(0, len(array), 10000):
+                frame = frame_from_array(array[start:start+10000], reference)
+                yield serialization_frame(frame).to_csv(index=False, header=start == 0)
+        return chunks()
 
     def close(self):
         self.executor.shutdown(wait=True, cancel_futures=False)

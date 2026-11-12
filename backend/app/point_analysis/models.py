@@ -15,6 +15,7 @@ class JobStatus(Contract):
     stage: str
     error_code: str | None = None
     result_url: str | None = None
+    preview_url: str | None = None
 
 
 BoundsPair = Annotated[list[float], Field(min_length=2, max_length=2)]
@@ -26,6 +27,10 @@ class PointAnalysisResult(Contract):
     method_version: str
     created_utc: str
     execution: dict
+    evaluation_status: Literal["pending", "complete"] = "complete"
+    evaluation_stages: dict = Field(default_factory=dict)
+    hard_failure: dict | None = None
+    timeline_transport: dict = Field(default_factory=dict)
     request: PointAnalysisRequest
     end_utc: str
     coordinate: dict
@@ -38,6 +43,7 @@ class PointAnalysisResult(Contract):
     soft_violations: list[dict] = Field(default_factory=list)
     contact_analysis: dict | None = None
     metrics_hours: dict[str, BoundsPair]
+    joint_hours: BoundsPair | None = None
     availability_fraction: dict[str, BoundsPair]
     coverage: dict
     validation: dict

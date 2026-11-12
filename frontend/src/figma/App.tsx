@@ -14,7 +14,7 @@ import { Finder } from "./views";
 import ChatDock, { ChatPage, useAssistant } from "./Chat";
 import type { Mode } from "./Stage3D";
 import { usePointTerrain } from "../hooks/usePointTerrain";
-import { analyzePoint, api, downloadJson, useOperation } from "../mvp/api";
+import { analyzePoint, api, downloadJson, useOperation, usePointInstant, usePreparedMetrics } from "../mvp/api";
 import {
   DEFAULT_MISSION,
   boundsText,
@@ -267,11 +267,12 @@ export default function App() {
           onSite={setSiteId}
           onCoordinate={coordinate}
           onAnalyze={() =>
-            void point.run((signal, progress) =>
+            void point.run((signal, progress, preview) =>
               analyzePoint(
                 missionRequest(mission, toTarget(site)),
                 signal,
                 progress,
+                preview,
               ),
             )
           }
@@ -390,7 +391,7 @@ function Explore({
   site,
   sites,
   mission,
-  busy,
+  busy: operationsBusy,
   issue,
   point,
   catalogError,
@@ -423,8 +424,12 @@ function Explore({
 }) {
   const [mode, setMode] = useState<Mode>("pole");
   const [tab, setTab] = useState<"info" | "sites">("info");
-  const r = point.result,
+  const prepared = usePreparedMetrics(issue ? undefined : missionRequest(mission, toTarget(site)));
+  const r = point.result ?? prepared,
     end = s.endMs;
+  const busy = operationsBusy && !r;
+  const instant = usePointInstant(r, s.timeMs);
+  const viewResult = useMemo(() => r ? { ...r, instant } : undefined, [r, instant]);
   const customCoordinate = useMemo(
     () => site.id === "custom" && Number.isFinite(site.lat) && Number.isFinite(site.lon)
       ? { latitude: site.lat, longitude: site.lon }
@@ -529,7 +534,7 @@ function Explore({
               </div>
               <div className="space-y-3 border-b border-line p-5">
                 <p className="eyebrow">Right now · backend intervals</p>
-                <CurrentStatus result={r} time={s.timeMs} />
+                <CurrentStatus result={viewResult} time={s.timeMs} />
               </div>
               {customCoordinate && (
                 <div className="space-y-1 border-b border-line p-5 text-xs text-soft">
@@ -556,7 +561,7 @@ function Explore({
                 )}
                 <button
                   className={`${actionClass} w-full`}
-                  disabled={busy || !!issue}
+                  disabled={point.busy || !!issue}
                   onClick={onAnalyze}
                 >
                   {point.busy ? "Analyzing…" : "Analyze point"}
@@ -574,15 +579,15 @@ function Explore({
                 )}
                 {r && (
                   <div data-testid="point-result" className="space-y-3">
-                    <DecisionBadge value={r.decision} />
-                    <ValidationInfo result={r} />
+                    <DecisionBadge value={r.evaluation_status === "pending" ? point.error ? "EVALUATION FAILED" : point.busy ? "EVALUATING" : "METRICS READY" : r.decision} />
+                    <ValidationInfo result={r} pendingError={point.error} onTime={ctl.setTime} />
                     <button
                       className="text-xs text-mute underline underline-offset-2 hover:text-white"
                       onClick={() =>
                         downloadJson(r, `point-${r.result_id}.json`)
                       }
                     >
-                      Download JSON
+                      {r.evaluation_status === "pending" ? "Download initial metrics" : r.timeline_transport?.mode === "aggregated" ? "Download summary JSON" : "Download JSON"}
                     </button>
                   </div>
                 )}
@@ -659,7 +664,13 @@ function Explore({
                   ))
                 ) : (
                   <p className="text-xs text-mute">
-                    {r
+                    {r?.hard_failure && !r.contact_analysis
+                      ? "Contact requirements were not evaluated after the hard failure."
+                      : r?.evaluation_stages?.validation === "not_started"
+                      ? "Analyze point to evaluate contact requirements."
+                      : r?.evaluation_status === "pending"
+                      ? "Contact requirements are still being evaluated."
+                      : r
                       ? "No confirmed visibility windows in this mission."
                       : "Analyze to load confirmed windows."}
                   </p>
@@ -731,7 +742,7 @@ function Explore({
                 siteId={site.id}
                 timeMs={s.timeMs}
                 heightM={s.hIdx >= 0 ? HEIGHTS[s.hIdx] : mission.panel}
-                pointAnalysis={r}
+                pointAnalysis={viewResult}
                 onSelect={(id) => {
                   if (!busy) {
                     onSite(id);

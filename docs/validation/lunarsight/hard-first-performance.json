@@ -1,0 +1,747 @@
+{
+  "passed": true,
+  "cases": [
+    {
+      "name": "Haworth-72h",
+      "request": {
+        "site_id": "haworth",
+        "latitude_deg": null,
+        "longitude_e_deg": null,
+        "evaluation_policy": "hard_first",
+        "illumination_model": "solar_disc",
+        "start_utc": "2026-11-17T00:00:00Z",
+        "duration_hours": 72.0,
+        "end_utc": "2026-11-20T00:00:00Z",
+        "panel_height_m": 20.0,
+        "antenna_height_m": 20.0,
+        "constraints": {
+          "max_darkness_hours": null,
+          "max_earth_blackout_hours": null
+        },
+        "min_sunlit_fraction": 0.8,
+        "min_earth_los_fraction": null,
+        "contact_requirements": null,
+        "offline": true,
+        "resolve_indeterminate": true
+      },
+      "complete": {
+        "seconds": 1.137225717999172,
+        "preview": {
+          "seconds": 0.3901454070000909,
+          "physical_cache_hit": true,
+          "metrics_hours": {
+            "total_sun_hours": [
+              52.48584116789,
+              52.48584116789
+            ],
+            "total_earth_los_hours": [
+              72.0,
+              72.0
+            ],
+            "longest_dark_hours": [
+              0.0,
+              0.0
+            ],
+            "longest_blackout_hours": [
+              0.0,
+              0.0
+            ],
+            "longest_joint_hours": [
+              72.0,
+              72.0
+            ]
+          },
+          "joint_hours": [
+            72.0,
+            72.0
+          ]
+        },
+        "stages": [
+          {
+            "stage": "verify_dem",
+            "seconds": 0.0016062539998529246
+          },
+          {
+            "stage": "cached_horizon",
+            "seconds": 0.0950739079999039
+          },
+          {
+            "stage": "cached_physical_series",
+            "seconds": 0.16756068299946492
+          },
+          {
+            "stage": "initial_metrics",
+            "seconds": 0.16765460599890503
+          },
+          {
+            "stage": "hard_requirements",
+            "seconds": 0.3901496329999645
+          },
+          {
+            "stage": "scientific_validation",
+            "seconds": 0.39055571599965333
+          },
+          {
+            "stage": "shared_ephemeris_5min_sun",
+            "seconds": 0.3905644429996755
+          },
+          {
+            "stage": "shared_ephemeris_5min_earth",
+            "seconds": 0.522341684998537
+          },
+          {
+            "stage": "horizons_1min",
+            "seconds": 0.5333558209986222
+          },
+          {
+            "stage": "shared_ephemeris_1min_sun",
+            "seconds": 0.53337027499947
+          },
+          {
+            "stage": "shared_ephemeris_1min_earth",
+            "seconds": 0.5478442849998828
+          },
+          {
+            "stage": "metrics_and_validation",
+            "seconds": 0.5580149449997407
+          },
+          {
+            "stage": "soft_preferences",
+            "seconds": 0.8598122200000944
+          },
+          {
+            "stage": "commit_artifacts",
+            "seconds": 1.1035589409984823
+          },
+          {
+            "stage": "complete",
+            "seconds": 1.1368401009985973
+          }
+        ],
+        "commit_seconds": 0.03366677700068976,
+        "interval_csv_written": false,
+        "decision": "FAIL",
+        "result_id": "f995b0628b665f1788f9e32429ccb4f718b3ee59a43494659c1f1e72d7399905",
+        "metrics_hours": {
+          "total_sun_hours": [
+            52.48584116789,
+            52.48584116789
+          ],
+          "total_earth_los_hours": [
+            72.0,
+            72.0
+          ],
+          "longest_dark_hours": [
+            0.0,
+            0.0
+          ],
+          "longest_blackout_hours": [
+            0.0,
+            0.0
+          ],
+          "longest_joint_hours": [
+            72.0,
+            72.0
+          ]
+        }
+      },
+      "hard_first": {
+        "seconds": 0.28401519999897573,
+        "preview": {
+          "seconds": 0.24148010299904854,
+          "physical_cache_hit": true,
+          "metrics_hours": {
+            "total_sun_hours": [
+              52.48584116789,
+              52.48584116789
+            ],
+            "total_earth_los_hours": [
+              72.0,
+              72.0
+            ],
+            "longest_dark_hours": [
+              0.0,
+              0.0
+            ],
+            "longest_blackout_hours": [
+              0.0,
+              0.0
+            ],
+            "longest_joint_hours": [
+              72.0,
+              72.0
+            ]
+          },
+          "joint_hours": [
+            72.0,
+            72.0
+          ]
+        },
+        "stages": [
+          {
+            "stage": "verify_dem",
+            "seconds": 0.0008127159999276046
+          },
+          {
+            "stage": "cached_horizon",
+            "seconds": 0.011678650998874218
+          },
+          {
+            "stage": "cached_physical_series",
+            "seconds": 0.0338366349988064
+          },
+          {
+            "stage": "initial_metrics",
+            "seconds": 0.03397689899975376
+          },
+          {
+            "stage": "hard_requirements",
+            "seconds": 0.24148364899883745
+          },
+          {
+            "stage": "commit_artifacts",
+            "seconds": 0.25849521499912953
+          },
+          {
+            "stage": "complete",
+            "seconds": 0.2833529069994256
+          }
+        ],
+        "commit_seconds": 0.0255199849998462,
+        "interval_csv_written": false,
+        "decision": "FAIL",
+        "result_id": "894b0ecd67e05860aaa5465d272dbd9d0317bfb177e33169e10b6dbfcfcaed94",
+        "metrics_hours": {
+          "total_sun_hours": [
+            52.48584116789,
+            52.48584116789
+          ],
+          "total_earth_los_hours": [
+            72.0,
+            72.0
+          ],
+          "longest_dark_hours": [
+            0.0,
+            0.0
+          ],
+          "longest_blackout_hours": [
+            0.0,
+            0.0
+          ],
+          "longest_joint_hours": [
+            72.0,
+            72.0
+          ]
+        }
+      },
+      "same_native_metrics_and_decision": true,
+      "hard_failure": {
+        "constraint": "min_sunlit_fraction",
+        "scope": "requested_sampled_mission",
+        "policy_version": "hard-first-1.3",
+        "coordinate": {
+          "latitude_deg": -86.36428,
+          "longitude_e_deg": 336.79186
+        },
+        "window": {
+          "start_utc": "2026-11-17T00:00:00Z",
+          "end_utc": "2026-11-20T00:00:00Z"
+        },
+        "evidence_intervals": [
+          {
+            "target": "sun",
+            "start_utc": "2026-11-18T11:20:00+00:00",
+            "end_utc": "2026-11-19T18:55:00+00:00",
+            "at_utc": "2026-11-19T08:45:00+00:00"
+          },
+          {
+            "target": "sun",
+            "start_utc": "2026-11-18T10:15:00+00:00",
+            "end_utc": "2026-11-18T10:25:00+00:00",
+            "at_utc": "2026-11-18T10:15:00+00:00"
+          },
+          {
+            "target": "sun",
+            "start_utc": "2026-11-18T09:20:00+00:00",
+            "end_utc": "2026-11-18T09:25:00+00:00",
+            "at_utc": "2026-11-18T09:20:00+00:00"
+          }
+        ],
+        "sampling_minutes": 5,
+        "limit": 0.8,
+        "unit": "fraction",
+        "observed_bounds": [
+          0.7289700162206945,
+          0.7289700162206945
+        ],
+        "shortfall_hours_bounds": [
+          5.11415883211,
+          5.11415883211
+        ],
+        "explanation": "Even the upper bound is below the required fraction. Evidence intervals contribute to the whole-window shortfall; no single instant alone proves a fractional failure."
+      },
+      "speedup": 4.004101604432697,
+      "changed_requirement": {
+        "seconds": 0.27821218600001885,
+        "preview": {
+          "seconds": 0.23228320199996233,
+          "physical_cache_hit": true,
+          "metrics_hours": {
+            "total_sun_hours": [
+              52.48584116789,
+              52.48584116789
+            ],
+            "total_earth_los_hours": [
+              72.0,
+              72.0
+            ],
+            "longest_dark_hours": [
+              0.0,
+              0.0
+            ],
+            "longest_blackout_hours": [
+              0.0,
+              0.0
+            ],
+            "longest_joint_hours": [
+              72.0,
+              72.0
+            ]
+          },
+          "joint_hours": [
+            72.0,
+            72.0
+          ]
+        },
+        "stages": [
+          {
+            "stage": "verify_dem",
+            "seconds": 0.0005750740001531085
+          },
+          {
+            "stage": "cached_horizon",
+            "seconds": 0.0075382499999250285
+          },
+          {
+            "stage": "cached_physical_series",
+            "seconds": 0.029042145999483182
+          },
+          {
+            "stage": "initial_metrics",
+            "seconds": 0.029165121999540133
+          },
+          {
+            "stage": "hard_requirements",
+            "seconds": 0.2322865999994974
+          },
+          {
+            "stage": "commit_artifacts",
+            "seconds": 0.24652897899977688
+          },
+          {
+            "stage": "complete",
+            "seconds": 0.27759840399994573
+          }
+        ],
+        "commit_seconds": 0.031683207000241964,
+        "interval_csv_written": false,
+        "decision": "FAIL",
+        "result_id": "0de008803e10cf2ffd4ad38366aae46b27d254ff64df49bd598924120fad6e79",
+        "metrics_hours": {
+          "total_sun_hours": [
+            52.48584116789,
+            52.48584116789
+          ],
+          "total_earth_los_hours": [
+            72.0,
+            72.0
+          ],
+          "longest_dark_hours": [
+            0.0,
+            0.0
+          ],
+          "longest_blackout_hours": [
+            0.0,
+            0.0
+          ],
+          "longest_joint_hours": [
+            72.0,
+            72.0
+          ]
+        }
+      },
+      "subwindow": {
+        "seconds": 0.08684621800057357,
+        "preview": {
+          "seconds": 0.04310059100134822,
+          "physical_cache_hit": true,
+          "metrics_hours": {
+            "total_sun_hours": [
+              15.874614958125,
+              15.874614958125
+            ],
+            "total_earth_los_hours": [
+              24.0,
+              24.0
+            ],
+            "longest_dark_hours": [
+              0.0,
+              0.0
+            ],
+            "longest_blackout_hours": [
+              0.0,
+              0.0
+            ],
+            "longest_joint_hours": [
+              24.0,
+              24.0
+            ]
+          },
+          "joint_hours": [
+            24.0,
+            24.0
+          ]
+        },
+        "stages": [
+          {
+            "stage": "verify_dem",
+            "seconds": 0.0005098630008433247
+          },
+          {
+            "stage": "cached_horizon",
+            "seconds": 0.007278979001057451
+          },
+          {
+            "stage": "cached_physical_series",
+            "seconds": 0.028272852001464344
+          },
+          {
+            "stage": "initial_metrics",
+            "seconds": 0.028412861000106204
+          },
+          {
+            "stage": "hard_requirements",
+            "seconds": 0.04310524300126417
+          },
+          {
+            "stage": "commit_artifacts",
+            "seconds": 0.06451804800053651
+          },
+          {
+            "stage": "complete",
+            "seconds": 0.08639910200145096
+          }
+        ],
+        "commit_seconds": 0.022328170000037062,
+        "interval_csv_written": false,
+        "decision": "FAIL",
+        "result_id": "4cd483310ad7ef0fb541df2f98591d637c5ccbc4e44a2e1b71a01ffbd7c73c35",
+        "metrics_hours": {
+          "total_sun_hours": [
+            15.874614958125,
+            15.874614958125
+          ],
+          "total_earth_los_hours": [
+            24.0,
+            24.0
+          ],
+          "longest_dark_hours": [
+            0.0,
+            0.0
+          ],
+          "longest_blackout_hours": [
+            0.0,
+            0.0
+          ],
+          "longest_joint_hours": [
+            24.0,
+            24.0
+          ]
+        }
+      }
+    },
+    {
+      "name": "Site04-10years",
+      "request": {
+        "site_id": "Site04_P1",
+        "latitude_deg": null,
+        "longitude_e_deg": null,
+        "evaluation_policy": "hard_first",
+        "illumination_model": "solar_disc",
+        "start_utc": "2026-11-24T00:00:00Z",
+        "duration_hours": 87672.0,
+        "end_utc": "2036-11-24T00:00:00Z",
+        "panel_height_m": 20.0,
+        "antenna_height_m": 20.0,
+        "constraints": {
+          "max_darkness_hours": null,
+          "max_earth_blackout_hours": null
+        },
+        "min_sunlit_fraction": 0.99,
+        "min_earth_los_fraction": null,
+        "contact_requirements": null,
+        "offline": true,
+        "resolve_indeterminate": true
+      },
+      "complete": {
+        "seconds": 33.10104816400053,
+        "preview": {
+          "seconds": 1.5559671129994967,
+          "physical_cache_hit": true,
+          "metrics_hours": {
+            "total_sun_hours": [
+              76434.03398044725,
+              76434.03398044725
+            ],
+            "total_earth_los_hours": [
+              46276.91666666666,
+              46276.91666666666
+            ],
+            "longest_dark_hours": [
+              61.999999996391,
+              61.999999996391
+            ],
+            "longest_blackout_hours": [
+              333.750000009713,
+              333.750000009713
+            ],
+            "longest_joint_hours": [
+              383.249999977692,
+              383.249999977692
+            ]
+          },
+          "joint_hours": [
+            42487.08333333333,
+            42487.08333333333
+          ]
+        },
+        "stages": [
+          {
+            "stage": "verify_dem",
+            "seconds": 0.0010374859994044527
+          },
+          {
+            "stage": "cached_horizon",
+            "seconds": 0.047209590000420576
+          },
+          {
+            "stage": "cached_physical_series",
+            "seconds": 0.5585441519997403
+          },
+          {
+            "stage": "initial_metrics",
+            "seconds": 0.5589275389993418
+          },
+          {
+            "stage": "hard_requirements",
+            "seconds": 1.5559722529997089
+          },
+          {
+            "stage": "scientific_validation",
+            "seconds": 1.5579778789997363
+          },
+          {
+            "stage": "shared_ephemeris_5min_sun",
+            "seconds": 1.5579930709991459
+          },
+          {
+            "stage": "shared_ephemeris_5min_earth",
+            "seconds": 3.4955753440008266
+          },
+          {
+            "stage": "horizons_1min",
+            "seconds": 5.130331095999281
+          },
+          {
+            "stage": "shared_ephemeris_1min_sun",
+            "seconds": 5.130338200000551
+          },
+          {
+            "stage": "shared_ephemeris_1min_earth",
+            "seconds": 11.406099044999792
+          },
+          {
+            "stage": "metrics_and_validation",
+            "seconds": 17.589968095000586
+          },
+          {
+            "stage": "soft_preferences",
+            "seconds": 30.78659600500032
+          },
+          {
+            "stage": "commit_artifacts",
+            "seconds": 31.71738748899952
+          },
+          {
+            "stage": "complete",
+            "seconds": 33.090792447999775
+          }
+        ],
+        "commit_seconds": 1.3836606750010105,
+        "interval_csv_written": false,
+        "decision": "FAIL",
+        "result_id": "2f2da506bc56b477f32e2da1464f71b8d82e2fdc5ed837e5f9a57ee80036f796",
+        "metrics_hours": {
+          "total_sun_hours": [
+            76434.03398044725,
+            76434.03398044725
+          ],
+          "total_earth_los_hours": [
+            46276.91666666666,
+            46276.91666666666
+          ],
+          "longest_dark_hours": [
+            61.999999996391,
+            61.999999996391
+          ],
+          "longest_blackout_hours": [
+            333.750000009713,
+            333.750000009713
+          ],
+          "longest_joint_hours": [
+            383.249999977692,
+            383.249999977692
+          ]
+        }
+      },
+      "hard_first": {
+        "seconds": 3.1114246679990174,
+        "preview": {
+          "seconds": 1.267827612999099,
+          "physical_cache_hit": true,
+          "metrics_hours": {
+            "total_sun_hours": [
+              76434.03398044725,
+              76434.03398044725
+            ],
+            "total_earth_los_hours": [
+              46276.91666666666,
+              46276.91666666666
+            ],
+            "longest_dark_hours": [
+              61.999999996391,
+              61.999999996391
+            ],
+            "longest_blackout_hours": [
+              333.750000009713,
+              333.750000009713
+            ],
+            "longest_joint_hours": [
+              383.249999977692,
+              383.249999977692
+            ]
+          },
+          "joint_hours": [
+            42487.08333333333,
+            42487.08333333333
+          ]
+        },
+        "stages": [
+          {
+            "stage": "verify_dem",
+            "seconds": 0.0011192229994776426
+          },
+          {
+            "stage": "cached_horizon",
+            "seconds": 0.00835475299936661
+          },
+          {
+            "stage": "cached_physical_series",
+            "seconds": 0.35353679899890267
+          },
+          {
+            "stage": "initial_metrics",
+            "seconds": 0.353826107999339
+          },
+          {
+            "stage": "hard_requirements",
+            "seconds": 1.2678339880003477
+          },
+          {
+            "stage": "commit_artifacts",
+            "seconds": 1.815456947999337
+          },
+          {
+            "stage": "complete",
+            "seconds": 3.1078168370004278
+          }
+        ],
+        "commit_seconds": 1.2959677199996804,
+        "interval_csv_written": false,
+        "decision": "FAIL",
+        "result_id": "efe0a2d4abc48a0171bd96c50a30e3ac27d3a1ed6f5d64f8ba3682e716eba602",
+        "metrics_hours": {
+          "total_sun_hours": [
+            76434.03398044725,
+            76434.03398044725
+          ],
+          "total_earth_los_hours": [
+            46276.91666666666,
+            46276.91666666666
+          ],
+          "longest_dark_hours": [
+            61.999999996391,
+            61.999999996391
+          ],
+          "longest_blackout_hours": [
+            333.750000009713,
+            333.750000009713
+          ],
+          "longest_joint_hours": [
+            383.249999977692,
+            383.249999977692
+          ]
+        }
+      },
+      "same_native_metrics_and_decision": true,
+      "hard_failure": {
+        "constraint": "min_sunlit_fraction",
+        "scope": "requested_sampled_mission",
+        "policy_version": "hard-first-1.3",
+        "coordinate": {
+          "latitude_deg": -89.77979955709672,
+          "longitude_e_deg": 203.7337862603575
+        },
+        "window": {
+          "start_utc": "2026-11-24T00:00:00Z",
+          "end_utc": "2036-11-24T00:00:00Z"
+        },
+        "evidence_intervals": [
+          {
+            "target": "sun",
+            "start_utc": "2034-12-05T05:00:00+00:00",
+            "end_utc": "2034-12-08T10:45:00+00:00",
+            "at_utc": "2034-12-05T11:30:00+00:00"
+          },
+          {
+            "target": "sun",
+            "start_utc": "2028-04-18T22:10:00+00:00",
+            "end_utc": "2028-04-22T03:30:00+00:00",
+            "at_utc": "2028-04-19T04:40:00+00:00"
+          },
+          {
+            "target": "sun",
+            "start_utc": "2035-11-24T13:20:00+00:00",
+            "end_utc": "2035-11-27T18:35:00+00:00",
+            "at_utc": "2035-11-24T19:45:00+00:00"
+          }
+        ],
+        "sampling_minutes": 5,
+        "limit": 0.99,
+        "unit": "fraction",
+        "observed_bounds": [
+          0.8718180716813492,
+          0.8718180716813492
+        ],
+        "shortfall_hours_bounds": [
+          10361.246019552753,
+          10361.246019552753
+        ],
+        "explanation": "Even the upper bound is below the required fraction. Evidence intervals contribute to the whole-window shortfall; no single instant alone proves a fractional failure."
+      },
+      "speedup": 10.638550405685407
+    }
+  ],
+  "live_llm_calls": 0,
+  "scope": "Local timings; isolated completed-result caches, installed verified terrain/kernel data. Physical cache is persistent and prepared for catalog 2026\u20132028. complete includes numerical validation; hard_first skips it only after a sampled hard upper-bound failure. Neither path writes CSV automatically."
+}

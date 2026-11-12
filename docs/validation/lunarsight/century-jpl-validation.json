@@ -1,0 +1,215 @@
+{
+  "passed": true,
+  "cases": [
+    {
+      "site_id": "Site01_P1",
+      "start_utc": "2000-01-01T00:00:00Z",
+      "target": 10,
+      "height_m": 20.0,
+      "step_minutes": 1,
+      "samples": 61,
+      "max_az_error_deg": 1.6405652161211037e-06,
+      "max_el_error_deg": 6.329320269782279e-06,
+      "shared_interpolation_check": {
+        "passed": true,
+        "probe_count": 25,
+        "max_az_error_deg": 1.6588961102570465e-06,
+        "max_el_error_deg": 6.3267425011864775e-06,
+        "tolerance_deg": 0.001,
+        "reference": "exact SPICE at probe epochs",
+        "scope": "sampled numerical check, not a continuous-time error bound"
+      },
+      "jpl_sources": [
+        {
+          "raw_file": "raw/horizons/coordinate_sun_1min_019f8121142e.json",
+          "sha256": "4f23d89096c2c85a199d66f481eacb78874f789b63bbb43f7cf77e76ef4997c5",
+          "observer_frame": "MEAN_ME (high precision)        {East-longitude positive}"
+        }
+      ]
+    },
+    {
+      "site_id": "Site01_P1",
+      "start_utc": "2000-01-01T00:00:00Z",
+      "target": 399,
+      "height_m": 20.0,
+      "step_minutes": 1,
+      "samples": 61,
+      "max_az_error_deg": 4.33595238291673e-05,
+      "max_el_error_deg": 4.3013468091324114e-05,
+      "shared_interpolation_check": {
+        "passed": true,
+        "probe_count": 25,
+        "max_az_error_deg": 4.33035815774474e-05,
+        "max_el_error_deg": 6.509812038402174e-05,
+        "tolerance_deg": 0.001,
+        "reference": "exact SPICE at probe epochs",
+        "scope": "sampled numerical check, not a continuous-time error bound"
+      },
+      "jpl_sources": [
+        {
+          "raw_file": "raw/horizons/coordinate_earth_1min_5807fb69b990.json",
+          "sha256": "b7a9de9a04474260adb7aa394a974a66d85640d65085e83b8f26d1db981db9bf",
+          "observer_frame": "MEAN_ME (high precision)        {East-longitude positive}"
+        }
+      ]
+    },
+    {
+      "site_id": "Site01_P1",
+      "start_utc": "2100-12-31T00:00:00Z",
+      "target": 10,
+      "height_m": 20.0,
+      "step_minutes": 1,
+      "samples": 61,
+      "max_az_error_deg": 7.248754059219209e-07,
+      "max_el_error_deg": 1.18631948602399e-05,
+      "shared_interpolation_check": {
+        "passed": true,
+        "probe_count": 25,
+        "max_az_error_deg": 7.248927431646734e-07,
+        "max_el_error_deg": 1.1862288755493111e-05,
+        "tolerance_deg": 0.001,
+        "reference": "exact SPICE at probe epochs",
+        "scope": "sampled numerical check, not a continuous-time error bound"
+      },
+      "jpl_sources": [
+        {
+          "raw_file": "raw/horizons/coordinate_sun_1min_db0911d492e2.json",
+          "sha256": "c4d0a573c27925a230900553b57ec805c1a1cec20f1d1b4397a5738209a21277",
+          "observer_frame": "MEAN_ME (high precision)        {East-longitude positive}"
+        }
+      ]
+    },
+    {
+      "site_id": "Site01_P1",
+      "start_utc": "2100-12-31T00:00:00Z",
+      "target": 399,
+      "height_m": 20.0,
+      "step_minutes": 1,
+      "samples": 61,
+      "max_az_error_deg": 5.6036687766436444e-05,
+      "max_el_error_deg": 7.408084764648493e-05,
+      "shared_interpolation_check": {
+        "passed": true,
+        "probe_count": 25,
+        "max_az_error_deg": 5.441079869683563e-05,
+        "max_el_error_deg": 7.426313517289174e-05,
+        "tolerance_deg": 0.001,
+        "reference": "exact SPICE at probe epochs",
+        "scope": "sampled numerical check, not a continuous-time error bound"
+      },
+      "jpl_sources": [
+        {
+          "raw_file": "raw/horizons/coordinate_earth_1min_0bdc964d0398.json",
+          "sha256": "3c10c4b9cc134f05c8b50d8700e19835346e910c6f24dba4ab0a228e8f9ec312",
+          "observer_frame": "MEAN_ME (high precision)        {East-longitude positive}"
+        }
+      ]
+    },
+    {
+      "site_id": "Site04_P1",
+      "start_utc": "2000-01-01T00:00:00Z",
+      "target": 10,
+      "height_m": 20.0,
+      "step_minutes": 1,
+      "samples": 61,
+      "max_az_error_deg": 1.6550974635265447e-06,
+      "max_el_error_deg": 6.32788265636508e-06,
+      "shared_interpolation_check": {
+        "passed": true,
+        "probe_count": 25,
+        "max_az_error_deg": 1.667117487613723e-06,
+        "max_el_error_deg": 6.324779550037629e-06,
+        "tolerance_deg": 0.001,
+        "reference": "exact SPICE at probe epochs",
+        "scope": "sampled numerical check, not a continuous-time error bound"
+      },
+      "jpl_sources": [
+        {
+          "raw_file": "raw/horizons/coordinate_sun_1min_19c5fb5d07d6.json",
+          "sha256": "be6ed2c7b80260b20cdfaaac3d39308ae6d822881ac6930145016c028a535076",
+          "observer_frame": "MEAN_ME (high precision)        {East-longitude positive}"
+        }
+      ]
+    },
+    {
+      "site_id": "Site04_P1",
+      "start_utc": "2000-01-01T00:00:00Z",
+      "target": 399,
+      "height_m": 20.0,
+      "step_minutes": 1,
+      "samples": 61,
+      "max_az_error_deg": 4.307449137286312e-05,
+      "max_el_error_deg": 4.323160165053963e-05,
+      "shared_interpolation_check": {
+        "passed": true,
+        "probe_count": 25,
+        "max_az_error_deg": 4.301161609987503e-05,
+        "max_el_error_deg": 6.530389590331254e-05,
+        "tolerance_deg": 0.001,
+        "reference": "exact SPICE at probe epochs",
+        "scope": "sampled numerical check, not a continuous-time error bound"
+      },
+      "jpl_sources": [
+        {
+          "raw_file": "raw/horizons/coordinate_earth_1min_831cfb8d68ec.json",
+          "sha256": "81b61c442688e341257f3b83d0401f06bfa5c0082f2fad4b86530d4bb592482d",
+          "observer_frame": "MEAN_ME (high precision)        {East-longitude positive}"
+        }
+      ]
+    },
+    {
+      "site_id": "Site04_P1",
+      "start_utc": "2100-12-31T00:00:00Z",
+      "target": 10,
+      "height_m": 20.0,
+      "step_minutes": 1,
+      "samples": 61,
+      "max_az_error_deg": 7.686544449825305e-07,
+      "max_el_error_deg": 1.1861826584302904e-05,
+      "shared_interpolation_check": {
+        "passed": true,
+        "probe_count": 25,
+        "max_az_error_deg": 7.665038310733507e-07,
+        "max_el_error_deg": 1.1861438290239334e-05,
+        "tolerance_deg": 0.001,
+        "reference": "exact SPICE at probe epochs",
+        "scope": "sampled numerical check, not a continuous-time error bound"
+      },
+      "jpl_sources": [
+        {
+          "raw_file": "raw/horizons/coordinate_sun_1min_02bcf87dfb59.json",
+          "sha256": "72470601f03e7a13a8372c8034cc22ac1557acc4e4acc344a6a7c65d735bacd0",
+          "observer_frame": "MEAN_ME (high precision)        {East-longitude positive}"
+        }
+      ]
+    },
+    {
+      "site_id": "Site04_P1",
+      "start_utc": "2100-12-31T00:00:00Z",
+      "target": 399,
+      "height_m": 20.0,
+      "step_minutes": 1,
+      "samples": 61,
+      "max_az_error_deg": 5.638598852897303e-05,
+      "max_el_error_deg": 7.380895532804743e-05,
+      "shared_interpolation_check": {
+        "passed": true,
+        "probe_count": 25,
+        "max_az_error_deg": 5.475433391666229e-05,
+        "max_el_error_deg": 7.399844149524881e-05,
+        "tolerance_deg": 0.001,
+        "reference": "exact SPICE at probe epochs",
+        "scope": "sampled numerical check, not a continuous-time error bound"
+      },
+      "jpl_sources": [
+        {
+          "raw_file": "raw/horizons/coordinate_earth_1min_59b3930cbab9.json",
+          "sha256": "53f55a1902c9571b20c6ee78b68de607a8b698fe745c2a4b38ce24cdf6a6d02c",
+          "observer_frame": "MEAN_ME (high precision)        {East-longitude positive}"
+        }
+      ]
+    }
+  ],
+  "live_llm_calls": 0,
+  "scope": "Independent native one-minute JPL Horizons observer angles versus shared SPICE at selected windows near each boundary. Not continuous-time certification or a validation PASS for the whole century."
+}
