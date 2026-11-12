@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Audit a LunarSight release candidate without mutating scientific products."""
+"""Audit a HOSA release candidate without mutating scientific products."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-# LunarSight data pipeline
+# HOSA data pipeline
 
 Pipeline for two NASA LOLA south pole ROIs and Sun/Earth centre ephemerides. The scenario beginning 2026-11-14 00:00 UTC and the G0 tolerances are **PROVISIONAL**. A passing job means the sampled pipeline ran for its input configuration; it does not approve the epoch, model tolerances, or any operational interpretation.
 

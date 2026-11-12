@@ -1,0 +1,20 @@
+[
+  {
+    "id": "CONV-VI-10",
+    "category": "long_conversation",
+    "expected_intents": ["knowledge", "explain"],
+    "require_citation": true,
+    "turns": [
+      {"text": "HOSA đang giải quyết câu hỏi gì?", "required_terms": ["Mặt Trăng", "chiếu sáng"]},
+      {"text": "Nó dùng dữ liệu NASA và JPL cho phần nào?", "required_terms": ["NASA", "JPL"]},
+      {"text": "Hai observer P1 nào có ephemeris Horizons đã lưu?", "required_terms": ["Site01_P1", "Site04_P1"]},
+      {"text": "Vậy dữ liệu đó có chứng minh coverage cho toàn bộ catalog không?", "required_terms": ["không", "catalog"], "forbidden_terms": ["Site02"]},
+      {"text": "Còn ROI của Site06 có thể dùng được không?", "required_terms": ["Site06", "ROI"], "forbidden_terms": ["verified ROI"]},
+      {"text": "Site20v2 độc lập với Site20 hay thuộc cùng nhóm?", "required_terms": ["Site20", "Site20v2"]},
+      {"text": "Nếu số liệu nominal đạt nhưng validation chưa đạt, có thể đổi INDETERMINATE thành PASS không?", "required_terms": ["INDETERMINATE", "PASS"], "forbidden_terms": ["INDETERMINATE means PASS"]},
+      {"text": "Contact requirement min_contact_minutes có ý nghĩa gì?", "required_terms": ["phút", "liên lạc"], "required_source_paths": ["docs/demo/contact-windows.md"]},
+      {"text": "setup_minutes ảnh hưởng thế nào tới thời gian liên lạc sử dụng được?", "required_terms": ["setup_minutes"]},
+      {"text": "Tóm tắt vai trò của LLM so với engine khi giải thích một quyết định PASS hoặc INDETERMINATE.", "required_terms": ["LLM", "engine", "PASS", "INDETERMINATE"]}
+    ]
+  }
+]

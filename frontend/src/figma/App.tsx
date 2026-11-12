@@ -13,6 +13,7 @@ import {
 import { Finder } from "./views";
 import ChatDock, { ChatPage, useAssistant } from "./Chat";
 import type { Mode } from "./Stage3D";
+import { usePointTerrain } from "../hooks/usePointTerrain";
 import { analyzePoint, api, downloadJson, useOperation } from "../mvp/api";
 import {
   DEFAULT_MISSION,
@@ -60,6 +61,7 @@ function initialView(): View {
 export default function App() {
   const [view, setView] = useState<View>(initialView);
   const [mission, setMission] = useState<Mission>(DEFAULT_MISSION);
+  const [viewerHeight, setViewerHeight] = useState(DEFAULT_MISSION.panel);
   const { sites: catalog, error: catalogError } = useCatalog();
   const [siteId, setSiteId] = useState(
     () => new URLSearchParams(location.search).get("site") ?? SITES[0].id,
@@ -135,7 +137,7 @@ export default function App() {
     speed,
     dark: 0,
     margin: 0,
-    hIdx: HEIGHTS.indexOf(mission.panel),
+    hIdx: HEIGHTS.indexOf(viewerHeight),
   };
   const assistant = useAssistant();
   const go = (v: View) => {
@@ -144,11 +146,15 @@ export default function App() {
     window.scrollTo(0, 0);
   };
   const onMission = (m: Mission) => {
+    if (m.panel !== mission.panel) setViewerHeight(m.panel);
     setMission(m);
     setPlaying(false);
   };
-  const setH = (i: number) =>
-    onMission({ ...mission, panel: HEIGHTS[i], antenna: HEIGHTS[i] });
+  const setH = (i: number) => {
+    const height = HEIGHTS[i];
+    setViewerHeight(height);
+    if (height <= 20) onMission({ ...mission, panel: height, antenna: height });
+  };
   const coordinate = (latitude: number, longitude: number) => {
     setCustom((old) => ({ ...old, lat: latitude, lon: longitude }));
     setSiteId("custom");
@@ -210,11 +216,11 @@ export default function App() {
             type="button"
             onClick={() => go("explore")}
             className="flex items-center gap-3"
-            aria-label="LunarSight, explore"
+            aria-label="HOSA, explore"
           >
             <Logo size={30} />
             <span className="font-display text-[15px] font-bold tracking-[0.12em] max-sm:hidden">
-              LunarSight
+              HOSA
             </span>
           </button>
           <p className="flex items-center gap-2 font-display text-[15px] font-semibold tracking-[0.06em] text-mute max-md:hidden">
@@ -419,6 +425,15 @@ function Explore({
   const [tab, setTab] = useState<"info" | "sites">("info");
   const r = point.result,
     end = s.endMs;
+  const customCoordinate = useMemo(
+    () => site.id === "custom" && Number.isFinite(site.lat) && Number.isFinite(site.lon)
+      ? { latitude: site.lat, longitude: site.lon }
+      : null,
+    [site.id, site.lat, site.lon],
+  );
+  const { result: customTerrain, loading: terrainLoading } =
+    usePointTerrain(customCoordinate, customCoordinate !== null);
+  const terrain = customTerrain?.terrain;
   return (
     <div className="flex min-h-[640px] flex-col lg:h-[calc(100svh-3.5rem)] lg:flex-row">
       <aside className="flex w-full shrink-0 flex-col border-b border-line bg-panel lg:w-[340px] lg:border-r lg:border-b-0">
@@ -516,6 +531,18 @@ function Explore({
                 <p className="eyebrow">Right now · backend intervals</p>
                 <CurrentStatus result={r} time={s.timeMs} />
               </div>
+              {customCoordinate && (
+                <div className="space-y-1 border-b border-line p-5 text-xs text-soft">
+                  <p className="eyebrow">Point terrain</p>
+                  {terrainLoading ? <p>Checking DEM coverage…</p> : terrain ? (
+                    <>
+                      <p>Elevation {terrain.elevation_m.toFixed(1)} m · {terrain.resolution_m} m DEM</p>
+                      {terrain.slope_deg != null && <p>Local slope {terrain.slope_deg.toFixed(2)}°</p>}
+                      {terrain.local_3x3_roughness_m != null && <p>Roughness {terrain.local_3x3_roughness_m.toFixed(2)} m</p>}
+                    </>
+                  ) : customTerrain ? <p>No validated DEM covers this point.</p> : <p>DEM coverage unavailable.</p>}
+                </div>
+              )}
               <div className="space-y-5 border-b border-line p-5">
                 <MissionFields
                   mission={mission}
@@ -610,8 +637,8 @@ function Explore({
                   }))}
                 />
                 <p className="mt-2 text-[10px] text-mute">
-                  Sets panel and antenna together. Exact inputs are in Mission
-                  requirements.
+                  Up to 20 m sets panel and antenna together. The 30 m option is
+                  a viewer preview; calculation heights stay in Mission requirements.
                 </p>
               </div>
               <div className="space-y-3 p-5">
@@ -703,7 +730,8 @@ function Explore({
                 sites={sites}
                 siteId={site.id}
                 timeMs={s.timeMs}
-                heightM={mission.panel}
+                heightM={s.hIdx >= 0 ? HEIGHTS[s.hIdx] : mission.panel}
+                pointAnalysis={r}
                 onSelect={(id) => {
                   if (!busy) {
                     onSite(id);

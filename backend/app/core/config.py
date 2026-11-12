@@ -2,7 +2,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    service_name: str = "lunarsight-api"
+    service_name: str = "hosa-api"
     app_version: str = "0.1.0"
     app_env: str = "local"
     log_level: str = "INFO"

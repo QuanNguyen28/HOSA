@@ -1,0 +1,17 @@
+{
+  "id": "global_ldem64",
+  "status": "VERIFIED_BYTES",
+  "url": "https://imbrium.mit.edu/DATA/LOLA_GDR/CYLINDRICAL/JP2/LDEM_64.JP2",
+  "source_page": "https://pds-geosciences.wustl.edu/missions/lro/lola.htm",
+  "filename": "LDEM_64.JP2",
+  "bytes": 211190204,
+  "sha256": "5bcdc1add91447d4386f0ccab17da2f6dd0ae8e116fbd60f56aa31d74248c096",
+  "accessed_utc": "2026-11-12T07:46:18.965954+00:00",
+  "http_identity": {
+    "etag": "\"5c7848d8-c9681bc\"",
+    "last_modified": "Thu, 28 Feb 2019 20:47:20 GMT"
+  },
+  "frame": "MOON_ME/DE421",
+  "reference_radius_m": 1737400,
+  "native_resolution": "64 pixels/degree; 473.802 m/pixel at equator"
+}

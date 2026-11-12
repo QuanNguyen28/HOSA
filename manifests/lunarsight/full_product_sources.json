@@ -321,6 +321,21 @@
       "required_for": ["global_relief_metadata"]
     },
     {
+      "id": "lola_global_ldem64",
+      "title": "LOLA global lunar DEM, 64 pixels per degree",
+      "provider": "NASA LRO LOLA Science Team / PDS",
+      "source_page": "https://pds-geosciences.wustl.edu/missions/lro/lola.htm",
+      "url": "https://imbrium.mit.edu/DATA/LOLA_GDR/CYLINDRICAL/JP2/LDEM_64.JP2",
+      "destination": "data/raw/global/lola_ldem64/LDEM_64.JP2",
+      "profile": "core",
+      "access_mode": "download",
+      "expected_bytes": 211190204,
+      "media_type": "image/jp2",
+      "crs": "Moon Mean Earth/Polar Axis of DE421",
+      "vertical_datum": "metres above 1737.4 km lunar reference sphere",
+      "required_for": ["global_moon_3d", "global_topography"]
+    },
+    {
       "id": "nasa_svs_moon_small",
       "title": "NASA SVS Moon web 3D model",
       "provider": "NASA Scientific Visualization Studio",

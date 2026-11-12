@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "./api";
+import { useGroundedChat, type ChatMessage } from "./useGroundedChat";
 
 type Baseline = {
   scenario_id: string;
@@ -37,6 +38,7 @@ type ParseRequest = {
   resolve_indeterminate: boolean;
   text: string;
   baseline: Baseline;
+  require_explicit_start?: boolean;
   selected_site_ids: string[];
   conversation_history: Turn[];
   clarifications: Turn["clarifications"];
@@ -53,6 +55,7 @@ type Draft = {
   draft_id: string;
   spec_hash: string;
   spec: Baseline & {
+    data_source?: "snapshot" | "coordinate";
     site_ids: string[];
     rank_by: string;
     search_from_utc: string | null;
@@ -80,10 +83,12 @@ type Evaluation = {
     }[];
   };
 };
-type Message = { who: "user" | "assistant"; text: string };
+type Message = ChatMessage;
 
 export function useAssistant() {
   const [caps, setCaps] = useState<Capabilities | null>(null);
+  const [mode, setMode] = useState<"general" | "planning">("general");
+  const general = useGroundedChat(caps?.assistant_enabled === true);
   const [error, setError] = useState("");
   const [baseline, setBaseline] = useState<Baseline | null>(null);
   const [selectedSites, setSelectedSites] = useState<string[]>([]);
@@ -132,10 +137,10 @@ export function useAssistant() {
   }, []);
   const add = (who: Message["who"], value: string) =>
     setMessages((old) => [...old, { who, text: value }]);
-  const send = async () => {
-    if (!baseline || !caps?.assistant_enabled || busy || review || !text.trim())
+  const sendPlanning = async (input: string, fromGeneral = false) => {
+    if (!baseline || !caps?.assistant_enabled || busy || review || !input.trim())
       return;
-    const answer = text.trim();
+    const answer = input.trim();
     setText("");
     setError("");
     setOutcome(null);
@@ -143,7 +148,7 @@ export function useAssistant() {
     setBusy(true);
     const controller = new AbortController();
     active.current = controller;
-    const request: ParseRequest = pending
+    const request: ParseRequest = pending && !fromGeneral
       ? {
           ...pending,
           clarifications: [
@@ -155,6 +160,7 @@ export function useAssistant() {
           text: answer,
           resolve_indeterminate: resolveIndeterminate,
           baseline,
+          require_explicit_start: fromGeneral,
           selected_site_ids: selectedSites,
           conversation_history: history.slice(-8),
           clarifications: [],
@@ -181,6 +187,22 @@ export function useAssistant() {
     } finally {
       if (!controller.signal.aborted) setBusy(false);
     }
+  };
+  const send = async () => {
+    if (mode === "planning") {
+      await sendPlanning(text);
+      return;
+    }
+    const prompt = general.text.trim();
+    const completed = await general.send();
+    if (completed?.result?.next_action !== "prepare_mission") return;
+    setMode("planning");
+    if (busy || review) {
+      // Keep an outstanding calculation or review intact.
+      setText(prompt);
+      return;
+    }
+    await sendPlanning(prompt, true);
   };
   const evaluate = async () => {
     if (!review || busy) return;
@@ -225,8 +247,7 @@ export function useAssistant() {
         constraints: spec.constraints,
         min_sunlit_fraction: spec.min_sunlit_fraction,
         min_earth_los_fraction: spec.min_earth_los_fraction,
-        current_site_id:
-          spec.site_ids.length === 1 ? spec.site_ids[0] : spec.current_site_id,
+        current_site_id: spec.site_ids.length === 1 ? spec.site_ids[0] : spec.current_site_id,
       });
       setContext({
         rank_by: spec.rank_by,
@@ -281,17 +302,21 @@ export function useAssistant() {
     resolveIndeterminate,
     setResolveIndeterminate,
     caps,
-    error,
+    mode,
+    setMode,
+    error: mode === "general" ? general.error || (!caps ? error : "") : error,
     baseline,
-    text,
-    setText,
-    messages,
-    review,
-    busy,
-    outcome,
+    text: mode === "general" ? general.text : text,
+    setText: mode === "general" ? general.setText : setText,
+    messages: mode === "general" ? general.messages : messages,
+    review: mode === "general" ? null : review,
+    busy: mode === "general" ? general.busy : busy,
+    outcome: mode === "general" ? null : outcome,
+    run: mode === "general" ? general.run : null,
+    stop: general.stop,
     send,
     evaluate,
-    reset,
+    reset: mode === "general" ? general.reset : reset,
     cancel,
   };
 }

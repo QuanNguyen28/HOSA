@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Acquire the official raw inputs needed by the complete LunarSight product.
+"""Acquire the official raw inputs needed by the complete HOSA product.
 
 The script is intentionally conservative: it never overwrites raw data, rejects
 HTML error pages, verifies expected byte counts, writes SHA-256 receipts and
@@ -29,6 +29,8 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MANIFEST = ROOT / "manifests/lunarsight/full_product_sources.json"
 TRACKED_RECEIPTS = ROOT / "manifests/lunarsight/full_product_receipts"
 ALLOWED_HOSTS = {
+    # LOLA Science Team archive referenced by the NASA PDS LOLA data page.
+    "imbrium.mit.edu",
     "naif.jpl.nasa.gov",
     "pgda.gsfc.nasa.gov",
     "pds-geosciences.wustl.edu",
@@ -171,7 +173,7 @@ def session() -> requests.Session:
     current.mount("https://", HTTPAdapter(max_retries=retry))
     current.headers.update(
         {
-            "User-Agent": "LunarSight/0.4 official-data-acquisition (NASA Space Apps project)",
+            "User-Agent": "HOSA/0.4 official-data-acquisition (NASA Space Apps project)",
             "Accept-Encoding": "identity",
         }
     )

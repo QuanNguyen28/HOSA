@@ -1,4 +1,4 @@
-# Từ điển dữ liệu LunarSight
+# Từ điển dữ liệu HOSA
 
 | Nhóm | Trường nguồn | Trường chuẩn hóa hoặc tính thêm |
 | --- | --- | --- |

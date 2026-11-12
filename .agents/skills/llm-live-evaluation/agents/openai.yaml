@@ -1,0 +1,3 @@
+interface:
+  display_name: "LLM Live Evaluation"
+  short_description: "Run strict live LLM evaluations and produce traceable reports"

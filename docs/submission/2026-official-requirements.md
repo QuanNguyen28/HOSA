@@ -22,7 +22,7 @@ Challenge yêu cầu một công cụ trực quan cho phép mission planners, ed
 công chúng so sánh nhanh landing sites và dates, đồng thời trực quan vị trí Sun và
 Earth so với horizon để đánh giá tiềm năng phát điện và các cửa sổ direct-to-Earth.
 
-LunarSight đáp ứng phần so sánh hai site/date và giải thích Sun/Earth-horizon. Hồ sơ
+HOSA đáp ứng phần so sánh hai site/date và giải thích Sun/Earth-horizon. Hồ sơ
 phải giữ đúng giới hạn: geometric Sun-center/Earth-center visibility không tự nó là
 mô hình công suất hay link budget.
 

@@ -10,7 +10,7 @@ import rasterio
 from rasterio.transform import from_origin
 from backend.app.services.lunarsight.terrain import DEM, R
 from backend.app.services.lunarsight.horizon import angles_enu, ray_positions, ray_elevation, ranges, profile, reference_check
-from backend.app.services.lunarsight.horizons import parse, request_params
+from backend.app.services.lunarsight.horizons import parse, request_params, timestamp
 from backend.app.services.lunarsight.visibility import classify, combine, lookup, bounds, max_rule, valid_start, visibility, analyze
 
 CASES=json.loads((Path(__file__).parent/"fixtures/synthetic_cases.json").read_text())
@@ -99,6 +99,8 @@ def test_horizons_minute_precision_calendar_keeps_grid_validation():
     assert meta['missing_timestamps']==meta['missing_angles']==0
     with pytest.raises(ValueError,match='off-grid'):
         parse(fixture(rows.replace('00:05','00:07')),kw,a,b,5,R)
+def test_horizons_timestamp_accepts_minute_precision_from_live_api():
+    assert timestamp(" 2026-Apr-02 02:20") == pd.Timestamp("2026-04-02T02:20:00Z")
 
 def test_t08_t13_last_start_and_terminal_boundary():
     a=pd.Timestamp("2026-11-14T00:00:00Z");b=a+pd.Timedelta(days=14)

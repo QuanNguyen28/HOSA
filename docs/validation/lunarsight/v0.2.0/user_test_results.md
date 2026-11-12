@@ -1,4 +1,4 @@
-# Biên bản kết quả thử tác vụ LunarSight
+# Biên bản kết quả thử tác vụ HOSA
 
 Trạng thái: **NOT RUN — không được đổi thành PASS nếu chưa có người thử thật**.
 

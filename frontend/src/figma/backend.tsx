@@ -35,7 +35,7 @@ const exampleSites: Site[] = EXAMPLES.map((t) => ({
   kind: "exact",
   point:
     "Documented backend verification coordinate; click Analyze to calculate.",
-  source: "LunarSight coordinate API",
+  source: "HOSA coordinate API",
   url: "",
 }));
 export function useCatalog() {

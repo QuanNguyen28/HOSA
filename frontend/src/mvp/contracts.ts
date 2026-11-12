@@ -1,3 +1,5 @@
+import compareSites from "../../../manifests/compare-sites.json";
+
 export type Decision = "PASS" | "FAIL" | "INDETERMINATE";
 export type Bounds = [number, number];
 export type Target = {
@@ -69,9 +71,17 @@ export type Validation = {
 export type Interval = {
   start_utc: string;
   end_utc: string;
-  sun_state: string;
-  earth_state: string;
-  joint_state: string;
+  sun_state: "V" | "B" | "?";
+  earth_state: "V" | "B" | "?";
+  joint_state: "V" | "B" | "?";
+  sun_az_deg?: number | null;
+  sun_el_deg?: number | null;
+  earth_az_deg?: number | null;
+  earth_el_deg?: number | null;
+  sun_horizon_deg?: number | null;
+  earth_horizon_deg?: number | null;
+  sun_clearance_deg?: number | null;
+  earth_clearance_deg?: number | null;
 };
 export type Contact = {
   visible_windows: Array<{
@@ -157,24 +167,16 @@ export function missionEnd(m: Mission): string {
   return Number.isFinite(date.valueOf()) ? date.toISOString().slice(0, 16) : "";
 }
 // Coordinates of the two documented requests, not precomputed science values.
-export const EXAMPLES: Target[] = [
-  {
-    id: "example-a",
-    name: "Example A",
-    latitude: -88.80771296769387,
-    longitude: 123.81313283430084,
+export const EXAMPLES: Target[] = compareSites
+  .filter((site) => site.id.startsWith("example-"))
+  .map((site) => ({
+    id: site.id,
+    name: site.name,
+    latitude: site.lat,
+    longitude: site.lon,
     elevationM: NaN,
     status: "provisional",
-  },
-  {
-    id: "example-b",
-    name: "Example B",
-    latitude: -87,
-    longitude: 180,
-    elevationM: NaN,
-    status: "provisional",
-  },
-];
+  }));
 export function missionRequest(m: Mission, target: Target): MissionRequest {
   return {
     latitude_deg: target.latitude,

@@ -2,7 +2,7 @@
 
 Verification date: 2026-11-09 Asia/Ho_Chi_Minh.
 
-This report records the application-layer checks for the versioned LunarSight v0.2.0 science products. It does not replace the pipeline scientific validation report.
+This report records the application-layer checks for the versioned HOSA v0.2.0 science products. It does not replace the pipeline scientific validation report.
 
 ## Automated gates
 

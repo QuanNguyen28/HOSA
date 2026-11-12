@@ -1,0 +1,5 @@
+interface:
+  display_name: "HOSA Grounded Chat"
+  short_description: "Check evidence grounding and safe scientific chat behavior"
+policy:
+  allow_implicit_invocation: true

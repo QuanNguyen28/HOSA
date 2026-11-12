@@ -1,0 +1,5 @@
+interface:
+  display_name: "HOSA System Context"
+  short_description: "Understand HOSA system scope and scientific limits"
+policy:
+  allow_implicit_invocation: true

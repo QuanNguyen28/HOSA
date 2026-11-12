@@ -4,9 +4,14 @@ import { DecisionBadge } from "../mvp/DecisionBadge";
 export { useAssistant };
 export type Assistant = ReturnType<typeof useAssistant>;
 const SUGGEST = [
-  "Compare Site01_P1 and Site04_P1 on 2026-11-17T00:00:00Z, keep the hardware.",
+  "So sánh Haworth và Nobile Rim 1.",
   "Chỉ chọn Site04_P1, giữ nguyên lịch và phần cứng.",
   "Set minimum sunlight to 90%, keep the site and arrival.",
+];
+const GENERAL_SUGGEST = [
+  "Nếu lịch nhiệm vụ ở cực nam Mặt Trăng thay đổi, HOSA giúp tôi quyết định điều gì?",
+  "INDETERMINATE khác FAIL như thế nào?",
+  "HOSA dùng nguồn dữ liệu nào để đánh giá ánh sáng và tầm nhìn Trái Đất?",
 ];
 export function ChatThread({
   a,
@@ -15,7 +20,8 @@ export function ChatThread({
   a: Assistant;
   page?: boolean;
 }) {
-  const { messages, busy, review, outcome, baseline, caps, error } = a;
+  const { messages, busy, review, outcome, baseline, caps, error, mode, run } = a;
+  const general = mode === "general";
   const end = useRef<HTMLDivElement>(null);
   useEffect(() => {
     end.current?.scrollIntoView({ block: "nearest" });
@@ -23,18 +29,25 @@ export function ChatThread({
   const pad = page ? "px-5 sm:px-8" : "px-5";
   return (
     <>
+      <div className={`flex shrink-0 gap-1 border-b border-line py-2 ${pad}`} role="group" aria-label="Assistant mode">
+        {([["general", "General chat"], ["planning", "Mission planning"]] as const).map(([id, label]) => (
+          <button key={id} type="button" aria-pressed={mode === id} onClick={() => a.setMode(id)}
+            className={`border px-3 py-1.5 text-xs font-semibold ${mode === id ? "border-white bg-white text-ink" : "border-line text-soft hover:border-white"}`}>
+            {label}
+          </button>
+        ))}
+      </div>
       <div
         className={`min-h-0 flex-1 space-y-5 overflow-y-auto py-5 ${pad}`}
         aria-label="Conversation"
         aria-live="polite"
       >
         <p className="text-xs leading-relaxed text-mute">
-          Default mission: Site01/Site04, 72 hours, panel 1 m / antenna 2 m.
-          Longer missions use verified terrain and JPL data without a duration
-          cap. This conversation keeps its own mission context.
-          Coordinate/contact settings are in Explore, Compare and Best dates.
+          {general
+            ? "Ask what HOSA can do, how to interpret results, or where its data comes from."
+            : "Choose any site from Compare, up to two per request. The default mission is 72 hours with a 1 m panel and 2 m antenna. Longer missions or an explicit UTC end date are supported without a duration cap. Review before evaluation."}
         </p>
-        {baseline && (
+        {!general && baseline && (
           <p className="break-words font-mono text-[10px] text-mute">
             Conversation context: {baseline.current_site_id} ·{" "}
             {baseline.arrival_utc}
@@ -48,11 +61,11 @@ export function ChatThread({
         {caps && !caps.assistant_enabled && (
           <p role="status" className="border border-line p-3 text-sm text-mute">
             The LLM assistant is disabled on this backend. Configure
-            ASSISTANT_ENABLED, OPENROUTER_MODEL and OPENROUTER_API_KEY on the
-            server. Other views work without an LLM.
+            ASSISTANT_ENABLED and the selected provider’s model and API key on
+            the server. Other views work without an LLM.
           </p>
         )}
-        <label className="flex items-start gap-2 text-xs text-mute">
+        {!general && <label className="flex items-start gap-2 text-xs text-mute">
           <input
             type="checkbox"
             checked={a.resolveIndeterminate}
@@ -61,18 +74,18 @@ export function ChatThread({
           />
           Complete inconclusive validation automatically (can take several
           minutes).
-        </label>
+        </label>}
         {!messages.length && (
           <div>
             <p
               className={`${page ? "text-lg" : "text-[15px]"} leading-relaxed text-soft`}
             >
-              Hi. Ask me about sunlight, Earth visibility and landing dates at
-              the lunar south pole. Review the interpreted request before
-              evaluation.
+              {general
+                ? "Ask about lunar mission planning or the evidence behind HOSA’s results."
+                : "Describe a change to the mission. You’ll review the request before it is evaluated."}
             </p>
             <div className={`mt-5 grid gap-2 ${page ? "sm:grid-cols-2" : ""}`}>
-              {SUGGEST.map((q) => (
+              {(general ? GENERAL_SUGGEST : SUGGEST).map((q) => (
                 <button
                   key={q}
                   type="button"
@@ -88,7 +101,7 @@ export function ChatThread({
         )}
         {messages.map((m, i) =>
           m.who === "user" ? (
-            <div key={i} className="flex justify-end">
+            <div key={m.id ?? i} className="flex justify-end">
               <p
                 className={`max-w-[85%] whitespace-pre-wrap break-words bg-white px-3 py-2 text-ink ${page ? "text-[15px]" : "text-sm"}`}
               >
@@ -96,12 +109,25 @@ export function ChatThread({
               </p>
             </div>
           ) : (
-            <div key={i} className="border-l-2 border-white pl-3">
+            <div key={m.id ?? i} className="border-l-2 border-white pl-3">
               <p
                 className={`whitespace-pre-wrap break-words leading-relaxed text-white ${page ? "text-[15px]" : "text-sm"}`}
               >
                 {m.text}
               </p>
+              {!!m.citations?.length && (
+                <details className="mt-2 text-xs text-soft">
+                  <summary className="cursor-pointer text-mute">Sources ({m.citations.length})</summary>
+                  <ul className="mt-2 space-y-2">
+                    {m.citations.map((source) => (
+                      <li key={source.source_id} className="break-words border-l border-line pl-2">
+                        <p>{source.path}</p>
+                        <p className="mt-1 line-clamp-4 whitespace-pre-wrap text-mute">{source.excerpt}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
             </div>
           ),
         )}
@@ -151,7 +177,11 @@ export function ChatThread({
             className="flex items-center gap-3 border-l-2 border-white/40 pl-3 text-xs text-mute"
           >
             <span className="size-1.5 animate-pulse bg-soft" />
-            Waiting for the backend…
+            {run?.stage === "retrieving" || run?.stage === "indexing"
+              ? "Finding project sources…" : "Waiting for the backend…"}
+            {general && run && (run.status === "queued" || run.status === "running") && (
+              <button type="button" onClick={() => void a.stop()} className="underline hover:text-white">Stop</button>
+            )}
           </div>
         )}
         {outcome && (
@@ -218,7 +248,7 @@ export function ChatThread({
 }
 export function ChatPage({ a }: { a: Assistant }) {
   const topics = [
-    ["Ask", "Describe a change to the snapshot mission."],
+    ["Ask", "Name a site from Compare or describe a change to your mission."],
     ["Review", "Confirm the interpreted requirements before computation."],
     ["Evidence", "Read backend decisions and unknown evidence."],
     ["Continue", "Follow-up turns retain the evaluated site and date."],
@@ -313,7 +343,7 @@ export default function ChatDock({
                 Assistant
               </h2>
               <p className="mt-0.5 text-[11px] text-mute">
-                Answers from the backend snapshot scenario
+                Project questions and mission planning
               </p>
             </div>
             <div className="flex shrink-0 items-center gap-3">

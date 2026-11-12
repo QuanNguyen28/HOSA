@@ -1,4 +1,4 @@
-# Kịch bản trình diễn LunarSight
+# Kịch bản trình diễn HOSA
 
 Thời lượng mục tiêu: 2 phút. Môi trường: backend cổng 8000, frontend cổng 5173, dữ liệu v0.2.0 đã cache cục bộ.
 
@@ -15,7 +15,7 @@ Thời lượng mục tiêu: 2 phút. Môi trường: backend cổng 8000, front
 
 ### 0 đến 20 giây
 
-**Lời thoại:** LunarSight là nguyên mẫu giáo dục giúp so sánh hai điểm ứng viên ở cực nam Mặt Trăng cho một hoạt động cố định 72 giờ. Ứng dụng kết hợp địa hình NASA LOLA với vị trí Sun và Earth từ JPL Horizons.
+**Lời thoại:** HOSA là nguyên mẫu giáo dục giúp so sánh hai điểm ứng viên ở cực nam Mặt Trăng cho một hoạt động cố định 72 giờ. Ứng dụng kết hợp địa hình NASA LOLA với vị trí Sun và Earth từ JPL Horizons.
 
 **Thao tác:** Mở Explore, xoay Moon nhẹ, chọn South Pole rồi lần lượt chọn marker Site01 và Site04.
 
@@ -45,7 +45,7 @@ Thời lượng mục tiêu: 2 phút. Môi trường: backend cổng 8000, front
 
 ### 115 đến 120 giây
 
-**Lời thoại:** Mỗi kết quả có thể xuất JSON hoặc CSV cùng request, nguồn, phiên bản dữ liệu và phương pháp để tái lập. LunarSight biến dữ liệu khoa học thành một luồng so sánh có thể kiểm tra và giải thích.
+**Lời thoại:** Mỗi kết quả có thể xuất JSON hoặc CSV cùng request, nguồn, phiên bản dữ liệu và phương pháp để tái lập. HOSA biến dữ liệu khoa học thành một luồng so sánh có thể kiểm tra và giải thích.
 
 **Thao tác:** Chỉ vào hai nút JSON và CSV, kết thúc ở toàn cảnh Compare.
 

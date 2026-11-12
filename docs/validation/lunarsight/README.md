@@ -1,4 +1,4 @@
-# Dữ liệu và kiểm định LunarSight v0.2.0
+# Dữ liệu và kiểm định HOSA v0.2.0
 
 Snapshot này ghi lại lần chạy từng cell trong Kaggle Draft với Site01 và Site04. Mốc bắt đầu kịch bản và ngưỡng khoa học vẫn mang nhãn `PROVISIONAL`. 17 bài kiểm thử đã đạt. Mỗi site có 4.896 khoảng 5 phút và 1.344 mốc bắt đầu cho cửa sổ 72 giờ. [Báo cáo thực thi](v0.2.0/reports/execution_status.json) · [Báo cáo EDA](v0.2.0/reports/eda_summary.md) · [Từ điển dữ liệu](data-dictionary.md)
 

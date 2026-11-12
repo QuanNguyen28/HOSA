@@ -46,7 +46,7 @@ TO_POLAR = Transformer.from_crs(MOON_LON_LAT, MOON_SOUTH_POLAR, always_xy=True)
 GDAL_HTTP_ENV = {
     "GDAL_DISABLE_READDIR_ON_OPEN": "EMPTY_DIR",
     "CPL_VSIL_CURL_ALLOWED_EXTENSIONS": ".TIF,.tif",
-    "GDAL_HTTP_USERAGENT": "LunarSight/0.4 official-data-acquisition",
+    "GDAL_HTTP_USERAGENT": "HOSA/0.4 official-data-acquisition",
     "GDAL_HTTP_MAX_RETRY": "5",
     "GDAL_HTTP_RETRY_DELAY": "2",
     "GDAL_HTTP_MERGE_CONSECUTIVE_RANGES": "YES",

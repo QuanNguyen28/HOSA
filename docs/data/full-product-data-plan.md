@@ -1,4 +1,4 @@
-# LunarSight full-product data plan
+# HOSA full-product data plan
 
 Status date: 2026-11-12  
 Registry: `manifests/lunarsight/full_product_sources.json`
@@ -8,7 +8,7 @@ Registry: `manifests/lunarsight/full_product_sources.json`
 - Scientific inputs come only from official NASA, JPL/NAIF, PDS, NASA GSFC
   PGDA and NASA/JPL Moon Trek endpoints.
 - The competitor product is used only to identify useful product capabilities.
-  Its generated binaries and scientific claims are not inputs to LunarSight.
+  Its generated binaries and scientific claims are not inputs to HOSA.
 - Raw assets are immutable. Every complete download has an exact URL, byte
   count, retrieval time and SHA-256 receipt.
 - A user-selected coordinate is not declared safe merely because data exists.

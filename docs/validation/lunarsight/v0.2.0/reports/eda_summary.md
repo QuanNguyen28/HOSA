@@ -1,4 +1,4 @@
-# LunarSight data EDA
+# HOSA data EDA
 
 NASA PGDA LOLA (MOON_ME/DE421); JPL Horizons, PROVISIONAL scenario.
 

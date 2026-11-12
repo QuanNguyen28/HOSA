@@ -1,0 +1,218 @@
+{
+  "passed": true,
+  "point_compare_search_csv": {
+    "passed": true,
+    "tolerances": {
+      "horizon_deg": 0.1,
+      "event_minutes": 5,
+      "duration_minutes": 10
+    },
+    "cases": [
+      {
+        "request_file": "docs/examples/point-revalidation-pass-request.json",
+        "before": "INDETERMINATE",
+        "after": "PASS",
+        "result_id": "a10c9f3a223ed926e1158223640051e1c1e485f684447c68d52445a2002afdeb",
+        "validation_passed": false,
+        "mission_path": {
+          "passed": true,
+          "policy_version": "sampled-mission-path-envelope-2.0",
+          "scope": "requested_sampled_sun_and_earth_paths_only",
+          "tolerance_status": "PROVISIONAL",
+          "targets": {
+            "sun": {
+              "required_for_decision": true,
+              "height_m": 1.0,
+              "state": "V",
+              "native_sample_counts_5min_1min": [
+                865,
+                4321
+              ],
+              "state_counts_1min": {
+                "V": 4320,
+                "B": 0,
+                "?": 0
+              },
+              "max_path_horizon_spread_deg": 0.056941509847057814,
+              "global_discrepancy_deg": 0.5597935022975423,
+              "envelope_padding_deg": 0.6597935022975423,
+              "min_clearance_beyond_envelope_deg": 0.7592327671519059
+            },
+            "earth": {
+              "required_for_decision": true,
+              "height_m": 2.0,
+              "state": "V",
+              "native_sample_counts_5min_1min": [
+                865,
+                4321
+              ],
+              "state_counts_1min": {
+                "V": 4320,
+                "B": 0,
+                "?": 0
+              },
+              "max_path_horizon_spread_deg": 0.007907005440364046,
+              "global_discrepancy_deg": 0.09359855530391714,
+              "envelope_padding_deg": 0.19359855530391715,
+              "min_clearance_beyond_envelope_deg": 0.48080888879887385
+            }
+          },
+          "limitations": [
+            "Empirical numerical envelope; not a bound on physical DEM uncertainty or unsampled events.",
+            "Full-circle horizon validation remains unchanged."
+          ],
+          "metrics_hours": {
+            "total_sun_hours": [
+              72.0,
+              72.0
+            ],
+            "total_earth_los_hours": [
+              72.0,
+              72.0
+            ],
+            "longest_dark_hours": [
+              0.0,
+              0.0
+            ],
+            "longest_blackout_hours": [
+              0.0,
+              0.0
+            ],
+            "longest_joint_hours": [
+              71.999999999997,
+              71.999999999997
+            ]
+          },
+          "constraint_checks": {
+            "min_sunlit_fraction": "PASS",
+            "min_earth_los_fraction": "PASS"
+          },
+          "bounded_decision": "PASS",
+          "reason": "ROBUST_REQUIREMENT_BOUNDS"
+        },
+        "reason_codes": [
+          "azimuth_0.25_vs_0.125:SENSITIVITY_FAILED"
+        ],
+        "refinement_rounds": 0,
+        "cross_routes": [
+          "point",
+          "compare",
+          "search",
+          "csv"
+        ],
+        "metrics_hours": {
+          "total_sun_hours": [
+            72.0,
+            72.0
+          ],
+          "total_earth_los_hours": [
+            72.0,
+            72.0
+          ],
+          "longest_dark_hours": [
+            0.0,
+            0.0
+          ],
+          "longest_blackout_hours": [
+            0.0,
+            0.0
+          ],
+          "longest_joint_hours": [
+            72.0,
+            72.0
+          ]
+        },
+        "configuration": {
+          "coarse_az_step_deg": 0.25,
+          "fine_az_step_deg": 0.125,
+          "scan_radii_m": [
+            400000,
+            300000
+          ],
+          "time_steps_minutes": [
+            5,
+            1
+          ]
+        }
+      },
+      {
+        "request_file": "docs/examples/point-revalidation-fail-request.json",
+        "before": "FAIL",
+        "after": "FAIL",
+        "result_id": "dc5642b58ae37a2dddbb886b26a3a40b30f940c55fb0bd3d6692437bf800eebf",
+        "validation_passed": false,
+        "mission_path": null,
+        "reason_codes": [
+          "azimuth_0.25_vs_0.125:SENSITIVITY_FAILED"
+        ],
+        "refinement_rounds": 0,
+        "cross_routes": [
+          "point",
+          "compare",
+          "search",
+          "csv"
+        ],
+        "metrics_hours": {
+          "total_sun_hours": [
+            0.0,
+            0.0
+          ],
+          "total_earth_los_hours": [
+            0.0,
+            0.0
+          ],
+          "longest_dark_hours": [
+            72.0,
+            72.0
+          ],
+          "longest_blackout_hours": [
+            72.0,
+            72.0
+          ],
+          "longest_joint_hours": [
+            0.0,
+            0.0
+          ]
+        },
+        "configuration": {
+          "coarse_az_step_deg": 0.25,
+          "fine_az_step_deg": 0.125,
+          "scan_radii_m": [
+            400000,
+            300000
+          ],
+          "time_steps_minutes": [
+            5,
+            1
+          ]
+        }
+      }
+    ]
+  },
+  "long_mission": {
+    "result_id": "2c16a41310bf0bc359e666104f7cc50ecac6436dbe4eb2a3b6abd011a8d9653c",
+    "duration_hours": 240,
+    "decision": "PASS",
+    "full_validation_passed": false,
+    "mission_path_passed": true,
+    "resolution_policy": "indeterminate-resolution-2.1",
+    "first_call_seconds": 0.19264621299998907,
+    "first_result_cache_hit": true,
+    "repeat_call_seconds": 0.2573475049998706,
+    "repeat_result_cache_hit": true
+  },
+  "routes_present": [
+    "/api/assistant/sessions/{session_id}/messages",
+    "/api/assistant/runs/{run_id}/cancel",
+    "/api/lunar/point/analyze",
+    "/api/lunar/terrain/south-polar-cap"
+  ],
+  "real_terrain_mesh_covered": true,
+  "llm": {
+    "provider": "nvidia",
+    "provider_configured": false,
+    "assistant_enabled": true,
+    "live_inference_run": false,
+    "note": "Provider inference is a separate check; this script does not call an LLM."
+  }
+}

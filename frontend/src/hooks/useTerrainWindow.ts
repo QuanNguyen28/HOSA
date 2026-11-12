@@ -10,6 +10,7 @@ export type TerrainWindow = {
   coverage_status: "COVERED" | "UNKNOWN";
   dataset_id?: string;
   native_resolution_m?: number;
+  detail?: "best" | "regional";
   radius_km?: number;
   geometry?: TerrainGeometryMetadata;
   grid: null | TerrainGrid;
@@ -20,7 +21,11 @@ export type TerrainWindow = {
 export function useTerrainWindow(
   coordinate: LunarCoordinate | null,
   enabled: boolean,
-  options: { radiusKm?: number; samples?: 65 | 129 | 257 | 513 } = {},
+  options: {
+    radiusKm?: number;
+    samples?: 65 | 129 | 257 | 401 | 513;
+    regionalOnly?: boolean;
+  } = {},
 ) {
   const [result, setResult] = useState<TerrainWindow | null>(null);
   const [resultKey, setResultKey] = useState("");
@@ -31,6 +36,7 @@ export function useTerrainWindow(
     enabled,
     options.radiusKm ?? 8,
     options.samples ?? 257,
+    options.regionalOnly ?? false,
   ]);
 
   useEffect(() => {
@@ -45,6 +51,7 @@ export function useTerrainWindow(
       longitude: coordinate.longitude.toString(),
       radius_km: (options.radiusKm ?? 8).toString(),
       samples: (options.samples ?? 257).toString(),
+      detail: options.regionalOnly ? "regional" : "best",
     });
     setLoading(true);
     setResult(null);
@@ -70,7 +77,7 @@ export function useTerrainWindow(
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [coordinate, enabled, options.radiusKm, options.samples, key]);
+  }, [coordinate, enabled, options.radiusKm, options.samples, options.regionalOnly, key]);
 
   return { result: resultKey === key ? result : null, loading };
 }

@@ -1,5 +1,23 @@
 """Validate references and render factual prose; LLMs do not own numbers or decisions."""
 
+REASON_SUFFIX = {"DARKNESS": "dark", "BLACKOUT": "blackout", "EARTH_LOS": "earth",
+                 "SUNLIGHT": "sun", "DATA_MISSING": "availability"}
+HARD_CONSTRAINT = {"EARTH_LOS": "min_earth_los_fraction", "SUNLIGHT": "min_sunlit_fraction"}
+
+
+def explanation_options(candidate, facts):
+    """Allowed reason/fact pairs for this exact candidate and computed status."""
+    options = {}
+    for reason, suffix in REASON_SUFFIX.items():
+        if candidate.issue and reason != "DATA_MISSING":
+            continue
+        if candidate.decision == "FAIL" and candidate.constraint_states.get(HARD_CONSTRAINT.get(reason)) != "FAIL":
+            continue
+        fact_id = f"{candidate.candidate_id}.{suffix}"
+        if fact_id in facts and facts[fact_id]["candidate_id"] == candidate.candidate_id:
+            options[reason] = fact_id
+    return options
+
 
 def identity(block):
     return block.candidate_id or block.site_id
@@ -11,20 +29,14 @@ def valid_plan(plan, evidence):
     candidates = {c.candidate_id: c for c in evidence.candidates}
     if sorted(identity(b) for b in plan.blocks) != sorted(candidates):
         return False
-    suffix = {"DARKNESS": "dark", "BLACKOUT": "blackout", "EARTH_LOS": "earth", "SUNLIGHT": "sun", "DATA_MISSING": "availability"}
-    constraint = {"EARTH_LOS": "min_earth_los_fraction", "SUNLIGHT": "min_sunlit_fraction"}
     for block in plan.blocks:
         key = identity(block)
         candidate = candidates[key]
         if block.site_id != candidate.site_id:
             return False
-        if f"{key}.{suffix[block.reason_code]}" not in block.fact_ids:
+        if explanation_options(candidate, evidence.facts).get(block.reason_code) not in block.fact_ids:
             return False
         if any(k not in evidence.facts or evidence.facts[k]["candidate_id"] != key for k in block.fact_ids):
-            return False
-        if candidate.issue and block.reason_code != "DATA_MISSING":
-            return False
-        if candidate.decision == "FAIL" and candidate.constraint_states.get(constraint.get(block.reason_code)) != "FAIL":
             return False
     return True
 
@@ -32,6 +44,7 @@ def valid_plan(plan, evidence):
 def render(evidence, plan=None):
     ordering = [identity(b) for b in plan.blocks] if plan else [c.candidate_id for c in evidence.candidates]
     by_id = {c.candidate_id: c for c in evidence.candidates}
+    focus = {identity(b): b.reason_code for b in plan.blocks} if plan else {}
     texts, fact_ids = [], []
     for key in ordering:
         c = by_id[key]
@@ -41,10 +54,13 @@ def render(evidence, plan=None):
             fact_ids.append(f"{key}.availability")
             continue
         sun, earth = c.metrics["total_sun_hours"], c.metrics["total_earth_los_hours"]
-        texts.append(f"{label}: {c.decision}; có nắng {sun[0]:.2f}–{sun[1]:.2f} giờ "
-                     f"(tối thiểu {evidence.request.min_sunlit_fraction*100:g}%); "
-                     f"có Earth LOS {earth[0]:.2f}–{earth[1]:.2f} giờ "
-                     f"(tối thiểu {evidence.request.min_earth_los_fraction*100:g}%).")
+        sun_text = (f"có nắng {sun[0]:.2f}–{sun[1]:.2f} giờ "
+                    f"(tối thiểu {evidence.request.min_sunlit_fraction*100:g}%)")
+        earth_text = (f"có tầm nhìn Trái Đất {earth[0]:.2f}–{earth[1]:.2f} giờ "
+                      f"(tối thiểu {evidence.request.min_earth_los_fraction*100:g}%)")
+        ordered_metrics = (earth_text, sun_text) if focus.get(key) == "EARTH_LOS" else (sun_text, earth_text)
+        decision = "chưa đủ căn cứ để kết luận (INDETERMINATE)" if c.decision == "INDETERMINATE" else c.decision
+        texts.append(f"{label}: {decision} theo yêu cầu cứng; {'; '.join(ordered_metrics)}.")
         fact_ids.extend((f"{key}.sun", f"{key}.earth"))
         if not c.validation.get("passed"):
             if c.validation.get("mission_path", {}).get("passed"):

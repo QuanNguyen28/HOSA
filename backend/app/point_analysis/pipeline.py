@@ -4,6 +4,7 @@ import json
 import os
 import tempfile
 from filelock import FileLock
+import time
 
 import numpy as np
 import pandas as pd
@@ -163,6 +164,7 @@ class PointAnalysisPipeline:
                 "warnings": warnings}
             if request.contact_requirements is not None:
                 result["contact_analysis"] = frame_contacts(request, v, result)
+            progress("commit_artifacts")
             v.to_csv(directory / "intervals.csv", index=False)
             result["provenance"]["artifacts"] = {path.name: hashfile(path) for path in directory.glob("*.csv")}
             atomic_json(directory / "result.json", result)
@@ -230,6 +232,7 @@ class PointAnalysisPipeline:
         progress("radius_sensitivity")
         short = scan_horizons(terrain, heights, radius=300000, az_step=az_step*2)
         verify_profiles(short, terrain.site)
+        progress("verify_horizon_artifacts")
         files = {}
         for label, profiles in (("fine", fine), ("short", short)):
             for h, profile in profiles.items():
@@ -304,6 +307,14 @@ def atomic_json(path, value):
         with os.fdopen(fd, "w", encoding="utf-8") as handle:
             json.dump(value, handle, ensure_ascii=False, allow_nan=False, indent=2)
             handle.write("\n")
-        os.replace(name, path)
+        for attempt in range(6):
+            try:
+                os.replace(name,path)
+                break
+            except PermissionError:
+                if attempt==5:
+                    raise
+                # Windows scanners/readers can hold an atomic-replace target briefly.
+                time.sleep(.01*(attempt+1))
     finally:
         Path(name).unlink(missing_ok=True)

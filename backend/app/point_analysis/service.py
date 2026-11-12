@@ -5,7 +5,7 @@ import json
 import logging
 import os
 from pathlib import Path
-from threading import Lock
+from threading import Event, Lock
 from uuid import uuid4
 
 from filelock import FileLock, Timeout
@@ -22,9 +22,11 @@ def get_point_pipeline():
     return PointAnalysisPipeline(repository_root() / "data/cache/point-analysis")
 
 
-def calculate(request, pipeline, progress=lambda stage: None, timeout=0):
+def calculate(request, pipeline, progress=lambda stage: None, timeout=0, cancel_event: Event | None = None):
     """Serialize identical calculations; shared terrain/raw caches lock their own writes."""
     pipeline.root.mkdir(parents=True, exist_ok=True)
+    if cancel_event is not None and cancel_event.is_set():
+        raise DomainError("POINT_ANALYSIS_CANCELLED", 409)
     cached = pipeline.lookup_cached(request) if hasattr(pipeline, 'lookup_cached') else None
     if cached is not None:
         progress("cached")
@@ -33,6 +35,22 @@ def calculate(request, pipeline, progress=lambda stage: None, timeout=0):
         locks = pipeline.root / "request-locks"
         locks.mkdir(exist_ok=True)
         key = digest(request.resolved().model_dump(exclude={"offline"}))
+        if cancel_event is not None:
+            lock = FileLock(str(locks / f"{key}.lock"))
+            while True:
+                if cancel_event.is_set():
+                    raise DomainError("POINT_ANALYSIS_CANCELLED", 409)
+                try:
+                    lock.acquire(timeout=0)
+                    break
+                except Timeout:
+                    cancel_event.wait(.1)
+            try:
+                if cancel_event.is_set():
+                    raise DomainError("POINT_ANALYSIS_CANCELLED", 409)
+                return pipeline.run(request, progress)
+            finally:
+                lock.release()
         with FileLock(str(locks / f"{key}.lock"), timeout=timeout):
             return pipeline.run(request, progress)
     except Timeout as error:

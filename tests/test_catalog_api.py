@@ -16,7 +16,12 @@ from app.services.lunarsight.catalog import (  # noqa: E402
     site_catalog,
     site_timeline,
 )
-from app.services.lunarsight.point import sample_terrain, terrain_window, terrain_sources  # noqa: E402
+from app.services.lunarsight.point import (  # noqa: E402
+    sample_terrain,
+    south_polar_cap,
+    terrain_sources,
+    terrain_window,
+)
 from app.services.lunarsight.planning import (  # noqa: E402
     analyze_request,
     load_result,
@@ -27,6 +32,7 @@ from app.services.lunarsight.planning import (  # noqa: E402
 
 _SOURCES = {source["dataset_id"]: source["path"] for source in terrain_sources()}
 RAW_SITE01 = _SOURCES["Site01_dem"]
+RAW_SITE06 = _SOURCES["Site06_dem"]
 RAW_DEM80 = _SOURCES["dem80"]
 
 
@@ -111,16 +117,74 @@ def test_terrain_window_is_bounded_and_keeps_native_provenance():
     assert result["geometry"]["vertical_scale"] == 1.0
     assert result["geometry"]["lunar_reference_radius_m"] == 1_737_400.0
     assert math.isfinite(result["geometry"]["center_elevation_m"])
+    assert math.isfinite(result["geometry"]["center_x_m"])
+    assert math.isfinite(result["geometry"]["center_y_m"])
+    assert result["geometry"]["projection"] == "spherical south polar stereographic"
     assert 0 <= result["geometry"]["column_azimuth_deg"] < 360
     assert 0 <= result["geometry"]["row_azimuth_deg"] < 360
 
 
 @pytest.mark.skipif(not RAW_DEM80.is_file(), reason="optional south-polar DEM is not installed")
+def test_regional_terrain_window_uses_continuous_south_polar_dem():
+    result = terrain_window(
+        -89.43892646479243,
+        -137.0959780737777,
+        12.0,
+        65,
+        "regional",
+    )
+    assert result["coverage_status"] == "COVERED"
+    assert result["dataset_id"] == "dem80"
+    assert result["native_resolution_m"] == 80
+    assert result["detail"] == "regional"
+    assert result["grid"]["valid_fraction"] > 0.99
+
+
+@pytest.mark.skipif(not RAW_DEM80.is_file(), reason="optional south-polar DEM is not installed")
+def test_south_polar_cap_preserves_projection_and_site_footprints():
+    result = south_polar_cap(257)
+    assert result["coverage_status"] == "COVERED"
+    assert result["dataset_id"] == "dem80"
+    assert result["latitude_limit_deg"] == -80.0
+    assert result["grid"]["rows"] == 257
+    assert len(result["grid"]["elevation_m_row_major"]) == 257 * 257
+    assert result["grid"]["valid_fraction"] > 0.75
+    assert result["projection"]["bounds_xy_m"] == [-304000.0, -304000.0, 304000.0, 304000.0]
+    if RAW_SITE01.is_file():
+        site01 = next(item for item in result["site_footprints"] if item["site_id"] == "Site01")
+        assert site01["native_resolution_m"] == 5
+        assert len(site01["ring_lon_lat"]) == 5
+
+
+@pytest.mark.skipif(not RAW_DEM80.is_file(), reason="optional south-polar DEM is not installed")
 def test_south_polar_dem_covers_arbitrary_point_at_80m():
+    from app.services.lunarsight.point import has_verified_receipt
     result = sample_terrain(-85.0, 0.0)
     assert result["coverage_status"] == "COVERED"
     assert result["terrain"]["dataset_id"] == "dem80"
     assert result["terrain"]["resolution_m"] == 80
+    source=next(s for s in terrain_sources() if s['dataset_id']=='dem80')
+    available={name for name,path_key in [('rms_error_m','error_path'),('effective_resolution_m','effective_resolution_path')]
+               if has_verified_receipt(source[path_key])}
+    quality=result['terrain']['quality']
+    if available:
+        assert set(quality)==available
+        if 'rms_error_m' in available:
+            assert quality['rms_error_m'] >= 0
+        if 'effective_resolution_m' in available:
+            assert quality['effective_resolution_m'] > 0
+    else:
+        assert quality is None
+        assert any('quality rasters are not available' in warning for warning in result['warnings'])
+
+
+@pytest.mark.skipif(not RAW_SITE06.is_file(), reason="optional raw Site06 DEM is not installed")
+def test_new_pgda_site_prefers_downloaded_five_metre_dem():
+    result = sample_terrain(-85.43810048, 37.36666941)
+    assert result["coverage_status"] == "COVERED"
+    assert result["terrain"]["dataset_id"] == "Site06_dem"
+    assert result["terrain"]["resolution_m"] == 5
+    assert result["terrain"]["quality"] is not None
 
 
 def test_scenario_contract_preserves_fixed_grid_and_heights():

@@ -19,6 +19,7 @@ export async function api<T>(
   path: string,
   signal?: AbortSignal,
   body?: unknown,
+  headers?: Record<string, string>,
 ): Promise<T> {
   const response = await fetch("/api" + path, {
     signal,
@@ -26,7 +27,7 @@ export async function api<T>(
       ? {}
       : {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", ...headers },
           body: JSON.stringify(body),
         }),
   });
@@ -38,7 +39,7 @@ export async function api<T>(
     );
   return payload as T;
 }
-function wait(ms: number, signal: AbortSignal): Promise<void> {
+export function wait(ms: number, signal: AbortSignal): Promise<void> {
   return new Promise((resolve, reject) => {
     if (signal.aborted) {
       reject(new DOMException("Aborted", "AbortError"));

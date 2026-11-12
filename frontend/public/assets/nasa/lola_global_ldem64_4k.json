@@ -1,0 +1,28 @@
+{
+  "id": "lola_global_ldem64_web_lod",
+  "status": "DERIVED_FROM_VERIFIED_BYTES",
+  "created_utc": "2026-11-12T07:51:12.835719+00:00",
+  "source": "data/raw/global/lola_ldem64/LDEM_64.JP2",
+  "source_sha256": "5bcdc1add91447d4386f0ccab17da2f6dd0ae8e116fbd60f56aa31d74248c096",
+  "source_frame": "MOON_ME/DE421",
+  "source_resolution": "64 pixels/degree; 473.802 m/pixel at equator",
+  "output": "frontend/public/assets/nasa/lola_global_ldem64_4k.png",
+  "output_sha256": "319276bc94892440b9fd82af9c0ff19fc04b27bcb7afa9b12707452a5880d371",
+  "output_shape": [
+    2048,
+    4096
+  ],
+  "encoding": {
+    "dtype": "uint8",
+    "channels": "RGB; identical normalized elevation in each channel",
+    "minimum_elevation_m": -9125.5,
+    "maximum_elevation_m": 10773.0
+  },
+  "renderer": {
+    "lunar_reference_radius_m": 1737400.0,
+    "moon_scene_radius": 2.0,
+    "displacement_scale": 0.022906066536203522,
+    "displacement_bias": -0.0105047772533671
+  },
+  "method": "Rasterio bilinear display resampling; source elevations retain true radial scale"
+}

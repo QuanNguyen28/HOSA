@@ -53,6 +53,7 @@ class ParseRequest(Contract):
     resolve_indeterminate: bool = Field(default=False, strict=True)
     text: str = Field(min_length=1, max_length=4000)
     baseline: Baseline | None = None
+    require_explicit_start: bool = False
     selected_site_ids: list[str] | None = Field(default=None, max_length=2)
     clarifications: list[ClarificationTurn] = Field(default_factory=list, max_length=6)
     conversation_history: list[ConversationTurn] = Field(default_factory=list, max_length=8)
@@ -162,11 +163,14 @@ class EvidenceBundle(Contract):
 
 class EvaluateResponse(Contract):
     evidence: EvidenceBundle
-    explanation_mode: Literal["llm_plan", "template_fallback"]
+    explanation_mode: Literal["llm_plan", "llm_failed"]
     explanation: list[str]
     explanation_fact_ids: list[str]
+    explanation_error: str | None = None
     llm_calls: int
     model: str
+    provider: str | None = None
+    trace: list[dict] = Field(default_factory=list)
     prompt_version: str
     token_usage: dict[str, dict | None]
     timings_ms: dict[str, float]

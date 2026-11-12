@@ -15,7 +15,10 @@ class PlanningAdapter:
         caps = self.planner.capabilities(resolve_indeterminate=True) if resolve_indeterminate else self.planner.capabilities()
         q = CompareRequest(site_ids=[caps['scenario']['site_ids'][0]], arrival_utc=caps['scenario']['A_utc'],
                            data_source='coordinate', min_sunlit_fraction=0., resolve_indeterminate=resolve_indeterminate)
-        return {**caps, 'coordinate_source_hash': self.planner.source_capabilities(q)['source_hash']}
+        from app.mission.targets import compare_sites
+        return {**caps, 'coordinate_source_hash': digest({
+            'coordinate': self.planner.source_capabilities(q)['source_hash'],
+            'named_catalog': compare_sites()})}
 
     index = staticmethod(start_index)
     baseline_issue = staticmethod(baseline_issue)
@@ -27,7 +30,7 @@ class PlanningAdapter:
                  "arrival_utc": spec.arrival_utc, "constraints": spec.constraints,
                  "hardware": spec.hardware, "current_site_id": spec.current_site_id,
                  "min_sunlit_fraction": spec.min_sunlit_fraction, "min_earth_los_fraction": spec.min_earth_los_fraction, "rank_by": spec.rank_by,
-                 "expected_source_hash": spec.source_hash}
+                 "expected_source_hash": spec.source_hash if spec.data_source == "snapshot" else None}
         if spec.search_from_utc:
             result = self.planner.search(SearchRequest(**{**query, "arrival_utc": spec.search_from_utc},
                 until_utc=spec.search_until_utc, max_results=3, non_overlapping=True))

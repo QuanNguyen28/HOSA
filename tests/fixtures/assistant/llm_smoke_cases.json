@@ -1,0 +1,67 @@
+[
+  {
+    "id": "SMK-K01",
+    "text": "HOSA đang giải quyết vấn đề gì?",
+    "expected_intent": "knowledge",
+    "require_citation": true,
+    "required_terms": ["Mặt Trăng", "Trái Đất"],
+    "forbidden_terms": ["landing certified", "đảm bảo hạ cánh"]
+  },
+  {
+    "id": "SMK-K02",
+    "text": "Which data and geometry does HOSA use to assess illumination and visibility?",
+    "expected_intent": "knowledge",
+    "require_citation": true,
+    "required_terms": ["NASA", "JPL"],
+    "forbidden_terms": ["RF link budget"]
+  },
+  {
+    "id": "SMK-K03",
+    "text": "Vì sao kết luận INDETERMINATE không được đổi thành PASS chỉ vì số liệu danh định đạt ngưỡng?",
+    "expected_intent": "knowledge",
+    "require_citation": true,
+    "required_terms": ["INDETERMINATE", "PASS"],
+    "forbidden_terms": ["INDETERMINATE means PASS"]
+  },
+  {
+    "id": "SMK-K04",
+    "text": "Can you confirm that Site06 has a usable NASA ROI?",
+    "expected_intent": "knowledge",
+    "require_citation": true,
+    "required_terms": ["Site06", "ROI"],
+    "forbidden_terms": ["Site06 ROI is verified"]
+  },
+  {
+    "id": "SMK-K05",
+    "text": "Site20 và Site20v2 là hai vị trí độc lập hay cùng nhóm địa điểm?",
+    "expected_intent": "knowledge",
+    "require_citation": true,
+    "required_terms": ["Site20", "Site20v2"],
+    "forbidden_terms": ["đã kiểm định riêng toàn bộ nhiệm vụ"]
+  },
+  {
+    "id": "SMK-K06",
+    "text": "Are the archived JPL Horizons responses sufficient to claim coverage for every catalog region?",
+    "expected_intent": "knowledge",
+    "require_citation": true,
+    "required_terms": ["JPL", "P1"],
+    "forbidden_terms": ["all regions are covered", "Site02"],
+    "required_source_paths": ["docs/assistant/lunarsight-current-context.md"]
+  },
+  {
+    "id": "SMK-K07",
+    "text": "Giải thích contact window và vì sao số cửa sổ không đồng nghĩa số phiên liên lạc có thể xếp vào cùng cửa sổ.",
+    "expected_intent": "knowledge",
+    "require_citation": true,
+    "required_terms": ["cửa sổ", "phiên"],
+    "forbidden_terms": ["trạm mặt đất đã được mô hình hóa"]
+  },
+  {
+    "id": "SMK-K08",
+    "text": "Tóm tắt giới hạn của mô hình và nêu rõ hệ thống không chứng nhận điều kiện hạ cánh.",
+    "expected_intent": "knowledge",
+    "require_citation": true,
+    "required_terms": ["không", "hạ cánh"],
+    "forbidden_terms": ["certifies landing safety"]
+  }
+]

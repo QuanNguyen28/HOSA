@@ -7,6 +7,7 @@ import {
   missionIssue,
   missionRequest,
   planningRequest,
+  type Interval,
 } from "./contracts";
 import { errorText } from "./api";
 
@@ -85,7 +86,7 @@ describe("shared backend mission contracts", () => {
     expect(boundsText([72, 72])).toBe("72");
   });
   it("uses half-open backend intervals", () => {
-    const rows = [
+    const rows: Interval[] = [
       {
         start_utc: "2026-11-24T00:00:00Z",
         end_utc: "2026-11-24T00:05:00Z",

@@ -38,6 +38,9 @@ def header_value(header,label):
     return m.group(1).strip()
 
 def timestamp(field):
+    # Horizons may omit the seconds column for minute-aligned tables even when
+    # TIME_DIGITS=SECONDS was requested.  Both forms are lossless for our 1/5
+    # minute grids; expected_grid() below still rejects off-grid timestamps.
     m=re.fullmatch(r"(?:A\.D\.\s+)?(\d{4})-([A-Za-z]{3})-(\d\d) (\d\d):(\d\d)(?::(\d\d)(?:\.0+)?)?",field.strip())
     if not m: raise ValueError(f"Unexpected JPL timestamp: {field!r}")
     y,mo,d,hh,mm,ss=m.groups()

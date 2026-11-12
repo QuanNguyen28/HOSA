@@ -1,0 +1,281 @@
+[
+  {
+    "id": "connecting-ridge",
+    "name": "Connecting ridge",
+    "group": "illumination",
+    "lat": -89.4398,
+    "lon": -137.17,
+    "kind": "exact",
+    "height_m": 1958.6,
+    "point": "The published highest-illumination point on the ridge joining Shackleton and de Gerlache",
+    "source": "Mazarico et al. 2011, Icarus",
+    "url": "https://doi.org/10.1016/j.icarus.2011.03.007"
+  },
+  {
+    "id": "shackleton-rim",
+    "name": "Shackleton rim",
+    "group": "illumination",
+    "lat": -89.6866,
+    "lon": -162.81,
+    "kind": "exact",
+    "height_m": 1729.6,
+    "point": "The published highest-illumination point on the rim of Shackleton crater",
+    "source": "Mazarico et al. 2011, Icarus",
+    "url": "https://doi.org/10.1016/j.icarus.2011.03.007"
+  },
+  {
+    "id": "peak-near-cabeus-b",
+    "name": "Peak near Cabeus B",
+    "group": "artemis",
+    "lat": -83.58392,
+    "lon": -68.46415,
+    "kind": "approx",
+    "height_m": 4602.1,
+    "point": "Highest LOLA point inside the region footprint (2022 list, served by NASA Moon Trek). lat/lon below is the footprint centroid",
+    "source": "NASA Moon Trek, A3_Named_regions_SP",
+    "url": "https://trek.nasa.gov/moon/trekarcgis2/rest/services/A3_Named_regions_SP/MapServer/0",
+    "notes": "Region added in 2024."
+  },
+  {
+    "id": "haworth",
+    "name": "Haworth",
+    "group": "artemis",
+    "lat": -86.36428,
+    "lon": -23.20814,
+    "kind": "approx",
+    "height_m": 2842.2,
+    "point": "Highest LOLA point inside the region footprint (2022 list, served by NASA Moon Trek). lat/lon below is the footprint centroid",
+    "source": "NASA Moon Trek, A3_Named_regions_SP",
+    "url": "https://trek.nasa.gov/moon/trekarcgis2/rest/services/A3_Named_regions_SP/MapServer/0"
+  },
+  {
+    "id": "malapert-massif",
+    "name": "Malapert Massif",
+    "group": "artemis",
+    "lat": -85.98794,
+    "lon": 2.06238,
+    "kind": "approx",
+    "height_m": 5173.3,
+    "point": "Highest LOLA point inside the region footprint (2022 list, served by NASA Moon Trek). lat/lon below is the footprint centroid",
+    "source": "NASA Moon Trek, A3_Named_regions_SP",
+    "url": "https://trek.nasa.gov/moon/trekarcgis2/rest/services/A3_Named_regions_SP/MapServer/0",
+    "notes": "Intuitive Machines IM-5 plans to land at Mons Malapert (no coordinates published)."
+  },
+  {
+    "id": "mons-mouton-plateau",
+    "name": "Mons Mouton Plateau",
+    "group": "artemis",
+    "lat": -84.37473,
+    "lon": 32.00484,
+    "kind": "approx",
+    "height_m": 5605.6,
+    "point": "Highest LOLA point inside the region footprint (2022 list, served by NASA Moon Trek). lat/lon below is the footprint centroid",
+    "source": "NASA Moon Trek, A3_Named_regions_SP",
+    "url": "https://trek.nasa.gov/moon/trekarcgis2/rest/services/A3_Named_regions_SP/MapServer/0"
+  },
+  {
+    "id": "mons-mouton",
+    "name": "Mons Mouton",
+    "group": "artemis",
+    "lat": -85.40381,
+    "lon": 31.70225,
+    "kind": "approx",
+    "height_m": 6463.6,
+    "point": "Highest LOLA point inside the region footprint (2022 list, served by NASA Moon Trek). lat/lon below is the footprint centroid",
+    "source": "NASA Moon Trek, A3_Named_regions_SP",
+    "url": "https://trek.nasa.gov/moon/trekarcgis2/rest/services/A3_Named_regions_SP/MapServer/0"
+  },
+  {
+    "id": "nobile-rim-1",
+    "name": "Nobile Rim 1",
+    "group": "artemis",
+    "lat": -85.23291,
+    "lon": 36.59181,
+    "kind": "approx",
+    "height_m": 6800,
+    "point": "Highest LOLA point inside the region footprint (2022 list, served by NASA Moon Trek). lat/lon below is the footprint centroid",
+    "source": "NASA Moon Trek, A3_Named_regions_SP",
+    "url": "https://trek.nasa.gov/moon/trekarcgis2/rest/services/A3_Named_regions_SP/MapServer/0"
+  },
+  {
+    "id": "nobile-rim-2",
+    "name": "Nobile Rim 2",
+    "group": "artemis",
+    "lat": -84.07924,
+    "lon": 54.89488,
+    "kind": "approx",
+    "height_m": 1817.4,
+    "point": "Highest LOLA point inside the region footprint (2022 list, served by NASA Moon Trek). lat/lon below is the footprint centroid",
+    "source": "NASA Moon Trek, A3_Named_regions_SP",
+    "url": "https://trek.nasa.gov/moon/trekarcgis2/rest/services/A3_Named_regions_SP/MapServer/0"
+  },
+  {
+    "id": "de-gerlache-rim-2",
+    "name": "de Gerlache Rim 2",
+    "group": "artemis",
+    "lat": -88.58734,
+    "lon": -67.89559,
+    "kind": "approx",
+    "height_m": 1764.9,
+    "point": "Highest LOLA point inside the region footprint (2022 list, served by NASA Moon Trek). lat/lon below is the footprint centroid",
+    "source": "NASA Moon Trek, A3_Named_regions_SP",
+    "url": "https://trek.nasa.gov/moon/trekarcgis2/rest/services/A3_Named_regions_SP/MapServer/0"
+  },
+  {
+    "id": "im1-odysseus",
+    "name": "IM-1 Odysseus landing site",
+    "group": "clps",
+    "lat": -80.13,
+    "lon": 1.44,
+    "kind": "exact",
+    "height_m": 2592,
+    "point": "Landing point reported after touchdown on 22 February 2024",
+    "source": "NASA: LRO images Odysseus",
+    "url": "https://www.nasa.gov/",
+    "aliases": [
+      "IM1",
+      "IM-1",
+      "Odysseus"
+    ]
+  },
+  {
+    "id": "im2-athena",
+    "name": "IM-2 Athena landing site",
+    "group": "clps",
+    "lat": -84.7906,
+    "lon": 29.1957,
+    "kind": "exact",
+    "height_m": 5321.7,
+    "point": "Landing point reported after touchdown on 6 March 2025",
+    "source": "LROC image 1408",
+    "url": "https://www.nasa.gov/",
+    "aliases": [
+      "IM2",
+      "IM-2",
+      "Athena"
+    ]
+  },
+  {
+    "id": "viper",
+    "name": "VIPER mission area",
+    "group": "clps",
+    "lat": -85.42088,
+    "lon": 31.6218,
+    "kind": "exact",
+    "height_m": 6417.6,
+    "point": "Centre of the planned VIPER traverse area on Nobile",
+    "source": "NASA VIPER",
+    "url": "https://www.nasa.gov/",
+    "aliases": [
+      "VIPER"
+    ]
+  },
+  {
+    "id": "shackleton-floor",
+    "name": "Shackleton crater floor",
+    "group": "contrast",
+    "lat": -89.62511,
+    "lon": 118.60583,
+    "kind": "approx",
+    "height_m": -2872.3,
+    "point": "Lowest LOLA point inside the permanently shadowed floor",
+    "source": "NASA Moon Trek, A3_Named_regions_SP",
+    "url": "https://trek.nasa.gov/",
+    "aliases": [
+      "Shackleton floor"
+    ]
+  },
+  {
+    "id": "peak-near-shackleton",
+    "name": "Peak near Shackleton",
+    "lat": -88.81101,
+    "lon": 123.69007,
+    "height_m": 1645.5,
+    "group": "illumination",
+    "kind": "exact",
+    "point": "Centre pixel of the verified 5 m/pixel LOLA terrain footprint used by HOSA",
+    "source": "NASA GSFC PGDA Product 78",
+    "url": "https://pgda.gsfc.nasa.gov/products/78"
+  },
+  {
+    "id": "leibnitz-beta-plateau",
+    "name": "Leibnitz Beta Plateau",
+    "lat": -85.42658,
+    "lon": 31.74276,
+    "height_m": 6398.9,
+    "group": "illumination",
+    "kind": "exact",
+    "point": "Centre pixel of the verified 5 m/pixel LOLA terrain footprint used by HOSA",
+    "source": "NASA GSFC PGDA Product 78",
+    "url": "https://pgda.gsfc.nasa.gov/products/78",
+    "aliases": [
+      "Leibnitz Beta"
+    ]
+  },
+  {
+    "id": "de-gerlache-kocher",
+    "name": "de Gerlache–Kocher Massif",
+    "lat": -85.82955,
+    "lon": -116.32202,
+    "height_m": 2705.9,
+    "group": "illumination",
+    "kind": "exact",
+    "point": "Centre pixel of the verified 5 m/pixel LOLA terrain footprint used by HOSA",
+    "source": "NASA GSFC PGDA Product 78",
+    "url": "https://pgda.gsfc.nasa.gov/products/78",
+    "aliases": [
+      "de Gerlache Kocher"
+    ]
+  },
+  {
+    "id": "shoemaker",
+    "name": "Shoemaker crater",
+    "lat": -87.18351,
+    "lon": 62.83501,
+    "height_m": 548.1,
+    "group": "illumination",
+    "kind": "exact",
+    "point": "Centre pixel of the verified 5 m/pixel LOLA terrain footprint used by HOSA",
+    "source": "NASA GSFC PGDA Product 78",
+    "url": "https://pgda.gsfc.nasa.gov/products/78",
+    "aliases": [
+      "Shoemaker"
+    ]
+  },
+  {
+    "id": "amundsen-rim",
+    "name": "Amundsen rim",
+    "lat": -84.22874,
+    "lon": 69.44395,
+    "height_m": 399.3,
+    "group": "illumination",
+    "kind": "exact",
+    "point": "Centre pixel of the verified 5 m/pixel LOLA terrain footprint used by HOSA",
+    "source": "NASA GSFC PGDA Product 78",
+    "url": "https://pgda.gsfc.nasa.gov/products/78"
+  },
+  {
+    "id": "example-a",
+    "name": "Example A",
+    "lat": -88.80771296769387,
+    "lon": 123.81313283430084,
+    "height_m": null,
+    "group": "illumination",
+    "kind": "exact",
+    "point": "Documented backend verification coordinate; click Analyze to calculate.",
+    "source": "HOSA coordinate API",
+    "url": ""
+  },
+  {
+    "id": "example-b",
+    "name": "Example B",
+    "lat": -87,
+    "lon": 180,
+    "height_m": null,
+    "group": "illumination",
+    "kind": "exact",
+    "point": "Documented backend verification coordinate; click Analyze to calculate.",
+    "source": "HOSA coordinate API",
+    "url": ""
+  }
+]

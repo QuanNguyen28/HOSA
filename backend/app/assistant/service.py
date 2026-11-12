@@ -1,6 +1,7 @@
 from time import monotonic, perf_counter
 
 from starlette.concurrency import run_in_threadpool
+from app.core.errors import DomainError
 
 from .config import AssistantSettings
 from .clarification import questions_for
@@ -30,7 +31,9 @@ class AssistantService:
             return ParseResponse(status=status, issues=[error.code], questions=questions_for(error.code, reply.output), patch=reply.output, llm_calls=1)
         spec_hash = digest(spec.model_dump())
         identifier = self.drafts.create(Draft(spec, spec_hash, monotonic()+self.settings.assistant_draft_ttl_seconds,
-            reply.latency_ms, reply.model, parse_usage=reply.usage), self.settings.assistant_max_drafts)
+            reply.latency_ms, reply.model, parse_usage=reply.usage,
+            provider=getattr(self.llm,"last_provider",None),trace=list(getattr(self.llm,"events",[]))),
+            self.settings.assistant_max_drafts)
         return ParseResponse(status="READY", issues=[], patch=reply.output, draft_id=identifier, spec_hash=spec_hash,
             baseline_hash=spec.baseline_hash, spec=spec, llm_calls=1)
 
@@ -55,22 +58,41 @@ class AssistantService:
         except AssistantError as error:
             self.drafts.fail(request.draft_id, error.code, error.status_code)
             raise
+        except DomainError as error:
+            self.drafts.fail(request.draft_id, error.code, error.status_code)
+            raise AssistantError(error.code, error.status_code) from error
         except (OSError, ValueError) as error:
             self.drafts.fail(request.draft_id, "DATA_NOT_READY", 503)
             raise AssistantError("DATA_NOT_READY", 503) from error
         engine_ms = (perf_counter()-started)*1000
-        plan, explain_usage = None, None
+        plan, explain_usage, explanation_error, explain_model = None, None, None, None
         explain_started = perf_counter()
+        llm_calls = 1  # The parse call that created this draft.
         try:
-            reply = await self.llm.complete(ExplainPlan, explain_messages(evidence))
-            explain_usage = reply.usage
-            if valid_plan(reply.output, evidence):
-                plan = reply.output
-        except AssistantError:
-            pass  # Preserve science and render templates, never call a third time.
+            for repair in (False, True):
+                llm_calls += 1
+                reply = await self.llm.complete(ExplainPlan, explain_messages(evidence, repair=repair))
+                if explain_usage is None:
+                    explain_usage = {}
+                for name, value in reply.usage.items():
+                    if isinstance(value, (int, float)):
+                        explain_usage[name] = explain_usage.get(name, 0) + value
+                if valid_plan(reply.output, evidence):
+                    plan = reply.output
+                    explain_model = reply.model
+                    explanation_error = None
+                    break
+                explanation_error = "MODEL_EXPLANATION_INVALID"
+        except AssistantError as error:
+            explanation_error = error.code
         text, fact_ids = render(evidence, plan)
-        response = EvaluateResponse(evidence=evidence, explanation_mode="llm_plan" if plan else "template_fallback",
-            explanation=text, explanation_fact_ids=fact_ids, llm_calls=2, model=draft.model,
+        if not plan:
+            text.insert(0, "Tóm tắt từ kết quả tính toán: phần giải thích của LLM chưa được xác thực.")
+        response = EvaluateResponse(evidence=evidence, explanation_mode="llm_plan" if plan else "llm_failed",
+            explanation=text, explanation_fact_ids=fact_ids, explanation_error=explanation_error,
+            llm_calls=llm_calls, model=explain_model or draft.model,
+            provider=getattr(self.llm,"last_provider",None) or draft.provider,
+            trace=[*draft.trace,*list(getattr(self.llm,"events",[]))],
             prompt_version=PROMPT_VERSION, token_usage={"parse": draft.parse_usage, "explain": explain_usage},
             timings_ms={"parse": draft.parse_ms, "engine": engine_ms, "explain": (perf_counter()-explain_started)*1000})
         self.drafts.finish(request.draft_id, response)

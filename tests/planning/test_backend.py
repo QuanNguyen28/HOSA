@@ -195,3 +195,35 @@ def test_identical_results_can_be_persisted_concurrently(tmp_path, monkeypatch):
     assert len(set(temporaries)) == 2
     assert json.loads((directory/("a"*20+".json")).read_text()) == result
     assert not list(directory.glob("*.tmp"))
+
+
+def test_result_persistence_retries_transient_windows_replace_denial(tmp_path, monkeypatch):
+    directory=tmp_path/"transient"
+    monkeypatch.setattr(legacy,"_result_dir",lambda:directory)
+    real_replace=legacy.os.replace
+    calls=[]
+    def replace(source,target):
+        calls.append((source,target))
+        if len(calls)==1:
+            raise PermissionError("transient sharing violation")
+        return real_replace(source,target)
+    monkeypatch.setattr(legacy.os,"replace",replace)
+    monkeypatch.setattr(legacy.time,"sleep",lambda _:None)
+    result={"result_id":"b"*20,"value":1}
+    legacy._persist_result(result)
+    assert len(calls)==2
+    assert json.loads((directory/("b"*20+".json")).read_text())==result
+    assert not list(directory.glob("*.tmp"))
+
+
+def test_result_persistence_does_not_hide_permanent_replace_denial(tmp_path, monkeypatch):
+    directory=tmp_path/"permanent"
+    monkeypatch.setattr(legacy,"_result_dir",lambda:directory)
+    def denied(*args):
+        raise PermissionError("permanent denial")
+    monkeypatch.setattr(legacy.os,"replace",denied)
+    monkeypatch.setattr(legacy.time,"sleep",lambda _:None)
+    with pytest.raises(PermissionError):
+        legacy._persist_result({"result_id":"c"*20})
+    assert not list(directory.glob("*.tmp"))
+    assert not list(directory.glob("*.json"))

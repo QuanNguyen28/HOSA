@@ -1,4 +1,4 @@
-"""Read-only access to versioned LunarSight presentation data.
+"""Read-only access to versioned HOSA presentation data.
 
 This adapter intentionally uses the Python standard library so the lightweight API can
 serve the verified catalog without importing the scientific pipeline dependencies.

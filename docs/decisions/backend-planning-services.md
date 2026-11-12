@@ -129,7 +129,7 @@ Ngày rà soát: 10/11/2026. Việc đọc mã không chứng nhận độc lậ
 
 Báo cáo cục bộ: data/cache/assistant/backend-final-validation.xml, data/cache/assistant/live-window-search-final.json và data/cache/planning/http-smoke.json.
 
-OpenRouter adapter gửi schema rõ ràng ngay cả ở JSON mode; báo riêng đầu ra bị cắt và schema sai, không tự retry. Mỗi lượt có giới hạn tổng thời gian bằng OPENROUTER_TIMEOUT_SECONDS, ngoài timeout socket. OPENROUTER_REASONING_ENABLED là tùy chọn qua env; để trống giữ mặc định provider. Với model reasoning hiện có đã cấu hình false cho thử nghiệm JSON ngắn; key/model không bị đổi. Điều này chưa chứng minh đã xử lý được mọi trường hợp của endpoint miễn phí.
+OpenRouter adapter gửi schema rõ ràng ngay cả ở JSON mode; báo riêng đầu ra bị cắt và schema sai, không tự retry ở lớp transport. Cấu hình thử nghiệm ban đầu dùng `OPENROUTER_TIMEOUT_SECONDS` để giới hạn tổng thời gian. Cấu hình hiện tại chỉ giới hạn thời gian thiết lập kết nối bằng `ASSISTANT_CONNECT_TIMEOUT_SECONDS`; HOSA không đặt giới hạn đọc phản hồi hay giới hạn tổng thời gian. `OPENROUTER_REASONING_ENABLED` là tùy chọn; bỏ qua để giữ mặc định của provider.
 
 Chạy lại ca tìm ngày thật (tối đa hai lượt, không tự sửa lỗi):
 

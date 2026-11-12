@@ -1,0 +1,30 @@
+[
+  {
+    "id":"FOCUS-PURPOSE",
+    "text":"HOSA giúp tôi quyết định điều gì nếu lịch nhiệm vụ ở cực Nam Mặt Trăng thay đổi? Giải thích cho người mới.",
+    "expected_intents":["knowledge","explain"],"require_citation":true,
+    "forbidden_terms":["typed query","arrival_utc","1.344"]
+  },
+  {
+    "id":"FOCUS-MISSING-DATE",
+    "text":"So sánh Site01_P1 và Site04_P1, yêu cầu ít nhất 80% thời gian có nắng và 80% Earth LOS.",
+    "expected_intent":"clarify","expected_run_status":"needs_input",
+    "forbidden_terms":["typed query","arrival_utc","max_darkness_hours","57,6","57.6"]
+  },
+  {
+    "id":"FOCUS-RESULT-FOLLOWUP",
+    "require_citation":false,"require_engine_evidence":true,
+    "turns":[
+      {"text":"Dùng snapshot so sánh Site01_P1 và Site04_P1 trong 72 giờ bắt đầu 2026-11-14T00:00:00Z. Yêu cầu tối thiểu 80% thời gian có nắng và 80% Earth LOS. Giải thích kết luận dễ hiểu, ưu tiên nguyên nhân và ý nghĩa thay vì liệt kê số liệu.",
+       "expected_intent":"compare","expected_engine":{"status":"INSUFFICIENT_DATA"}},
+      {"text":"Tại sao chưa thể khẳng định phương án đạt? Chỉ giải thích nguyên nhân liên quan đến kết quả vừa tính, không chạy lại.",
+       "expected_intents":["explain","knowledge"]}
+    ]
+  },
+  {
+    "id":"FOCUS-CONTACT-MEANING",
+    "text":"Does a high total Earth LOS guarantee one usable continuous 30-minute contact window? Explain the reason without listing all project features.",
+    "expected_intents":["knowledge","explain"],"require_citation":true,
+    "forbidden_terms":["guarantees radio communication","typed query"]
+  }
+]

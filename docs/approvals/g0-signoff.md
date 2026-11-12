@@ -1,4 +1,4 @@
-# Biên bản chốt cổng G0 — LunarSight
+# Biên bản chốt cổng G0 — HOSA
 
 Trạng thái: **PENDING APPROVAL**  
 Phiên bản dữ liệu/phương pháp: `v0.2.0` / `lunar-sphere-enu-v2`  
