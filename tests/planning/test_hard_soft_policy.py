@@ -30,7 +30,7 @@ def planner(tmp_path, monkeypatch):
 
 
 def request(**updates):
-    return CompareRequest(**{"scenario_id": "south_pole_demo_v1", "site_ids": ["Site01_P1"],
+    return CompareRequest(**{"illumination_model": "sun_center", "scenario_id": "south_pole_demo_v1", "site_ids": ["Site01_P1"],
         "arrival_utc": "2026-11-14T00:00:00Z", "min_sunlit_fraction": 0.8, "min_earth_los_fraction": 0.1,
         "constraints": Constraints(max_darkness_hours=0, max_earth_blackout_hours=1), **updates})
 
@@ -133,7 +133,7 @@ def test_search_preserves_soft_violations_without_filtering_passes(planner):
 
 
 def test_cli_requires_both_main_inputs_and_accepts_no_soft_limits(planner, capsys):
-    args = ["compare", "--sites", "Site01_P1", "--arrival", "2026-11-14T00:00:00Z", "--min-sunlit-fraction", ".8"]
+    args = ["compare", "--illumination-model", "sun_center", "--sites", "Site01_P1", "--arrival", "2026-11-14T00:00:00Z", "--min-sunlit-fraction", ".8"]
     assert planning_cli.main(args, service=planner) == 2
     assert "min_earth_los_fraction" in capsys.readouterr().err
     assert planning_cli.main([*args, "--min-earth-los-fraction", ".1"], service=planner) == 0

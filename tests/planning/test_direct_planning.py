@@ -31,7 +31,7 @@ def planner(tmp_path, monkeypatch):
 
 
 def query(**updates):
-    return CompareRequest(**{"scenario_id": "south_pole_demo_v1", "site_ids": ["Site04_P1"],
+    return CompareRequest(**{"illumination_model": "sun_center", "scenario_id": "south_pole_demo_v1", "site_ids": ["Site04_P1"],
         "arrival_utc": "2026-11-14T00:00:00Z",
         "min_sunlit_fraction": 0.8, "min_earth_los_fraction": (72-71.15)/72,
         "constraints": Constraints(max_darkness_hours=12, max_earth_blackout_hours=71.15), **updates})

@@ -1,0 +1,180 @@
+{
+  "result_id": "4240fe876c222c63e827fede40ea9cb2533cf93336886a08115b9ba64d27d60f",
+  "request": {
+    "site_id": null,
+    "latitude_deg": -89.77979955709672,
+    "longitude_e_deg": 203.7337862603575,
+    "illumination_model": "solar_disc",
+    "start_utc": "2026-03-01T00:00:00Z",
+    "duration_hours": 720.0,
+    "end_utc": "2026-03-31T00:00:00Z",
+    "panel_height_m": 20.0,
+    "antenna_height_m": 20.0,
+    "constraints": {
+      "max_darkness_hours": 12.0,
+      "max_earth_blackout_hours": 6.0
+    },
+    "min_sunlit_fraction": 0.8,
+    "min_earth_los_fraction": null,
+    "contact_requirements": {
+      "min_contact_minutes": 30.0,
+      "setup_minutes": 5.0,
+      "required_windows": 1,
+      "first_contact_deadline_minutes": 120.0
+    },
+    "offline": false,
+    "resolve_indeterminate": true
+  },
+  "decision": "PASS",
+  "illumination": {
+    "model": "solar_disc",
+    "method_version": "solar-disc-mean-1.0",
+    "metric": "time_mean_visible_solar_disc_fraction",
+    "mean_visible_fraction_bounds": [
+      0.9156576642192152,
+      0.9156576642192152
+    ],
+    "total_sun_hours_definition": "equivalent full-disc hours",
+    "darkness_definition": "no part of the solar disc visible",
+    "eclipse_model": "solid Earth disc; no atmospheric dimming"
+  },
+  "validation_passed": true,
+  "resolution": {
+    "enabled": true,
+    "policy_version": "indeterminate-resolution-2.1",
+    "status": "resolved",
+    "initial_decision": "INDETERMINATE",
+    "initial_reason_codes": [
+      "azimuth_0.25_vs_0.125:SENSITIVITY_FAILED"
+    ],
+    "max_refinement_rounds": 2,
+    "refinement_rounds": 2,
+    "attempts": [
+      {
+        "coarse_az_step_deg": 0.25,
+        "fine_az_step_deg": 0.125,
+        "decision": "INDETERMINATE",
+        "nominal_sampled_decision": "PASS",
+        "validation_passed": false,
+        "mission_path_passed": false,
+        "reason_codes": [
+          "azimuth_0.25_vs_0.125:SENSITIVITY_FAILED"
+        ],
+        "metrics_hours": {
+          "total_sun_hours": [
+            659.216863629354,
+            659.216863629354
+          ],
+          "total_earth_los_hours": [
+            377.666666666667,
+            377.666666666667
+          ],
+          "longest_dark_hours": [
+            28.083333333327,
+            28.083333333327
+          ],
+          "longest_blackout_hours": [
+            331.166666666648,
+            331.166666666648
+          ],
+          "longest_joint_hours": [
+            318.250000000058,
+            318.250000000058
+          ]
+        }
+      },
+      {
+        "coarse_az_step_deg": 0.125,
+        "fine_az_step_deg": 0.0625,
+        "decision": "INDETERMINATE",
+        "nominal_sampled_decision": "PASS",
+        "validation_passed": false,
+        "mission_path_passed": false,
+        "reason_codes": [
+          "azimuth_0.125_vs_0.0625:SENSITIVITY_FAILED"
+        ],
+        "metrics_hours": {
+          "total_sun_hours": [
+            659.258479842161,
+            659.258479842161
+          ],
+          "total_earth_los_hours": [
+            377.666666666667,
+            377.666666666667
+          ],
+          "longest_dark_hours": [
+            27.91666666666,
+            27.91666666666
+          ],
+          "longest_blackout_hours": [
+            331.166666666648,
+            331.166666666648
+          ],
+          "longest_joint_hours": [
+            318.250000000058,
+            318.250000000058
+          ]
+        }
+      },
+      {
+        "coarse_az_step_deg": 0.0625,
+        "fine_az_step_deg": 0.03125,
+        "decision": "PASS",
+        "nominal_sampled_decision": "PASS",
+        "validation_passed": true,
+        "mission_path_passed": false,
+        "reason_codes": [],
+        "metrics_hours": {
+          "total_sun_hours": [
+            659.273518237835,
+            659.273518237835
+          ],
+          "total_earth_los_hours": [
+            377.666666666667,
+            377.666666666667
+          ],
+          "longest_dark_hours": [
+            27.749999999994,
+            27.749999999994
+          ],
+          "longest_blackout_hours": [
+            331.166666666648,
+            331.166666666648
+          ],
+          "longest_joint_hours": [
+            318.250000000058,
+            318.250000000058
+          ]
+        }
+      }
+    ],
+    "final_decision": "PASS",
+    "remaining_reason_codes": []
+  },
+  "partial_samples_20_to_80_percent": 160,
+  "example_partial_sample": {
+    "sun_az_deg": 161.9284078638,
+    "sun_el_deg": -0.3458623487,
+    "sun_horizon_deg": -0.7478567064,
+    "sun_terrain_complete": true,
+    "sun_clearance_deg": 0.4019943577,
+    "sun_ephem_valid": true,
+    "sun_state": "V",
+    "sun_coverage_flag": "covered",
+    "earth_az_deg": 161.0021153304,
+    "earth_el_deg": -0.8487384458,
+    "earth_horizon_deg": -0.5968665041,
+    "earth_terrain_complete": true,
+    "earth_clearance_deg": -0.2518719417,
+    "earth_ephem_valid": true,
+    "earth_state": "B",
+    "earth_coverage_flag": "covered",
+    "sun_center_state": "V",
+    "sun_visible_fraction_lower": 0.749863711,
+    "sun_visible_fraction_upper": 0.749863711,
+    "sun_visible_fraction": 0.749863711,
+    "joint_state": "B",
+    "start_utc": "2026-03-03T09:50:00.000Z",
+    "end_utc": "2026-03-03T09:55:00.000Z"
+  }
+}

@@ -10,7 +10,7 @@ from app.services.lunarsight.visibility import lookup
 from app.services.lunarsight.durations import combine
 from .evaluation import TOLERANCES, metrics, constraint_checks, decision
 
-VERSION = "sampled-mission-path-envelope-2.0"
+VERSION = "sampled-mission-path-envelope-3.0"
 
 
 def validate_mission_path(request, validation, base, fine, shorter, ephemerides):
@@ -41,7 +41,7 @@ def validate_mission_path(request, validation, base, fine, shorter, ephemerides)
         delta = max(differences)
         padding = delta + TOLERANCES["horizon_deg"]
         all_above, all_below, margins, spreads = [], [], [], []
-        for grid in (coarse.reindex(index, method="ffill"), native):
+        for grid_number, grid in enumerate((coarse.reindex(index, method="ffill"), native)):
             profiles = [lookup(p[height], grid.az_deg) for p in (base, fine, shorter)]
             horizons = np.stack([h for h, _ in profiles])
             covered = np.stack([c for _, c in profiles]).all(axis=0)
@@ -51,13 +51,37 @@ def validate_mission_path(request, validation, base, fine, shorter, ephemerides)
             complete &= bool(valid.all())
             above = elevation - horizons.max(axis=0) - padding
             below = horizons.min(axis=0) - elevation - padding
-            all_above.append(valid & (above > 0))
-            all_below.append(valid & (below > 0))
+            if label == "sun" and request.illumination_model == "solar_disc":
+                from app.services.lunarsight.solar_disc import fractions, SUN_RADIUS_KM, EARTH_RADIUS_KM
+                from app.services.lunarsight.shared_ephemeris import ANGLE_TOLERANCE_DEG
+                other = earth.reindex(index, method="ffill") if grid_number == 0 else earth1
+                lower, upper = [], []
+                for group in (base, fine, shorter):
+                    profile = group[height]
+                    # Full/zero disk proofs only. Partial disks stay [0,1] in
+                    # this conservative mission-path override, never centre V.
+                    lo, _ = fractions(grid, other, profile.assign(horizon_deg=profile.horizon_deg+padding))
+                    _, hi = fractions(grid, other, profile.assign(horizon_deg=profile.horizon_deg-padding))
+                    lower.append(lo)
+                    upper.append(hi)
+                sr = np.rad2deg(np.arcsin(SUN_RADIUS_KM/grid.distance_km.to_numpy()))
+                er = np.rad2deg(np.arcsin(EARTH_RADIUS_KM/other.distance_km.to_numpy()))
+                separation = np.hypot(((other.az_deg.to_numpy()-grid.az_deg.to_numpy()+180)%360-180)
+                                     *np.cos(np.deg2rad(elevation)), other.el_deg.to_numpy()-elevation)
+                eclipse_clear = separation > sr+er+2*ANGLE_TOLERANCE_DEG
+                all_above.append(valid & eclipse_clear & (np.min(lower, axis=0) >= 1-1e-12))
+                all_below.append(valid & (np.max(upper, axis=0) <= 0))
+            else:
+                all_above.append(valid & (above > 0))
+                all_below.append(valid & (below > 0))
             margins.extend(np.maximum(above, below).tolist())
             spreads.extend(np.ptp(horizons, axis=0).tolist())
         state = np.where(np.stack(all_above).all(axis=0), "V",
                          np.where(np.stack(all_below).all(axis=0), "B", "?"))
         frame[label + "_state"] = state
+        if label == "sun" and request.illumination_model == "solar_disc":
+            frame["sun_visible_fraction_lower"] = (state == "V").astype(float)
+            frame["sun_visible_fraction_upper"] = (state != "B").astype(float)
         finite = bool(np.isfinite(margins).all() and np.isfinite(spreads).all())
         required = ((request.min_sunlit_fraction or 0) > 0 if label == "sun" else
                     (request.min_earth_los_fraction or 0) > 0 or request.contact_requirements is not None)

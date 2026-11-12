@@ -140,7 +140,7 @@ export default function Stage3D({
       const earthEl = coordinateExact.earth_el_deg;
       if (sunAz != null && sunEl != null && earthAz != null && earthEl != null) {
         return {
-          source: "JPL_HORIZONS",
+          source: pointAnalysis?.illumination?.model === "solar_disc" ? "SHARED_SPICE" : "JPL_HORIZONS",
           observerHeightM: heightM ?? 2,
           sun: {
             azimuthDeg: sunAz,
@@ -289,8 +289,8 @@ export default function Stage3D({
             {(terrainWindow.radius_km! * 2).toFixed(0)} km field · curvature
             enabled
           </div>
-          <div className={groundSky.source === "JPL_HORIZONS" ? "text-mint" : "text-sun"}>
-            SKY · {groundSky.source === "JPL_HORIZONS" ? "JPL HORIZONS" : "MODEL PREVIEW"}
+          <div className={groundSky.source !== "MODEL_PREVIEW" ? "text-mint" : "text-sun"}>
+            SKY · {groundSky.source === "SHARED_SPICE" ? "SPICE / JPL CHECKED" : groundSky.source === "JPL_HORIZONS" ? "JPL HORIZONS" : "MODEL PREVIEW"}
           </div>
         </div>
       )}

@@ -56,7 +56,7 @@ def _safe_result(result) -> dict:
     if isinstance(result, dict) and "result_id" in result and "metrics_hours" in result:
         keys = ("result_id", "decision", "nominal_sampled_decision", "constraint_checks", "soft_constraint_checks",
                 "soft_violations", "metrics_hours", "availability_fraction", "coverage", "validation", "contact_analysis",
-                "coordinate", "request", "end_utc", "method_version", "created_utc", "warnings", "provenance", "resolution")
+                "coordinate", "request", "end_utc", "method_version", "created_utc", "warnings", "provenance", "resolution", "illumination")
         summary={key: result.get(key) for key in keys if key in result}
         summary["explanation_events"]=_explanation_events(result.get("events",[]))
         return summary
@@ -67,7 +67,7 @@ def _safe_result(result) -> dict:
             "rank_by":result.rank_by,"candidates":[{"candidate_id":x.candidate_id,"site_id":x.site_id,
                 "start_utc":x.start_utc,"end_utc":x.end_utc,"decision":x.decision,"issue":x.issue,
                 "metrics":x.metrics,"constraint_states":x.constraint_states,"soft_constraint_states":x.soft_constraint_states,
-                "validation":x.validation,"resolution":x.resolution,"sensitivity":x.sensitivity,"contact_analysis":x.contact_analysis,
+                "validation":x.validation,"resolution":x.resolution,"sensitivity":x.sensitivity,"contact_analysis":x.contact_analysis,"illumination":x.illumination,
                 "nominal_sampled_decision":x.nominal_sampled_decision,"metric_context":x.metric_context,
                 "explanation_events":_explanation_events(x.events),"provenance":x.provenance,
                 "coordinate":x.coordinate,"analysis_result_id":x.analysis_result_id} for x in result.candidates]}
@@ -85,7 +85,9 @@ class ChatService:
             "You are HOSA's bilingual lunar mission-planning assistant. Answer in the user's language. "
             "Refer to the project as HOSA only, even if older names appear in conversation history or source references. "
             "HOSA compares geometric Sun illumination and Earth-centre line of sight using NASA LOLA/PGDA terrain, "
-            "JPL Horizons ephemerides, terrain horizons, explicit provenance, uncertainty bounds and validation gates. "
+            "SPICE shared ephemerides validated against JPL Horizons, terrain horizons, explicit provenance, uncertainty bounds and validation gates. "
+            "Default sunlight requirements use the time-mean visible solar-disc area including Earth occultation; "
+            "half a solar disk throughout the mission is 50%, even though some Sun is visible all the time. "
             "It is an educational prototype, not landing certification, a power/thermal model or a radio link budget. "
             "Never invent measurements, supported regions, data coverage, source facts or scientific outcomes. "
             "The deterministic backend owns all metrics, ranking, validation and PASS/FAIL/INDETERMINATE decisions. "

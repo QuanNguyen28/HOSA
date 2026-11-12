@@ -3,6 +3,7 @@ import { api } from "./api";
 import { useGroundedChat, type ChatMessage } from "./useGroundedChat";
 
 type Baseline = {
+  illumination_model: "solar_disc" | "sun_center";
   scenario_id: string;
   arrival_utc: string;
   duration_hours: number;
@@ -110,6 +111,7 @@ export function useAssistant() {
   const [outcome, setOutcome] = useState<Evaluation | null>(null);
   const active = useRef<AbortController | null>(null);
   const createBaseline = (c: Capabilities): Baseline => ({
+    illumination_model: "solar_disc",
     scenario_id: c.scenario.scenario_id,
     arrival_utc: c.scenario.A_utc,
     duration_hours: c.scenario.D_hours,
@@ -240,6 +242,7 @@ export function useAssistant() {
       const spec = draft.spec;
       setSelectedSites(spec.site_ids);
       setBaseline({
+        illumination_model: spec.illumination_model,
         scenario_id: spec.scenario_id,
         arrival_utc: spec.arrival_utc,
         duration_hours: spec.duration_hours,

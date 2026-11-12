@@ -99,7 +99,10 @@ def normalize_request(request: ParseRequest, patch: RequestPatch, caps: dict) ->
         selected = explicit
     if not selected or len(set(selected)) != len(selected) or any(s not in supported for s in selected):
         raise AssistantError("UNSUPPORTED_SITE_SCOPE")
-    coordinate = any(s in coordinate_sites for s in selected) or duration != scenario["D_hours"] or patch.mission_end_utc is not None
+    # All new planning uses the solar-disc model; centre-only snapshots cannot
+    # supply that metric even for the original P1 observers and dates.
+    coordinate = (b.illumination_model == "solar_disc" or any(s in coordinate_sites for s in selected)
+                  or duration != scenario["D_hours"] or patch.mission_end_utc is not None)
     try:
         if search_from is not None or search_until is not None:
             if search_from is None or search_until is None:
@@ -132,6 +135,7 @@ def normalize_request(request: ParseRequest, patch: RequestPatch, caps: dict) ->
     constraints = b.constraints.model_copy(update={k: getattr(patch, k) for k in
         ("max_darkness_hours", "max_earth_blackout_hours") if getattr(patch, k) is not None})
     return RequestSpec(
+        illumination_model=b.illumination_model,
         resolve_indeterminate=request.resolve_indeterminate,
         scenario_id=b.scenario_id, arrival_utc=arrival,
         end_utc=window.end_utc, duration_hours=window.duration_hours,

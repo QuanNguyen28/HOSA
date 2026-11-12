@@ -12,6 +12,7 @@ dependencies = [
   "uvicorn[standard]>=0.30,<1",
   "pydantic-settings>=2.6,<3",
   "numpy>=1.26,<3",
+  "spiceypy>=6,<9",
   "pandas>=2.2,<4",
   "requests>=2.31,<3",
   "filelock>=3.16,<4",

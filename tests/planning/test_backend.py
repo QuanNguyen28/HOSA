@@ -31,7 +31,7 @@ def planner(tmp_path, monkeypatch):
 
 @pytest.fixture
 def query():
-    return CompareRequest(scenario_id="south_pole_demo_v1", site_ids=["Site01_P1", "Site04_P1"],
+    return CompareRequest(illumination_model="sun_center", scenario_id="south_pole_demo_v1", site_ids=["Site01_P1", "Site04_P1"],
         arrival_utc="2026-11-17T00:00:00Z", constraints=Constraints(max_darkness_hours=12, max_earth_blackout_hours=6),
         min_sunlit_fraction=0.8, min_earth_los_fraction=0.8)
 

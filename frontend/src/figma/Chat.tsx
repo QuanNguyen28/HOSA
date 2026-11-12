@@ -141,7 +141,7 @@ export function ChatThread({
               {review.draft.spec.arrival_utc}
             </p>
             <p className="text-xs text-mute">
-              Minimum sunlight {review.draft.spec.min_sunlit_fraction * 100}% ·
+              Minimum mean visible Sun disc {review.draft.spec.min_sunlit_fraction * 100}% ·
               minimum Earth LOS {review.draft.spec.min_earth_los_fraction * 100}
               %
             </p>

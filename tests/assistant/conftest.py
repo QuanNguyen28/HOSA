@@ -50,7 +50,7 @@ class FixtureLLM:
 @pytest.fixture
 def request_payload():
     return {"text": "Lịch hạ cánh bị lùi ba ngày. Giữ phần cứng, đổi điểm trong vùng này, tối tối đa 12 giờ.",
-        "baseline": {"scenario_id": "south_pole_demo_v1", "arrival_utc": "2026-11-14T00:00:00Z",
+        "baseline": {"illumination_model": "sun_center", "scenario_id": "south_pole_demo_v1", "arrival_utc": "2026-11-14T00:00:00Z",
             "duration_hours": 72, "hardware": {"sun_panel": 1, "earth_antenna": 2},
             "constraints": {"max_darkness_hours": 12, "max_earth_blackout_hours": 6},
             "min_sunlit_fraction": 0.8, "min_earth_los_fraction": 0.8,

@@ -7,11 +7,28 @@ import {
   missionIssue,
   missionRequest,
   planningRequest,
+  timelineBins,
   type Interval,
 } from "./contracts";
 import { errorText } from "./api";
 
 describe("shared backend mission contracts", () => {
+  it("weights solar disc display bins by duration and preserves missing evidence", () => {
+    const start = Date.parse("2026-11-17T00:00:00Z");
+    const row = (a: number, b: number, fraction: number | null): Interval => ({
+      start_utc: new Date(start + a * 60000).toISOString(),
+      end_utc: new Date(start + b * 60000).toISOString(),
+      sun_state: fraction == null ? "?" : fraction > 0 ? "V" : "B", earth_state: "V", joint_state: "V",
+      sun_visible_fraction: fraction,
+    });
+    const bin = timelineBins([row(0, 15, 0), row(15, 60, 1)], start, start + 3600000, 1)[0];
+    expect(bin.sun_visible_fraction).toBe(0.75);
+    const missing = timelineBins([row(0, 15, null), row(15, 60, 1)], start, start + 3600000, 1)[0];
+    expect(missing.sun_visible_fraction).toBeNull();
+    expect(missing.sun_state).toBe("?");
+    expect(missing.sun_visible_fraction_lower).toBe(.75);
+    expect(missing.sun_visible_fraction_upper).toBe(1);
+  });
   it("uses identical mission requirements for direct analysis and comparison", () => {
     const direct = missionRequest(DEFAULT_MISSION, EXAMPLES[0]);
     const compare = planningRequest(DEFAULT_MISSION, EXAMPLES);
@@ -26,6 +43,8 @@ describe("shared backend mission contracts", () => {
     expect(direct.resolve_indeterminate).toBe(true);
     expect(compare.min_sunlit_fraction).toBe(0.8);
     expect(compare.data_source).toBe("coordinate");
+    expect(direct.illumination_model).toBe("solar_disc");
+    expect(compare.illumination_model).toBe("solar_disc");
     expect(compare.targets[0]).toEqual({
       latitude_deg: direct.latitude_deg,
       longitude_e_deg: direct.longitude_e_deg,

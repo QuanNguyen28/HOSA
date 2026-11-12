@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 import unicodedata
 
-INTERPRETATION_VERSION = "mission-interpretation-1.0"
+INTERPRETATION_VERSION = "mission-interpretation-2.0"
 
 
 def explanation_view(evidence: dict, text: str) -> dict:
@@ -53,7 +53,7 @@ VALIDATION_MEANINGS = {
 
 METRIC_MEANINGS = {
     "total_sun_hours": {
-        "meaning": "Total geometric Sun-centre visibility during the requested mission, possibly split into intervals.",
+        "meaning": "Equivalent full-disc sunlight hours: integral of visible solar-disc area fraction over mission time, including solid-Earth occultation. Divide by mission duration for mean illumination. Explicit legacy sun_center results retain their original centre-visibility meaning.",
         "use": "Checks the requested minimum illumination fraction; relates to opportunities for solar exposure.",
         "limit": "Not generated energy, thermal safety or continuous sunlight. Those require other models."},
     "total_earth_los_hours": {
@@ -61,7 +61,7 @@ METRIC_MEANINGS = {
         "use": "Checks the requested minimum Earth LOS fraction.",
         "limit": "Not one continuous contact window, radio link success, throughput or ground-station availability."},
     "longest_dark_hours": {
-        "meaning": "Longest continuous Sun blockage within the mission window.",
+        "meaning": "Longest continuous interval with no part of the solar disc visible within the mission window (centre blockage for explicit legacy sun_center results).",
         "use": "Describes continuity of illumination; a supplied maximum is a soft preference.",
         "limit": "Does not determine battery endurance; a boundary-clipped event can continue outside the mission."},
     "longest_blackout_hours": {
@@ -69,7 +69,7 @@ METRIC_MEANINGS = {
         "use": "Describes geometric communication interruptions; a supplied maximum is a soft preference.",
         "limit": "Exceeding this soft preference alone never causes a hard FAIL."},
     "longest_joint_hours": {
-        "meaning": "Longest continuous interval with both Sun and Earth centre geometrically visible.",
+        "meaning": "Longest continuous interval with some solar-disc area visible and Earth's centre geometrically visible (Sun centre for explicit legacy results).",
         "use": "Helps identify overlapping opportunities; use the engine's ranking when selected.",
         "limit": "Not a universal site quality score or proof of actual power and communications."},
     "contact": {

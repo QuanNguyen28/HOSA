@@ -17,7 +17,7 @@ from app.planning.service import PlanningService
 
 
 def point(**changes):
-    return MissionRequest(latitude_deg=-89.5, longitude_e_deg=220,
+    return MissionRequest(illumination_model='sun_center', latitude_deg=-89.5, longitude_e_deg=220,
                           start_utc='2026-11-17T00:00:00Z', min_sunlit_fraction=.8, **changes)
 
 
@@ -34,7 +34,7 @@ def test_target_end_date_is_an_equivalent_exact_mission_window():
     end = point(end_utc='2026-11-27T07:05:00+07:00')
     hours = point(duration_hours=240+1/12)
     assert end.model_dump() == hours.model_dump()
-    compare = CompareRequest(targets=[{'latitude_deg': -89.5, 'longitude_e_deg':220}], data_source='coordinate',
+    compare = CompareRequest(illumination_model='sun_center', targets=[{'latitude_deg': -89.5, 'longitude_e_deg':220}], data_source='coordinate',
         arrival_utc=end.start_utc, end_utc=end.end_utc, min_sunlit_fraction=.8)
     assert compare.duration_hours == hours.duration_hours
     assert compare.mission(compare.targets[0]).model_dump() == hours.model_dump()
@@ -123,7 +123,7 @@ def test_long_default_planning_uses_coordinate_engine_and_shifts_same_duration_i
     repo = ResultRepository()
     monkeypatch.setattr(repo, 'directory', lambda:tmp_path/'planning')
     planner = PlanningService(results=repo, point_pipeline=pipeline)
-    query = CompareRequest(targets=[{'latitude_deg':-89.5, 'longitude_e_deg':220}],
+    query = CompareRequest(illumination_model='sun_center', targets=[{'latitude_deg':-89.5, 'longitude_e_deg':220}],
         arrival_utc='2026-11-17T00:00:00Z', end_utc='2026-11-21T00:00:00Z', min_sunlit_fraction=.8)
     direct = pipeline.run(point(duration_hours=96))
     compared = planner.compare(query)

@@ -4,7 +4,7 @@ from .models import EvidenceBundle, ParseRequest
 from .explanations import explanation_options
 from .sites import available_sites, coordinate_sites_for_prompt
 
-PROMPT_VERSION = "assistant-2.3"
+PROMPT_VERSION = "assistant-3.0"
 
 
 def parse_messages(request: ParseRequest, capabilities: dict) -> list[dict]:
@@ -47,6 +47,9 @@ def parse_messages(request: ParseRequest, capabilities: dict) -> list[dict]:
             "timezone-aware timestamp; never silently resolve conflicting alternatives. "
             "720 minutes of darkness = 12 hours. 75% sunlight = 0.75. "
             "Hard requirements are min_sunlit_fraction and min_earth_los_fraction, fractions in [0,1]. "
+            "Sunlight means the time-mean visible area fraction of the solar disk including Earth occultation, "
+            "not the fraction of time the Sun centre or any part is visible. Half the disk for the whole mission means 0.5. "
+            "Preserve baseline.illumination_model: an explicit legacy sun_center baseline instead means centre-visible time. "
             "For example 80% Earth LOS means min_earth_los_fraction=0.8; 36 hours out of a 72-hour mission means 0.5. "
             "max_darkness_hours and max_earth_blackout_hours are OPTIONAL SOFT preferences only. "
             "Exceeding a soft preference never fails a candidate. Inherit both hard minima from the working baseline unless changed. "

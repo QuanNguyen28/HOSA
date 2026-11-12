@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import math
-from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -223,6 +222,17 @@ def terrain_window(
     samples: int = 129,
     detail: str = "best",
 ) -> dict[str, Any]:
+    from app.precompute.display import mesh_response, decode
+    return decode(mesh_response(latitude, longitude, radius_km, samples, detail)[0])
+
+
+def _terrain_window_uncached(
+    latitude: float,
+    longitude: float,
+    radius_km: float = 8.0,
+    samples: int = 129,
+    detail: str = "best",
+) -> dict[str, Any]:
     """Return a bounded display mesh around a covered coordinate.
 
     Heights remain metres from the native DEM. The regular grid is a visualization
@@ -345,8 +355,12 @@ def terrain_window(
     }
 
 
-@lru_cache(maxsize=2)
 def south_polar_cap(samples: int = 513) -> dict[str, Any]:
+    from app.precompute.display import cap_response, decode
+    return decode(cap_response(samples)[0])
+
+
+def _south_polar_cap_uncached(samples: int = 513) -> dict[str, Any]:
     """Return a display LOD for the complete NASA DEM south of 80 degrees.
 
     The grid remains in the source lunar polar-stereographic frame. Clients can

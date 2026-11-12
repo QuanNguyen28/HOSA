@@ -5,6 +5,7 @@ from app.planning.models import Candidate, Contract, Constraints, Decision, Frac
 
 
 class Baseline(Contract):
+    illumination_model: Literal["solar_disc", "sun_center"] = "solar_disc"
     scenario_id: str
     arrival_utc: str
     duration_hours: Annotated[float, Field(strict=True, gt=0)]
@@ -90,6 +91,7 @@ class RequestPatch(Contract):
 
 
 class RequestSpec(Contract):
+    illumination_model: Literal["solar_disc", "sun_center"] = "solar_disc"
     resolve_indeterminate: bool = Field(default=False, strict=True)
     schema_version: Literal["2.0"] = "2.0"
     scenario_id: str

@@ -106,6 +106,9 @@ def analyze_candidate(query, index=None, *, target=None, snapshot=None, point_pi
                     'coverage_flag': value('coverage_flag')}})
         event_rows.sort(key=lambda e: (-e['duration_hours'], e['start_utc']))
         context = {}
+        context['total_sun_hours'] = {'illumination_model': request.illumination_model,
+            'definition': 'equivalent full-disc hours; divide by mission hours for time-mean solar-disc visibility'
+                          if request.illumination_model == 'solar_disc' else 'legacy Sun-centre visible hours'}
         for body, key in (('sun', 'longest_dark_hours'), ('earth', 'longest_blackout_hours')):
             worst = next((e for e in event_rows if e['body'] == body and e['state'] == 'B'), None)
             context[key] = {'scope': 'within_mission_window', 'outside_window_duration_known': False,
@@ -118,7 +121,8 @@ def analyze_candidate(query, index=None, *, target=None, snapshot=None, point_pi
             soft_constraint_states=result['soft_constraint_checks'], soft_violations=result.get('soft_violations', []),
             violations=violations, events=event_rows, metric_context=context, decisive_event=None,
             sensitivity=summary, contact_analysis=result.get('contact_analysis'), coordinate=result.get('coordinate'),
-            analysis_result_id=result.get('result_id'), provenance=result['provenance'], resolution=resolution)
+            analysis_result_id=result.get('result_id'), provenance=result['provenance'], resolution=resolution,
+            illumination=result.get('illumination', {'model': request.illumination_model}))
     except DomainError as error:
         if error.code not in {'INCOMPLETE_TIMELINE', 'OUTSIDE_DEM_COVERAGE', 'HORIZONS_CACHE_MISS'}:
             raise

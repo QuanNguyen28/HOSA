@@ -84,6 +84,8 @@ class ContactRequirements(Contract):
 
 
 class MissionRequest(MissionTarget):
+    illumination_model: Literal["solar_disc", "sun_center"] = Field(default="solar_disc",
+        description="solar_disc: time-mean visible solar-disc area including Earth occultation; sun_center: explicit legacy geometric centre model")
     start_utc: str = Field(description="Timezone-aware ISO 8601 on an exact 5-minute UTC grid",
                            json_schema_extra={"format": "date-time", "examples": ["2026-11-17T00:00:00Z"]})
     duration_hours: float = Field(default=72.0, strict=True, ge=1,
@@ -93,7 +95,8 @@ class MissionRequest(MissionTarget):
     panel_height_m: float = Field(default=1.0, gt=0, le=20)
     antenna_height_m: float = Field(default=2.0, gt=0, le=20)
     constraints: Constraints = Field(default_factory=Constraints)
-    min_sunlit_fraction: float | None = Field(default=None, ge=0, le=1)
+    min_sunlit_fraction: float | None = Field(default=None, ge=0, le=1,
+        description="Minimum time-mean visible solar-disc fraction (0–1) under the default solar_disc model")
     min_earth_los_fraction: float | None = Field(default=None, ge=0, le=1)
     contact_requirements: ContactRequirements | None = None
     offline: bool = False

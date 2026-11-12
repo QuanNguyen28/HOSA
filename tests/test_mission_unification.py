@@ -24,7 +24,7 @@ from app.services.lunarsight.catalog import site_catalog
 
 
 def mission(**updates):
-    return MissionRequest(**{'latitude_deg': -89.5, 'longitude_e_deg': 220,
+    return MissionRequest(**{'illumination_model': 'sun_center', 'latitude_deg': -89.5, 'longitude_e_deg': 220,
         'start_utc': '2026-11-17T00:00:00Z', 'duration_hours': 1, 'min_sunlit_fraction': .8,
         'contact_requirements': {'min_contact_minutes': 30, 'setup_minutes': 5, 'required_windows': 1,
             'first_contact_deadline_minutes': 40}, **updates})
@@ -150,7 +150,7 @@ def test_search_limits_are_checked_before_computation(planner, monkeypatch):
 
 def test_snapshot_full_coverage_does_not_bypass_common_gate():
     target = MissionTarget(site_id='Site01_P1')
-    req = MissionRequest(site_id=target.site_id, start_utc='2026-11-17T00:00:00Z', min_sunlit_fraction=.8)
+    req = MissionRequest(illumination_model='sun_center', site_id=target.site_id, start_utc='2026-11-17T00:00:00Z', min_sunlit_fraction=.8)
     provider = SnapshotProvider()
     result = provider.analyze(target, req)
     assert result['nominal_sampled_decision'] == 'PASS'

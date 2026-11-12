@@ -6,6 +6,8 @@ from app.mission.resolution import VERSION as RESOLUTION_VERSION
 from .analysis import analyze_candidate
 from app.mission.snapshot import SnapshotProvider
 from app.mission.evaluation import EVALUATION_VERSION, VALIDATION_VERSION
+from app.services.lunarsight.shared_ephemeris import SharedEphemeris
+from app.services.lunarsight.solar_disc import VERSION as SOLAR_DISC_VERSION
 from .finder import scan_windows
 from .metrics import violation_key
 from .models import CompareRequest, PlanningResult, SearchRequest, utc
@@ -37,7 +39,7 @@ class PlanningService:
             return caps
         scenario = caps['scenario']
         query = CompareRequest(site_ids=[scenario['site_ids'][0]], arrival_utc=scenario['A_utc'],
-            min_sunlit_fraction=0., resolve_indeterminate=True)
+            min_sunlit_fraction=0., resolve_indeterminate=True, illumination_model="sun_center")
         return self.source_capabilities(query)
 
     def source_capabilities(self, query):
@@ -55,16 +57,27 @@ class PlanningService:
         from app.services.lunarsight.visibility import SENSITIVITY_VERSION
         from app.services.lunarsight.contact_windows import METHOD_VERSION as CONTACT_VERSION
         sources = [{key: source[key] for key in ("dataset_id", "sha256", "resolution_m")} for source in installed_sources()]
+        if not sources:
+            from app.precompute.store import Store
+            from app.services.lunarsight.point import terrain_sources
+            records = Store().manifest()["sites"].values()
+            reference = next(iter(records), None)
+            if reference:
+                resolutions = {r["dataset_id"]: r["resolution_m"] for r in terrain_sources()}
+                sources = [{**r, "resolution_m": resolutions[r["dataset_id"]]} for r in reference["source_inventory"]]
         from app.services.lunarsight.catalog import processed_root
         from app.services.lunarsight.acquire import hashfile
         catalog = processed_root()/"site_catalog.geojson"
         sites = compare_sites()
         named_targets = {t.site_id: {"latitude_deg": sites[t.site_id]["lat"], "longitude_e_deg": sites[t.site_id]["lon"]}
                          for t in query.mission_targets() if t.site_id in sites}
-        return {"scenario": {}, "warnings": ["PROVISIONAL: sampled Sun/Earth centre geometry; no RF, power or thermal model."],
+        return {"scenario": {}, "warnings": ["PROVISIONAL: sampled solar-disc illumination and Earth-centre LOS; no RF, power or thermal model."],
             "dataset_version": "verified-dem-coordinate", "source_hash": digest({
             "datasets": sources, "evaluation": EVALUATION_VERSION, "validation": VALIDATION_VERSION,
             "planning": METHOD_VERSION,
+            "illumination_model": query.illumination_model,
+            "solar_disc_method": SOLAR_DISC_VERSION if query.illumination_model == "solar_disc" else None,
+            "ephemeris": SharedEphemeris().descriptor() if query.illumination_model == "solar_disc" else None,
             "geometry": GEOMETRY_VERSION, "horizons": ADAPTER_VERSION, "sensitivity": SENSITIVITY_VERSION,
             "contact": CONTACT_VERSION, "resolution": RESOLUTION_VERSION if query.resolve_indeterminate else None, "catalog": hashfile(catalog) if any(t.site_id for t in query.mission_targets()) else None,
             **({"named_targets": named_targets} if named_targets else {})})}
@@ -96,7 +109,7 @@ class PlanningService:
             snapshot=snapshot, point_pipeline=self.point_pipeline)
 
     def compare(self, query: CompareRequest) -> PlanningResult:
-        if query.data_source == "snapshot" and query.duration_hours != 72:
+        if query.data_source == "snapshot" and (query.duration_hours != 72 or query.illumination_model == "solar_disc"):
             query = query.model_copy(update={"data_source": "coordinate"})
         caps, index = self.validate(query)
         canonical = query.model_copy(update={"arrival_utc": utc(query.arrival_utc).isoformat().replace("+00:00", "Z")})
@@ -108,7 +121,7 @@ class PlanningService:
         return self.finish(canonical, caps, candidates, counts, "compare")
 
     def search(self, query: SearchRequest) -> PlanningResult:
-        if query.data_source == "snapshot" and query.duration_hours != 72:
+        if query.data_source == "snapshot" and (query.duration_hours != 72 or query.illumination_model == "solar_disc"):
             query = query.model_copy(update={"data_source": "coordinate"})
         caps, first = self.validate(query)
         scenario = caps["scenario"]

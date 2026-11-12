@@ -1,0 +1,12 @@
+{
+  "site_id": "Site01_P1",
+  "illumination_model": "solar_disc",
+  "start_utc": "2026-11-17T00:00:00Z",
+  "end_utc": "2026-11-27T00:00:00Z",
+  "panel_height_m": 1,
+  "antenna_height_m": 2,
+  "min_sunlit_fraction": 0.8,
+  "min_earth_los_fraction": 0.8,
+  "resolve_indeterminate": true,
+  "offline": true
+}

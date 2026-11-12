@@ -186,7 +186,7 @@ def test_snapshot_recomputation_preserves_target_and_origin(pipeline, monkeypatc
         'validation': {'passed': False, 'reason_codes': ['time_5min_vs_1min:COMPARISON_EVIDENCE_MISSING']},
         'provenance': {'provider': 'snapshot'}, 'timeline_frame': None, 'sensitivity': {}}
     monkeypatch.setattr(SnapshotProvider, 'analyze', lambda *args: deepcopy(snapshot))
-    q = CompareRequest(site_ids=['Site01_P1'], arrival_utc=query().start_utc, duration_hours=1,
+    q = CompareRequest(illumination_model='sun_center', site_ids=['Site01_P1'], arrival_utc=query().start_utc, duration_hours=1,
         min_sunlit_fraction=.8, resolve_indeterminate=True)
     candidate = analyze_candidate(q, 0, snapshot=SnapshotProvider(), point_pipeline=pipeline)
     assert candidate.decision == 'PASS' and candidate.site_id == 'Site01_P1'
@@ -210,7 +210,7 @@ def test_snapshot_missing_cache_keeps_original_unknown_evidence(pipeline, monkey
     monkeypatch.setattr(MissionTarget, 'resolved', lambda self: query())
     def missing(*args): raise DomainError('HORIZONS_CACHE_MISS', 503)
     monkeypatch.setattr('app.point_analysis.service.calculate', missing)
-    q = CompareRequest(site_ids=['Site01_P1'], arrival_utc=query().start_utc, duration_hours=1,
+    q = CompareRequest(illumination_model='sun_center', site_ids=['Site01_P1'], arrival_utc=query().start_utc, duration_hours=1,
         min_sunlit_fraction=.8, resolve_indeterminate=True, offline=True)
     candidate = analyze_candidate(q, 0, snapshot=SnapshotProvider(), point_pipeline=pipeline)
     assert candidate.decision == 'INDETERMINATE'
@@ -240,7 +240,7 @@ def test_resolved_result_is_identical_through_direct_compare_search_and_export(p
     results = ResultRepository()
     monkeypatch.setattr(results, 'directory', lambda: tmp_path/'planning')
     planner = PlanningService(results=results, point_pipeline=pipeline)
-    q = CompareRequest(targets=[{'latitude_deg': request.latitude_deg, 'longitude_e_deg': request.longitude_e_deg}],
+    q = CompareRequest(illumination_model='sun_center', targets=[{'latitude_deg': request.latitude_deg, 'longitude_e_deg': request.longitude_e_deg}],
         data_source='coordinate', arrival_utc=request.start_utc, duration_hours=1,
         min_sunlit_fraction=.8, resolve_indeterminate=True)
     compared = planner.compare(q)

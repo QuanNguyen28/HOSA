@@ -25,7 +25,7 @@ class PlanningAdapter:
     normalize = staticmethod(normalize_request)
 
     def evaluate(self, spec, run_id, spec_hash):
-        query = {"resolve_indeterminate": spec.resolve_indeterminate, "scenario_id": spec.scenario_id, "site_ids": spec.site_ids,
+        query = {"illumination_model": spec.illumination_model, "resolve_indeterminate": spec.resolve_indeterminate, "scenario_id": spec.scenario_id, "site_ids": spec.site_ids,
                  "duration_hours": spec.duration_hours, "data_source": spec.data_source,
                  "arrival_utc": spec.arrival_utc, "constraints": spec.constraints,
                  "hardware": spec.hardware, "current_site_id": spec.current_site_id,

@@ -3,6 +3,9 @@ from pathlib import Path
 import json
 import os
 import tempfile
+import hashlib
+from collections import OrderedDict
+from threading import Lock
 from filelock import FileLock
 import time
 
@@ -15,7 +18,7 @@ from app.mission.identity import digest
 from app.mission.resolution import VERSION as RESOLUTION_VERSION, FINE_AZIMUTH_STEPS, can_refine, attempt
 from app.mission.mission_path import validate_mission_path
 from app.services.lunarsight.decision_policy import decision_validated
-from app.mission.evaluation import (EVALUATION_VERSION, VALIDATION_VERSION, metrics, constraint_checks, decision, records, events, angle_difference, validate, evaluate, frame_contacts)
+from app.mission.evaluation import (EVALUATION_VERSION, VALIDATION_VERSION, metrics, constraint_checks, decision, records, serialization_frame, events, angle_difference, validate, evaluate, frame_contacts)
 from app.services.lunarsight.acquire import hashfile, utc_now
 from app.services.lunarsight.horizons import fetch, ADAPTER_VERSION
 from app.services.lunarsight.terrain import R
@@ -24,13 +27,45 @@ from app.services.lunarsight.contact_windows import analyze_contacts, METHOD_VER
 from .geometry import METHOD_VERSION, scan_horizons, seam_checks, verify_profiles
 from .sources import TerrainInputs
 from .ephemeris_plan import segments
+from app.services.lunarsight.shared_ephemeris import SharedEphemeris
+from app.services.lunarsight.solar_disc import VERSION as SOLAR_DISC_VERSION
 
-METRICS_VERSION = "coordinate-metrics-0.2.0"
+METRICS_VERSION = "coordinate-metrics-1.0.0"
 
 
 class PointAnalysisPipeline:
     def __init__(self, root: Path):
         self.root = Path(root)
+        self.shared_ephemeris = SharedEphemeris()
+        self._visibility_cache = OrderedDict()
+        self._visibility_lock = Lock()
+
+    def terrain(self, request):
+        from app.precompute.geometry import prepared_terrain
+        return prepared_terrain(request) or TerrainInputs(request)
+
+    def visible(self, sun, earth, profiles, request):
+        """Reuse physical series when only mission thresholds/contact rules change.
+
+        Content keys include native ephemeris and terrain evidence. A bounded
+        memory cache avoids retaining multi-year DataFrames or trusting pickle.
+        """
+        key = hashlib.sha256(request.illumination_model.encode())
+        for frame in (sun, earth, profiles[request.panel_height_m], profiles[request.antenna_height_m]):
+            key.update(pd.util.hash_pandas_object(frame, index=True).values.tobytes())
+        identifier = key.hexdigest()
+        with self._visibility_lock:
+            if identifier in self._visibility_cache:
+                self._visibility_cache.move_to_end(identifier)
+                return self._visibility_cache[identifier]
+        frame = visibility(sun, earth, profiles[request.panel_height_m], profiles[request.antenna_height_m],
+                           solar_disc=request.illumination_model == "solar_disc")
+        if frame.memory_usage(deep=True).sum() <= 8_000_000:
+            with self._visibility_lock:
+                self._visibility_cache[identifier] = frame
+                while len(self._visibility_cache) > 8:
+                    self._visibility_cache.popitem(last=False)
+        return frame
 
     def identity(self, request, terrain):
         identity = {"method_version": METHOD_VERSION, "metrics_version": METRICS_VERSION,
@@ -44,12 +79,15 @@ class PointAnalysisPipeline:
                         "scan_radii_m": [400000, 300000], "time_steps_minutes": [5, 1]}
         if request.resolve_indeterminate:
             identity["resolution_policy"] = {"version": RESOLUTION_VERSION, "fine_az_steps_deg": list(FINE_AZIMUTH_STEPS)}
+        if request.illumination_model == "solar_disc":
+            identity["solar_disc_method"] = SOLAR_DISC_VERSION
+            identity["shared_ephemeris"] = self.shared_ephemeris.identity()
         return identity
 
     def lookup_cached(self, request):
         """Read committed, hash-verified results without waiting for compute workers."""
         request = request.resolved()
-        with TerrainInputs(request) as terrain:
+        with self.terrain(request) as terrain:
             identity = self.identity(request, terrain)
             cached = self.cached_result(self.root / "results" / digest(identity), identity)
         if cached is not None:
@@ -59,7 +97,7 @@ class PointAnalysisPipeline:
     def run(self, request, progress=lambda stage: None):
         request = request.resolved()
         progress("verify_dem")
-        with TerrainInputs(request) as terrain:
+        with self.terrain(request) as terrain:
             identity = self.identity(request, terrain)
             result_id = digest(identity)
             directory = self.root / "results" / result_id
@@ -130,7 +168,8 @@ class PointAnalysisPipeline:
             metric = evaluation["metrics_hours"]
             validated = decision_validated(validation)
             warnings = ["PROVISIONAL: numerical tolerances require mission-owner approval.",
-                "Sun/Earth centre visibility only; no solar-disc, power, thermal or RF link-budget model.",
+                ("Time-mean visible solar-disc area including solid-Earth occultation; Earth-centre LOS. No power, thermal or RF model."
+                 if request.illumination_model == "solar_disc" else "Legacy Sun/Earth centre visibility; no solar-disc, power, thermal or RF model."),
                 "Duration bounds cover missing samples in this sampled model, not continuous-time or DEM uncertainty.",
                 "Horizon coverage describes sampled rays to 400 km; no global occluder or landing certification."]
             if not validated:
@@ -147,6 +186,13 @@ class PointAnalysisPipeline:
                                "elevation_sampling": "nearest registered DEM pixel; observer coordinate is not snapped"},
                 "decision": evaluation["decision"], "nominal_sampled_decision": evaluation["nominal_sampled_decision"],
                 "requirement_policy": "availability-and-contact-windows-v1" if request.contact_requirements else "availability-fractions-v1",
+                "illumination": {"model": request.illumination_model,
+                    "method_version": SOLAR_DISC_VERSION if request.illumination_model == "solar_disc" else "legacy-sun-centre",
+                    "metric": "time_mean_visible_solar_disc_fraction" if request.illumination_model == "solar_disc" else "sun_center_visible_time_fraction",
+                    "mean_visible_fraction_bounds": [x/request.duration_hours for x in metric["total_sun_hours"]],
+                    "total_sun_hours_definition": "equivalent full-disc hours" if request.illumination_model == "solar_disc" else "Sun-centre visible hours",
+                    "darkness_definition": "no part of the solar disc visible" if request.illumination_model == "solar_disc" else "Sun centre blocked",
+                    "eclipse_model": "solid Earth disc; no atmospheric dimming" if request.illumination_model == "solar_disc" else "not modeled"},
                 "constraint_checks": evaluation["constraint_checks"], "metrics_hours": metric,
                 "soft_constraint_checks": evaluation["soft_constraint_checks"],
                 "soft_violations": evaluation["soft_violations"],
@@ -160,12 +206,13 @@ class PointAnalysisPipeline:
                 "timeline": records(v), "events": events(v),
                 "horizons": {str(h): records(p) for h, p in base.items()},
                 "provenance": {"identity": identity, "ephemerides": records5 + records1, "geometry": geometry_receipt,
-                               "frame": "MOON_ME/DE421", "radial_reference_radius_m": R},
+                               "frame": "MOON_ME", "ephemeris_provider": "shared_spice_DE440" if request.illumination_model == "solar_disc" else "JPL_Horizons",
+                               "radial_reference_radius_m": R},
                 "warnings": warnings}
             if request.contact_requirements is not None:
                 result["contact_analysis"] = frame_contacts(request, v, result)
             progress("commit_artifacts")
-            v.to_csv(directory / "intervals.csv", index=False)
+            serialization_frame(v).to_csv(directory / "intervals.csv", index=False)
             result["provenance"]["artifacts"] = {path.name: hashfile(path) for path in directory.glob("*.csv")}
             atomic_json(directory / "result.json", result)
             atomic_json(directory / "receipt.json", {"identity": identity, "sha256": hashfile(directory / "result.json")})
@@ -177,11 +224,13 @@ class PointAnalysisPipeline:
         references = verify_profiles(fine, terrain.site)
         references.update({"short:"+key: value for key, value in verify_profiles(shorter, terrain.site).items()})
         base = {h: p.iloc[::2].reset_index(drop=True).assign(az_step_deg=fine_step*2) for h, p in fine.items()}
-        v = visibility(sun, earth, base[request.panel_height_m], base[request.antenna_height_m])
+        def visible(s, e, profiles):
+            return self.visible(s, e, profiles, request)
+        v = visible(sun, earth, base)
         name = f"azimuth_{fine_step*2:g}_vs_{fine_step:g}"
-        alternatives = {name: visibility(sun, earth, fine[request.panel_height_m], fine[request.antenna_height_m]),
-            "radius_400km_vs_300km": visibility(sun, earth, shorter[request.panel_height_m], shorter[request.antenna_height_m]),
-            "time_5min_vs_1min": visibility(sun1, earth1, base[request.panel_height_m], base[request.antenna_height_m])}
+        alternatives = {name: visible(sun, earth, fine),
+            "radius_400km_vs_300km": visible(sun, earth, shorter),
+            "time_5min_vs_1min": visible(sun1, earth1, base)}
         angles = {name: angle_difference(base, fine), "radius_400km_vs_300km": angle_difference(base, shorter)}
         complete_ephemerides = all(item.get("used_coverage", item)["missing_timestamps"] == 0
             and item.get("used_coverage", item)["missing_angles"] == 0 for item in records5+records1)
@@ -189,8 +238,25 @@ class PointAnalysisPipeline:
             bool(g.row_present.eq(True).all() and np.isfinite(g[["az_deg", "el_deg"]]).all().all())
             for g in (sun, earth, sun1, earth1))
         complete_terrain = all(bool(p.coverage_complete.all()) for p in [*fine.values(), *shorter.values()])
+        evidence_checks = []
+        if request.illumination_model == "solar_disc":
+            evidence_checks.append({"code": "SHARED_EPHEMERIS_VALIDATION_FAILED", "passed": all(
+                record.get("interpolation_validation", {}).get("passed") is True for record in records5+records1)})
+            from app.services.lunarsight.solar_disc import fractions, STRIPS
+            refined_bounds = np.column_stack(fractions(sun, earth, base[request.panel_height_m], strips=2*STRIPS))[:-1]
+            original_bounds = v[["sun_visible_fraction_lower", "sun_visible_fraction_upper"]].to_numpy()
+            disc_difference = np.abs(refined_bounds-original_bounds)
+            quadrature = {"code": "SOLAR_DISC_QUADRATURE_FAILED", "strips": [STRIPS, 2*STRIPS],
+                "max_fraction_difference": float(disc_difference.max()), "tolerance_fraction": .002,
+                "passed": bool(disc_difference.max() <= .002)}
+            evidence_checks.append(quadrature)
         validation = validate(request, v, alternatives, angles, terrain_complete=complete_terrain,
-            ephemeris_complete=complete_ephemerides, seams=seams, references=references, azimuth_comparison_name=name)
+            ephemeris_complete=complete_ephemerides, seams=seams, references=references, azimuth_comparison_name=name,
+            evidence_checks=evidence_checks)
+        if request.illumination_model == "solar_disc":
+            validation["ephemeris"] = {"provider": "shared_spice", "sampling_comparison": "1/5-minute resampling of shared hourly vectors",
+                "independent_reference": "exact SPICE at per-request probe epochs; external JPL check is release evidence",
+                "checks": [r["interpolation_validation"] for r in records5+records1]}
         validation["configuration"] = {"coarse_az_step_deg": fine_step*2, "fine_az_step_deg": fine_step,
             "scan_radii_m": [400000, 300000], "time_steps_minutes": [5, 1]}
         return v, base, validation, evaluate(request, v, validation), complete_terrain, complete_ephemerides
@@ -224,14 +290,18 @@ class PointAnalysisPipeline:
             except (OSError, ValueError, KeyError) as error:
                 raise DomainError("HORIZON_CACHE_INTEGRITY_FAILED", 503) from error
         directory.mkdir(parents=True, exist_ok=True)
-        progress("seam_validation")
-        seams = seam_checks(terrain)
-        progress("terrain_horizon")
-        fine = scan_horizons(terrain, heights, az_step=az_step)
-        verify_profiles(fine, terrain.site)
-        progress("radius_sensitivity")
-        short = scan_horizons(terrain, heights, radius=300000, az_step=az_step*2)
-        verify_profiles(short, terrain.site)
+        if hasattr(terrain, "profiles"):
+            progress("precomputed_horizon")
+            fine, short, seams = terrain.profiles(heights, az_step)
+        else:
+            progress("seam_validation")
+            seams = seam_checks(terrain)
+            progress("terrain_horizon")
+            fine = scan_horizons(terrain, heights, az_step=az_step)
+            verify_profiles(fine, terrain.site)
+            progress("radius_sensitivity")
+            short = scan_horizons(terrain, heights, radius=300000, az_step=az_step*2)
+            verify_profiles(short, terrain.site)
         progress("verify_horizon_artifacts")
         files = {}
         for label, profiles in (("fine", fine), ("short", short)):
@@ -244,6 +314,14 @@ class PointAnalysisPipeline:
         return fine, short, seams, receipt
 
     def ephemerides(self, request, site, step, progress=lambda stage: None):
+        if request.illumination_model == "solar_disc":
+            data, receipts = [], []
+            for target, height in ((10, request.panel_height_m), (399, request.antenna_height_m)):
+                progress(f"shared_ephemeris_{step}min_{'sun' if target == 10 else 'earth'}")
+                frame, receipt = self.shared_ephemeris.sample(site, target, height, request.start_utc, request.end_utc, step)
+                data.append(frame)
+                receipts.append(receipt)
+            return *data, receipts
         data, receipts = [], []
         for target, height in ((10, request.panel_height_m), (399, request.antenna_height_m)):
             parts = []
@@ -305,7 +383,9 @@ def atomic_json(path, value):
     fd, name = tempfile.mkstemp(prefix=path.name, suffix=".tmp", dir=path.parent)
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as handle:
-            json.dump(value, handle, ensure_ascii=False, allow_nan=False, indent=2)
+            # Machine cache: the C encoder avoids millions of tiny writes and
+            # whitespace for multi-year timelines. HTTP/JSON semantics match.
+            handle.write(json.dumps(value, ensure_ascii=False, allow_nan=False, separators=(",", ":")))
             handle.write("\n")
         for attempt in range(6):
             try:

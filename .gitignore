@@ -23,6 +23,12 @@ data/processed/*
 data/cache/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
+!data/processed/site-precompute/
+data/processed/site-precompute/*
+!data/processed/site-precompute/v1/
+data/processed/site-precompute/v1/*
+!data/processed/site-precompute/v1/manifest.json
+!data/processed/site-precompute/v1/blobs/
 !data/cache/.gitkeep
 !data/processed/lunarsight/
 data/processed/lunarsight/*

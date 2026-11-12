@@ -1,0 +1,221 @@
+{
+  "passed": true,
+  "requested_sites": 23,
+  "records": [
+    {
+      "site_ids": [
+        "Site01_P1"
+      ],
+      "status": "prepared",
+      "seconds": 79.31699904000016,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "Site04_P1"
+      ],
+      "status": "prepared",
+      "seconds": 80.53997764499945,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "shackleton-rim"
+      ],
+      "status": "prepared",
+      "seconds": 78.29067951099933,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "connecting-ridge"
+      ],
+      "status": "prepared",
+      "seconds": 80.35154038399924,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "peak-near-cabeus-b"
+      ],
+      "status": "prepared",
+      "seconds": 60.96540613599973,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "haworth"
+      ],
+      "status": "prepared",
+      "seconds": 60.18346755999846,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "mons-mouton-plateau"
+      ],
+      "status": "prepared",
+      "seconds": 61.904781995999656,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "malapert-massif"
+      ],
+      "status": "prepared",
+      "seconds": 62.30438343999958,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "nobile-rim-1"
+      ],
+      "status": "prepared",
+      "seconds": 73.3748757329995,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "mons-mouton"
+      ],
+      "status": "prepared",
+      "seconds": 74.04482313899825,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "nobile-rim-2"
+      ],
+      "status": "prepared",
+      "seconds": 62.77998847500021,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "de-gerlache-rim-2"
+      ],
+      "status": "prepared",
+      "seconds": 65.04521418600052,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "im2-athena"
+      ],
+      "status": "prepared",
+      "seconds": 69.0086309440012,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "im1-odysseus"
+      ],
+      "status": "prepared",
+      "seconds": 71.95220347699978,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "viper"
+      ],
+      "status": "prepared",
+      "seconds": 60.757653426000616,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "shackleton-floor"
+      ],
+      "status": "prepared",
+      "seconds": 62.51028618000055,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "peak-near-shackleton"
+      ],
+      "status": "prepared",
+      "seconds": 76.73818394699992,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "leibnitz-beta-plateau"
+      ],
+      "status": "prepared",
+      "seconds": 76.16085694499998,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "shoemaker"
+      ],
+      "status": "prepared",
+      "seconds": 83.5061270389997,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "de-gerlache-kocher"
+      ],
+      "status": "prepared",
+      "seconds": 85.73569911699997,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "amundsen-rim"
+      ],
+      "status": "prepared",
+      "seconds": 76.20906382900102,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "example-a"
+      ],
+      "status": "prepared",
+      "seconds": 78.21027072800098,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "example-b"
+      ],
+      "status": "prepared",
+      "seconds": 63.73616384700108,
+      "meshes": 11,
+      "coverage_complete": true
+    }
+  ],
+  "errors": [],
+  "package": {
+    "schema_version": "site-precompute-1.0",
+    "manifest_hash": "245596ea9855196a6e84917c0bc2fb096e8a8a981e922062069cb44926a8a957",
+    "sites": 23,
+    "meshes": 255
+  },
+  "live_llm_calls": 0
+}

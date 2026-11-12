@@ -28,6 +28,7 @@ export type Mission = {
   resolve_indeterminate: boolean;
 };
 export type MissionRequest = {
+  illumination_model: "solar_disc";
   latitude_deg: number;
   longitude_e_deg: number;
   start_utc: string;
@@ -69,6 +70,9 @@ export type Validation = {
   policy_version?: string;
 };
 export type Interval = {
+  sun_visible_fraction?: number | null;
+  sun_visible_fraction_lower?: number;
+  sun_visible_fraction_upper?: number;
   start_utc: string;
   end_utc: string;
   sun_state: "V" | "B" | "?";
@@ -83,6 +87,44 @@ export type Interval = {
   sun_clearance_deg?: number | null;
   earth_clearance_deg?: number | null;
 };
+// Duration-weighted display bins bound the DOM for multi-year missions.
+// Unknown evidence stays hatched; aggregation never affects engine decisions.
+export function timelineBins(rows: Interval[], start: number, end: number, columns = 800): Interval[] {
+  if (!rows.length || !(end > start)) return [];
+  const count = Math.max(1, Math.min(columns, rows.length));
+  const width = (end - start) / count;
+  const bins: Interval[] = [];
+  let cursor = 0;
+  for (let j = 0; j < count; j++) {
+    const a = start + j * width, b = start + (j + 1) * width;
+    const totals = { sun: [0, 0], earth: [0, 0], joint: [0, 0] };
+    let covered = 0;
+    while (cursor < rows.length && Date.parse(rows[cursor].end_utc) <= a) cursor++;
+    for (let i = cursor; i < rows.length && Date.parse(rows[i].start_utc) < b; i++) {
+      const row = rows[i];
+      const dt = Math.max(0, Math.min(b, Date.parse(row.end_utc)) - Math.max(a, Date.parse(row.start_utc)));
+      covered += dt;
+      for (const body of ["sun", "earth", "joint"] as const) {
+        const state = row[`${body}_state`];
+        const lo = body === "sun" ? (row.sun_visible_fraction_lower ?? row.sun_visible_fraction ?? (state === "V" ? 1 : 0)) : state === "V" ? 1 : 0;
+        const hi = body === "sun" ? (row.sun_visible_fraction_upper ?? row.sun_visible_fraction ?? (state === "B" ? 0 : 1)) : state === "B" ? 0 : 1;
+        totals[body][0] += lo * dt;
+        totals[body][1] += hi * dt;
+      }
+    }
+    const state = (body: "sun" | "earth" | "joint"): Interval["sun_state"] => {
+      const [lo, hi] = totals[body];
+      if (covered < width - 1 || hi - lo > 1) return "?";
+      return hi > 0 ? "V" : "B";
+    };
+    bins.push({ start_utc: new Date(a).toISOString(), end_utc: new Date(b).toISOString(),
+      sun_state: state("sun"), earth_state: state("earth"), joint_state: state("joint"),
+      sun_visible_fraction: state("sun") !== "?" ? totals.sun[0] / width : null,
+      sun_visible_fraction_lower: totals.sun[0] / width,
+      sun_visible_fraction_upper: (totals.sun[1] + Math.max(0, width - covered)) / width });
+  }
+  return bins;
+}
 export type Contact = {
   visible_windows: Array<{
     start_utc: string;
@@ -94,6 +136,7 @@ export type Contact = {
   metrics: { qualified_windows_count: number; visible_windows_count: number };
 };
 export type PointResult = {
+  illumination?: { model: string; mean_visible_fraction_bounds: Bounds };
   result_id: string;
   request: MissionRequest;
   decision: Decision | null;
@@ -179,6 +222,7 @@ export const EXAMPLES: Target[] = compareSites
   }));
 export function missionRequest(m: Mission, target: Target): MissionRequest {
   return {
+    illumination_model: "solar_disc",
     latitude_deg: target.latitude,
     longitude_e_deg: target.longitude,
     start_utc: new Date(m.start + "Z").toISOString(),

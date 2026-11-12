@@ -84,7 +84,7 @@ export type GroundSkyBody = {
 };
 
 export type GroundSky = {
-  source: "JPL_HORIZONS" | "MODEL_PREVIEW";
+  source: "JPL_HORIZONS" | "SHARED_SPICE" | "MODEL_PREVIEW";
   observerHeightM: number;
   sun: GroundSkyBody;
   earth: GroundSkyBody;

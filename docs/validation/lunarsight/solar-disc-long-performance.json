@@ -1,0 +1,42 @@
+{
+  "request": {
+    "site_id": "Site01_P1",
+    "latitude_deg": null,
+    "longitude_e_deg": null,
+    "illumination_model": "solar_disc",
+    "start_utc": "2026-11-17T00:00:00Z",
+    "duration_hours": 17520.0,
+    "end_utc": "2028-11-16T00:00:00Z",
+    "panel_height_m": 1.0,
+    "antenna_height_m": 2.0,
+    "constraints": {
+      "max_darkness_hours": null,
+      "max_earth_blackout_hours": null
+    },
+    "min_sunlit_fraction": 0.8,
+    "min_earth_los_fraction": null,
+    "contact_requirements": null,
+    "offline": true,
+    "resolve_indeterminate": false
+  },
+  "result_id": "b6d15700e2f910608b10921304de5a5959d3375401145601ba3e99e70b392a8b",
+  "seconds": 12.599595140999554,
+  "decision": "INDETERMINATE",
+  "illumination": {
+    "model": "solar_disc",
+    "method_version": "solar-disc-mean-1.0",
+    "metric": "time_mean_visible_solar_disc_fraction",
+    "mean_visible_fraction_bounds": [
+      0.8010792038452987,
+      0.8010792038452987
+    ],
+    "total_sun_hours_definition": "equivalent full-disc hours",
+    "darkness_definition": "no part of the solar disc visible",
+    "eclipse_model": "solid Earth disc; no atmospheric dimming"
+  },
+  "intervals": 210240,
+  "result_cache_hit": false,
+  "unchanged_vs_pre_optimization": true,
+  "timing_scope": "Isolated completed-result cache; warmed NASA terrain and hourly SPICE tables; full 1/5-minute validation, full JSON/CSV artifacts; no profiler",
+  "cache_bytes": 140251419
+}

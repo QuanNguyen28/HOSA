@@ -32,6 +32,7 @@ class PointAnalysisResult(Contract):
     decision: PointDecision | None
     nominal_sampled_decision: PointDecision | None
     requirement_policy: str = "availability-fractions-v1"
+    illumination: dict = Field(default_factory=dict)
     constraint_checks: dict[str, PointDecision]
     soft_constraint_checks: dict[str, PointDecision]
     soft_violations: list[dict] = Field(default_factory=list)

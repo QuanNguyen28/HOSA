@@ -66,7 +66,7 @@ class ChatSession:
             conversation_history=self.history, planning_context=self.planning)
 
     def remember(self, spec):
-        updates = {"arrival_utc": spec.arrival_utc, "constraints": spec.constraints,
+        updates = {"illumination_model": spec.illumination_model, "arrival_utc": spec.arrival_utc, "constraints": spec.constraints,
                    "min_sunlit_fraction": spec.min_sunlit_fraction, "min_earth_los_fraction": spec.min_earth_los_fraction}
         if len(spec.site_ids) == 1:
             updates["current_site_id"] = spec.site_ids[0]

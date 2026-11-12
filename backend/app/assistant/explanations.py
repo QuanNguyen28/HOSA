@@ -54,8 +54,11 @@ def render(evidence, plan=None):
             fact_ids.append(f"{key}.availability")
             continue
         sun, earth = c.metrics["total_sun_hours"], c.metrics["total_earth_los_hours"]
-        sun_text = (f"có nắng {sun[0]:.2f}–{sun[1]:.2f} giờ "
+        sun_text = (f"chiếu sáng trung bình {sun[0]/evidence.request.duration_hours*100:.2f}–{sun[1]/evidence.request.duration_hours*100:.2f}% diện tích đĩa Mặt Trời "
                     f"(tối thiểu {evidence.request.min_sunlit_fraction*100:g}%)")
+        if evidence.request.illumination_model == "sun_center":
+            sun_text = (f"có nắng {sun[0]:.2f}–{sun[1]:.2f} giờ "
+                        f"(tối thiểu {evidence.request.min_sunlit_fraction*100:g}%)")
         earth_text = (f"có tầm nhìn Trái Đất {earth[0]:.2f}–{earth[1]:.2f} giờ "
                       f"(tối thiểu {evidence.request.min_earth_los_fraction*100:g}%)")
         ordered_metrics = (earth_text, sun_text) if focus.get(key) == "EARTH_LOS" else (sun_text, earth_text)
@@ -95,7 +98,7 @@ def render(evidence, plan=None):
         ranking = next((r for r in evidence.ranking if r.candidate_id == key), None)
         if ranking and ranking.rank_min != ranking.rank_max:
             texts.append(f"{label}: khoảng hạng {ranking.rank_min}–{ranking.rank_max}; các cận chỉ số xếp hạng chồng lấn.")
-        if any(context["touches_window_edge"] for context in c.metric_context.values()):
+        if any(context.get("touches_window_edge") for context in c.metric_context.values()):
             texts.append(f"{label}: sự kiện chạm biên nhiệm vụ; thời lượng ngoài cửa sổ chưa được đo.")
     if not evidence.apply_allowed:
         texts.append("Chưa có phương án đạt trong tập đã đánh giá; không tự nới ngưỡng hoặc cho phép áp dụng.")

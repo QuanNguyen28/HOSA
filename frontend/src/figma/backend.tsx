@@ -6,6 +6,7 @@ import {
   intervalAt,
   missionHours,
   missionEnd,
+  timelineBins,
   type Bounds,
   type Candidate,
   type Mission,
@@ -196,7 +197,7 @@ export function MissionFields({
         </summary>
         <div className="mt-3 space-y-3">
           <NumberField
-            label="Minimum sunlight %"
+            label="Minimum mean visible Sun disc %"
             value={m.sun}
             min={0}
             max={100}
@@ -291,7 +292,7 @@ export function MissionFields({
               checked={m.offline}
               onChange={(e) => change("offline", e.target.checked)}
             />
-            Use cached JPL data only
+            Use local astronomy data only
           </label>
         </div>
       </details>
@@ -364,7 +365,7 @@ export function MetricBar({
       </div>
       {pair && (
         <p className="mt-1 font-mono text-[10px] text-mute">
-          {boundsText(pair)} h
+          {boundsText(pair)} {label === "Mean visible Sun disc" ? "equivalent full-disc h" : "h"}
         </p>
       )}
     </div>
@@ -398,7 +399,9 @@ export function CurrentStatus({
                     : "unknown"}
               </p>
               <p className="font-mono text-[10px]">
-                {row ? "Backend interval" : "No interval evidence"}
+                {body === "sun" && row?.sun_visible_fraction != null
+                  ? `${(row.sun_visible_fraction * 100).toFixed(1)}% of disc visible`
+                  : row ? "Backend interval" : "No interval evidence"}
               </p>
             </div>
           </div>
@@ -430,6 +433,7 @@ export function BackendTimeline({
   time: number;
   onTime: (v: number) => void;
 }) {
+  const bins = useMemo(() => timelineBins(result?.timeline ?? [], start, end), [result, start, end]);
   return (
     <div className="space-y-1.5" aria-label="Backend visibility timeline">
       {(["sun", "earth", "joint"] as const).map((body) => (
@@ -458,12 +462,15 @@ export function BackendTimeline({
               );
             }}
           >
-            {result?.timeline.map((r, i) => (
+            {bins.map((r, i) => (
               <span
                 aria-hidden="true"
                 key={i}
-                title={`${fmtTime(Date.parse(r.start_utc))}: ${r[`${body}_state`]}`}
+                title={`${fmtTime(Date.parse(r.start_utc))}: ${body === "sun" && r.sun_visible_fraction != null ? `${(r.sun_visible_fraction * 100).toFixed(1)}% of Sun disc` : r[`${body}_state`]}`}
                 style={{
+                  alignSelf: "flex-end",
+                  height: body === "sun" && r.sun_visible_fraction != null
+                    ? `${Math.max(0, r.sun_visible_fraction) * 100}%` : "100%",
                   flexGrow: Date.parse(r.end_utc) - Date.parse(r.start_utc),
                   background:
                     r[`${body}_state`] === "V"
@@ -484,7 +491,7 @@ export function BackendTimeline({
         </div>
       ))}
       <p className="text-right font-mono text-[9px] text-mute">
-        VISIBLE · BLOCKED · HATCHED = UNKNOWN
+        SUN HEIGHT = VISIBLE DISC FRACTION · EARTH/BOTH = VISIBLE · HATCHED = UNKNOWN
         {!result && " · Run Analyze to load evidence"}
       </p>
     </div>
@@ -620,7 +627,7 @@ export function CandidateCard({
         {fmtTime(Date.parse(c.start_utc))}
       </p>
       <MetricBar
-        label="Sunlight"
+        label="Mean visible Sun disc"
         pair={c.metrics.total_sun_hours}
         hours={hours}
         color="#FBBF24"

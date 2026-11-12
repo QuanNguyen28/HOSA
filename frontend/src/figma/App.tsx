@@ -568,8 +568,8 @@ function Explore({
                 />
                 {!r && !point.busy && !point.error && (
                   <p className="text-xs text-mute">
-                    Run Analyze point to calculate. First-time terrain/JPL
-                    processing can take several minutes.
+                    Run Analyze point to calculate. First-time terrain
+                    preparation can take longer; astronomy uses local SPICE data.
                   </p>
                 )}
                 {r && (
@@ -587,7 +587,7 @@ function Explore({
                   </div>
                 )}
                 <MetricBar
-                  label="Sunlight"
+                  label="Mean visible Sun disc"
                   pair={r?.metrics_hours.total_sun_hours}
                   hours={missionHours(mission)}
                   color="#FBBF24"
@@ -696,7 +696,7 @@ function Explore({
                   </details>
                 )}
                 <p className="text-[10px] leading-relaxed text-mute">
-                  NASA LOLA + JPL · sampled Sun/Earth-centre visibility ·
+                  NASA LOLA + SPICE/JPL · mean solar-disc visibility / Earth-centre LOS ·
                   PROVISIONAL. No RF link or landing-safety certification.
                 </p>
                 {catalogError && (

@@ -38,10 +38,12 @@ class Candidate(Contract):
     coordinate: dict | None = None
     analysis_result_id: str | None = None
     resolution: dict = Field(default_factory=dict)
+    illumination: dict = Field(default_factory=dict)
 
 
 
 class CompareRequest(Contract):
+    illumination_model: Literal["solar_disc", "sun_center"] = "solar_disc"
     scenario_id: str = "south_pole_demo_v1"
     site_ids: list[str] = Field(default_factory=list, max_length=20)
     targets: list[MissionTarget] = Field(default_factory=list, max_length=20)
@@ -84,6 +86,7 @@ class CompareRequest(Contract):
     def mission(self, target, start_utc=None):
         hardware = self.hardware or Hardware(sun_panel=1., earth_antenna=2.)
         return MissionRequest(**target.model_dump(), start_utc=start_utc or self.arrival_utc,
+            illumination_model=self.illumination_model,
             duration_hours=self.duration_hours, panel_height_m=hardware.sun_panel,
             antenna_height_m=hardware.earth_antenna, min_sunlit_fraction=self.min_sunlit_fraction,
             min_earth_los_fraction=self.min_earth_los_fraction, constraints=self.constraints,

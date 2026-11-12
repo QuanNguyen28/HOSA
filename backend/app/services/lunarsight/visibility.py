@@ -28,7 +28,7 @@ def lookup(p,az):
     result=np.where(finite&exact,h[i],np.where(c,h[i]*(1-f)+h[j]*f,np.nan))
     return result,c
 
-def visibility(sun,earth,ps,pe):
+def visibility(sun,earth,ps,pe, *, solar_disc=False):
     if not sun.index.equals(earth.index) or len(sun)<2: raise ValueError("Sun/Earth grids differ or empty")
     index=sun.index
     if index.tz is None or index.has_duplicates or not index.is_monotonic_increasing:
@@ -44,6 +44,16 @@ def visibility(sun,earth,ps,pe):
         df[f"{label}_state"]=pd.Categorical(np.where(valid, classify(ep.el_deg,h,cov), "?"), categories=["V","B","?"])
         df[f"{label}_coverage_flag"]=pd.Categorical(np.select(
             [~df[f"{label}_ephem_valid"],~cov],["missing_ephemeris","incomplete_terrain"],default="covered"))
+    if solar_disc:
+        from .solar_disc import fractions
+        lo, hi = fractions(sun, earth, ps)
+        df["sun_center_state"] = df.sun_state.copy()
+        df["sun_visible_fraction_lower"] = lo
+        df["sun_visible_fraction_upper"] = hi
+        df["sun_visible_fraction"] = np.where(np.isclose(lo, hi, atol=1e-12, rtol=0), lo, np.nan)
+        df["sun_state"] = pd.Categorical(np.where(hi <= 0, "B", np.where(lo > 0, "V", "?")), categories=["V","B","?"])
+        uncertain = ~np.isclose(lo, hi, atol=1e-12, rtol=0)
+        df["sun_coverage_flag"] = np.where(uncertain & df.sun_coverage_flag.eq("covered"), "incomplete_solar_disc_evidence", df.sun_coverage_flag.astype(str))
     df["joint_state"]=pd.Categorical(combine(df.sun_state,df.earth_state), categories=["V","B","?"])
     # Final timestamp is a boundary only, not an extra interval.
     df["start_utc"]=index; df["end_utc"]=index.to_series().shift(-1)

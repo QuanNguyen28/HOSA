@@ -95,6 +95,8 @@ class SnapshotProvider:
         return result
 
     def analyze(self, target, request):
+        if request.illumination_model != "sun_center":
+            raise DomainError("ILLUMINATION_MODEL_MISMATCH", 409)
         evidence = self.prepare(target.site_id)
         frame = clip(evidence["base"], request)
         if frame is None:

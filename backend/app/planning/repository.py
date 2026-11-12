@@ -15,7 +15,7 @@ from app.services.lunarsight import planning as legacy
 from .metrics import METRICS
 from .models import PlanningResult, utc
 
-METHOD_VERSION = "planning-services-3.1.0"
+METHOD_VERSION = "planning-services-4.0.0"
 
 
 class SnapshotRepository:
@@ -40,6 +40,9 @@ class SnapshotRepository:
                 "supported_operations": ["compare", "window_search"], "ranking_metrics": list(METRICS),
                 "supported_contact_requirements": ["min_contact_minutes", "setup_minutes", "required_windows", "first_contact_deadline_minutes"],
                 "data_sources": ["snapshot", "coordinate"],
+                "illumination": {"default": "solar_disc", "min_sunlit_fraction": "time-mean visible solar-disc area, including solid-Earth occultation",
+                    "total_sun_hours": "equivalent full-disc hours", "legacy_model": "sun_center",
+                    "snapshot_policy": "solar_disc requests are evaluated by the coordinate pipeline"},
                 "indeterminate_resolution": {"request_field": "resolve_indeterminate", "default": False,
                     "policy_version": RESOLUTION_VERSION, "max_refinement_rounds": len(FINE_AZIMUTH_STEPS),
                     "fine_azimuth_steps_deg": list(FINE_AZIMUTH_STEPS), "max_search_evaluations": 128},
@@ -107,7 +110,8 @@ def result_csv(result: PlanningResult) -> str:
     stream = io.StringIO()
     fields = ["candidate_id", "site_id", "start_utc", "end_utc", "decision", "dataset_version", "method_version", "source_hash",
               "min_sunlit_fraction", "min_earth_los_fraction", "soft_constraint_states_json", "soft_violations_json",
-              "sensitivity_status", "sensitivity_scope_json", "sensitivity_comparisons_json", "resolution_json", "validation_json"]
+              "sensitivity_status", "sensitivity_scope_json", "sensitivity_comparisons_json", "resolution_json", "validation_json",
+              "illumination_model", "total_sun_hours_definition", "mean_visible_solar_disc_fraction_L", "mean_visible_solar_disc_fraction_U"]
     fields += [metric+suffix for metric in METRICS for suffix in ("_L", "_U")]
     writer = csv.DictWriter(stream, fieldnames=fields)
     writer.writeheader()
@@ -122,6 +126,12 @@ def result_csv(result: PlanningResult) -> str:
                    sensitivity_comparisons_json=json.dumps(candidate.sensitivity.get("comparisons", {}), separators=(",", ":")))
         row["resolution_json"] = json.dumps(candidate.resolution, separators=(",", ":"))
         row["validation_json"] = json.dumps(candidate.validation, separators=(",", ":"))
+        model = result.request.get("illumination_model", "sun_center")
+        row["illumination_model"] = model
+        row["total_sun_hours_definition"] = "equivalent full-disc hours" if model == "solar_disc" else "Sun-centre visible hours"
+        if model == "solar_disc" and candidate.metrics.get("total_sun_hours"):
+            hours = result.request["duration_hours"]
+            row["mean_visible_solar_disc_fraction_L"], row["mean_visible_solar_disc_fraction_U"] = [v/hours for v in candidate.metrics["total_sun_hours"]]
         for metric, pair in candidate.metrics.items():
             row[metric+"_L"], row[metric+"_U"] = pair
         writer.writerow(row)

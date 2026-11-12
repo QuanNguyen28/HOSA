@@ -11,22 +11,42 @@ from app.services.lunarsight.durations import bounds
 from app.services.lunarsight.visibility import sensitivity, lookup, SENSITIVITY_VERSION
 from .metrics import hard_checks, assess_soft, validate_metrics
 
-EVALUATION_VERSION = "mission-evaluation-1.2.0"
+EVALUATION_VERSION = "mission-evaluation-2.0.1"
 VALIDATION_VERSION = "mission-validation-1.0"
 REQUIRED_COMPARISONS = ("azimuth_0.25_vs_0.125", "radius_400km_vs_300km", "time_5min_vs_1min")
 TOLERANCES = {"horizon_deg": .1, "event_minutes": 5, "duration_minutes": 10}
 
+def serialization_frame(frame):
+    """Format UTC columns in NumPy, without boxing millions of Timestamps."""
+    output = frame.copy(deep=False)
+    for name in frame.columns:
+        column = frame[name]
+        if pd.api.types.is_datetime64_any_dtype(column.dtype):
+            values = np.datetime_as_string(column.to_numpy(dtype="datetime64[ms]"), unit="ms", timezone="UTC")
+            output[name] = np.where(column.isna(), None, values)
+    return output
+
+
 def records(frame):
-    return json.loads(frame.to_json(orient="records", date_format="iso"))
+    return json.loads(serialization_frame(frame).to_json(orient="records", date_format="iso"))
 
 
 def metrics(frame):
     if (frame.empty or frame.start_utc.isna().any() or frame.end_utc.isna().any()
             or (frame.end_utc <= frame.start_utc).any()
-            or not np.array_equal(frame.start_utc.iloc[1:].to_numpy(), frame.end_utc.iloc[:-1].to_numpy())):
+            or not np.array_equal(frame.start_utc.iloc[1:].to_numpy(dtype="datetime64[us]"),
+                                  frame.end_utc.iloc[:-1].to_numpy(dtype="datetime64[us]"))):
         raise DomainError("INCOMPLETE_TIMELINE", 409)
     duration = (frame.end_utc - frame.start_utc).dt.total_seconds().to_numpy() / 3600
     result = bounds(frame.sun_state, frame.earth_state, duration)
+    if "sun_visible_fraction_lower" in frame:
+        fractions = frame[["sun_visible_fraction_lower", "sun_visible_fraction_upper"]].to_numpy(dtype=float)
+        if (not np.isfinite(fractions).all() or (fractions < 0).any() or (fractions > 1).any()
+                or (fractions[:, 0] > fractions[:, 1]).any()):
+            raise DomainError("INVALID_SOLAR_FRACTION_BOUNDS", 409)
+        # Compatibility key: these are equivalent full-disc hours, not hours
+        # when any part or the centre of the Sun was visible.
+        result["total_sun_hours"] = (fractions*duration[:, None]).sum(axis=0).tolist()
     hours = float((frame.end_utc.iloc[-1] - frame.start_utc.iloc[0]).total_seconds() / 3600)
     validate_metrics(result, hours)
     # Clamp only sub-tolerance floating point accumulation (e.g. 72+2e-13).
@@ -146,6 +166,8 @@ def evaluate(request, frame, validation):
     if frame.empty or (frame.start_utc.iloc[0] != pd.Timestamp(request.start_utc)
             or frame.end_utc.iloc[-1] != pd.Timestamp(request.end_utc)):
         raise DomainError("INCOMPLETE_TIMELINE", 409)
+    if getattr(request, "illumination_model", "sun_center") == "solar_disc" and "sun_visible_fraction_lower" not in frame:
+        raise DomainError("ILLUMINATION_MODEL_MISMATCH", 409)
     metric = metrics(frame)
     checks = constraint_checks(metric, request, frame)
     nominal = decision(checks.values()) if checks else None

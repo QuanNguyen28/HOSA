@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { responseCache } from "../lib/responseCache";
 
 import type {
   TerrainGeometryMetadata,
@@ -17,6 +18,8 @@ export type TerrainWindow = {
   method_version: string;
   warnings: string[];
 };
+
+const getCachedWindow = responseCache<TerrainWindow>();
 
 export function useTerrainWindow(
   coordinate: LunarCoordinate | null,
@@ -48,20 +51,20 @@ export function useTerrainWindow(
     const controller = new AbortController();
     const query = new URLSearchParams({
       latitude: coordinate.latitude.toString(),
-      longitude: coordinate.longitude.toString(),
+      longitude: (coordinate.longitude < 0 ? coordinate.longitude + 360 : coordinate.longitude).toString(),
       radius_km: (options.radiusKm ?? 8).toString(),
       samples: (options.samples ?? 257).toString(),
       detail: options.regionalOnly ? "regional" : "best",
     });
     setLoading(true);
     setResult(null);
-    fetch(`/api/lunar/point/terrain-window?${query}`, {
-      signal: controller.signal,
-    })
-      .then((response) => {
+    const url = `/api/lunar/point/terrain-window?${query}`;
+    // A shared request outlives a single component. Cleanup only suppresses
+    // this consumer; aborting it would also cancel another site's/view's load.
+    getCachedWindow(url, () => fetch(url).then((response) => {
         if (!response.ok) throw new Error("Terrain window unavailable");
-        return response.json();
-      })
+        return response.json() as Promise<TerrainWindow>;
+      }))
       .then((value) => {
         if (!controller.signal.aborted) {
           setResult(value);

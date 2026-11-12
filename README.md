@@ -12,6 +12,7 @@ Yêu cầu Python 3.11+, Node 22.12+, npm 10.5.1+:
 make backend-install
 make frontend-install
 backend/.venv/bin/python scripts/prepare_point_data.py
+make ephemeris-prepare
 ```
 
 Chạy ở hai terminal:
@@ -31,9 +32,17 @@ make verify
 make mvp-smoke
 ```
 
-Assistant cần cấu hình `.env` từ `.env.example`; khóa OpenRouter chỉ nằm ở backend. Assistant nhận tên hoặc mã điểm từ cùng danh mục với Compare, tối đa hai điểm mỗi lượt. Nếu chỉ chọn Site01_P1 hoặc Site04_P1 thì dùng snapshot; khi chọn thêm một điểm ngoài snapshot, backend tính theo tọa độ của toàn bộ lựa chọn. Các giới hạn và hướng dẫn đầy đủ: [MVP tích hợp](docs/demo/fe-be-mvp.md), [frontend](frontend/README.md).
+Assistant cần cấu hình `.env` từ `.env.example`; khóa OpenRouter chỉ nằm ở backend. Assistant nhận tên hoặc mã điểm từ cùng danh mục với Compare, tối đa hai điểm mỗi lượt. Mặc định solar-disc tính theo tọa độ, kể cả Site01_P1/Site04_P1; snapshot legacy dành cho yêu cầu `sun_center` tương thích. Các giới hạn và hướng dẫn đầy đủ: [MVP tích hợp](docs/demo/fe-be-mvp.md), [frontend](frontend/README.md).
 
 Các phần dưới mô tả thêm pipeline dữ liệu và API snapshot legacy, không phải toàn bộ phạm vi của giao diện MVP mới.
+
+API Point/Planning và chat mới mặc định dùng `illumination_model: "solar_disc"`: yêu cầu `min_sunlit_fraction` là **trung bình theo thời gian của phần diện tích đĩa Mặt Trời nhìn thấy**, gồm địa hình và Trái Đất che khuất. Thấy nửa đĩa suốt nhiệm vụ là 50%, không đạt yêu cầu 80%. `total_sun_hours` giữ tên tương thích nhưng mang nghĩa giờ tương đương toàn đĩa; `illumination` giải thích định nghĩa trong response. Earth LOS vẫn xét tâm Trái Đất. Snapshot cũ chỉ dùng với `illumination_model: "sun_center"` rõ ràng; request solar-disc được chuyển qua engine tọa độ.
+
+`make ephemeris-prepare` tải kernel chính thức NAIF/JPL một lần, lưu checksum và nguồn. Backend sinh bảng vector MOON_ME theo giờ/từng tháng khi cần và tái sử dụng cho các tọa độ, chiều cao, ngày khác nhau. Không gọi mạng trong phép tính solar-disc; không giới hạn trên thời lượng nhiệm vụ ở ứng dụng, nhưng ngày phải nằm trong coverage kernel đã cài. Cần bảng mở rộng thì chạy lại pipeline với kernel phù hợp; backend không kẹp ngày về biên dữ liệu.
+
+Chi tiết và kiểm thử: [quyết định mô hình](docs/decisions/solar-disc-mean-and-shared-ephemeris.md), [nghiệm thu](docs/validation/lunarsight/solar-disc-backend.md).
+
+Gói `data/processed/site-precompute/v1/` đi cùng repo chứa horizon cho **23 tọa độ mặc định**, chiều cao **1/2/10/20 m**, đủ các mức refinement hiện có, và **255 mesh hiển thị** (11 cấu hình mỗi tọa độ + 2 mesh toàn vùng cực nam). Backend đọc artifact có checksum; đổi ngày, thời lượng hay yêu cầu không cần scan lại DEM cho các cấu hình này. GET mesh dùng gzip/ETag, frontend tái sử dụng dữ liệu khi đổi điểm. Tọa độ khác hoặc chiều cao khác vẫn dùng DEM và cache runtime. Khi cập nhật DEM/thuật toán, tạo lại gói bằng `make precompute-catalog`. Hướng dẫn deploy và giới hạn: [precompute catalog](docs/decisions/catalog-precompute.md).
 
 ## Mục tiêu của bộ khung
 

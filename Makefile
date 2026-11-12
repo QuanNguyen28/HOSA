@@ -28,6 +28,14 @@ data-verify:
 data-sites:
 	backend/.venv/bin/python scripts/build_official_site_catalog.py
 
+.PHONY: ephemeris-prepare
+ephemeris-prepare:
+	PYTHONPATH=backend backend/.venv/bin/python scripts/prepare_shared_ephemeris.py
+
+.PHONY: precompute-catalog
+precompute-catalog:
+	PYTHONPATH=backend backend/.venv/bin/python scripts/precompute_catalog.py --workers 2 --report docs/validation/lunarsight/catalog-precompute-build.json
+
 data-windows-plan:
 	backend/.venv/bin/python scripts/materialize_dem_windows.py --dry-run
 
