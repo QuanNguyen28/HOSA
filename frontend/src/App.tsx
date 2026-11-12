@@ -1,2 +1,2 @@
-// Canonical product shell imported from the user's Figma Make export.
+// Preserve the feature/lunarsight-frontend product shell; data flows use real APIs.
 export { default } from "./figma/App";

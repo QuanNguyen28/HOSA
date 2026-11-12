@@ -2,6 +2,39 @@
 
 LunarSight là nguyên mẫu hỗ trợ so sánh điều kiện chiếu sáng Mặt Trời và đường nhìn hình học tới Trái Đất tại các vị trí ứng viên ở cực nam Mặt Trăng.
 
+## MVP frontend–backend tích hợp
+
+Nhánh `feat/merge-fe-be` ghép `feature/lunarsight-frontend` với `feat/fix-compute-backend`, gồm các sửa lỗi đã rà soát. Giao diện giữ product shell gốc tại `frontend/src/figma/`, gọi API thật cho Explore, Compare, Best dates và Assistant; các hàm mô phỏng horizon/ephemeris/metric và chat heuristic của bản Figma đã được gỡ bỏ.
+
+Yêu cầu Python 3.11+, Node 22.12+, npm 10.5.1+:
+
+```bash
+make backend-install
+make frontend-install
+backend/.venv/bin/python scripts/prepare_point_data.py
+```
+
+Chạy ở hai terminal:
+
+```bash
+make backend-run
+```
+
+```bash
+make frontend-run
+```
+
+Mở `http://127.0.0.1:5173`. Hai điểm Example A/B là hai request NASA/JPL đã kiểm chứng với nhiệm vụ **72 giờ, panel/antenna 20 m**; bấm Analyze point để lấy kết quả backend. Đổi ngày/tọa độ không tự dùng lại metric của điểm cũ.
+
+```bash
+make verify
+make mvp-smoke
+```
+
+Assistant cần cấu hình `.env` từ `.env.example`; khóa OpenRouter chỉ nằm ở backend. Assistant hiện dùng snapshot Site01/Site04, còn phân tích tọa độ/compare/search dùng pipeline chung. Các giới hạn và hướng dẫn đầy đủ: [MVP tích hợp](docs/demo/fe-be-mvp.md), [frontend](frontend/README.md).
+
+Các phần dưới mô tả thêm pipeline dữ liệu và API snapshot legacy, không phải toàn bộ phạm vi của giao diện MVP mới.
+
 ## Mục tiêu của bộ khung
 
 Bộ khung này tách rõ các lớp dữ liệu, tính toán và giao diện để nhóm có thể phát triển theo trình tự:

@@ -1,16 +1,17 @@
 .PHONY: backend-install backend-run backend-health frontend-install frontend-run data-plan data-acquire data-verify data-sites data-windows-plan test verify release-audit release-check package-release
 
 backend-install:
-	cd backend && python -m pip install -e .
+	python3 -m venv backend/.venv
+	backend/.venv/bin/python -m pip install -e 'backend[test]'
 
 backend-run:
-	cd backend && uvicorn app.main:app --reload --port 8000
+	backend/.venv/bin/python -m uvicorn app.main:app --app-dir backend --reload --host 127.0.0.1 --port 8000
 
 backend-health:
 	curl --fail http://localhost:8000/api/health
 
 frontend-install:
-	cd frontend && npm install
+	cd frontend && npm ci
 
 frontend-run:
 	cd frontend && npm run dev
@@ -45,3 +46,7 @@ release-check: verify release-audit
 
 package-release:
 	backend/.venv/bin/python scripts/package_release.py
+
+.PHONY: mvp-smoke
+mvp-smoke:
+	backend/.venv/bin/python scripts/verify_mvp_api.py

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { MoonScene } from "../components/MoonScene";
 import { useTerrainWindow } from "../hooks/useTerrainWindow";
@@ -8,12 +8,14 @@ import type {
   LunarCoordinate,
   Site as RendererSite,
 } from "../types";
-import { SITES } from "./model";
+import { type Site } from "./model";
 
 export type Mode = "orbit" | "pole" | "surface";
 
 type Props = {
   mode: Mode;
+  sites: Site[];
+  onCoordinateSelect?: (coordinate: LunarCoordinate) => void;
   siteId: string;
   timeMs: number;
   heightM?: number;
@@ -22,15 +24,6 @@ type Props = {
   interactive?: boolean;
 };
 
-const TEMPLATE_TO_RENDERER_ID: Record<string, string> = {
-  "connecting-ridge": "Site01_P1",
-  "shackleton-rim": "Site04_P1",
-};
-
-const RENDERER_TO_TEMPLATE_ID = Object.fromEntries(
-  Object.entries(TEMPLATE_TO_RENDERER_ID).map(([templateId, rendererId]) => [rendererId, templateId]),
-);
-
 const LAYERS: LayerState = {
   labels: true,
   grid: false,
@@ -38,9 +31,9 @@ const LAYERS: LayerState = {
   enhancedLight: true,
 };
 
-function toRendererSite(site: (typeof SITES)[number]): RendererSite {
+function toRendererSite(site: Site): RendererSite {
   return {
-    id: TEMPLATE_TO_RENDERER_ID[site.id] ?? site.id,
+    id: site.id,
     name: site.name,
     latitude: site.lat,
     longitude: site.lon,
@@ -57,23 +50,25 @@ function modeToPreset(mode: Mode): CameraPreset {
 
 export default function Stage3D({
   mode,
+  sites: catalog,
+  onCoordinateSelect,
   siteId,
   timeMs,
   onSelect,
   className = "",
   interactive = true,
 }: Props) {
-  const sites = useMemo(() => SITES.map(toRendererSite), []);
+  const sites = useMemo(() => catalog.map(toRendererSite), [catalog]);
   const activeSite = useMemo(
-    () => sites.find((site) => site.id === (TEMPLATE_TO_RENDERER_ID[siteId] ?? siteId)) ?? sites[0],
+    () => sites.find((site) => site.id === siteId) ?? sites[0],
     [siteId, sites],
   );
-  const [selected, setSelected] = useState<LunarCoordinate>(activeSite);
-  const [selectedSiteId, setSelectedSiteId] = useState<string | null>(activeSite.id);
+  const selected = activeSite;
+  const selectedSiteId = activeSite.id === "custom" ? null : activeSite.id;
   const [hovered, setHovered] = useState<LunarCoordinate | null>(null);
   const [ready, setReady] = useState(false);
   const hasFiveMetreDem =
-    selectedSiteId !== null && selectedSiteId in RENDERER_TO_TEMPLATE_ID;
+    selectedSiteId === "Site01_P1" || selectedSiteId === "Site04_P1";
   const { result: terrainWindow, loading: terrainLoading } = useTerrainWindow(
     selected,
     mode === "surface",
@@ -82,16 +77,13 @@ export default function Stage3D({
       : { radiusKm: 8, samples: 257 },
   );
 
-  useEffect(() => {
-    setSelected(activeSite);
-    setSelectedSiteId(activeSite.id);
-  }, [activeSite]);
-
-  const handleSelect = (coordinate: LunarCoordinate, rendererSiteId?: string) => {
-    setSelected(coordinate);
-    setSelectedSiteId(rendererSiteId ?? null);
+  const handleSelect = (
+    coordinate: LunarCoordinate,
+    rendererSiteId?: string,
+  ) => {
+    if (!rendererSiteId) onCoordinateSelect?.(coordinate);
     if (rendererSiteId) {
-      onSelect?.(RENDERER_TO_TEMPLATE_ID[rendererSiteId] ?? rendererSiteId);
+      onSelect?.(rendererSiteId);
     }
   };
 
@@ -132,20 +124,26 @@ export default function Stage3D({
         <div className="pointer-events-none absolute top-16 left-4 border border-line bg-black/80 px-3 py-2 font-mono text-[10px] leading-relaxed tracking-wider text-soft">
           <div className="text-mint">LOLA TERRAIN · TRUE SCALE 1×</div>
           <div className="text-mute">
-            {terrainWindow.dataset_id} · source {terrainWindow.native_resolution_m} m
+            {terrainWindow.dataset_id} · source{" "}
+            {terrainWindow.native_resolution_m} m
           </div>
           <div className="text-mute">
-            mesh {terrainWindow.grid.spacing_m.toFixed(1)} m · {terrainWindow.grid.rows}² vertices
+            mesh {terrainWindow.grid.spacing_m.toFixed(1)} m ·{" "}
+            {terrainWindow.grid.rows}² vertices
           </div>
           <div className="text-mute">
-            {(terrainWindow.radius_km! * 2).toFixed(0)} km field · curvature enabled
+            {(terrainWindow.radius_km! * 2).toFixed(0)} km field · curvature
+            enabled
           </div>
         </div>
       )}
 
       {hovered && mode !== "surface" && (
         <div className="pointer-events-none absolute right-4 bottom-4 border border-line bg-black/75 px-2.5 py-1.5 font-mono text-[10px] text-soft tabular">
-          {Math.abs(hovered.latitude).toFixed(4)}°{hovered.latitude < 0 ? "S" : "N"} · {Math.abs(hovered.longitude).toFixed(4)}°{hovered.longitude < 0 ? "W" : "E"}
+          {Math.abs(hovered.latitude).toFixed(4)}°
+          {hovered.latitude < 0 ? "S" : "N"} ·{" "}
+          {Math.abs(hovered.longitude).toFixed(4)}°
+          {hovered.longitude < 0 ? "W" : "E"}
         </div>
       )}
     </div>
