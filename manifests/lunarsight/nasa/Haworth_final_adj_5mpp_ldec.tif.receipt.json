@@ -1,0 +1,21 @@
+{
+  "id": "Haworth_count",
+  "filename": "Haworth_final_adj_5mpp_ldec.tif",
+  "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Haworth/Haworth_final_adj_5mpp_ldec.tif",
+  "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+  "role": "count",
+  "unit": "LOLA spots",
+  "site": "Haworth",
+  "frame": "MOON_ME/DE421",
+  "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Haworth/Haworth_final_adj_5mpp_ldec.tif",
+  "bytes": 142123705,
+  "sha256": "1c39bb83be3213bf87b551c3ee700697d3554dd9afa25649a1a4006fefd7eb27",
+  "accessed_utc": "2026-11-12T02:52:08.188373+00:00",
+  "status": "VERIFIED_BYTES",
+  "http_headers": {
+    "Content-Length": "142123705",
+    "ETag": "W/\"878a2b9-175fcd77cb0\"",
+    "Last-Modified": "Wed, 25 Nov 2020 00:39:42 GMT",
+    "Content-Type": "image/tiff"
+  }
+}

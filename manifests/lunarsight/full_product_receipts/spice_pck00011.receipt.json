@@ -1,0 +1,28 @@
+{
+  "id": "spice_pck00011",
+  "title": "NAIF planetary constants kernel",
+  "provider": "NASA/JPL NAIF",
+  "source_page": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/",
+  "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/pck00011.tpc",
+  "destination": "data/raw/full_product/spice/pck00011.tpc",
+  "profile": "core",
+  "access_mode": "download",
+  "expected_bytes": 131226,
+  "media_type": "text/plain",
+  "required_for": [
+    "ephemeris",
+    "eclipse_replay",
+    "dsn"
+  ],
+  "final_url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/pck00011.tpc",
+  "bytes": 131226,
+  "sha256": "3dff7b1dbeceaa01f25467767d3fa25816051c85d162d1edf04acb310ee28bb1",
+  "retrieved_utc": "2026-11-11T18:46:33.177050+00:00",
+  "status": "VERIFIED_BYTES",
+  "http_headers": {
+    "Content-Length": "131226",
+    "Content-Type": "text/plain; charset=UTF-8",
+    "ETag": null,
+    "Last-Modified": "Tue, 27 Dec 2022 16:28:50 GMT"
+  }
+}

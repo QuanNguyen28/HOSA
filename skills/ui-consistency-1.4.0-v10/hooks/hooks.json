@@ -1,0 +1,16 @@
+{
+  "description": "Keeps new UI consistent with a project's existing pages. Your coding agent reads how they are built and writes new ones the same way.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/run-hook.cmd\" session-start",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "id": "pds_ldem16_img",
+  "title": "Global LOLA LDEM 16 pixels/degree image",
+  "provider": "NASA PDS Geosciences Node",
+  "source_page": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/cylindrical/img/",
+  "url": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/cylindrical/img/ldem_16.img",
+  "destination": "data/raw/full_product/global/ldem_16.img",
+  "profile": "core",
+  "access_mode": "download",
+  "expected_bytes": 33177600,
+  "media_type": "application/octet-stream",
+  "required_for": [
+    "global_relief",
+    "moon_normal_map"
+  ],
+  "final_url": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/cylindrical/img/ldem_16.img",
+  "bytes": 33177600,
+  "sha256": "a511e40d7a3ea3275945b4da2a1df377133264fab0be94b7434b1cf8907254cb",
+  "retrieved_utc": "2026-11-11T19:23:31.848790+00:00",
+  "status": "VERIFIED_BYTES",
+  "http_headers": {
+    "Content-Length": "33177600",
+    "Content-Type": "application/octet-stream",
+    "ETag": "\"76a9f37accd2d41:0\"",
+    "Last-Modified": "Mon, 04 Mar 2019 20:54:37 GMT"
+  }
+}

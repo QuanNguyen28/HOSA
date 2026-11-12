@@ -1,0 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import 'tailwindcss';
+@source './**/*.{ts,tsx}';
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Barlow', ui-sans-serif, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --color-ink: #000;
+  --color-panel: #0d0d0d;
+  --color-panel-2: #161616;
+  --color-line: #2a2a2a;
+  --color-mute: #8c8c8c;
+  --color-soft: #c8c8c8;
+  --color-ice: #f2f2f2;
+  --color-ice-100: #fff;
+  --color-amber: #e0b95a;
+  --color-sun: #ffc53d;
+  --color-earth: #5ab4ff;
+  --color-mint: #7ad99a;
+  --color-rose: #ff8f7d;
+}
+
+@layer base {
+  html { background: var(--color-ink); color: #f2f2f2; font-family: var(--font-sans); color-scheme: dark; }
+  body { background: var(--color-ink); -webkit-font-smoothing: antialiased; min-height: 100vh; overflow-x: hidden; }
+  button { cursor: pointer; }
+  .font-display { text-transform: uppercase; letter-spacing: 0.04em; }
+  .font-mono { font-family: var(--font-display); letter-spacing: 0.06em; }
+  ::selection { background: var(--color-ice); color: var(--color-ink); }
+  :focus-visible { outline: 2px solid var(--color-ice); outline-offset: 2px; }
+  input[type='range'] { accent-color: var(--color-ice); }
+  input[type='date'] { color-scheme: dark; }
+}
+
+@utility tabular { font-variant-numeric: tabular-nums lining-nums; }
+@utility glass {
+  background: rgba(10, 10, 10, 0.92);
+  border: 1px solid #2a2a2a;
+}
+@utility eyebrow { font-family: var(--font-display); font-weight: 600; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-mute); }

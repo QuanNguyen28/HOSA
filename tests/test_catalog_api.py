@@ -1,4 +1,5 @@
 from pathlib import Path
+import math
 import sys
 
 import pytest
@@ -106,6 +107,12 @@ def test_terrain_window_is_bounded_and_keeps_native_provenance():
     assert result["grid"]["rows"] == 65
     assert len(result["grid"]["elevation_m_row_major"]) == 65 * 65
     assert result["grid"]["valid_fraction"] > 0.99
+    assert result["geometry"]["horizontal_scale"] == 1.0
+    assert result["geometry"]["vertical_scale"] == 1.0
+    assert result["geometry"]["lunar_reference_radius_m"] == 1_737_400.0
+    assert math.isfinite(result["geometry"]["center_elevation_m"])
+    assert 0 <= result["geometry"]["column_azimuth_deg"] < 360
+    assert 0 <= result["geometry"]["row_azimuth_deg"] < 360
 
 
 @pytest.mark.skipif(not RAW_DEM80.is_file(), reason="optional south-polar DEM is not installed")

@@ -1,0 +1,806 @@
+{
+  "schema_version": "1.0.0",
+  "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+  "updated_utc": "2026-11-12T03:00:00.970652+00:00",
+  "sites": [
+    {
+      "site": "Site06",
+      "display_name": "Nobile Rim 1",
+      "roi_published_by_nasa": true
+    },
+    {
+      "site": "Site07",
+      "display_name": "Peak Near Shackleton",
+      "roi_published_by_nasa": true
+    },
+    {
+      "site": "Site11",
+      "display_name": "de Gerlache Rim",
+      "roi_published_by_nasa": true
+    },
+    {
+      "site": "Site20",
+      "display_name": "Leibnitz Beta Plateau",
+      "roi_published_by_nasa": false
+    },
+    {
+      "site": "Site20v2",
+      "display_name": "Leibnitz Beta Plateau (extended)",
+      "roi_published_by_nasa": false
+    },
+    {
+      "site": "Site23",
+      "display_name": "Malapert Massif",
+      "roi_published_by_nasa": false
+    },
+    {
+      "site": "Site42",
+      "display_name": "de Gerlache-Kocher Massif",
+      "roi_published_by_nasa": false
+    },
+    {
+      "site": "Haworth",
+      "display_name": "Haworth Crater",
+      "roi_published_by_nasa": false
+    },
+    {
+      "site": "Shoemaker",
+      "display_name": "Shoemaker Crater",
+      "roi_published_by_nasa": false
+    },
+    {
+      "site": "DM1",
+      "display_name": "Amundsen Rim",
+      "roi_published_by_nasa": false
+    },
+    {
+      "site": "DM2",
+      "display_name": "Nobile Rim 2",
+      "roi_published_by_nasa": false
+    }
+  ],
+  "records": [
+    {
+      "id": "DM1_count",
+      "filename": "DM1_final_adj_5mpp_ldec.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/DM1/DM1_final_adj_5mpp_ldec.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "count",
+      "unit": "LOLA spots",
+      "site": "DM1",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/DM1/DM1_final_adj_5mpp_ldec.tif",
+      "bytes": 64033615,
+      "sha256": "ec6aecc5580263509c25d17dd9c537a690161ad6bc9afbe7c0b87e15696a0f8f",
+      "accessed_utc": "2026-11-12T02:57:24.184345+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "64033615",
+        "ETag": "W/\"3d1134f-178daaf7090\"",
+        "Last-Modified": "Fri, 16 Apr 2021 12:37:14 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "DM1_dem",
+      "filename": "DM1_final_adj_5mpp_surf.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/DM1/DM1_final_adj_5mpp_surf.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "dem",
+      "unit": "m",
+      "site": "DM1",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/DM1/DM1_final_adj_5mpp_surf.tif",
+      "bytes": 64033681,
+      "sha256": "ceb7e786d05ef6a604c80b78be885e641ad7bd2b5c3aac944201a4f2008d8ca4",
+      "accessed_utc": "2026-11-12T02:55:41.487388+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "64033681",
+        "ETag": "W/\"3d11391-178daaf1aa0\"",
+        "Last-Modified": "Fri, 16 Apr 2021 12:36:52 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "DM1_error",
+      "filename": "DM1_final_adj_5mpp_toterr.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/DM1/DM1_final_adj_5mpp_toterr.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "error",
+      "unit": "m RMS",
+      "site": "DM1",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/DM1/DM1_final_adj_5mpp_toterr.tif",
+      "bytes": 64033683,
+      "sha256": "c6db47ed8201910ba8e50ac72ece0da71af9a1c2d83e7f13f2c1ddd7228e2d69",
+      "accessed_utc": "2026-11-12T02:57:10.327713+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "64033683",
+        "ETag": "W/\"3d11393-178daaffd30\"",
+        "Last-Modified": "Fri, 16 Apr 2021 12:37:50 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "DM2_count",
+      "filename": "DM2_final_adj_5mpp_ldec.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/DM2/DM2_final_adj_5mpp_ldec.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "count",
+      "unit": "LOLA spots",
+      "site": "DM2",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/DM2/DM2_final_adj_5mpp_ldec.tif",
+      "bytes": 64025543,
+      "sha256": "a01a6ae1ff1b8c087859940c94ad77e7eaa5015a73b115debafd9e74ecfceb19",
+      "accessed_utc": "2026-11-12T03:00:00.965718+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "64025543",
+        "ETag": "W/\"3d0f3c7-17783038530\"",
+        "Last-Modified": "Mon, 08 Feb 2021 18:59:42 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "DM2_dem",
+      "filename": "DM2_final_adj_5mpp_surf.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/DM2/DM2_final_adj_5mpp_surf.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "dem",
+      "unit": "m",
+      "site": "DM2",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/DM2/DM2_final_adj_5mpp_surf.tif",
+      "bytes": 64025607,
+      "sha256": "d88677c21633683061117db0a577f0510e0948fe9db315d13be28782407ff604",
+      "accessed_utc": "2026-11-12T02:58:32.099058+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "64025607",
+        "ETag": "W/\"3d0f407-17783036208\"",
+        "Last-Modified": "Mon, 08 Feb 2021 18:59:33 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "DM2_error",
+      "filename": "DM2_final_adj_5mpp_toterr.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/DM2/DM2_final_adj_5mpp_toterr.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "error",
+      "unit": "m RMS",
+      "site": "DM2",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/DM2/DM2_final_adj_5mpp_toterr.tif",
+      "bytes": 64025611,
+      "sha256": "7b4ad3b954dcf458f807c5637fa27fa2bae987c3e0bc369768868bca6483c418",
+      "accessed_utc": "2026-11-12T02:59:36.077323+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "64025611",
+        "ETag": "W/\"3d0f40b-1778303b410\"",
+        "Last-Modified": "Mon, 08 Feb 2021 18:59:54 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "Haworth_count",
+      "filename": "Haworth_final_adj_5mpp_ldec.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Haworth/Haworth_final_adj_5mpp_ldec.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "count",
+      "unit": "LOLA spots",
+      "site": "Haworth",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Haworth/Haworth_final_adj_5mpp_ldec.tif",
+      "bytes": 142123705,
+      "sha256": "1c39bb83be3213bf87b551c3ee700697d3554dd9afa25649a1a4006fefd7eb27",
+      "accessed_utc": "2026-11-12T02:52:08.188373+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "142123705",
+        "ETag": "W/\"878a2b9-175fcd77cb0\"",
+        "Last-Modified": "Wed, 25 Nov 2020 00:39:42 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "Haworth_dem",
+      "filename": "Haworth_final_adj_5mpp_surf.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Haworth/Haworth_final_adj_5mpp_surf.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "dem",
+      "unit": "m",
+      "site": "Haworth",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Haworth/Haworth_final_adj_5mpp_surf.tif",
+      "bytes": 142123767,
+      "sha256": "387fd6e99bca266f4982f7256c4c185921105313882b4c2eee5b5ff1ef75016b",
+      "accessed_utc": "2026-11-12T02:49:50.928596+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "142123767",
+        "ETag": "W/\"878a2f7-175fcd726c0\"",
+        "Last-Modified": "Wed, 25 Nov 2020 00:39:20 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "Haworth_error",
+      "filename": "Haworth_final_adj_5mpp_toterr.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Haworth/Haworth_final_adj_5mpp_toterr.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "error",
+      "unit": "m RMS",
+      "site": "Haworth",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Haworth/Haworth_final_adj_5mpp_toterr.tif",
+      "bytes": 142123773,
+      "sha256": "f4231e1605d27b90c21fe5183db4e37de7532fed6b8fcfda860ec2eca8c61963",
+      "accessed_utc": "2026-11-12T02:51:46.377560+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "142123773",
+        "ETag": "W/\"878a2fd-175fcd7d2a0\"",
+        "Last-Modified": "Wed, 25 Nov 2020 00:40:04 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "Shoemaker_count",
+      "filename": "Shoemaker_final_adj_5mpp_ldec.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Shoemaker/Shoemaker_final_adj_5mpp_ldec.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "count",
+      "unit": "LOLA spots",
+      "site": "Shoemaker",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Shoemaker/Shoemaker_final_adj_5mpp_ldec.tif",
+      "bytes": 64025539,
+      "sha256": "d054fbce5cdbf23ead0a667bf897d8075169d6d649b60d2b02da0c9f0a622765",
+      "accessed_utc": "2026-11-12T02:54:39.031151+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "64025539",
+        "ETag": "W/\"3d0f3c3-175c6f465b8\"",
+        "Last-Modified": "Sat, 14 Nov 2020 13:31:47 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "Shoemaker_dem",
+      "filename": "Shoemaker_final_adj_5mpp_surf.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Shoemaker/Shoemaker_final_adj_5mpp_surf.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "dem",
+      "unit": "m",
+      "site": "Shoemaker",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Shoemaker/Shoemaker_final_adj_5mpp_surf.tif",
+      "bytes": 64025605,
+      "sha256": "75329262a6dbe37e4370adcf23ec3854396c9d3e911a682d76c170178a0b8290",
+      "accessed_utc": "2026-11-12T02:52:41.629698+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "64025605",
+        "ETag": "W/\"3d0f405-175c6f43ea8\"",
+        "Last-Modified": "Sat, 14 Nov 2020 13:31:37 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "Shoemaker_error",
+      "filename": "Shoemaker_final_adj_5mpp_toterr.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Shoemaker/Shoemaker_final_adj_5mpp_toterr.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "error",
+      "unit": "m RMS",
+      "site": "Shoemaker",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Shoemaker/Shoemaker_final_adj_5mpp_toterr.tif",
+      "bytes": 64025605,
+      "sha256": "6e9aae69ff0f1bd6fa65c4ecd0e270c02aa6318da834c53c3e2edd81ce0c5d0e",
+      "accessed_utc": "2026-11-12T02:54:35.433832+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "64025605",
+        "ETag": "W/\"3d0f405-175c6f490b0\"",
+        "Last-Modified": "Sat, 14 Nov 2020 13:31:58 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "Site06_count",
+      "filename": "Site06_final_adj_5mpp_ldec.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site06/Site06_final_adj_5mpp_ldec.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "count",
+      "unit": "LOLA spots",
+      "site": "Site06",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site06/Site06_final_adj_5mpp_ldec.tif",
+      "bytes": 64025541,
+      "sha256": "f7a42c93209bcfe7991632ee569bbb597a3c8a22e1521c7697e13be1cf5a2562",
+      "accessed_utc": "2026-11-12T02:26:56.382429+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "64025541",
+        "ETag": "W/\"3d0f3c5-177967282d8\"",
+        "Last-Modified": "Fri, 12 Feb 2021 13:33:43 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "Site06_dem",
+      "filename": "Site06_final_adj_5mpp_surf.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site06/Site06_final_adj_5mpp_surf.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "dem",
+      "unit": "m",
+      "site": "Site06",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site06/Site06_final_adj_5mpp_surf.tif",
+      "bytes": 64025603,
+      "sha256": "cca17e8067601dd659b583f889204db6bce685bc30c60a9e62427a8bce36b03d",
+      "accessed_utc": "2026-11-12T02:26:36.729503+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "64025603",
+        "ETag": "W/\"3d0f403-17796725fb0\"",
+        "Last-Modified": "Fri, 12 Feb 2021 13:33:34 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "Site06_error",
+      "filename": "Site06_final_adj_5mpp_toterr.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site06/Site06_final_adj_5mpp_toterr.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "error",
+      "unit": "m RMS",
+      "site": "Site06",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site06/Site06_final_adj_5mpp_toterr.tif",
+      "bytes": 64025607,
+      "sha256": "997c7d2d7ae6a74a1d5c38411cf30a414b1a83474b6b3c3a7b1cb32ef675661e",
+      "accessed_utc": "2026-11-12T02:26:35.845182+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "64025607",
+        "ETag": "W/\"3d0f407-1779672add0\"",
+        "Last-Modified": "Fri, 12 Feb 2021 13:33:54 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "Site07_count",
+      "filename": "Site07_final_adj_5mpp_ldec.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site07/Site07_final_adj_5mpp_ldec.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "count",
+      "unit": "LOLA spots",
+      "site": "Site07",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site07/Site07_final_adj_5mpp_ldec.tif",
+      "bytes": 40980742,
+      "sha256": "860ff76518edaa4f6b3d5b637c9192dc84541a8cc27487f21f9d2bd19181487b",
+      "accessed_utc": "2026-11-12T02:28:52.993148+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "40980742",
+        "ETag": "W/\"2715106-17285c8e0d0\"",
+        "Last-Modified": "Fri, 05 Jun 2020 18:40:34 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "Site07_dem",
+      "filename": "Site07_final_adj_5mpp_surf.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site07/Site07_final_adj_5mpp_surf.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "dem",
+      "unit": "m",
+      "site": "Site07",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site07/Site07_final_adj_5mpp_surf.tif",
+      "bytes": 40980808,
+      "sha256": "38aaee10bb4da4d63e7427aa1ca25c79bdbc649d212079a04990e135462091f8",
+      "accessed_utc": "2026-11-12T02:28:44.353552+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "40980808",
+        "ETag": "W/\"2715148-17285c8c960\"",
+        "Last-Modified": "Fri, 05 Jun 2020 18:40:28 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "Site07_error",
+      "filename": "Site07_final_adj_5mpp_toterr.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site07/Site07_final_adj_5mpp_toterr.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "error",
+      "unit": "m RMS",
+      "site": "Site07",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site07/Site07_final_adj_5mpp_toterr.tif",
+      "bytes": 40980810,
+      "sha256": "9be3e4b989ad3164ab5c9036fadab548e5c1c027d056b96f5ef055362c4b1e3e",
+      "accessed_utc": "2026-11-12T02:28:19.158238+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "40980810",
+        "ETag": "W/\"271514a-17285c8fc28\"",
+        "Last-Modified": "Fri, 05 Jun 2020 18:40:41 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "Site07_roi",
+      "filename": "Site07_ROIs.tgz",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site07/Site07_ROIs.tgz",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "roi",
+      "unit": null,
+      "site": "Site07",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site07/Site07_ROIs.tgz",
+      "bytes": 1312,
+      "sha256": "694d85297c40133e91570f020e46f7fd0b25c14e94f0a7c5b6d001e8728bddbe",
+      "accessed_utc": "2026-11-12T02:28:20.292282+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "1312",
+        "ETag": "W/\"520-1761e69b5c8\"",
+        "Last-Modified": "Tue, 01 Dec 2020 13:06:53 GMT",
+        "Content-Type": "application/octet-stream"
+      }
+    },
+    {
+      "id": "Site11_count",
+      "filename": "Site11_final_adj_5mpp_ldec.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site11/Site11_final_adj_5mpp_ldec.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "count",
+      "unit": "LOLA spots",
+      "site": "Site11",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site11/Site11_final_adj_5mpp_ldec.tif",
+      "bytes": 40980742,
+      "sha256": "aa779cddc7948809d0053ae855ab09a3e1321ac1289223aa68080f89a0d4dbff",
+      "accessed_utc": "2026-11-12T02:31:17.891839+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "40980742",
+        "ETag": "W/\"2715106-17285c94a48\"",
+        "Last-Modified": "Fri, 05 Jun 2020 18:41:01 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "Site11_dem",
+      "filename": "Site11_final_adj_5mpp_surf.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site11/Site11_final_adj_5mpp_surf.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "dem",
+      "unit": "m",
+      "site": "Site11",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site11/Site11_final_adj_5mpp_surf.tif",
+      "bytes": 40980806,
+      "sha256": "58f3372c35bbd6baf38ffd5633c1c96b59bd89dbd252150581d12893a43136e5",
+      "accessed_utc": "2026-11-12T02:30:28.363410+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "40980806",
+        "ETag": "W/\"2715146-17285c92ef0\"",
+        "Last-Modified": "Fri, 05 Jun 2020 18:40:54 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "Site11_error",
+      "filename": "Site11_final_adj_5mpp_toterr.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site11/Site11_final_adj_5mpp_toterr.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "error",
+      "unit": "m RMS",
+      "site": "Site11",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site11/Site11_final_adj_5mpp_toterr.tif",
+      "bytes": 40980810,
+      "sha256": "0d61e972981483fb3022af8e65d052506969a758aa95eb0ebe0478a83ac55e1b",
+      "accessed_utc": "2026-11-12T02:30:57.755716+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "40980810",
+        "ETag": "W/\"271514a-17285c961b8\"",
+        "Last-Modified": "Fri, 05 Jun 2020 18:41:07 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "Site11_roi",
+      "filename": "Site11_ROIs.tgz",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site11/Site11_ROIs.tgz",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "roi",
+      "unit": null,
+      "site": "Site11",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site11/Site11_ROIs.tgz",
+      "bytes": 1719,
+      "sha256": "6ec7a3110717f3d0b76abc49fe634580f2960f216372f835ae6a7d5797c4d278",
+      "accessed_utc": "2026-11-12T02:30:29.554365+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "1719",
+        "ETag": "W/\"6b7-1761e69c950\"",
+        "Last-Modified": "Tue, 01 Dec 2020 13:06:58 GMT",
+        "Content-Type": "application/octet-stream"
+      }
+    },
+    {
+      "id": "Site20_count",
+      "filename": "Site20_final_adj_5mpp_ldec.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site20/Site20_final_adj_5mpp_ldec.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "count",
+      "unit": "LOLA spots",
+      "site": "Site20",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site20/Site20_final_adj_5mpp_ldec.tif",
+      "bytes": 40980740,
+      "sha256": "dcc6e2a52b9f0f4ca03b59b1dbc5bc725563de79ddcbed0ec4e7dbac8d62163b",
+      "accessed_utc": "2026-11-12T02:33:37.957533+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "40980740",
+        "ETag": "W/\"2715104-172a8537fc0\"",
+        "Last-Modified": "Fri, 12 Jun 2020 11:39:04 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "Site20_dem",
+      "filename": "Site20_final_adj_5mpp_surf.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site20/Site20_final_adj_5mpp_surf.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "dem",
+      "unit": "m",
+      "site": "Site20",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site20/Site20_final_adj_5mpp_surf.tif",
+      "bytes": 40980802,
+      "sha256": "e51451f3629ba7cd5cfc1b32c8c0ee3c5c454607488b00ea00cd06a9e301a892",
+      "accessed_utc": "2026-11-12T02:32:39.482458+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "40980802",
+        "ETag": "W/\"2715142-172a8536850\"",
+        "Last-Modified": "Fri, 12 Jun 2020 11:38:58 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "Site20_error",
+      "filename": "Site20_final_adj_5mpp_toterr.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site20/Site20_final_adj_5mpp_toterr.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "error",
+      "unit": "m RMS",
+      "site": "Site20",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site20/Site20_final_adj_5mpp_toterr.tif",
+      "bytes": 40980809,
+      "sha256": "3600dcb6dde91cec86cb8d350a620391e828097a46026031d3638b4b3b46367a",
+      "accessed_utc": "2026-11-12T02:33:34.621762+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "40980809",
+        "ETag": "W/\"2715149-177d43cd320\"",
+        "Last-Modified": "Wed, 24 Feb 2021 13:31:32 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "Site20v2_count",
+      "filename": "Site20v2_final_adj_5mpp_ldec.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site20v2/Site20v2_final_adj_5mpp_ldec.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "count",
+      "unit": "LOLA spots",
+      "site": "Site20v2",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site20v2/Site20v2_final_adj_5mpp_ldec.tif",
+      "bytes": 108192845,
+      "sha256": "b3d94807d2c4dc87823551015b342f6188d284c7d1122ae635214d256165d37b",
+      "accessed_utc": "2026-11-12T02:39:01.628746+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "108192845",
+        "ETag": "W/\"672e44d-18262678a28\"",
+        "Last-Modified": "Wed, 03 Aug 2022 06:32:09 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "Site20v2_dem",
+      "filename": "Site20v2_final_adj_5mpp_surf.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site20v2/Site20v2_final_adj_5mpp_surf.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "dem",
+      "unit": "m",
+      "site": "Site20v2",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site20v2/Site20v2_final_adj_5mpp_surf.tif",
+      "bytes": 108192905,
+      "sha256": "0e96c40987c0814eadd4f94f85dacbb33bcab5388dd0b1dc99dc59bf987f072f",
+      "accessed_utc": "2026-11-12T02:36:56.619084+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "108192905",
+        "ETag": "W/\"672e489-18262675378\"",
+        "Last-Modified": "Wed, 03 Aug 2022 06:31:55 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "Site20v2_error",
+      "filename": "Site20v2_final_adj_5mpp_toterr.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site20v2/Site20v2_final_adj_5mpp_toterr.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "error",
+      "unit": "m RMS",
+      "site": "Site20v2",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site20v2/Site20v2_final_adj_5mpp_toterr.tif",
+      "bytes": 108192913,
+      "sha256": "c20b7bc4658ecf1d83808e55c6a370451e378207b17deffa2f8fc25fc2e8a3f2",
+      "accessed_utc": "2026-11-12T02:38:48.089409+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "108192913",
+        "ETag": "W/\"672e491-1826267d078\"",
+        "Last-Modified": "Wed, 03 Aug 2022 06:32:27 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "Site23_count",
+      "filename": "Site23_final_adj_5mpp_ldec.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site23/Site23_final_adj_5mpp_ldec.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "count",
+      "unit": "LOLA spots",
+      "site": "Site23",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site23/Site23_final_adj_5mpp_ldec.tif",
+      "bytes": 70586742,
+      "sha256": "ebb6adb3603f3921fcce9c8bfd06fb79ca5fd88b53f11ab4c65f0da158316c74",
+      "accessed_utc": "2026-11-12T02:42:15.615343+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "70586742",
+        "ETag": "W/\"4351176-172a853d5b0\"",
+        "Last-Modified": "Fri, 12 Jun 2020 11:39:26 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "Site23_dem",
+      "filename": "Site23_final_adj_5mpp_surf.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site23/Site23_final_adj_5mpp_surf.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "dem",
+      "unit": "m",
+      "site": "Site23",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site23/Site23_final_adj_5mpp_surf.tif",
+      "bytes": 70586804,
+      "sha256": "12d280a59cd7580415f6bada638d0abe025ce6727541fddf68d5dc371a6c94cf",
+      "accessed_utc": "2026-11-12T02:40:07.181491+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "70586804",
+        "ETag": "W/\"43511b4-172a853aab8\"",
+        "Last-Modified": "Fri, 12 Jun 2020 11:39:15 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "Site23_error",
+      "filename": "Site23_final_adj_5mpp_toterr.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site23/Site23_final_adj_5mpp_toterr.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "error",
+      "unit": "m RMS",
+      "site": "Site23",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site23/Site23_final_adj_5mpp_toterr.tif",
+      "bytes": 70586811,
+      "sha256": "fe08539cfa3a0f7bb4ddf15dd7e0835fae0c761d516b2157d51116311a1ff69d",
+      "accessed_utc": "2026-11-12T02:41:50.720114+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "70586811",
+        "ETag": "W/\"43511bb-177bac658a8\"",
+        "Last-Modified": "Fri, 19 Feb 2021 14:51:37 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "Site42_count",
+      "filename": "Site42_final_adj_5mpp_ldec.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site42/Site42_final_adj_5mpp_ldec.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "count",
+      "unit": "LOLA spots",
+      "site": "Site42",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site42/Site42_final_adj_5mpp_ldec.tif",
+      "bytes": 64025549,
+      "sha256": "9cafd653e42d92e47c5cdb1eacdbe8acdd43ae52ff7dc1f3ed722c6b4fa22ec4",
+      "accessed_utc": "2026-11-12T02:45:20.290716+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "64025549",
+        "ETag": "W/\"3d0f3cd-17855dda788\"",
+        "Last-Modified": "Sun, 21 Mar 2021 17:38:13 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "Site42_dem",
+      "filename": "Site42_final_adj_5mpp_surf.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site42/Site42_final_adj_5mpp_surf.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "dem",
+      "unit": "m",
+      "site": "Site42",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site42/Site42_final_adj_5mpp_surf.tif",
+      "bytes": 64025611,
+      "sha256": "5af35ddca6ee9d7b10348610cb6714fd6d04dcce08d4e8cb6fb1113f4c1839cf",
+      "accessed_utc": "2026-11-12T02:43:23.261766+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "64025611",
+        "ETag": "W/\"3d0f40b-17855dd8460\"",
+        "Last-Modified": "Sun, 21 Mar 2021 17:38:04 GMT",
+        "Content-Type": "image/tiff"
+      }
+    },
+    {
+      "id": "Site42_error",
+      "filename": "Site42_final_adj_5mpp_toterr.tif",
+      "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site42/Site42_final_adj_5mpp_toterr.tif",
+      "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+      "role": "error",
+      "unit": "m RMS",
+      "site": "Site42",
+      "frame": "MOON_ME/DE421",
+      "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site42/Site42_final_adj_5mpp_toterr.tif",
+      "bytes": 64025617,
+      "sha256": "df1e12ab9307b45fb4474dd276a7cb1ce5b6eff5fd3a528166ad7061f96ebef4",
+      "accessed_utc": "2026-11-12T02:45:08.971947+00:00",
+      "status": "VERIFIED_BYTES",
+      "http_headers": {
+        "Content-Length": "64025617",
+        "ETag": "W/\"3d0f411-17855ddd280\"",
+        "Last-Modified": "Sun, 21 Mar 2021 17:38:24 GMT",
+        "Content-Type": "image/tiff"
+      }
+    }
+  ],
+  "failures": [
+    {
+      "id": "Site06_roi",
+      "error": "ValueError: Unexpected gzip signature"
+    }
+  ],
+  "total_verified_bytes": 2291948382
+}

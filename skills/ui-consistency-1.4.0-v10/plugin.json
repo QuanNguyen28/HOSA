@@ -1,0 +1,29 @@
+{
+  "name": "ui-consistency",
+  "version": "1.4.0",
+  "description": "Keeps new UI consistent with a project's existing pages. Your coding agent reads how they are built and writes new ones the same way.",
+  "author": {
+    "name": "Kamen Kurtev"
+  },
+  "homepage": "https://github.com/kamenkurtev/ui-consistency",
+  "repository": "https://github.com/kamenkurtev/ui-consistency",
+  "license": "MIT",
+  "keywords": [
+    "design-system",
+    "design",
+    "ui",
+    "ux",
+    "frontend",
+    "components",
+    "theme",
+    "design-tokens",
+    "css",
+    "ui-design",
+    "accessibility",
+    "code-quality",
+    "consistency",
+    "react",
+    "vue",
+    "angular"
+  ]
+}

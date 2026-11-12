@@ -1,0 +1,27 @@
+{
+  "id": "lola_hillshade_80s_80m",
+  "title": "LOLA hillshade raster, 80 m/pixel",
+  "provider": "NASA GSFC PGDA",
+  "source_page": "https://pgda.gsfc.nasa.gov/products/90",
+  "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_80S_80MPP_ADJ_HILL.TIF",
+  "destination": "data/raw/full_product/visual/LDEM_80S_80MPP_ADJ_HILL.TIF",
+  "profile": "core",
+  "access_mode": "download",
+  "expected_bytes": 88474342,
+  "media_type": "image/tiff",
+  "required_for": [
+    "polar_basemap",
+    "terrain_preview"
+  ],
+  "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_80S_80MPP_ADJ_HILL.TIF",
+  "bytes": 88474342,
+  "sha256": "f669073ea6bf05ae97bce897e5e3c08f2ee9097a663c8cd3a758db296f373ae2",
+  "retrieved_utc": "2026-11-11T19:18:27.360727+00:00",
+  "status": "VERIFIED_BYTES",
+  "http_headers": {
+    "Content-Length": "88474342",
+    "Content-Type": "image/tiff",
+    "ETag": "W/\"54602e6-188980910d8\"",
+    "Last-Modified": "Wed, 07 Jun 2023 22:45:11 GMT"
+  }
+}

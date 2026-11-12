@@ -1,0 +1,38 @@
+{
+  "name": "kkurtev-plugins",
+  "owner": {
+    "name": "Kamen Kurtev",
+    "url": "https://github.com/kamenkurtev"
+  },
+  "description": "Kamen Kurtev's plugins",
+  "plugins": [
+    {
+      "name": "ui-consistency",
+      "source": "./",
+      "description": "Keeps new UI consistent with a project's existing pages. Your coding agent reads how they are built and writes new ones the same way.",
+      "version": "1.4.0",
+      "author": {
+        "name": "Kamen Kurtev"
+      },
+      "category": "design",
+      "tags": [
+        "design-system",
+        "design",
+        "ui",
+        "ux",
+        "frontend",
+        "components",
+        "theme",
+        "design-tokens",
+        "css",
+        "ui-design",
+        "accessibility",
+        "code-quality",
+        "consistency",
+        "react",
+        "vue",
+        "angular"
+      ]
+    }
+  ]
+}

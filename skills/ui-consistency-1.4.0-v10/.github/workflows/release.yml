@@ -1,0 +1,40 @@
+name: release
+
+# A version merged to main is a release: this tags it v<version>, publishes its
+# section of RELEASE-NOTES.md as a GitHub Release, and moves the `release`
+# branch to it, so nobody does any of it by hand. Anthropic's directory follows
+# `release`, and so sees releases, not every merge. A merge that does not move
+# the version finds its release already there and does nothing.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Tag and publish the version, once
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(perl -MJSON::PP -e 'local $/; open my $h, "<", ".claude-plugin/plugin.json" or die; print JSON::PP->new->decode(<$h>)->{version}')
+          if gh release view "v$version" >/dev/null 2>&1; then
+            echo "v$version is already released"
+            exit 0
+          fi
+          VERSION="$version" perl -ne '
+            if (/^## v\Q$ENV{VERSION}\E(?: |$)/) { $on = 1; next }
+            exit if $on && /^## /;
+            print if $on;
+          ' RELEASE-NOTES.md > notes.md
+          [ -s notes.md ] || { echo "no section for v$version in RELEASE-NOTES.md" >&2; exit 1; }
+          gh release create "v$version" --target "$GITHUB_SHA" --title "v$version" --notes-file notes.md
+          # Nobody commits to `release`: it only ever points at the last release.
+          git push --force origin "$GITHUB_SHA:refs/heads/release"

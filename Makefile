@@ -1,4 +1,4 @@
-.PHONY: backend-install backend-run backend-health frontend-install frontend-run test verify release-audit release-check package-release
+.PHONY: backend-install backend-run backend-health frontend-install frontend-run data-plan data-acquire data-verify data-sites data-windows-plan test verify release-audit release-check package-release
 
 backend-install:
 	cd backend && python -m pip install -e .
@@ -14,6 +14,21 @@ frontend-install:
 
 frontend-run:
 	cd frontend && npm run dev
+
+data-plan:
+	backend/.venv/bin/python scripts/acquire_full_product_data.py --dry-run
+
+data-acquire:
+	backend/.venv/bin/python scripts/acquire_full_product_data.py
+
+data-verify:
+	backend/.venv/bin/python scripts/acquire_full_product_data.py --verify
+
+data-sites:
+	backend/.venv/bin/python scripts/build_official_site_catalog.py
+
+data-windows-plan:
+	backend/.venv/bin/python scripts/materialize_dem_windows.py --dry-run
 
 test:
 	PYTHONPATH=. backend/.venv/bin/pytest -q

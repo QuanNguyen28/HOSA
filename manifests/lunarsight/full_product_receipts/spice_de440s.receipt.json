@@ -1,0 +1,28 @@
+{
+  "id": "spice_de440s",
+  "title": "JPL DE440 short planetary ephemeris",
+  "provider": "NASA/JPL NAIF",
+  "source_page": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/",
+  "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de440s.bsp",
+  "destination": "data/raw/full_product/spice/de440s.bsp",
+  "profile": "core",
+  "access_mode": "download",
+  "expected_bytes": 32726016,
+  "media_type": "application/octet-stream",
+  "required_for": [
+    "ephemeris",
+    "eclipse_replay",
+    "dsn"
+  ],
+  "final_url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/de440s.bsp",
+  "bytes": 32726016,
+  "sha256": "c1c7feeab882263fc493a9d5a5b2ddd71b54826cdf65d8d17a76126b260a49f2",
+  "retrieved_utc": "2026-11-11T18:46:40.518108+00:00",
+  "status": "VERIFIED_BYTES",
+  "http_headers": {
+    "Content-Length": "32726016",
+    "Content-Type": "model/vnd.valve.source.compiled-map",
+    "ETag": null,
+    "Last-Modified": "Mon, 21 Dec 2020 19:39:26 GMT"
+  }
+}

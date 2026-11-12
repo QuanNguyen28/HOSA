@@ -1,0 +1,28 @@
+{
+  "id": "spice_naif0012",
+  "title": "NAIF leap-seconds kernel",
+  "provider": "NASA/JPL NAIF",
+  "source_page": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/",
+  "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/naif0012.tls",
+  "destination": "data/raw/full_product/spice/naif0012.tls",
+  "profile": "core",
+  "access_mode": "download",
+  "expected_bytes": 5257,
+  "media_type": "text/plain",
+  "required_for": [
+    "ephemeris",
+    "eclipse_replay",
+    "dsn"
+  ],
+  "final_url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/lsk/naif0012.tls",
+  "bytes": 5257,
+  "sha256": "678e32bdb5a744117a467cd9601cd6b373f0e9bc9bbde1371d5eee39600a039b",
+  "retrieved_utc": "2026-11-11T18:46:32.187772+00:00",
+  "status": "VERIFIED_BYTES",
+  "http_headers": {
+    "Content-Length": "5257",
+    "Content-Type": "text/plain; charset=UTF-8",
+    "ETag": null,
+    "Last-Modified": "Fri, 15 Jul 2016 00:00:37 GMT"
+  }
+}

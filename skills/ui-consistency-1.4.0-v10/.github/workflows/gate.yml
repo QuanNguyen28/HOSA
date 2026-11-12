@@ -1,0 +1,22 @@
+name: gate
+
+# The same gate that runs locally, run where a reviewer can see it. Without
+# this, `scripts/gate.sh` is a thing only the author knows to run, and an
+# outside contributor has no way to tell whether their change passes.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The version check compares the branch against origin/main, so the
+          # history has to be there for it to have anything to compare.
+          fetch-depth: 0
+
+      # Bash and perl are on the runner; there is nothing to install.
+      - run: bash scripts/gate.sh

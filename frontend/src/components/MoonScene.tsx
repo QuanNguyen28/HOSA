@@ -13,9 +13,10 @@ import {
   Color,
   Float32BufferAttribute,
   MathUtils,
-  Mesh,
   MeshStandardMaterial,
+  Quaternion,
   SRGBColorSpace,
+  Uint32BufferAttribute,
   Vector3,
 } from "three";
 
@@ -26,6 +27,10 @@ import {
   isSurfaceSelectionGesture,
   surfaceHitToCoordinate,
 } from "../lib/lunar";
+import {
+  buildTerrainMeshData,
+  worldSunToTerrainAxes,
+} from "../lib/terrainGeometry";
 import type {
   CameraPreset,
   LayerState,
@@ -47,20 +52,31 @@ type MoonSceneProps = {
   onReady: () => void;
 };
 
-function SceneRig({ preset }: { preset: CameraPreset }) {
+function SceneRig({
+  preset,
+  surfaceRadiusKm,
+}: {
+  preset: CameraPreset;
+  surfaceRadiusKm?: number;
+}) {
   const { camera } = useThree();
   const desired = useRef(new Vector3(0, 0.3, 6.4));
   const transitioning = useRef(false);
 
   useEffect(() => {
+    const terrainRadius = surfaceRadiusKm ?? 8;
     desired.current =
       preset === "south-pole"
         ? new Vector3(0.25, -5.8, 0.7)
         : preset === "surface"
-          ? new Vector3(3.7, 2.65, 3.7)
+          ? new Vector3(
+              terrainRadius * 1.28 + 0.25,
+              terrainRadius * 0.74 + 0.3,
+              terrainRadius * 1.28 + 0.25,
+            )
           : new Vector3(0, 0.35, 6.4);
     transitioning.current = true;
-  }, [preset]);
+  }, [preset, surfaceRadiusKm]);
 
   useFrame((_, delta) => {
     if (!transitioning.current) return;
@@ -75,150 +91,100 @@ function SceneRig({ preset }: { preset: CameraPreset }) {
   return null;
 }
 
-const LOCAL_TERRAIN = {
-  Site01_P1: {
-    height: "/assets/terrain/site01_height.png",
-    hillshade: "/assets/terrain/site01_hillshade.jpg",
-    marker: [-0.164, 0.54, 0.13] as [number, number, number],
-  },
-  Site04_P1: {
-    height: "/assets/terrain/site04_height.png",
-    hillshade: "/assets/terrain/site04_hillshade.jpg",
-    marker: [-0.475, 0.54, -0.25] as [number, number, number],
-  },
-} as const;
-
-function LocalTerrain({
-  siteId,
-  onReady,
-}: {
-  siteId: keyof typeof LOCAL_TERRAIN;
-  onReady: () => void;
-}) {
-  const config = LOCAL_TERRAIN[siteId];
-  const [heightMap, hillshade] = useTexture([
-    config.height,
-    config.hillshade,
-  ]);
-
-  useEffect(() => {
-    hillshade.colorSpace = SRGBColorSpace;
-    heightMap.anisotropy = 4;
-    hillshade.anisotropy = 8;
-    onReady();
-  }, [heightMap, hillshade, onReady]);
-
-  return (
-    <group>
-      <ambientLight intensity={0.12} />
-      <directionalLight position={[-4, 7, 3]} intensity={3.2} color="#fff3df" />
-      <directionalLight position={[4, 1, -4]} intensity={0.22} color="#5f89a3" />
-      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <planeGeometry args={[4.5, 4.5, 256, 256]} />
-        <meshStandardMaterial
-          map={hillshade}
-          displacementMap={heightMap}
-          displacementScale={0.7}
-          displacementBias={-0.15}
-          roughness={1}
-          metalness={0}
-          color="#c6c2b7"
-        />
-      </mesh>
-      <group position={config.marker}>
-        <mesh>
-          <sphereGeometry args={[0.035, 20, 20]} />
-          <meshBasicMaterial color="#dffaff" toneMapped={false} />
-        </mesh>
-        <pointLight color="#6edcf4" intensity={1.2} distance={0.7} />
-        <Line points={[[0, 0, 0], [0, 0.42, 0]]} color="#7ce3ff" lineWidth={1} />
-      </group>
-      <gridHelper args={[4.5, 8, "#6f9cab", "#31454c"]} position={[0, 0.012, 0]} />
-    </group>
-  );
-}
-
 function DynamicTerrain({
   terrain,
+  coordinate,
+  time,
+  enhancedLight,
   onReady,
 }: {
   terrain: TerrainWindow;
+  coordinate: LunarCoordinate;
+  time: Date;
+  enhancedLight: boolean;
   onReady: () => void;
 }) {
-  const geometry = useMemo(() => {
+  const terrainMesh = useMemo(() => {
     const grid = terrain.grid;
-    if (!grid) return null;
+    const metadata = terrain.geometry;
+    if (!grid || !metadata) return null;
+    const mesh = buildTerrainMeshData(grid, metadata);
     const output = new BufferGeometry();
-    const positions: number[] = [];
-    const colors: number[] = [];
-    const indices: number[] = [];
-    const span = Math.max(grid.max_elevation_m - grid.min_elevation_m, 1);
-    for (let row = 0; row < grid.rows; row += 1) {
-      for (let column = 0; column < grid.columns; column += 1) {
-        const value = grid.elevation_m_row_major[row * grid.columns + column];
-        const normalized = value === null ? 0 : (value - grid.min_elevation_m) / span;
-        positions.push(
-          (column / (grid.columns - 1) - 0.5) * 4.5,
-          normalized * 0.72 - 0.16,
-          (row / (grid.rows - 1) - 0.5) * 4.5,
-        );
-        const shade = value === null ? 0.03 : 0.34 + normalized * 0.5;
-        colors.push(shade * 0.93, shade * 0.91, shade * 0.84);
-      }
-    }
-    for (let row = 0; row < grid.rows - 1; row += 1) {
-      for (let column = 0; column < grid.columns - 1; column += 1) {
-        const a = row * grid.columns + column;
-        const b = a + 1;
-        const c = a + grid.columns;
-        const d = c + 1;
-        const valid = [a, b, c, d].every(
-          (index) => grid.elevation_m_row_major[index] !== null,
-        );
-        if (valid) indices.push(a, c, b, b, c, d);
-      }
-    }
-    output.setAttribute("position", new Float32BufferAttribute(positions, 3));
-    output.setAttribute("color", new Float32BufferAttribute(colors, 3));
-    output.setIndex(indices);
+    output.setAttribute("position", new Float32BufferAttribute(mesh.positions, 3));
+    output.setIndex(new Uint32BufferAttribute(mesh.indices, 1));
     output.computeVertexNormals();
-    return output;
+    output.computeBoundingBox();
+    output.computeBoundingSphere();
+    return { geometry: output, mesh };
   }, [terrain]);
 
-  useEffect(() => {
-    if (geometry) onReady();
-    return () => geometry?.dispose();
-  }, [geometry, onReady]);
+  const localSun = useMemo(() => {
+    if (!terrain.geometry) return [0.35, 0.7, 0.25] as const;
+    return worldSunToTerrainAxes(
+      approximateSunVector(time),
+      coordinate,
+      terrain.geometry,
+    );
+  }, [coordinate, terrain.geometry, time]);
 
-  if (!geometry || !terrain.grid) return null;
-  const centre = terrain.grid.elevation_m_row_major[
-    Math.floor(terrain.grid.rows / 2) * terrain.grid.columns + Math.floor(terrain.grid.columns / 2)
+  useEffect(() => {
+    if (terrainMesh) onReady();
+    return () => terrainMesh?.geometry.dispose();
+  }, [terrainMesh, onReady]);
+
+  if (!terrainMesh || !terrain.grid) return null;
+  const lightDistance = 24;
+  const lightPosition: [number, number, number] = [
+    localSun[0] * lightDistance,
+    localSun[1] * lightDistance,
+    localSun[2] * lightDistance,
   ];
-  const centreY =
-    centre === null
-      ? 0
-      : ((centre - terrain.grid.min_elevation_m) /
-          Math.max(terrain.grid.max_elevation_m - terrain.grid.min_elevation_m, 1)) *
-          0.72 -
-        0.16;
+  const shadowHalfSize =
+    Math.max(terrainMesh.mesh.widthSceneUnits, terrainMesh.mesh.depthSceneUnits) * 0.58;
 
   return (
     <group>
-      <ambientLight intensity={0.11} />
-      <directionalLight position={[-4, 7, 3]} intensity={3.4} color="#fff3df" />
-      <directionalLight position={[4, 1, -4]} intensity={0.24} color="#5f89a3" />
-      <mesh geometry={geometry}>
-        <meshStandardMaterial vertexColors roughness={1} metalness={0} />
+      <ambientLight intensity={enhancedLight ? 0.16 : 0.018} />
+      <hemisphereLight
+        color="#dbe4e8"
+        groundColor="#030405"
+        intensity={enhancedLight ? 0.12 : 0.015}
+      />
+      <directionalLight
+        castShadow
+        position={lightPosition}
+        intensity={localSun[1] > 0 ? 3.1 : 0.08}
+        color="#fff2d9"
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-camera-left={-shadowHalfSize}
+        shadow-camera-right={shadowHalfSize}
+        shadow-camera-top={shadowHalfSize}
+        shadow-camera-bottom={-shadowHalfSize}
+        shadow-camera-near={0.1}
+        shadow-camera-far={60}
+        shadow-bias={-0.00018}
+        shadow-normalBias={0.012}
+      />
+      <mesh
+        geometry={terrainMesh.geometry}
+        castShadow
+        receiveShadow
+      >
+        <meshStandardMaterial
+          color="#99978f"
+          roughness={0.98}
+          metalness={0}
+        />
       </mesh>
-      <group position={[0, centreY + 0.035, 0]}>
+      <group position={[0, terrainMesh.mesh.centerYSceneUnits + 0.032, 0]}>
         <mesh>
-          <sphereGeometry args={[0.035, 20, 20]} />
+          <sphereGeometry args={[0.032, 20, 20]} />
           <meshBasicMaterial color="#dffaff" toneMapped={false} />
         </mesh>
-        <pointLight color="#6edcf4" intensity={1.2} distance={0.7} />
-        <Line points={[[0, 0, 0], [0, 0.42, 0]]} color="#7ce3ff" lineWidth={1} />
+        <pointLight color="#6edcf4" intensity={0.8} distance={0.6} />
+        <Line points={[[0, 0, 0], [0, 0.22, 0]]} color="#7ce3ff" lineWidth={1} />
       </group>
-      <gridHelper args={[4.5, 8, "#6f9cab", "#31454c"]} position={[0, -0.155, 0]} />
     </group>
   );
 }
@@ -274,9 +240,16 @@ function SiteMarker({
     [site],
   );
   const normal = useMemo(() => position.clone().normalize(), [position]);
+  const orientation = useMemo(
+    () => new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), normal),
+    [normal],
+  );
 
   return (
-    <group position={position} quaternion={new Mesh().quaternion.setFromUnitVectors(new Vector3(0, 1, 0), normal)}>
+    <group
+      position={[position.x, position.y, position.z]}
+      quaternion={[orientation.x, orientation.y, orientation.z, orientation.w]}
+    >
       <mesh
         onClick={(event) => {
           event.stopPropagation();
@@ -306,7 +279,7 @@ function SelectedMarker({ coordinate }: { coordinate: LunarCoordinate }) {
   );
 
   return (
-    <group position={position}>
+    <group position={[position.x, position.y, position.z]}>
       <mesh>
         <sphereGeometry args={[0.025, 18, 18]} />
         <meshBasicMaterial color="#7ce3ff" toneMapped={false} />
@@ -356,12 +329,12 @@ function Moon({
       <directionalLight
         color="#fff6e7"
         intensity={layers.enhancedLight ? 2.65 : 2.4}
-        position={sun.clone().multiplyScalar(8)}
+        position={[sun.x * 8, sun.y * 8, sun.z * 8]}
       />
       <directionalLight
         color="#769ab1"
         intensity={layers.enhancedLight ? 0.58 : 0.035}
-        position={sun.clone().multiplyScalar(-6)}
+        position={[sun.x * -6, sun.y * -6, sun.z * -6]}
       />
       <mesh
         rotation={[0, Math.PI, 0]}
@@ -412,10 +385,11 @@ function Moon({
 export function MoonScene(props: MoonSceneProps) {
   const localSurface =
     props.cameraPreset === "surface" &&
-    ((props.selectedSiteId !== null && props.selectedSiteId in LOCAL_TERRAIN) ||
-      props.terrainWindow?.coverage_status === "COVERED");
+    props.selected !== null &&
+    props.terrainWindow?.coverage_status === "COVERED";
   return (
     <Canvas
+      shadows
       dpr={[1, 1.8]}
       camera={{ position: [0, 0.35, 6.4], fov: 36, near: 0.02, far: 120 }}
       gl={{ antialias: true, powerPreference: "high-performance" }}
@@ -440,31 +414,35 @@ export function MoonScene(props: MoonSceneProps) {
         speed={0.08}
       />
       <Suspense fallback={null}>
-        {localSurface && props.selectedSiteId && props.selectedSiteId in LOCAL_TERRAIN ? (
-          <LocalTerrain
-            siteId={props.selectedSiteId as keyof typeof LOCAL_TERRAIN}
+        {localSurface && props.terrainWindow && props.selected ? (
+          <DynamicTerrain
+            terrain={props.terrainWindow}
+            coordinate={props.selected}
+            time={props.time}
+            enhancedLight={props.layers.enhancedLight}
             onReady={props.onReady}
           />
-        ) : localSurface && props.terrainWindow ? (
-          <DynamicTerrain terrain={props.terrainWindow} onReady={props.onReady} />
         ) : (
           <Moon {...props} />
         )}
       </Suspense>
-      <SceneRig preset={props.cameraPreset} />
+      <SceneRig
+        preset={props.cameraPreset}
+        surfaceRadiusKm={props.terrainWindow?.radius_km}
+      />
       {localSurface ? (
         <OrbitControls
           makeDefault
           enableDamping
           dampingFactor={0.065}
-          minDistance={1.2}
-          maxDistance={8}
+          minDistance={0.18}
+          maxDistance={36}
           rotateSpeed={0.38}
           zoomSpeed={0.65}
           panSpeed={0.35}
           enablePan
-          minPolarAngle={MathUtils.degToRad(8)}
-          maxPolarAngle={MathUtils.degToRad(82)}
+          minPolarAngle={MathUtils.degToRad(4)}
+          maxPolarAngle={MathUtils.degToRad(88)}
         />
       ) : (
         <TrackballControls

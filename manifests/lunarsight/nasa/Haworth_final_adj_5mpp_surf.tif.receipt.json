@@ -1,0 +1,21 @@
+{
+  "id": "Haworth_dem",
+  "filename": "Haworth_final_adj_5mpp_surf.tif",
+  "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Haworth/Haworth_final_adj_5mpp_surf.tif",
+  "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+  "role": "dem",
+  "unit": "m",
+  "site": "Haworth",
+  "frame": "MOON_ME/DE421",
+  "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Haworth/Haworth_final_adj_5mpp_surf.tif",
+  "bytes": 142123767,
+  "sha256": "387fd6e99bca266f4982f7256c4c185921105313882b4c2eee5b5ff1ef75016b",
+  "accessed_utc": "2026-11-12T02:49:50.928596+00:00",
+  "status": "VERIFIED_BYTES",
+  "http_headers": {
+    "Content-Length": "142123767",
+    "ETag": "W/\"878a2f7-175fcd726c0\"",
+    "Last-Modified": "Wed, 25 Nov 2020 00:39:20 GMT",
+    "Content-Type": "image/tiff"
+  }
+}

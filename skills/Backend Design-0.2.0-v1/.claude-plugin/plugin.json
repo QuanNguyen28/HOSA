@@ -1,0 +1,29 @@
+{
+  "name": "backend-design",
+  "description": "Teaches Claude the reflexes of a senior backend engineer. Workflows, disciplines, and opinionated defaults for data modeling, migrations, queries, idempotency, error handling, observability, performance, security, authentication and authorization, debugging, and testing. Covers APIs, workers, CLIs, ETL, consumers, and cron jobs as first-class citizens.",
+  "version": "0.2.0",
+  "author": {
+    "name": "sheitabrk",
+    "url": "https://github.com/sheitabrk"
+  },
+  "homepage": "https://github.com/sheitabrk/backend-design",
+  "repository": "https://github.com/sheitabrk/backend-design",
+  "license": "MIT",
+  "keywords": [
+    "backend",
+    "api-design",
+    "data-modeling",
+    "migrations",
+    "observability",
+    "idempotency",
+    "workers",
+    "performance",
+    "security",
+    "auth",
+    "debugging",
+    "testing",
+    "skills",
+    "discipline",
+    "workflows"
+  ]
+}

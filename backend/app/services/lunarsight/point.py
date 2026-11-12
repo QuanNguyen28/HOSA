@@ -2,11 +2,33 @@
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 from typing import Any
 
 
 METHOD_VERSION = "terrain-point-api-0.1.0"
+LUNAR_REFERENCE_RADIUS_M = 1_737_400.0
+
+
+def _initial_bearing_deg(
+    longitude_a_deg: float,
+    latitude_a_deg: float,
+    longitude_b_deg: float,
+    latitude_b_deg: float,
+) -> float:
+    """Return spherical initial bearing clockwise from local north."""
+    longitude_a = math.radians(longitude_a_deg)
+    latitude_a = math.radians(latitude_a_deg)
+    longitude_b = math.radians(longitude_b_deg)
+    latitude_b = math.radians(latitude_b_deg)
+    delta_longitude = longitude_b - longitude_a
+    east = math.sin(delta_longitude) * math.cos(latitude_b)
+    north = (
+        math.cos(latitude_a) * math.sin(latitude_b)
+        - math.sin(latitude_a) * math.cos(latitude_b) * math.cos(delta_longitude)
+    )
+    return math.degrees(math.atan2(east, north)) % 360.0
 
 
 def repository_root() -> Path:
@@ -191,8 +213,8 @@ def terrain_window(
     """
     if not 0.5 <= radius_km <= 32:
         raise ValueError("radius_km must be between 0.5 and 32")
-    if samples not in {65, 129, 257}:
-        raise ValueError("samples must be one of 65, 129 or 257")
+    if samples not in {65, 129, 257, 513}:
+        raise ValueError("samples must be one of 65, 129, 257 or 513")
 
     try:
         import numpy as np
@@ -232,6 +254,22 @@ def terrain_window(
             finite = np.isfinite(values)
             if not finite.any():
                 continue
+            centre_index = samples // 2
+            centre_elevation = float(values[centre_index, centre_index])
+            if not np.isfinite(centre_elevation):
+                centre_elevation = float(dem.xy_at(x, y))
+            if not np.isfinite(centre_elevation):
+                continue
+            step_x = abs(float(dem.ds.res[0]))
+            step_y = abs(float(dem.ds.res[1]))
+            column_lon, column_lat = dem.inv.transform(x + step_x, y)
+            row_lon, row_lat = dem.inv.transform(x, y - step_y)
+            column_azimuth = _initial_bearing_deg(
+                longitude, latitude, column_lon, column_lat
+            )
+            row_azimuth = _initial_bearing_deg(
+                longitude, latitude, row_lon, row_lat
+            )
             encoded = [None if not np.isfinite(value) else round(float(value), 3) for value in values.ravel()]
             return {
                 "coverage_status": "COVERED",
@@ -239,6 +277,17 @@ def terrain_window(
                 "dataset_id": source["dataset_id"],
                 "native_resolution_m": source["resolution_m"],
                 "radius_km": radius_km,
+                "geometry": {
+                    "horizontal_scale": 1.0,
+                    "vertical_scale": 1.0,
+                    "horizontal_unit": "metre",
+                    "vertical_unit": "metre",
+                    "lunar_reference_radius_m": LUNAR_REFERENCE_RADIUS_M,
+                    "center_elevation_m": round(centre_elevation, 3),
+                    "column_azimuth_deg": round(column_azimuth, 9),
+                    "row_azimuth_deg": round(row_azimuth, 9),
+                    "surface_model": "spherical tangent frame with DEM radial elevation",
+                },
                 "grid": {
                     "rows": samples,
                     "columns": samples,
@@ -255,7 +304,8 @@ def terrain_window(
                     "resampling": "bilinear for visualization only",
                 },
                 "warnings": [
-                    "Display mesh only; use native DEM and validated horizon engine for scientific decisions."
+                    "Geometry uses a true 1:1 horizontal/vertical metre scale and lunar spherical curvature.",
+                    "The transported grid is bilinearly resampled for display; use the native DEM and validated horizon engine for scientific decisions."
                 ],
             }
 

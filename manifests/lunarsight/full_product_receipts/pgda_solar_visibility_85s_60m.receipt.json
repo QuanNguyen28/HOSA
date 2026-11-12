@@ -1,0 +1,27 @@
+{
+  "id": "pgda_solar_visibility_85s_60m",
+  "title": "Average solar visibility south of 85 S",
+  "provider": "NASA GSFC PGDA",
+  "source_page": "https://pgda.gsfc.nasa.gov/products/69",
+  "url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/AVGVISIB_85S_060M_201608.TIF",
+  "destination": "data/raw/full_product/validation/AVGVISIB_85S_060M_201608.TIF",
+  "profile": "core",
+  "access_mode": "download",
+  "expected_bytes": 33994464,
+  "media_type": "image/tiff",
+  "required_for": [
+    "illumination_validation",
+    "map_overlay"
+  ],
+  "final_url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/AVGVISIB_85S_060M_201608.TIF",
+  "bytes": 33994464,
+  "sha256": "ccf67d4f39e0a970c111196da7d6551ffcf50d075470b93067fb3904c0b05806",
+  "retrieved_utc": "2026-11-11T19:19:53.340263+00:00",
+  "status": "VERIFIED_BYTES",
+  "http_headers": {
+    "Content-Length": "33994464",
+    "Content-Type": "image/tiff",
+    "ETag": "W/\"206b6e0-195b4134a70\"",
+    "Last-Modified": "Thu, 20 Mar 2025 15:01:58 GMT"
+  }
+}
