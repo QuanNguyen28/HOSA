@@ -12,6 +12,8 @@ import csv
 import hashlib
 import json
 import math
+import os
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -412,7 +414,19 @@ def _persist_result(result: dict[str, Any]) -> None:
     temporary = directory / f".{result['result_id']}.{uuid4().hex}.tmp"
     try:
         temporary.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
-        temporary.replace(target)
+        try:
+            temporary.replace(target)
+        except PermissionError:
+            # Windows readers/scanners may briefly deny replacement. Retry only
+            # the atomic rename, retaining this writer's unique temporary file.
+            for attempt in range(5):
+                time.sleep(.01 * (attempt + 1))
+                try:
+                    os.replace(temporary, target)
+                    break
+                except PermissionError:
+                    if attempt == 4:
+                        raise
     finally:
         temporary.unlink(missing_ok=True)
 

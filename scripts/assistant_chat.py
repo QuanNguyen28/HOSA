@@ -5,6 +5,9 @@ from copy import deepcopy
 import json
 from pathlib import Path
 import sys
+import uuid
+
+import requests
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -22,6 +25,17 @@ from scripts.demo_provider import DEMO_PROMPT, DemoLLM
 
 QUIT = {"/quit", "/exit", "exit", "quit", "thoát"}
 NEW = {"/new", "/reset"}
+
+
+def configure_console_utf8():
+    """Keep Windows keyboard, native output and redirected streams on UTF-8."""
+    if sys.platform == "win32":
+        import ctypes
+        ctypes.windll.kernel32.SetConsoleCP(65001)
+        ctypes.windll.kernel32.SetConsoleOutputCP(65001)
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8")
 
 
 class ChatSession:
@@ -216,23 +230,169 @@ def run_console(service, initial_context, ask=input, say=print, demo=False, max_
         return 0
 
 
+def run_remote_console(base_url="http://127.0.0.1:8000/api/assistant", session_id=None,
+                      new_session=False, ask=input, say=print, confirm=input):
+    """Thin terminal client for the same persistent session/run API as the web UI."""
+    base_url=base_url.rstrip("/")
+    cache_path=ROOT/"data/cache/assistant/terminal-session.txt"
+
+    def api(method,path,**kwargs):
+        response=requests.request(method,base_url+path,timeout=(10,None),**kwargs)
+        if "application/json" in response.headers.get("content-type","").lower():
+            response.encoding="utf-8"
+        return response
+
+    try:
+        capabilities=api("GET","/capabilities")
+        if not capabilities.ok:
+            say("Assistant API chưa sẵn sàng: "+str(capabilities.status_code))
+            return 2
+        config=capabilities.json()
+        if not config.get("assistant_enabled") or not config.get("provider_configured"):
+            say("LLM chưa sẵn sàng. Kiểm tra ASSISTANT_ENABLED và cấu hình provider trong backend .env.")
+            return 2
+        if new_session:
+            session_id=None
+        if not new_session and not session_id and cache_path.is_file():
+            session_id=cache_path.read_text(encoding="utf-8").strip() or None
+        if session_id:
+            response=api("GET",f"/sessions/{session_id}")
+            if not response.ok:
+                session_id=None
+        if not session_id:
+            response=api("POST","/sessions")
+            if not response.ok:
+                say("Không thể tạo phiên: "+str(response.status_code))
+                return 2
+            session=response.json()
+            session_id=session["id"]
+            cache_path.parent.mkdir(parents=True,exist_ok=True)
+            cache_path.write_text(session_id,encoding="utf-8")
+        else:
+            session=response.json()
+        say(f"LunarSight assistant · {config['provider']} / {config['primary_model']}")
+        say("Kiểm tra dấu: Mặt Trăng - chiếu sáng - Trái Đất - dữ liệu.")
+        say(f"Phiên: {session_id}. Lệnh: /new, /unicode, /result, /apply <candidate_id>, /help, /quit")
+        say("Ctrl+C khi đang chờ để hủy lượt. Số liệu chi tiết chỉ hiện khi nhập /result.")
+        last_engine_result=next(((run.get("result") or {}).get("result") for run in reversed(session.get("runs",[]))
+                                 if (run.get("result") or {}).get("result")),None)
+        for message in session.get("messages",[]):
+            say(("Bạn> " if message["role"]=="user" else "LunarSight> ")+message["content"])
+
+        def apply_candidate(candidate_id):
+            current=api("GET",f"/sessions/{session_id}")
+            if not current.ok:
+                say("Không tải được trạng thái phiên.")
+                return
+            state=current.json()
+            match=None
+            for run in reversed(state.get("runs",[])):
+                result=(run.get("result") or {}).get("result") or {}
+                if result.get("apply_allowed"):
+                    candidate=next((item for item in result.get("candidates",[])
+                                    if item.get("candidate_id")==candidate_id and item.get("decision")=="PASS"),None)
+                    if candidate:
+                        match=(run,candidate)
+                        break
+            if not match:
+                say("Không tìm thấy candidate PASS có thể áp dụng trong phiên này.")
+                return
+            if confirm(f"Áp dụng candidate {candidate_id}? [y/N] ").strip().lower() not in {"y","yes","có","c"}:
+                say("Đã hủy; applied plan chưa đổi.")
+                return
+            payload={"run_id":match[0]["id"],"expected_applied_state":state.get("applied_state",{}),
+                     "candidate":{"candidate_id":candidate_id}}
+            result=api("POST",f"/sessions/{session_id}/apply",json=payload)
+            if result.ok:
+                say("Đã áp dụng candidate PASS và cập nhật applied plan.")
+            else:
+                say("Áp dụng bị từ chối: "+str(result.json().get("detail",{}).get("code","APPLY_FAILED")))
+
+        while True:
+            text=ask("\nBạn> ").strip()
+            if text.lower() in QUIT:
+                return 0
+            if text=="/help":
+                say("Nhập câu hỏi; /new tạo phiên mới; /unicode thử dấu tại máy, không gọi LLM; /result xem số liệu đã tính; /apply <candidate_id> yêu cầu xác nhận; /quit thoát.")
+                continue
+            if text=="/unicode":
+                sample=ask("Gõ thử một câu tiếng Việt (không gửi tới LLM)> ")
+                say("Bạn vừa nhập: "+sample)
+                continue
+            if text=="/result":
+                say(json.dumps(last_engine_result,ensure_ascii=False,indent=2) if last_engine_result else "Phiên này chưa có kết quả tính toán.")
+                continue
+            if text=="/new":
+                response=api("POST","/sessions")
+                if not response.ok:
+                    say("Không tạo được phiên mới: "+str(response.status_code))
+                    continue
+                session_id=response.json()["id"]
+                last_engine_result=None
+                cache_path.parent.mkdir(parents=True,exist_ok=True)
+                cache_path.write_text(session_id,encoding="utf-8")
+                say("Đã tạo phiên mới: "+session_id)
+                continue
+            if text.startswith("/apply "):
+                apply_candidate(text.partition(" ")[2].strip())
+                continue
+            if not text:
+                continue
+            response=api("POST",f"/sessions/{session_id}/messages",headers={"Idempotency-Key":str(uuid.uuid4())},
+                         json={"text":text})
+            if response.status_code!=202:
+                say("Yêu cầu chưa được nhận: "+str(response.json().get("detail",{}).get("code","MESSAGE_REJECTED")))
+                continue
+            run_id=response.json()["id"]
+            previous_stage=None
+            try:
+                while True:
+                    current=api("GET",f"/runs/{run_id}")
+                    if not current.ok:
+                        say("Không đọc được tiến độ run: "+str(current.status_code))
+                        break
+                    run=current.json()
+                    if run.get("stage")!=previous_stage:
+                        previous_stage=run.get("stage")
+                        say("Đang xử lý: "+str(previous_stage))
+                    if run["status"] in {"completed","partial","needs_input"} and run.get("result"):
+                        result=run["result"]
+                        say("\nLunarSight> "+result.get("answer",""))
+                        if result.get("provider"):
+                            say("Model thực tế: "+str(result.get("model") or result["provider"]))
+                        for citation in result.get("citations",[]):
+                            say(f"Nguồn: {citation['path']} [{citation['source_id']}]")
+                        if result.get("result"):
+                            last_engine_result=result["result"]
+                            say("Kết quả backend đã lưu. Nhập /result nếu muốn xem số liệu chi tiết.")
+                        if run["status"]=="partial":
+                            say("Kết quả tính đã lưu; phần giải thích LLM chưa hoàn tất.")
+                        break
+                    if run["status"] in {"failed","cancelled","interrupted"}:
+                        say("Run kết thúc: "+str(run.get("error_code") or run["status"]))
+                        break
+                    import time
+                    time.sleep(1.5)
+            except KeyboardInterrupt:
+                try:
+                    api("POST",f"/runs/{run_id}/cancel")
+                except requests.RequestException:
+                    pass
+                say("Đã gửi yêu cầu hủy; kết quả engine chưa được áp dụng.")
+    except requests.RequestException as error:
+        say("Không kết nối được LunarSight API: "+type(error).__name__)
+        return 2
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--demo", action="store_true", help="Explicit scripted LLM; real planning data, no API calls")
-    parser.add_argument("--context", type=Path, default=ROOT/"tests/fixtures/assistant/request.json")
-    parser.add_argument("--max-clarifications", type=int, choices=range(1,7), default=3)
+    parser.add_argument("--base-url",default="http://127.0.0.1:8000/api/assistant")
+    parser.add_argument("--session",help="Resume this server-side session ID")
+    parser.add_argument("--new",action="store_true",help="Start a fresh persistent session")
     args = parser.parse_args(argv)
-    context = json.loads(args.context.read_text(encoding="utf-8"))
-    settings = AssistantSettings(assistant_enabled=True, _env_file=None) if args.demo else get_assistant_settings()
-    if not args.demo and (not settings.assistant_enabled or not settings.openrouter_model or not settings.openrouter_api_key or not settings.openrouter_api_key.get_secret_value().strip()):
-        print("Cần ASSISTANT_ENABLED=true, OPENROUTER_MODEL và OPENROUTER_API_KEY trong .env; hoặc chạy --demo.")
-        return 2
-    llm = DemoLLM() if args.demo else OpenRouterLLM(settings)
-    return run_console(AssistantService(settings, llm, DraftStore()), context,
-                       demo=args.demo, max_clarifications=args.max_clarifications)
+    return run_remote_console(args.base_url,args.session,args.new)
 
 
 if __name__ == "__main__":
-    if hasattr(sys.stdout, "reconfigure"):
-        sys.stdout.reconfigure(encoding="utf-8")
+    configure_console_utf8()
     raise SystemExit(main())

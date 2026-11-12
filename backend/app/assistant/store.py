@@ -16,6 +16,8 @@ class Draft:
     parse_ms: float
     model: str
     parse_usage: dict = field(default_factory=dict)
+    provider: str | None = None
+    trace: list[dict] = field(default_factory=list)
     started: bool = False
     result: EvaluateResponse | None = None
     failure: tuple[str, int] | None = None

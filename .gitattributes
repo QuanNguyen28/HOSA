@@ -1,2 +1,8 @@
 # Keep archived response bytes identical to their SHA-256 receipts on checkout.
 data/cache/lunarsight/v0.2.0/raw/horizons/** -text
+
+# These bytes participate in scientific receipts and source fingerprints.
+data/processed/lunarsight/** -text
+data/cache/lunarsight/** -text
+manifests/** -text
+docs/validation/lunarsight/**/*.csv -text

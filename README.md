@@ -209,12 +209,14 @@ phiên bản. Shot list ảnh/video nằm tại `docs/submission/media-shot-list
 
 ## Backend planning và trợ lý LLM
 
-Backend mới có API dùng chung cho so sánh, tìm cửa sổ, xếp hạng bất định và xuất kết quả. Trợ lý gọi cùng service qua một LLM hai lượt.
+Backend có API dùng chung cho phân tích điểm, so sánh, tìm cửa sổ, xếp hạng bất định và xuất kết quả. Chat dùng NVIDIA NIM trực tiếp và Gemini dự phòng, truy xuất nguồn của dự án và gọi các engine hiện có; engine giữ quyền quyết định số liệu và trạng thái khoa học.
 
 - `/api/planning/compare`, `/api/planning/windows/search`, `/api/planning/results/{result_id}`.
-- `/api/assistant/parse`, `/api/assistant/evaluate`.
+- `/api/assistant/sessions`, `/api/assistant/sessions/{id}/messages`.
+- `/api/assistant/runs/{id}`, `/events`, `/cancel`; lịch sử và kết quả lưu SQLite.
+- `/api/assistant/parse`, `/api/assistant/evaluate` giữ tương thích, báo rõ khi giải thích LLM thất bại.
 - [Kiến trúc, module, nguồn tham khảo, ví dụ và kết quả kiểm thử](docs/decisions/backend-planning-services.md).
 
-Phạm vi vẫn là hai điểm P1, phần cứng hiện có và nhiệm vụ 72 giờ; các API planning hoạt động độc lập với LLM. Kết quả kiểm thử LLM thật được ghi riêng với kiểm thử offline.
+Snapshot giữ phạm vi hai điểm P1 và scenario 72 giờ. Coordinate engine phụ thuộc DEM, Horizons và validation cho đúng tọa độ/thời gian. Chat không suy rộng coverage hay đổi kết luận từ INDETERMINATE thành PASS. Diễn giải ưu tiên nguyên nhân và ý nghĩa, chỉ dùng số liệu chi tiết khi cần; không có giới hạn số từ của câu trả lời.
 
-Interactive terminal demo: [live model and scripted rehearsal](docs/demo/assistant-terminal.md).
+Xem [thiết lập BE/LLM, cấu hình provider và giới hạn kiểm thử](docs/assistant/BE_LLM_RELEASE.md) và [terminal UTF-8 dùng cùng HTTP backend](docs/demo/assistant-terminal.md). Nhánh này không cập nhật frontend.
