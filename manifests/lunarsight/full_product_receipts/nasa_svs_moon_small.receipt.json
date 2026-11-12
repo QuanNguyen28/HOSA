@@ -1,0 +1,26 @@
+{
+  "id": "nasa_svs_moon_small",
+  "title": "NASA SVS Moon web 3D model",
+  "provider": "NASA Scientific Visualization Studio",
+  "source_page": "https://svs.gsfc.nasa.gov/14959/",
+  "url": "https://svs.gsfc.nasa.gov/vis/a010000/a014900/a014959/moon_small.glb",
+  "destination": "data/raw/full_product/visual/moon_small.glb",
+  "profile": "core",
+  "access_mode": "download",
+  "expected_bytes": 13799876,
+  "media_type": "model/gltf-binary",
+  "required_for": [
+    "global_moon_3d"
+  ],
+  "final_url": "https://svs.gsfc.nasa.gov/vis/a010000/a014900/a014959/moon_small.glb",
+  "bytes": 13799876,
+  "sha256": "12d3b0bb7fe214903f51447d1bc61710f442e92a11c703fcaca6d4e7ff8e67d4",
+  "retrieved_utc": "2026-11-11T19:23:46.489309+00:00",
+  "status": "VERIFIED_BYTES",
+  "http_headers": {
+    "Content-Length": "13799876",
+    "Content-Type": "model/gltf-binary",
+    "ETag": "\"d291c4-64e68fe9595dd\"",
+    "Last-Modified": "Wed, 01 Apr 2026 16:58:35 GMT"
+  }
+}

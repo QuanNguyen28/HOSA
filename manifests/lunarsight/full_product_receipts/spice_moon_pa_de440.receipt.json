@@ -1,0 +1,28 @@
+{
+  "id": "spice_moon_pa_de440",
+  "title": "Moon principal-axes orientation kernel for DE440",
+  "provider": "NASA/JPL NAIF",
+  "source_page": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/",
+  "url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/moon_pa_de440_200625.bpc",
+  "destination": "data/raw/full_product/spice/moon_pa_de440_200625.bpc",
+  "profile": "core",
+  "access_mode": "download",
+  "expected_bytes": 12863488,
+  "media_type": "application/octet-stream",
+  "required_for": [
+    "ephemeris",
+    "eclipse_replay",
+    "dsn"
+  ],
+  "final_url": "https://naif.jpl.nasa.gov/pub/naif/generic_kernels/pck/moon_pa_de440_200625.bpc",
+  "bytes": 12863488,
+  "sha256": "60cd55aa401ea2ea97360636f567554bfe4e37bb829f901b4460a455dfaf783f",
+  "retrieved_utc": "2026-11-11T18:46:44.189394+00:00",
+  "status": "VERIFIED_BYTES",
+  "http_headers": {
+    "Content-Length": "12863488",
+    "Content-Type": null,
+    "ETag": null,
+    "Last-Modified": "Sat, 26 Jun 2021 01:49:57 GMT"
+  }
+}

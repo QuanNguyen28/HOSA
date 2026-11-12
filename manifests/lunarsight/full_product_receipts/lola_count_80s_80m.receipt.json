@@ -1,0 +1,27 @@
+{
+  "id": "lola_count_80s_80m",
+  "title": "LOLA observation-count raster, 80 m/pixel",
+  "provider": "NASA GSFC PGDA",
+  "source_page": "https://pgda.gsfc.nasa.gov/products/90",
+  "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEC_80S_80MPP_ADJ.TIF",
+  "destination": "data/raw/full_product/quality/LDEC_80S_80MPP_ADJ.TIF",
+  "profile": "core",
+  "access_mode": "download",
+  "expected_bytes": 115657642,
+  "media_type": "image/tiff",
+  "required_for": [
+    "data_quality",
+    "confidence"
+  ],
+  "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEC_80S_80MPP_ADJ.TIF",
+  "bytes": 115657642,
+  "sha256": "7ce73ea46243e7119076cf7bb4ed1d5536328431607fc1f7988d63ef7607cdd8",
+  "retrieved_utc": "2026-11-11T18:51:48.565456+00:00",
+  "status": "VERIFIED_BYTES",
+  "http_headers": {
+    "Content-Length": "115657642",
+    "Content-Type": "image/tiff",
+    "ETag": "W/\"6e4cbaa-188981228f8\"",
+    "Last-Modified": "Wed, 07 Jun 2023 22:55:07 GMT"
+  }
+}

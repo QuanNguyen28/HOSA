@@ -41,3 +41,6 @@ data/cache/lunarsight/*
 .DS_Store
 .idea/
 .vscode/
+
+# frontend template
+frontend_template/*

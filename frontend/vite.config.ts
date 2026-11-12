@@ -1,16 +1,14 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   build: {
     chunkSizeWarningLimit: 750,
     rollupOptions: {
       output: {
-        manualChunks: {
-          "three-core": ["three"],
-          "three-react": ["@react-three/fiber", "@react-three/drei"],
-        },
+        manualChunks: { "three-core": ["three"] },
       },
     },
   },

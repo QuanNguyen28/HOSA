@@ -1,0 +1,26 @@
+{
+  "id": "pds_ldem16_xml",
+  "title": "PDS4 metadata for global LDEM 16",
+  "provider": "NASA PDS Geosciences Node",
+  "source_page": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/cylindrical/img/",
+  "url": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/cylindrical/img/ldem_16.xml",
+  "destination": "data/raw/full_product/global/ldem_16.xml",
+  "profile": "core",
+  "access_mode": "download",
+  "expected_bytes": 11941,
+  "media_type": "application/xml",
+  "required_for": [
+    "global_relief_metadata"
+  ],
+  "final_url": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/cylindrical/img/ldem_16.xml",
+  "bytes": 11941,
+  "sha256": "011ebff260abb7c9a10a0f18601d7505e807b9a1b51d238b5587f5b02de59218",
+  "retrieved_utc": "2026-11-11T19:23:32.563756+00:00",
+  "status": "VERIFIED_BYTES",
+  "http_headers": {
+    "Content-Length": "11941",
+    "Content-Type": "application/xml",
+    "ETag": "\"7689402df346d91:0\"",
+    "Last-Modified": "Wed, 22 Feb 2023 19:23:43 GMT"
+  }
+}

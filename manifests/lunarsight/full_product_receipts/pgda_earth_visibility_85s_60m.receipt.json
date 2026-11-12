@@ -1,0 +1,27 @@
+{
+  "id": "pgda_earth_visibility_85s_60m",
+  "title": "Average Earth visibility south of 85 S",
+  "provider": "NASA GSFC PGDA",
+  "source_page": "https://pgda.gsfc.nasa.gov/products/69",
+  "url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/AVGVISIB_85S_060M_201608_EARTH.TIF",
+  "destination": "data/raw/full_product/validation/AVGVISIB_85S_060M_201608_EARTH.TIF",
+  "profile": "core",
+  "access_mode": "download",
+  "expected_bytes": 24862958,
+  "media_type": "image/tiff",
+  "required_for": [
+    "earth_visibility_validation",
+    "map_overlay"
+  ],
+  "final_url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/AVGVISIB_85S_060M_201608_EARTH.TIF",
+  "bytes": 24862958,
+  "sha256": "d71dc5adfff653e0e924e0a4cbf03795b996caa30b4ace3d5843a70a5ab2f3d2",
+  "retrieved_utc": "2026-11-11T19:21:30.139918+00:00",
+  "status": "VERIFIED_BYTES",
+  "http_headers": {
+    "Content-Length": "24862958",
+    "Content-Type": "image/tiff",
+    "ETag": "W/\"17b60ee-195b4133eb8\"",
+    "Last-Modified": "Thu, 20 Mar 2025 15:01:55 GMT"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "id": "nasa_moon_trek_artemis_regions",
+  "title": "Artemis III candidate landing-region polygons",
+  "provider": "NASA/JPL Solar System Treks",
+  "source_page": "https://trek.nasa.gov/moon/trekarcgis2/rest/services/A3_Named_regions_SP/MapServer/0",
+  "url": "https://trek.nasa.gov/moon/trekarcgis2/rest/services/A3_Named_regions_SP/MapServer/0/query?where=1%3D1&outFields=%2A&returnGeometry=true&f=json",
+  "destination": "data/raw/full_product/sites/artemis_candidate_regions.json",
+  "profile": "core",
+  "access_mode": "download",
+  "media_type": "application/json",
+  "required_for": [
+    "site_catalog",
+    "candidate_region_map"
+  ],
+  "final_url": "https://trek.nasa.gov/moon/trekarcgis2/rest/services/A3_Named_regions_SP/MapServer/0/query?where=1%3D1&outFields=%2A&returnGeometry=true&f=json",
+  "bytes": 4587,
+  "sha256": "2434ceb69cfda076a105cc41e655b9db3e3df089518af3745183bb7eea338488",
+  "retrieved_utc": "2026-11-11T18:58:34.267653+00:00",
+  "status": "VERIFIED_BYTES",
+  "http_headers": {
+    "Content-Length": "4587",
+    "Content-Type": "application/json;charset=UTF-8",
+    "ETag": "VFwjm4Yxq2pWF5sk_1661190040",
+    "Last-Modified": null
+  }
+}

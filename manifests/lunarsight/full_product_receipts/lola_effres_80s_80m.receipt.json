@@ -1,0 +1,27 @@
+{
+  "id": "lola_effres_80s_80m",
+  "title": "LOLA effective-resolution raster, 80 m/pixel",
+  "provider": "NASA GSFC PGDA",
+  "source_page": "https://pgda.gsfc.nasa.gov/products/90",
+  "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_80S_80MPP_ADJ_EFFRES.TIF",
+  "destination": "data/raw/full_product/quality/LDEM_80S_80MPP_ADJ_EFFRES.TIF",
+  "profile": "core",
+  "access_mode": "download",
+  "expected_bytes": 250228467,
+  "media_type": "image/tiff",
+  "required_for": [
+    "data_quality",
+    "confidence"
+  ],
+  "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_80S_80MPP_ADJ_EFFRES.TIF",
+  "bytes": 250228467,
+  "sha256": "7e973835104343f7c10e868e73ca1b0a506879d3eabe8c17c56ed6774a493400",
+  "retrieved_utc": "2026-11-11T19:03:52.312355+00:00",
+  "status": "VERIFIED_BYTES",
+  "http_headers": {
+    "Content-Length": "250228467",
+    "Content-Type": "image/tiff",
+    "ETag": "W/\"eea2ef3-1887ec815b0\"",
+    "Last-Modified": "Sat, 03 Jun 2023 01:03:42 GMT"
+  }
+}

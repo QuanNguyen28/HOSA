@@ -1,0 +1,27 @@
+{
+  "id": "pgda_psr_85s_60m",
+  "title": "Permanently shadowed regions south of 85 S",
+  "provider": "NASA GSFC PGDA",
+  "source_page": "https://pgda.gsfc.nasa.gov/products/69",
+  "url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/LPSR_85S_060M_201608.TIF",
+  "destination": "data/raw/full_product/validation/LPSR_85S_060M_201608.TIF",
+  "profile": "core",
+  "access_mode": "download",
+  "expected_bytes": 656183,
+  "media_type": "image/tiff",
+  "required_for": [
+    "psr_overlay",
+    "illumination_validation"
+  ],
+  "final_url": "https://pgda.gsfc.nasa.gov/data/MoonIllumination/LPSR_85S_060M_201608.TIF",
+  "bytes": 656183,
+  "sha256": "e9544c081dd4e36f079e92bc3a376d0913857a61a4a53c209175c081762de43c",
+  "retrieved_utc": "2026-11-11T19:21:31.957146+00:00",
+  "status": "VERIFIED_BYTES",
+  "http_headers": {
+    "Content-Length": "656183",
+    "Content-Type": "image/tiff",
+    "ETag": "W/\"a0337-195b4138120\"",
+    "Last-Modified": "Thu, 20 Mar 2025 15:02:12 GMT"
+  }
+}

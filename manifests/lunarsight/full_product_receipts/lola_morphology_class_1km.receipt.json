@@ -1,0 +1,27 @@
+{
+  "id": "lola_morphology_class_1km",
+  "title": "LOLA terrain morphology class, 1 km grid",
+  "provider": "NASA GSFC PGDA",
+  "source_page": "https://pgda.gsfc.nasa.gov/products/90",
+  "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDRM_80S_1000MPP_ADJ_CLASS.TIF",
+  "destination": "data/raw/full_product/morphology/LDRM_80S_1000MPP_ADJ_CLASS.TIF",
+  "profile": "core",
+  "access_mode": "download",
+  "expected_bytes": 448159,
+  "media_type": "image/tiff",
+  "required_for": [
+    "terrain_classification",
+    "landing_assessment"
+  ],
+  "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDRM_80S_1000MPP_ADJ_CLASS.TIF",
+  "bytes": 448159,
+  "sha256": "e29444027d5933f8a78e841ee5ca25a45079e11fa75bf4cfc75a928d58ac3b2d",
+  "retrieved_utc": "2026-11-11T19:21:33.310494+00:00",
+  "status": "VERIFIED_BYTES",
+  "http_headers": {
+    "Content-Length": "448159",
+    "Content-Type": "image/tiff",
+    "ETag": "W/\"6d69f-18881189560\"",
+    "Last-Modified": "Sat, 03 Jun 2023 11:50:52 GMT"
+  }
+}

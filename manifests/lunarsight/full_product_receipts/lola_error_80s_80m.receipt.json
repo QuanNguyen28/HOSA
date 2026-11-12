@@ -1,0 +1,27 @@
+{
+  "id": "lola_error_80s_80m",
+  "title": "LOLA total-error raster, 80 m/pixel",
+  "provider": "NASA GSFC PGDA",
+  "source_page": "https://pgda.gsfc.nasa.gov/products/90",
+  "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_80S_80MPP_ADJ_ERR.TIF",
+  "destination": "data/raw/full_product/quality/LDEM_80S_80MPP_ADJ_ERR.TIF",
+  "profile": "core",
+  "access_mode": "download",
+  "expected_bytes": 254808965,
+  "media_type": "image/tiff",
+  "required_for": [
+    "uncertainty",
+    "confidence"
+  ],
+  "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_80S_80MPP_ADJ_ERR.TIF",
+  "bytes": 254808965,
+  "sha256": "e89306914bb209143f61ba66d341703d75221339424b774c6a1eb3c6c370ffc6",
+  "retrieved_utc": "2026-11-11T19:14:47.020311+00:00",
+  "status": "VERIFIED_BYTES",
+  "http_headers": {
+    "Content-Length": "254808965",
+    "Content-Type": "image/tiff",
+    "ETag": "W/\"f301385-1887ebfc0e0\"",
+    "Last-Modified": "Sat, 03 Jun 2023 00:54:36 GMT"
+  }
+}

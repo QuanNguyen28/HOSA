@@ -1,0 +1,27 @@
+{
+  "id": "lola_specialized_slope_1km",
+  "title": "LOLA specialized slope, 1 km grid",
+  "provider": "NASA GSFC PGDA",
+  "source_page": "https://pgda.gsfc.nasa.gov/products/90",
+  "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDRM_80S_1000MPP_ADJ_SPSLP.TIF",
+  "destination": "data/raw/full_product/morphology/LDRM_80S_1000MPP_ADJ_SPSLP.TIF",
+  "profile": "core",
+  "access_mode": "download",
+  "expected_bytes": 1693734,
+  "media_type": "image/tiff",
+  "required_for": [
+    "slope",
+    "landing_assessment"
+  ],
+  "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDRM_80S_1000MPP_ADJ_SPSLP.TIF",
+  "bytes": 1693734,
+  "sha256": "6211e3744c0125f8a9a7357edf5a9347e5b070a33f3e0b350cc988351c19b280",
+  "retrieved_utc": "2026-11-11T19:21:42.852001+00:00",
+  "status": "VERIFIED_BYTES",
+  "http_headers": {
+    "Content-Length": "1693734",
+    "Content-Type": "image/tiff",
+    "ETag": "W/\"19d826-18881189948\"",
+    "Last-Modified": "Sat, 03 Jun 2023 11:50:53 GMT"
+  }
+}
