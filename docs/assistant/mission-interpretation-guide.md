@@ -1,4 +1,4 @@
-# LunarSight: giải thích kết quả cho người dùng
+# HOSA: giải thích kết quả cho người dùng
 
 Current reference. Metric meanings and evidence mapping are implemented in backend/app/assistant/interpretation.py. Numerical decisions continue to come from app.mission.evaluation and planning services.
 
@@ -6,7 +6,7 @@ Current reference. Metric meanings and evidence mapping are implemented in backe
 
 Theo đề bài Lunar Landing Site Navigator do người dùng cung cấp, công cụ cần giúp mission planners, educators và công chúng so sánh nhanh vị trí và ngày hoạt động ở cực Nam Mặt Trăng, quan sát Sun và Earth so với chân trời, hiểu tiềm năng chiếu sáng và cửa sổ đường nhìn trực tiếp về Trái Đất. Tương tác dễ hiểu và giải thích trade-off là mục tiêu; chatbot hỗ trợ hiểu và sử dụng công cụ hiện có.
 
-LunarSight dùng NASA LOLA/PGDA, JPL Horizons và terrain horizon. Engine xác định số liệu, ngưỡng, xếp hạng và quyết định. Chatbot trả lời câu hỏi bằng các nguồn và kết quả đã tính, giải thích ý nghĩa đối với yêu cầu cụ thể. Các phép tính được giới hạn bởi capabilities, nguồn dữ liệu và validation hiện tại. Chỉ có dữ liệu trong catalog chưa chứng minh một nhiệm vụ khả thi.
+HOSA dùng NASA LOLA/PGDA, JPL Horizons và terrain horizon. Engine xác định số liệu, ngưỡng, xếp hạng và quyết định. Chatbot trả lời câu hỏi bằng các nguồn và kết quả đã tính, giải thích ý nghĩa đối với yêu cầu cụ thể. Các phép tính được giới hạn bởi capabilities, nguồn dữ liệu và validation hiện tại. Chỉ có dữ liệu trong catalog chưa chứng minh một nhiệm vụ khả thi.
 
 ## Ý nghĩa chỉ số
 

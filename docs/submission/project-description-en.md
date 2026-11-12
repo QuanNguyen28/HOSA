@@ -1,10 +1,10 @@
-# LunarSight — submission copy
+# HOSA — submission copy
 
 Status: **submission-ready draft; team/event/link fields still required**.
 
 ## One-line pitch
 
-LunarSight turns NASA lunar terrain and JPL ephemerides into an explainable,
+HOSA turns NASA lunar terrain and JPL ephemerides into an explainable,
 reproducible comparison of illumination and geometric Earth visibility at two
 candidate locations near the Moon's south pole.
 
@@ -15,7 +15,7 @@ low Sun and Earth elevation angles allow nearby terrain to create long periods o
 shadow or blocked line of sight. A static map or a long-term percentage does not
 show which event disqualifies a specific 72-hour activity window.
 
-LunarSight is an educational web prototype that compares two supported lunar
+HOSA is an educational web prototype that compares two supported lunar
 south-pole observation points across 1,344 gridded start times. It combines NASA
 LOLA/PGDA digital elevation models with topocentric Sun-center and Earth-center
 angles from JPL Horizons. For each exact 15-minute start, the same deterministic

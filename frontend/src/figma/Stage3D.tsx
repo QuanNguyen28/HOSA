@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { MoonScene, type GroundSky } from "../components/MoonScene";
 import { useSiteAnalysis } from "../hooks/useSiteAnalysis";
@@ -33,6 +33,13 @@ const LAYERS: LayerState = {
   grid: false,
   sites: true,
   enhancedLight: true,
+};
+
+type PoleTerrain = {
+  coordinate: LunarCoordinate;
+  terrain: TerrainWindow;
+  lods: Array<TerrainWindow | null>;
+  sky: GroundSky;
 };
 
 function toRendererSite(site: Site): RendererSite {
@@ -83,27 +90,27 @@ export default function Stage3D({
   const { result: midTerrainWindow, loading: midTerrainLoading } = useTerrainWindow(
     selected,
     mode === "surface" || mode === "pole",
-    { radiusKm: 6, samples: 401 },
+    { radiusKm: 6, samples: mode === "pole" ? 257 : 401 },
   );
   const { result: farTerrainWindow, loading: farTerrainLoading } = useTerrainWindow(
     selected,
     mode === "surface" || mode === "pole",
-    { radiusKm: 24, samples: 401, regionalOnly: true },
+    { radiusKm: 24, samples: mode === "pole" ? 257 : 401, regionalOnly: true },
   );
   const { result: contextTerrainWindow, loading: contextTerrainLoading } = useTerrainWindow(
     selected,
     mode === "surface" || mode === "pole",
-    { radiusKm: 48, samples: 401, regionalOnly: true },
+    { radiusKm: 48, samples: mode === "pole" ? 257 : 401, regionalOnly: true },
   );
   const { result: regionalTerrainWindow, loading: regionalTerrainLoading } = useTerrainWindow(
     selected,
     mode === "surface" || mode === "pole",
-    { radiusKm: 120, samples: 401, regionalOnly: true },
+    { radiusKm: 120, samples: mode === "pole" ? 257 : 401, regionalOnly: true },
   );
   const { result: horizonTerrainWindow, loading: horizonTerrainLoading } = useTerrainWindow(
     selected,
     mode === "surface" || mode === "pole",
-    { radiusKm: 300, samples: 401, regionalOnly: true },
+    { radiusKm: 300, samples: mode === "pole" ? 257 : 401, regionalOnly: true },
   );
   const analysisSiteId =
     selectedSiteId === "Site01_P1" || selectedSiteId === "connecting-ridge" ? "Site01_P1"
@@ -178,6 +185,26 @@ export default function Stage3D({
     };
   }, [analysis, catalog, heightM, pointAnalysis, selected, selectedSiteId, siteId, timeMs]);
 
+  const terrainLods = useMemo(() => [
+    terrainWindow, midTerrainWindow, farTerrainWindow, contextTerrainWindow,
+    regionalTerrainWindow, horizonTerrainWindow,
+  ], [terrainWindow, midTerrainWindow, farTerrainWindow, contextTerrainWindow,
+    regionalTerrainWindow, horizonTerrainWindow]);
+  const terrainPending = terrainLoading || midTerrainLoading || farTerrainLoading ||
+    contextTerrainLoading || regionalTerrainLoading || horizonTerrainLoading;
+  const [poleTerrain, setPoleTerrain] = useState<PoleTerrain | null>(null);
+  useEffect(() => {
+    if (mode !== "pole" || terrainPending || !terrainWindow?.grid ||
+        terrainWindow.coverage_status !== "COVERED") return;
+    setPoleTerrain((previous) => previous?.terrain === terrainWindow &&
+      previous.lods === terrainLods ? previous : {
+        coordinate: selected, terrain: terrainWindow, lods: terrainLods, sky: groundSky,
+      });
+  }, [mode, terrainPending, terrainWindow, selected, terrainLods, groundSky]);
+  const poleIsCurrent = poleTerrain?.coordinate.latitude === selected.latitude &&
+    poleTerrain.coordinate.longitude === selected.longitude;
+  const visibleTerrain = mode === "pole" ? poleTerrain?.terrain ?? null : terrainWindow;
+
   const handleSelect = (
     coordinate: LunarCoordinate,
     rendererSiteId?: string,
@@ -200,19 +227,12 @@ export default function Stage3D({
           cameraPreset={modeToPreset(mode)}
           layers={LAYERS}
           sites={sites}
-          selected={selected}
+          selected={mode === "pole" ? poleTerrain?.coordinate ?? null : selected}
           selectedSiteId={selectedSiteId}
-          terrainWindow={terrainWindow}
-          terrainLods={[
-            terrainWindow,
-            midTerrainWindow,
-            farTerrainWindow,
-            contextTerrainWindow,
-            regionalTerrainWindow,
-            horizonTerrainWindow,
-          ].filter((item): item is TerrainWindow => item !== null)}
+          terrainWindow={visibleTerrain}
+          terrainLods={mode === "pole" ? poleTerrain?.lods : terrainLods}
           southPolarTerrain={southPolarTerrain}
-          groundSky={groundSky}
+          groundSky={mode === "pole" && !poleIsCurrent ? poleTerrain?.sky : groundSky}
           onSelect={handleSelect}
           onHover={setHovered}
           onReady={() => setReady(true)}
@@ -231,19 +251,24 @@ export default function Stage3D({
         </div>
       )}
 
-      {mode === "pole" && (terrainLoading || midTerrainLoading || farTerrainLoading || contextTerrainLoading || regionalTerrainLoading || horizonTerrainLoading || polarTerrainLoading) && (
+      {mode === "pole" && (terrainPending || polarTerrainLoading) && (
         <div className="pointer-events-none absolute top-16 left-1/2 -translate-x-1/2 border border-line bg-black/80 px-3 py-1.5 font-mono text-[10px] tracking-wider text-soft">
           STREAMING NASA SOUTH-POLE TERRAIN…
         </div>
       )}
+      {mode === "pole" && !terrainPending && !poleIsCurrent && !terrainWindow?.grid && (
+        <div className="pointer-events-none absolute top-16 left-1/2 -translate-x-1/2 border border-line bg-black/80 px-3 py-1.5 font-mono text-[10px] tracking-wider text-soft">
+          TERRAIN UNAVAILABLE FOR THIS POINT
+        </div>
+      )}
 
-      {mode === "pole" && terrainWindow?.grid && (
+      {mode === "pole" && visibleTerrain?.grid && (
         <div className="pointer-events-none absolute top-16 left-4 border border-line bg-black/80 px-3 py-2 font-mono text-[10px] leading-relaxed tracking-wider text-soft">
           <div className="text-mint">LOLA NESTED TERRAIN · TRUE RELIEF 1×</div>
           <div className="text-mute">NASA LOLA · 5 / 80 / 240 m source DEM</div>
           <div className="text-mute">6 circular LOD rings · south-pole flight view</div>
           <div className="text-sun">FOCUS LOD · 1.5 / 6 / 24 / 48 / 120 / 300 km</div>
-          <div className="text-mute">SOURCE · {terrainWindow?.dataset_id ?? "regional terrain"}</div>
+          <div className="text-mute">SOURCE · {visibleTerrain.dataset_id ?? "regional terrain"}</div>
           <div className="text-mute">MICRO-RELIEF · SHADING ONLY</div>
           <div className="mt-1 text-mint">MOUSE · LEFT DRAG MOVE · RIGHT DRAG TILT · WHEEL ZOOM</div>
         </div>

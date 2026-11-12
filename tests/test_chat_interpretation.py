@@ -88,6 +88,45 @@ def service(monkeypatch,llm):
     return instance
 
 
+def test_general_chat_uses_current_brand_without_rewriting_source_paths(monkeypatch):
+    llm = ScriptedLLM([ChatTurn(
+        intent="knowledge", source_ids=["doc"],
+        answer="Trợ lý HOSA/LunarSight chỉ hỗ trợ dự án LunarSight. Xem `data/processed/lunarsight/v0.2.0`.",
+    )])
+    result = asyncio.run(service(monkeypatch, llm).respond(
+        "Đề xuất cho tôi vài quán ăn ở Hà Nội", [], {}, knowledge_only=True,
+    ))
+    assert result["answer"] == "Trợ lý HOSA chỉ hỗ trợ dự án HOSA. Xem `data/processed/lunarsight/v0.2.0`."
+    assert result["citations"][0]["source_id"] == "doc"
+
+
+@pytest.mark.parametrize(("text", "intent"), [
+    ("đề xuất điểm hạ cánh", "clarify"),
+    ("so sánh 2 điểm 04 và 01", "compare"),
+])
+def test_general_chat_redirects_mission_requests_without_using_model_claims(monkeypatch, text, intent):
+    llm = ScriptedLLM([ChatTurn(intent=intent, answer="Site04 chắc chắn đạt.",
+                                source_ids=["invented"], query={"unverified": True})])
+    instance = service(monkeypatch, llm)
+
+    async def unexpected(*args):
+        pytest.fail("General chat must not run an analysis before confirmation")
+
+    monkeypatch.setattr(instance, "_execute", unexpected)
+    result = asyncio.run(instance.respond(text, [], {}, knowledge_only=True))
+    assert result["status"] == "needs_input" and len(llm.messages) == 1
+    assert result["next_action"] == "prepare_mission" and "chắc chắn đạt" not in result["answer"]
+    assert result["query"] is None and not result["citations"]
+
+
+def test_general_chat_never_displays_unverified_knowledge_answer(monkeypatch):
+    bad = ChatTurn(intent="knowledge", answer="Unsupported result.", source_ids=["invented"])
+    llm = ScriptedLLM([bad, bad])
+    result = asyncio.run(service(monkeypatch, llm).respond("HOSA giúp tôi điều gì?", [], {}, knowledge_only=True))
+    assert result["status"] == "partial" and result["explanation_error"] == "MODEL_GROUNDING_INVALID"
+    assert "chưa xác minh" in result["answer"] and not result["citations"]
+
+
 def explained(state="INDETERMINATE",evidence_id=None):
     key=evidence_id or next(k for k,v in engine_evidence(_safe_result(point_result()))["facts"].items() if v["kind"]=="decision")
     return ChatTurn(intent="explain",answer="Chưa thể xác nhận phương án đạt vì kiểm định độ nhạy chưa đạt, dù số liệu danh định đáp ứng yêu cầu.",

@@ -1,4 +1,4 @@
-# LunarSight integrated MVP
+# HOSA integrated MVP
 
 React/Three.js frontend connected to the shared FastAPI backend. The original `feature/lunarsight-frontend` product shell stays in `src/figma/App.tsx`: header, Site/All sites sidebar, Moon/Pole/Ground viewer, timeline, compare cards, date grid and Ask dock. Its data flows now call real backend APIs; the synthetic horizon/ephemeris/metric generators and heuristic chat have been removed.
 

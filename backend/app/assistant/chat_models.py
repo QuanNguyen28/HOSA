@@ -25,6 +25,7 @@ class NewSession(Contract):
 
 class NewMessage(Contract):
     text: str = Field(min_length=1, max_length=12000)
+    knowledge_only: bool = False
 
 
 class ApplyPlan(Contract):

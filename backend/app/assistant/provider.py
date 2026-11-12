@@ -530,21 +530,23 @@ class OpenRouterLLM:
             "messages": wire_messages,
             "response_format": response_format,
             "provider": {"require_parameters": True, "allow_fallbacks": False},
-            "max_tokens": s.openrouter_max_tokens,
             "stream": False,
         }
+        if s.openrouter_max_tokens is not None:
+            payload["max_tokens"] = s.openrouter_max_tokens
         if s.openrouter_reasoning_enabled is not None:
             payload["reasoning"] = {"enabled": s.openrouter_reasoning_enabled}
         started = perf_counter()
         try:
-            async with asyncio.timeout(s.openrouter_timeout_seconds), httpx.AsyncClient(timeout=s.openrouter_timeout_seconds, transport=self.transport) as client:
+            timeout = httpx.Timeout(None, connect=s.assistant_connect_timeout_seconds)
+            async with httpx.AsyncClient(timeout=timeout, transport=self.transport) as client:
                 response = await client.post(
                     "https://openrouter.ai/api/v1/chat/completions",
                     headers={"Authorization": "Bearer " + s.openrouter_api_key.get_secret_value(),
-                             "X-OpenRouter-Title": "LunarSight LLM Pilot"},
+                             "X-OpenRouter-Title": "HOSA LLM Pilot"},
                     json=payload,
                 )
-        except (httpx.TimeoutException, TimeoutError) as error:
+        except httpx.TimeoutException as error:
             raise AssistantError("OPENROUTER_TIMEOUT", 504) from error
         except httpx.HTTPError as error:
             raise AssistantError("OPENROUTER_UNAVAILABLE", 502) from error

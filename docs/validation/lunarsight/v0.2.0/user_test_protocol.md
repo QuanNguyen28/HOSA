@@ -1,4 +1,4 @@
-# Protocol thử tác vụ LunarSight
+# Protocol thử tác vụ HOSA
 
 Mục tiêu là kiểm tra người học có thể so sánh hai site, đổi mốc bắt đầu và giải thích nguyên nhân bị loại mà không cần người hướng dẫn diễn giải kết quả thay họ.
 

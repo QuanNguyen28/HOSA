@@ -1,10 +1,10 @@
-# LunarSight current system context
+# HOSA current system context
 
 Status: current working-tree reference. For a factual detail, verify the linked manifest or implementation before editing scientific behavior.
 
 ## What the project answers
 
-LunarSight estimates whether a specified lunar surface observer and mission time window meet illumination and geometric line-of-sight requirements to Earth's center. Terrain horizons and NASA LOLA/PGDA terrain data describe obstruction; JPL Horizons supplies Sun/Earth geometry. The deterministic engine owns measurements, candidate ranking, validation, and PASS/FAIL/INDETERMINATE. LLM output explains the project and the engine's result; it never creates scientific metrics or changes a decision.
+HOSA estimates whether a specified lunar surface observer and mission time window meet illumination and geometric line-of-sight requirements to Earth's center. Terrain horizons and NASA LOLA/PGDA terrain data describe obstruction; JPL Horizons supplies Sun/Earth geometry. The deterministic engine owns measurements, candidate ranking, validation, and PASS/FAIL/INDETERMINATE. LLM output explains the project and the engine's result; it never creates scientific metrics or changes a decision.
 
 This is a research and planning prototype. It is not landing-site certification, a power or thermal model, or a radio link budget.
 
@@ -22,4 +22,4 @@ The NASA assets and receipts are indexed as metadata. Large ZIPs, DEM rasters, p
 
 ## Source priority
 
-For current behavior, use the current backend schemas and code, `manifests/sites.csv`, `manifests/datasets.csv`, the current Lunarsight source manifest, and verified NASA/JPL receipts. `docs/submission/`, the OpenRouter-era LLM decision, and v0.2.0 validation notes describe historical state and must not override newer manifests, code, or v0.3.0 validation. Cite the exact passage used, and say when the requested fact is not present in the retrieved current sources.
+For current behavior, use the current backend schemas and code, `manifests/sites.csv`, `manifests/datasets.csv`, the current HOSA source manifest, and verified NASA/JPL receipts. `docs/submission/`, the OpenRouter-era LLM decision, and v0.2.0 validation notes describe historical state and must not override newer manifests, code, or v0.3.0 validation. Cite the exact passage used, and say when the requested fact is not present in the retrieved current sources.

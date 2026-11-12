@@ -7,7 +7,7 @@ from fastapi.responses import StreamingResponse
 
 from .chat import ChatStore, default_database
 from .chat_models import ApplyPlan, NewMessage
-from .chat_service import ChatService
+from .chat_service import ChatService, assistant_brand_text
 from .config import AssistantSettings, get_assistant_settings
 from .engine import PlanningAdapter
 from .knowledge import ProjectKnowledge
@@ -92,11 +92,14 @@ def read_session(session_id: str, settings: AssistantSettings = Depends(get_assi
     session=_chat_store(str(default_database(settings))).session(session_id)
     if not session:
         raise HTTPException(status_code=404,detail={"code":"SESSION_NOT_FOUND"})
+    for message in session["messages"]:
+        if message["role"] == "assistant":
+            message["content"] = assistant_brand_text(message["content"])
     return session
 
 
 async def _run_chat(store_: ChatStore, run_id: str, session_id: str, settings: AssistantSettings,
-                    clients: dict[str,object] | None = None):
+                    clients: dict[str,object] | None = None, *, knowledge_only: bool = False):
     llm=None
     database=store_.session(session_id)
     try:
@@ -106,7 +109,8 @@ async def _run_chat(store_: ChatStore, run_id: str, session_id: str, settings: A
                          if messages[index].get("run_id")==run_id and messages[index]["role"]=="user"),None)
         if user_index is None:
             raise AssistantError("RUN_MESSAGE_NOT_FOUND",500)
-        history=[{"role":item["role"],"content":item["content"]}
+        history=[{"role":item["role"],"content":assistant_brand_text(item["content"])
+                  if item["role"] == "assistant" else item["content"]}
                  for item in messages[:user_index] if item["role"] in {"user","assistant"}][-24:]
         user_text=messages[user_index]["content"]
         history_archive=[]
@@ -117,7 +121,7 @@ async def _run_chat(store_: ChatStore, run_id: str, session_id: str, settings: A
             prior_engine=prior_result.get("result") or {}
             history_archive.append({"run_id":prior["id"],"status":prior["status"],
                 "intent":prior_result.get("intent"),"query":prior_result.get("query"),
-                "answer_summary":prior_result.get("answer","")[:240],
+                "answer_summary":assistant_brand_text(prior_result.get("answer",""))[:240],
                 "result_id":prior_engine.get("result_id"),"result_status":prior_engine.get("status") or prior_engine.get("decision"),
                 "source_ids":[item.get("source_id") for item in prior_result.get("citations",[]) if item.get("source_id")]})
         working_state={**(database.get("working_state",{}) if database else {}),
@@ -127,7 +131,8 @@ async def _run_chat(store_: ChatStore, run_id: str, session_id: str, settings: A
         chat=ChatService(llm,ProjectKnowledge(raw_root=settings.lunarsight_raw_dataset_path or None))
         store_.set_stage(run_id,"running","understanding")
         result=await chat.respond(user_text,history,working_state,
-                                  progress=lambda stage:store_.set_stage(run_id,"running",stage))
+                                  progress=lambda stage:store_.set_stage(run_id,"running",stage),
+                                  knowledge_only=knowledge_only)
         result["trace"]=llm.events
         result["provider"]=llm.last_provider
         result["model"]=next((event.get("model") for event in reversed(llm.events)
@@ -177,7 +182,7 @@ async def post_message(session_id: str, app_request: Request, request: NewMessag
         raise HTTPException(status_code=404,detail={"code":"SESSION_NOT_FOUND"}) from error
     if created:
         task=asyncio.create_task(_run_chat(database,run["id"],session_id,settings,
-            getattr(app_request.app.state,"llm_clients",{})))
+            getattr(app_request.app.state,"llm_clients",{}),knowledge_only=request.knowledge_only))
         _ACTIVE_TASKS[run["id"]]=task
         task.add_done_callback(lambda _task,identifier=run["id"]:_ACTIVE_TASKS.pop(identifier,None))
     return {**run,"replayed":not created}

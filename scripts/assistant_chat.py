@@ -117,7 +117,7 @@ class ChatSession:
 
 def run_console(service, initial_context, ask=input, say=print, demo=False, max_clarifications=3):
     session = ChatSession(initial_context)
-    say("LunarSight | " + ("DEMO GIẢ LẬP LLM — không gọi OpenRouter." if demo else "OpenRouter thật — đọc model/key từ .env."))
+    say("HOSA | " + ("DEMO GIẢ LẬP LLM — không gọi OpenRouter." if demo else "OpenRouter thật — đọc model/key từ .env."))
     say(f"Kế hoạch làm việc: {session.baseline.arrival_utc}; {session.baseline.duration_hours:g} giờ; {session.baseline.current_site_id}.")
     say("Dữ liệu demo: 14/11–trước 28/11/2026 UTC, lưới 15 phút; nhiệm vụ 72 giờ.")
     say("Lệnh: /quit, /new, /reset, /baseline, /sites, /sites all, /sites Site04_P1, /sites coords <lat> <lon_e>.")
@@ -270,14 +270,14 @@ def run_remote_console(base_url="http://127.0.0.1:8000/api/assistant", session_i
             cache_path.write_text(session_id,encoding="utf-8")
         else:
             session=response.json()
-        say(f"LunarSight assistant · {config['provider']} / {config['primary_model']}")
+        say(f"HOSA assistant · {config['provider']} / {config['primary_model']}")
         say("Kiểm tra dấu: Mặt Trăng - chiếu sáng - Trái Đất - dữ liệu.")
         say(f"Phiên: {session_id}. Lệnh: /new, /unicode, /result, /apply <candidate_id>, /help, /quit")
         say("Ctrl+C khi đang chờ để hủy lượt. Số liệu chi tiết chỉ hiện khi nhập /result.")
         last_engine_result=next(((run.get("result") or {}).get("result") for run in reversed(session.get("runs",[]))
                                  if (run.get("result") or {}).get("result")),None)
         for message in session.get("messages",[]):
-            say(("Bạn> " if message["role"]=="user" else "LunarSight> ")+message["content"])
+            say(("Bạn> " if message["role"]=="user" else "HOSA> ")+message["content"])
 
         def apply_candidate(candidate_id):
             current=api("GET",f"/sessions/{session_id}")
@@ -357,7 +357,7 @@ def run_remote_console(base_url="http://127.0.0.1:8000/api/assistant", session_i
                         say("Đang xử lý: "+str(previous_stage))
                     if run["status"] in {"completed","partial","needs_input"} and run.get("result"):
                         result=run["result"]
-                        say("\nLunarSight> "+result.get("answer",""))
+                        say("\nHOSA> "+result.get("answer",""))
                         if result.get("provider"):
                             say("Model thực tế: "+str(result.get("model") or result["provider"]))
                         for citation in result.get("citations",[]):
@@ -380,7 +380,7 @@ def run_remote_console(base_url="http://127.0.0.1:8000/api/assistant", session_i
                     pass
                 say("Đã gửi yêu cầu hủy; kết quả engine chưa được áp dụng.")
     except requests.RequestException as error:
-        say("Không kết nối được LunarSight API: "+type(error).__name__)
+        say("Không kết nối được HOSA API: "+type(error).__name__)
         return 2
 
 

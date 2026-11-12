@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import re
 import threading
 from functools import lru_cache
 
@@ -20,6 +21,21 @@ from .chat_models import ChatTurn
 from .knowledge import ProjectKnowledge
 from .provider import AssistantError, JsonLLM
 from .interpretation import ANSWER_POLICY, METRIC_MEANINGS, engine_evidence, claim_issues, explanation_view
+
+
+_OLD_BRAND = r"lunar[ -]?sight"
+_COMBINED_BRAND = re.compile(
+    rf"\b(?:HOSA\s*[/–—]\s*{_OLD_BRAND}\b|{_OLD_BRAND}\s*[/–—]\s*HOSA\b"
+    rf"|HOSA\s*\(\s*{_OLD_BRAND}\s*\)|{_OLD_BRAND}\s*\(\s*HOSA\s*\))",
+    re.IGNORECASE,
+)
+_STANDALONE_BRAND = re.compile(rf"(?<![\w/.-]){_OLD_BRAND}(?![\w/-]|\.\w)", re.IGNORECASE)
+_PLANNING_INTENTS = {"clarify", "point", "compare", "search"}
+
+
+def assistant_brand_text(text: str) -> str:
+    """Use the current name in assistant prose; preserve technical paths and IDs."""
+    return _STANDALONE_BRAND.sub("HOSA", _COMBINED_BRAND.sub("HOSA", text))
 
 
 @lru_cache
@@ -66,8 +82,9 @@ class ChatService:
     def _messages(self, text: str, history: list[dict], sources: list[dict], working: dict,
                   include_operations: bool = True) -> list[dict]:
         system = (
-            "You are LunarSight's bilingual lunar mission-planning assistant. Answer in the user's language. "
-            "LunarSight compares geometric Sun illumination and Earth-centre line of sight using NASA LOLA/PGDA terrain, "
+            "You are HOSA's bilingual lunar mission-planning assistant. Answer in the user's language. "
+            "Refer to the project as HOSA only, even if older names appear in conversation history or source references. "
+            "HOSA compares geometric Sun illumination and Earth-centre line of sight using NASA LOLA/PGDA terrain, "
             "JPL Horizons ephemerides, terrain horizons, explicit provenance, uncertainty bounds and validation gates. "
             "It is an educational prototype, not landing certification, a power/thermal model or a radio link budget. "
             "Never invent measurements, supported regions, data coverage, source facts or scientific outcomes. "
@@ -84,7 +101,7 @@ class ChatService:
             "Never cite a prior result as if it evaluated a changed date or target. A changed mission requires a new engine call. "
             "Choose operations using operation_schema definitions: point=MissionRequest, compare=CompareRequest, search=SearchRequest. "
             "Use current working query to resolve follow-ups without replaying old changes. Do not fill missing dates with guesses. "
-            "Routing examples: 'What does LunarSight help decide if a launch date changes?' -> knowledge, no input question. "
+            "Routing examples: 'What does HOSA help decide if a launch date changes?' -> knowledge, no input question. "
             "'Compare Site01 and Site04 with 80% Sun/Earth LOS' -> clarify only the missing start date. "
             "'Why was that result indeterminate?' -> explain the saved result, no new computation. "
             "Do not silently substitute snapshot for explicitly requested coordinate analysis. "
@@ -125,9 +142,14 @@ class ChatService:
         return issues
 
     async def _complete_grounded(self, messages: list[dict], sources: list[dict], stage: str,
-                                knowledge_only: bool = False, evidence: dict | None = None) -> ChatTurn:
+                                knowledge_only: bool = False, evidence: dict | None = None,
+                                *, general_chat: bool = False) -> ChatTurn:
         source_map={item["source_id"]:item for item in sources}
         def validate(turn):
+            if general_chat and turn.intent in _PLANNING_INTENTS:
+                # General chat uses only the intent to show a navigation hint.
+                # Its generated prose, citations and query are never used.
+                return []
             issues=self._turn_issues(turn,source_map)
             if evidence and turn.evidence_claims:
                 issues=[item for item in issues if item != "citation_required"]
@@ -161,7 +183,8 @@ class ChatService:
                 raise AssistantError("MODEL_GROUNDING_INVALID",502)
         return turn
 
-    async def respond(self, text: str, history: list[dict], working: dict, progress=None) -> dict:
+    async def respond(self, text: str, history: list[dict], working: dict, progress=None,
+                      *, knowledge_only: bool = False) -> dict:
         progress=progress or (lambda stage:None)
         progress("indexing")
         await asyncio.to_thread(self._ensure_index)
@@ -173,12 +196,42 @@ class ChatService:
         except (OSError,ValueError,DomainError):
             self.capabilities={"available":False,"note":"Do not claim computed coverage until backend capabilities are available."}
         progress("generating")
-        messages=self._messages(text, history, sources, working)
+        messages=self._messages(text, history, sources, working, include_operations=not knowledge_only)
+        if knowledge_only:
+            messages[0]["content"] += (
+                " This conversation is for project questions only. Return knowledge or explain with query=null. "
+                "Answer general questions directly without asking for mission dates. "
+                "By default, answer in two or three short sentences, lead with the answer, and keep only essential caveats. "
+                "Give more detail only when the user asks for it. "
+                "If asked to calculate, compare, or recommend a specific landing site, return intent clarify "
+                "with query=null. The application will direct the user to Mission planning. "
+                "Do not choose a landing site yourself."
+            )
         prior_evidence=working.get("last_engine_evidence") or {}
-        turn = await self._complete_grounded(messages,sources,"understanding",evidence=prior_evidence)
+        try:
+            turn = await self._complete_grounded(messages,sources,"understanding",
+                                                 knowledge_only=knowledge_only,evidence=prior_evidence,
+                                                 general_chat=knowledge_only)
+        except AssistantError as error:
+            if not knowledge_only or error.code != "MODEL_GROUNDING_INVALID":
+                raise
+            return {"answer":"HOSA chưa xác minh được câu trả lời từ nguồn dự án. Hãy thử hỏi lại cụ thể hơn.",
+                    "status":"partial","intent":None,"citations":[],"query":None,
+                    "explanation_error":error.code,"provider":self.llm.last_provider,"trace":self.llm.events}
+        if knowledge_only and turn.intent in _PLANNING_INTENTS:
+            english = text.isascii() and bool(re.search(
+                r"\b(compare|recommend|suggest|which|where|evaluate|landing)\b", text, re.IGNORECASE))
+            answer = (
+                "I’ll check what’s needed to compare the landing sites before running the analysis."
+                if english else
+                "Tôi sẽ kiểm tra thông tin còn thiếu trước khi phân tích điểm hạ cánh."
+            )
+            return {"answer":answer,"status":"needs_input","intent":"clarify","citations":[],
+                    "provider":self.llm.last_provider,"trace":self.llm.events,"query":None,
+                    "next_action":"prepare_mission"}
         source_map = {item["source_id"]:item for item in sources}
         if turn.intent == "clarify":
-            return {"answer":turn.answer or turn.clarification or "Bạn cho tôi biết thêm thông tin cần thiết nhé.",
+            return {"answer":assistant_brand_text(turn.answer or turn.clarification or "Bạn cho tôi biết thêm thông tin cần thiết nhé."),
                     "status":"needs_input","intent":turn.intent,"citations":[],"provider":self.llm.last_provider,
                     "trace":self.llm.events,"query":None}
         if turn.intent in {"point","compare","search"}:
@@ -218,7 +271,7 @@ class ChatService:
             if not answer.strip():
                 raise AssistantError("MODEL_ANSWER_EMPTY",502)
         citations = [source_map[item] for item in citation_ids]
-        return {"answer":answer,"status":"completed","intent":intent,"citations":citations,
+        return {"answer":assistant_brand_text(answer),"status":"completed","intent":intent,"citations":citations,
                 "result":result_card,"provider":self.llm.last_provider,"trace":self.llm.events,
                 "query":turn.query if intent in {"point","compare","search"} else None,
                 "evidence":evidence,"evidence_claims":[claim.model_dump() for claim in explanation.evidence_claims]}

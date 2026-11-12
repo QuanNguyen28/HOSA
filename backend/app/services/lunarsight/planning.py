@@ -1,4 +1,4 @@
-"""Scenario-bound LunarSight comparison and export services.
+"""Scenario-bound HOSA comparison and export services.
 
 The scientific pipeline writes immutable, versioned CSV products.  This module
 turns those products into the exact MVP contract described in the project

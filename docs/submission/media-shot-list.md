@@ -1,4 +1,4 @@
-# Shot list hồ sơ và video LunarSight
+# Shot list hồ sơ và video HOSA
 
 Trạng thái: **READY TO CAPTURE — chưa có media khóa bản**.
 

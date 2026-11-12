@@ -66,7 +66,7 @@ type MoonSceneProps = {
   selected: LunarCoordinate | null;
   selectedSiteId: string | null;
   terrainWindow: TerrainWindow | null;
-  terrainLods?: TerrainWindow[];
+  terrainLods?: Array<TerrainWindow | null>;
   southPolarTerrain?: SouthPolarTerrain | null;
   groundSky?: GroundSky | null;
   onSelect: (coordinate: LunarCoordinate, siteId?: string) => void;
@@ -92,6 +92,13 @@ export type GroundSky = {
 
 const GLOBAL_LOLA_DISPLACEMENT_SCALE = 0.022906066536203522;
 const GLOBAL_LOLA_DISPLACEMENT_BIAS = -0.0105047772533671;
+const POLE_TARGET: [number, number, number] = [0, -10, 0];
+const INITIAL_CAMERA = {
+  position: [0, 0.35, 6.4] as [number, number, number],
+  fov: 36,
+  near: 0.02,
+  far: 2_000,
+};
 
 function SceneRig({
   preset,
@@ -106,10 +113,10 @@ function SceneRig({
   const desired = useRef(new Vector3(0, 0.3, 6.4));
   const target = useRef(new Vector3(0, 0, 0));
   const transitioning = useRef(false);
+  const viewX = preset === "surface" ? surfaceViewDirection?.[0] ?? -0.55 : -0.55;
+  const viewZ = preset === "surface" ? surfaceViewDirection?.[2] ?? -0.84 : -0.84;
 
   useEffect(() => {
-    const viewX = surfaceViewDirection?.[0] ?? -0.55;
-    const viewZ = surfaceViewDirection?.[2] ?? -0.84;
     const viewLength = Math.hypot(viewX, viewZ) || 1;
     desired.current =
       preset === "south-pole"
@@ -124,18 +131,25 @@ function SceneRig({
     target.current = preset === "surface"
       ? new Vector3(0, surfaceTargetY + 0.018, 0)
       : preset === "south-pole"
-        ? new Vector3(0, -10, 0)
+        ? new Vector3(...POLE_TARGET)
         : new Vector3(0, 0, 0);
     if ("fov" in camera && typeof camera.fov === "number") {
       camera.fov = preset === "surface" ? 68 : preset === "south-pole" ? 44 : 36;
       camera.updateProjectionMatrix();
     }
-    transitioning.current = true;
+    // The map controls own the camera after entering Pole. Keep their pose
+    // through terrain swaps and time changes.
+    transitioning.current = preset !== "south-pole";
+    if (preset === "south-pole") {
+      camera.position.copy(desired.current);
+      camera.lookAt(target.current);
+    }
   }, [
     camera,
     preset,
     surfaceTargetY,
-    surfaceViewDirection,
+    viewX,
+    viewZ,
   ]);
 
   useFrame((_, delta) => {
@@ -364,7 +378,7 @@ function DynamicTerrain({
   onReady,
 }: {
   terrain: TerrainWindow;
-  terrainLods?: TerrainWindow[];
+  terrainLods?: Array<TerrainWindow | null>;
   coordinate: LunarCoordinate;
   time: Date;
   enhancedLight: boolean;
@@ -418,20 +432,19 @@ function DynamicTerrain({
     if (terrainMesh) onReady();
   }, [terrainMesh, onReady]);
 
-  if (!terrainMesh || !terrain.grid) return null;
   const observerHeightM = groundSky?.observerHeightM ?? 2;
+  const horizonProfile = useMemo(
+    () => !overview && terrainMesh && terrain.geometry
+      ? buildTerrainHorizonProfile(terrainMesh.mesh, terrain.geometry, observerHeightM)
+      : new Float32Array(),
+    [overview, terrainMesh, terrain.geometry, observerHeightM],
+  );
+  if (!terrainMesh || !terrain.grid) return null;
   const observer: [number, number, number] = [
     0,
     terrainMesh.mesh.centerYSceneUnits + observerHeightM / 1_000,
     0,
   ];
-  const horizonProfile = terrain.geometry
-    ? buildTerrainHorizonProfile(
-        terrainMesh.mesh,
-        terrain.geometry,
-        observerHeightM,
-      )
-    : new Float32Array();
   const lightDistance = overview ? 720 : 24;
   const lightPosition: [number, number, number] = [
     localSun[0] * lightDistance,
@@ -473,8 +486,8 @@ function DynamicTerrain({
         position={lightPosition}
         intensity={localSun[1] > -0.005 ? 4.4 : 0.012}
         color="#fff2d9"
-        shadow-mapSize-width={4096}
-        shadow-mapSize-height={4096}
+        shadow-mapSize-width={overview ? 2048 : 4096}
+        shadow-mapSize-height={overview ? 2048 : 4096}
         shadow-camera-left={-shadowHalfSize}
         shadow-camera-right={shadowHalfSize}
         shadow-camera-top={shadowHalfSize}
@@ -1207,7 +1220,7 @@ function Moon({
       {southPolarTerrain && (
         <SouthPolarCap
           terrain={southPolarTerrain}
-          selectedTerrains={terrainLods ?? (terrainWindow ? [terrainWindow] : [])}
+          selectedTerrains={terrainLods?.filter((item): item is TerrainWindow => item !== null) ?? (terrainWindow ? [terrainWindow] : [])}
           selected={selected}
           selectedSiteId={selectedSiteId}
           showSelectedDetail={cameraPreset === "south-pole"}
@@ -1236,7 +1249,7 @@ export function MoonScene(props: MoonSceneProps) {
     props.selected !== null &&
     props.terrainWindow?.coverage_status === "COVERED";
   const surfaceViewDirection = useMemo<[number, number, number] | undefined>(() => {
-    if (!props.groundSky || !props.terrainWindow?.geometry) return undefined;
+    if (props.cameraPreset !== "surface" || !props.groundSky || !props.terrainWindow?.geometry) return undefined;
     const sun = skyDirectionToTerrainAxes(
       props.groundSky.sun.azimuthDeg,
       props.groundSky.sun.elevationDeg,
@@ -1252,12 +1265,12 @@ export function MoonScene(props: MoonSceneProps) {
     return Math.hypot(x, z) > 0.15
       ? [x, sun.y + earth.y, z]
       : [sun.x, sun.y, sun.z];
-  }, [props.groundSky, props.terrainWindow?.geometry]);
+  }, [props.cameraPreset, props.groundSky, props.terrainWindow?.geometry]);
   return (
     <Canvas
       shadows
       dpr={[1, 1.8]}
-      camera={{ position: [0, 0.35, 6.4], fov: 36, near: 0.02, far: 2_000 }}
+      camera={INITIAL_CAMERA}
       gl={{ antialias: true, powerPreference: "high-performance" }}
       onCreated={({ gl }) => {
         gl.setClearColor("#030507");
@@ -1296,9 +1309,9 @@ export function MoonScene(props: MoonSceneProps) {
             onHover={props.onHover}
             onReady={props.onReady}
           />
-        ) : (
+        ) : props.cameraPreset !== "south-pole" ? (
           <Moon {...props} />
-        )}
+        ) : null}
       </Suspense>
       <SceneRig
         preset={props.cameraPreset}
@@ -1324,10 +1337,10 @@ export function MoonScene(props: MoonSceneProps) {
           minPolarAngle={MathUtils.degToRad(4)}
           maxPolarAngle={MathUtils.degToRad(88)}
         />
-      ) : localTerrain && props.cameraPreset === "south-pole" ? (
+      ) : props.cameraPreset === "south-pole" ? (
         <MapControls
           makeDefault
-          target={[0, -10, 0]}
+          target={POLE_TARGET}
           enableDamping
           dampingFactor={0.1}
           minDistance={1.2}

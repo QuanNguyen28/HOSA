@@ -1,4 +1,4 @@
-# LunarSight skill inventory
+# HOSA skill inventory
 
 The five project skills live under `.agents/skills/`. They were authored for this project using Codex Skill Creator and the [Agent Skills specification](https://agentskills.io/specification). All five passed the Skill Creator frontmatter validator. They are packaged as source folders; this delivery does not install them into any account library.
 

@@ -13,4 +13,4 @@ Downloaded 2026-11-09.
 
 Credit: NASA's Scientific Visualization Studio; Ernie Wright (USRA); Noah Petro (NASA/GSFC).
 
-These assets are optimized for visualization and are not inputs to scientific analysis. LunarSight's scientific terrain calculations use the separately versioned NASA PGDA/LOLA datasets recorded in the project manifests.
+These assets are optimized for visualization and are not inputs to scientific analysis. HOSA's scientific terrain calculations use the separately versioned NASA PGDA/LOLA datasets recorded in the project manifests.

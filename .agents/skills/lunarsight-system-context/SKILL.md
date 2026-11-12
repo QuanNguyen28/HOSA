@@ -1,11 +1,11 @@
 ---
 name: lunarsight-system-context
-description: Explain or change LunarSight using the current system behavior, scientific evidence, and documented coverage. Use when a task needs project context or a technically accurate explanation of its purpose and limits.
+description: Explain or change HOSA using the current system behavior, scientific evidence, and documented coverage. Use when a task needs project context or a technically accurate explanation of its purpose and limits.
 ---
 
-# LunarSight System Context
+# HOSA System Context
 
-LunarSight evaluates whether a lunar observation point, time window, and mission requirements meet geometric illumination and Earth-centre line-of-sight conditions. NASA LOLA/PGDA terrain, JPL Horizons ephemerides, terrain horizons, uncertainty, provenance, and validation gates support the deterministic backend. It is an educational planning prototype, not landing certification, a power/thermal model, or a radio link budget.
+HOSA evaluates whether a lunar observation point, time window, and mission requirements meet geometric illumination and Earth-centre line-of-sight conditions. NASA LOLA/PGDA terrain, JPL Horizons ephemerides, terrain horizons, uncertainty, provenance, and validation gates support the deterministic backend. It is an educational planning prototype, not landing certification, a power/thermal model, or a radio link budget.
 
 ## Read the live system
 

@@ -1,4 +1,4 @@
-"""Run the LunarSight data pipeline from an HOSA checkout."""
+"""Run the HOSA data pipeline from an HOSA checkout."""
 import argparse
 import shutil
 import sys
@@ -28,7 +28,7 @@ def main():
     run_dir = Path(tempfile.mkdtemp(prefix="run-", dir=runs))
     shutil.copytree(REPO_ROOT / "manifests/lunarsight/config", run_dir / "config")
     shutil.copytree(cache / SNAPSHOT / "raw/horizons", run_dir / "raw/horizons")
-    print(f"LunarSight run directory: {run_dir}", flush=True)
+    print(f"HOSA run directory: {run_dir}", flush=True)
     status = run(
         run_dir, repository_root=REPO_ROOT, nasa_dir=args.nasa_dir.resolve(),
         offline=args.offline, site01_only=args.site01_only,

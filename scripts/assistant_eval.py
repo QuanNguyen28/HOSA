@@ -1,4 +1,4 @@
-"""Strict, real-provider evaluation through LunarSight's persistent chat API."""
+"""Strict, real-provider evaluation through HOSA's persistent chat API."""
 from __future__ import annotations
 
 import argparse

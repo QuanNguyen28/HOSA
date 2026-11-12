@@ -31,7 +31,7 @@ def reset_provider_health():
 
 
 def chat_json(**changes):
-    return json.dumps({"intent":"knowledge","answer":"LunarSight compares illumination and Earth line of sight.",
+    return json.dumps({"intent":"knowledge","answer":"HOSA compares illumination and Earth line of sight.",
         "clarification":None,"source_ids":[],"query":None,**changes},ensure_ascii=False)
 
 
@@ -89,7 +89,7 @@ def test_deepseek_v41_flash_disables_thinking_without_glm_template_fields():
             {"choices":[],"usage":{"prompt_tokens":15,"completion_tokens":24,"total_tokens":39}}]))
     settings=configured()
     result=asyncio.run(NativeLLM("nvidia",settings,httpx.MockTransport(handler)).complete(ChatTurn,[
-        {"role":"user","content":"Explain LunarSight briefly."}]))
+        {"role":"user","content":"Explain HOSA briefly."}]))
     assert len(seen)==1 and result.output.intent=="knowledge"
     assert result.usage=={"prompt_tokens":15,"completion_tokens":24,"total_tokens":39}
 
@@ -110,7 +110,7 @@ def test_gemini_native_stream_schema_thinking_and_api_key_header():
             {"candidates":[{"content":{"parts":[{"text":"hidden thought","thought":True},{"text":chat_json()}]},"finishReason":"STOP"}],
              "usageMetadata":{"promptTokenCount":12,"candidatesTokenCount":22,"totalTokenCount":34}}]))
     result=asyncio.run(NativeLLM("gemini",configured(),httpx.MockTransport(handler)).complete(ChatTurn,[
-        {"role":"user","content":"Return a knowledge response about LunarSight."}]))
+        {"role":"user","content":"Return a knowledge response about HOSA."}]))
     assert len(seen)==1 and result.output.intent=="knowledge"
     assert result.usage=={"prompt_tokens":12,"completion_tokens":22,"total_tokens":34}
 
@@ -218,7 +218,7 @@ def test_chat_store_sessions_idempotency_events_and_apply_survive_restart(tmp_pa
     path=tmp_path/"chat.sqlite3"
     database=ChatStore(path)
     session=database.create_session()
-    run,created=database.begin_run(session["id"],"request-1","What does LunarSight do?")
+    run,created=database.begin_run(session["id"],"request-1","What does HOSA do?")
     same,replayed=database.begin_run(session["id"],"request-1","duplicate")
     assert created and not replayed and same["id"]==run["id"]
     database.set_stage(run["id"],"running","retrieving")
@@ -247,7 +247,7 @@ def test_restart_marks_interrupted_run_without_erasing_messages(tmp_path):
 def test_cancel_is_idempotent_and_completed_run_cannot_be_overwritten(tmp_path):
     database=ChatStore(tmp_path/"chat.sqlite3")
     session=database.create_session()
-    run,_=database.begin_run(session["id"],"cancel-case","What is LunarSight?")
+    run,_=database.begin_run(session["id"],"cancel-case","What is HOSA?")
     database.cancel(run["id"])
     event_count=len(database.events_after(run["id"],0))
     database.cancel(run["id"])
@@ -259,10 +259,10 @@ def test_cancel_is_idempotent_and_completed_run_cannot_be_overwritten(tmp_path):
 
 def test_project_knowledge_indexes_sources_and_returns_valid_source_ids(tmp_path):
     root=tmp_path/"project"; (root/"docs").mkdir(parents=True)
-    (root/"docs"/"purpose.md").write_text("LunarSight compares lunar illumination and Earth-centre line of sight.",encoding="utf-8")
+    (root/"docs"/"purpose.md").write_text("HOSA compares lunar illumination and Earth-centre line of sight.",encoding="utf-8")
     knowledge=ProjectKnowledge(tmp_path/"index.sqlite3",root,tmp_path/"missing-raw-data")
     report=knowledge.rebuild()
-    hits=knowledge.search("Earth visibility LunarSight",4)
+    hits=knowledge.search("Earth visibility HOSA",4)
     assert report["passages"]>=1 and hits
     assert hits[0]["path"]=="docs/purpose.md"
     assert knowledge.source(hits[0]["source_id"])["excerpt"]==hits[0]["excerpt"]

@@ -25,8 +25,7 @@ class AssistantSettings(BaseSettings):
     openrouter_api_key: SecretStr | None = None
     openrouter_model: str = ""
     openrouter_reasoning_enabled: bool | None = None
-    openrouter_timeout_seconds: float = Field(default=30, gt=0, le=120)
-    openrouter_max_tokens: int = Field(default=1800, ge=128, le=8192)
+    openrouter_max_tokens: int | None = Field(default=None, ge=128)
     openrouter_response_format: str = Field(default="json_schema", pattern="^(json_schema|json_object)$")
     assistant_draft_ttl_seconds: int = Field(default=900, ge=30, le=3600)
     assistant_max_drafts: int = Field(default=128, ge=1, le=1024)

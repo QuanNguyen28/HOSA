@@ -54,6 +54,8 @@ def normalize_request(request: ParseRequest, patch: RequestPatch, caps: dict) ->
     context = request.planning_context
     search_from, search_until = patch.search_from_utc, patch.search_until_utc
     if search_from is None and search_until is None and patch.arrival_shift_days is None and patch.arrival_utc is None:
+        if request.require_explicit_start:
+            raise AssistantError("UNRESOLVED_ARRIVAL")
         search_from, search_until = context.search_from_utc, context.search_until_utc
     if search_from is not None or search_until is not None:
         if search_from is None or search_until is None:

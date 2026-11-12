@@ -1,6 +1,6 @@
 ---
 name: llm-provider-integration
-description: Integrate or diagnose LunarSight's NVIDIA NIM GLM-5.3-Flash, optional DeepSeek-V4.1-Flash and Gemini 3.1 Flash-Lite adapters, including structured output, streaming, provider recovery, and safe traces.
+description: Integrate or diagnose HOSA's NVIDIA NIM GLM-5.3-Flash, optional DeepSeek-V4.1-Flash and Gemini 3.1 Flash-Lite adapters, including structured output, streaming, provider recovery, and safe traces.
 ---
 
 # LLM Provider Integration

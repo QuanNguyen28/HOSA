@@ -1,9 +1,9 @@
 ---
 name: lunarsight-grounded-chat
-description: Build or review LunarSight chat retrieval, source citations, mission-tool routing, persistent state, and explanations grounded in engine evidence.
+description: Build or review HOSA chat retrieval, source citations, mission-tool routing, persistent state, and explanations grounded in engine evidence.
 ---
 
-# LunarSight Grounded Chat
+# HOSA Grounded Chat
 
 The chat contract is in `backend/app/assistant/chat_models.py`; orchestration is in `chat_service.py`; persistence and source search are in `chat.py` and `knowledge.py`; HTTP/SSE APIs are in `router.py`; the web panel is `frontend/src/components/AssistantChat.tsx`.
 

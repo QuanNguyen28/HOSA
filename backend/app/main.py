@@ -29,9 +29,9 @@ async def lifespan(application: FastAPI):
 
 
 app = FastAPI(
-    title="LunarSight API",
+    title="HOSA API",
     version=settings.app_version,
-    description="API nền tảng cho dữ liệu, visibility và mission windows của LunarSight.",
+    description="API nền tảng cho dữ liệu, visibility và mission windows của HOSA.",
     lifespan=lifespan,
 )
 app.add_middleware(

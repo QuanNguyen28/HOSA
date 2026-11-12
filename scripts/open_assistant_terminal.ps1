@@ -12,7 +12,7 @@ $OutputEncoding = $utf8
 $env:PYTHONUTF8 = '1'
 $env:PYTHONIOENCODING = 'utf-8'
 & (Join-Path $env:SystemRoot 'System32\chcp.com') 65001 | Out-Null
-$Host.UI.RawUI.WindowTitle = 'LunarSight LLM - UTF8'
+$Host.UI.RawUI.WindowTitle = 'HOSA LLM - UTF8'
 
 $pythonPath = Join-Path $projectRoot '.venv\Scripts\python.exe'
 $chatPath = Join-Path $projectRoot 'scripts\assistant_chat.py'
@@ -46,7 +46,7 @@ if ($Model -and $capabilities.primary_model -ne $Model) {
 if ($Strict -and $capabilities.fallback_model) {
     throw 'The running API has failover enabled. Restart it with ASSISTANT_FAILOVER_ENABLED=false before using -Strict.'
 }
-$Host.UI.RawUI.WindowTitle = 'LunarSight LLM - ' + $capabilities.primary_model + ' - UTF8'
+$Host.UI.RawUI.WindowTitle = 'HOSA LLM - ' + $capabilities.primary_model + ' - UTF8'
 
 if ($New) {
     & $pythonPath -X utf8 $chatPath --new

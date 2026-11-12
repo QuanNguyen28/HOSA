@@ -58,7 +58,7 @@ def main() -> int:
         output_dir = ROOT / output_dir
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    stem = f"HOSA-LunarSight-{short}"
+    stem = f"HOSA-{short}"
     archive = output_dir / f"{stem}.zip"
     manifest = output_dir / f"{stem}.manifest.json"
     checksum = output_dir / f"{stem}.zip.sha256"

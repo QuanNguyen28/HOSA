@@ -1,1 +1,1 @@
-"""LunarSight backend application."""
+"""HOSA backend application."""

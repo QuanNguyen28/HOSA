@@ -218,7 +218,7 @@ def reports(root,state,records,sites,eph):
     def write(name,lines): (root/"reports"/name).write_text("\n".join(lines)+"\n",encoding="utf-8")
     dem_rows=[f"| {r['id']} | {r['metadata']['shape']} | {r['metadata']['pixel_size_m']} | {r['stats']['min']:.3f} | {r['stats']['max']:.3f} | {r['stats']['nodata_percent']:.3f} |" for r in records.values() if "stats" in r]
     eph_rows=[f"| {r['name']} | {r['received_rows']}/{r['expected_rows']} | {r['missing_timestamps']} | {r['missing_angles']} | {r['elevation_min_deg']:.4f} to {r['elevation_max_deg']:.4f} |" for r in eph if r['elevation_min_deg'] is not None]
-    write("eda_summary.md",["# LunarSight data EDA","","NASA PGDA LOLA (MOON_ME/DE421); JPL Horizons, PROVISIONAL scenario.","",
+    write("eda_summary.md",["# HOSA data EDA","","NASA PGDA LOLA (MOON_ME/DE421); JPL Horizons, PROVISIONAL scenario.","",
          "| Raster | Shape | Pixel spacing (m) | Min (source unit) | Max (source unit) | NoData % |","|---|---|---|---:|---:|---:|",*dem_rows,"",
          "| Horizons query | Received / expected | Missing UTC | Missing angles | Elevation (°) |","|---|---:|---:|---:|---|",*eph_rows,"",
          "Exact windowed counts, moments and min/max, with systematic-sample percentiles in the manifest. Preview figures are downsampled by nearest neighbour; sparse NoData can be absent from previews. A 5 m spacing is not effective resolution. The count layer records LOLA shots, including zero at interpolated cells."])

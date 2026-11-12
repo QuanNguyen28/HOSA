@@ -118,9 +118,9 @@ with zipfile.ZipFile(io.BytesIO(base64.b64decode(archive))) as src:
 sys.path.insert(0,str(root/"src"))
 from build_notebooks import make
 make(root)
-print("LunarSight working tree:", root)
+print("HOSA working tree:", root)
 """
-    write("lunarsight-data-pipeline.ipynb","LunarSight data pipeline",
+    write("lunarsight-data-pipeline.ipynb","HOSA data pipeline",
           "Private CPU run. Enable Internet and execute each code cell in order in the Draft session. Downloads NASA PGDA data, requests JPL Horizons, runs scientific checks, and writes a compact ZIP. The epoch 2026-11-14T00:00Z and G0 tolerances are PROVISIONAL.",
           [bootstrap,"""
             from pipeline import run

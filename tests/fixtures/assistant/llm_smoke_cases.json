@@ -1,7 +1,7 @@
 [
   {
     "id": "SMK-K01",
-    "text": "LunarSight đang giải quyết vấn đề gì?",
+    "text": "HOSA đang giải quyết vấn đề gì?",
     "expected_intent": "knowledge",
     "require_citation": true,
     "required_terms": ["Mặt Trăng", "Trái Đất"],
@@ -9,7 +9,7 @@
   },
   {
     "id": "SMK-K02",
-    "text": "Which data and geometry does LunarSight use to assess illumination and visibility?",
+    "text": "Which data and geometry does HOSA use to assess illumination and visibility?",
     "expected_intent": "knowledge",
     "require_citation": true,
     "required_terms": ["NASA", "JPL"],

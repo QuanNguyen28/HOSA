@@ -1,6 +1,6 @@
 ---
 name: llm-live-evaluation
-description: Run or review strict live evaluations for LunarSight LLM providers, including provider smoke, grounded golden cases, multi-turn chat, and failover evidence.
+description: Run or review strict live evaluations for HOSA LLM providers, including provider smoke, grounded golden cases, multi-turn chat, and failover evidence.
 ---
 
 # LLM Live Evaluation

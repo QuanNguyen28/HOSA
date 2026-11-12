@@ -88,7 +88,7 @@ async def probe(provider: str, infer: bool = True) -> dict:
         try:
             completion = await adapter.complete(ChatTurn, [
                 {"role": "system", "content": "Reply in English. This is only a provider smoke test."},
-                {"role": "user", "content": "Return intent=knowledge and say LunarSight smoke check in answer."},
+                {"role": "user", "content": "Return intent=knowledge and say HOSA smoke check in answer."},
             ])
             profile.update({"inference_passed": completion.output.intent == "knowledge" and
                             "smoke check" in completion.output.answer.casefold(),

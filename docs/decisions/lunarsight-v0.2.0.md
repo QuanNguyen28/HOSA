@@ -1,4 +1,4 @@
-# Phương pháp tính và phân phối dữ liệu LunarSight v0.2.0
+# Phương pháp tính và phân phối dữ liệu HOSA v0.2.0
 
 Các lượt quét dùng tọa độ ENU trên mặt cầu Mặt Trăng, phương vị Bắc địa lý, DEM 5/80/240 m và bán kính 400 km. Với Site04, đường ghép bán kính cố định giữa DEM 5 m và 80 m cho sai biệt góc p95 khoảng 0,189°. Chuyển sang ghép theo biên DEM 5 m giảm sai biệt còn 0,106–0,107° trên hai lưới phương vị. Báo cáo giữ cả số liệu trước và sau khi đổi. [Bảng kiểm tra Site04](../validation/lunarsight/v0.2.0/reports/Site04_seam_summary.csv)
 

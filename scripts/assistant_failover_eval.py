@@ -32,7 +32,7 @@ def main() -> int:
                            transports={"nvidia": httpx.MockTransport(rate_limit)})
         knowledge = ProjectKnowledge(raw_root=settings.lunarsight_raw_dataset_path or None)
         result = await ChatService(llm, knowledge).respond(
-            "What problem is LunarSight designed to solve?", [], {})
+            "What problem is HOSA designed to solve?", [], {})
         source_checks = []
         for citation in result.get("citations", []):
             current = knowledge.source(citation["source_id"])

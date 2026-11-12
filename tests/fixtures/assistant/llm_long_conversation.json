@@ -5,7 +5,7 @@
     "expected_intents": ["knowledge", "explain"],
     "require_citation": true,
     "turns": [
-      {"text": "LunarSight đang giải quyết câu hỏi gì?", "required_terms": ["Mặt Trăng", "chiếu sáng"]},
+      {"text": "HOSA đang giải quyết câu hỏi gì?", "required_terms": ["Mặt Trăng", "chiếu sáng"]},
       {"text": "Nó dùng dữ liệu NASA và JPL cho phần nào?", "required_terms": ["NASA", "JPL"]},
       {"text": "Hai observer P1 nào có ephemeris Horizons đã lưu?", "required_terms": ["Site01_P1", "Site04_P1"]},
       {"text": "Vậy dữ liệu đó có chứng minh coverage cho toàn bộ catalog không?", "required_terms": ["không", "catalog"], "forbidden_terms": ["Site02"]},

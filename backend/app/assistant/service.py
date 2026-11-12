@@ -62,23 +62,30 @@ class AssistantService:
         engine_ms = (perf_counter()-started)*1000
         plan, explain_usage, explanation_error, explain_model = None, None, None, None
         explain_started = perf_counter()
+        llm_calls = 1  # The parse call that created this draft.
         try:
-            reply = await self.llm.complete(ExplainPlan, explain_messages(evidence))
-            explain_usage = reply.usage
-            if valid_plan(reply.output, evidence):
-                plan = reply.output
-                explain_model = reply.model
-            else:
+            for repair in (False, True):
+                llm_calls += 1
+                reply = await self.llm.complete(ExplainPlan, explain_messages(evidence, repair=repair))
+                if explain_usage is None:
+                    explain_usage = {}
+                for name, value in reply.usage.items():
+                    if isinstance(value, (int, float)):
+                        explain_usage[name] = explain_usage.get(name, 0) + value
+                if valid_plan(reply.output, evidence):
+                    plan = reply.output
+                    explain_model = reply.model
+                    explanation_error = None
+                    break
                 explanation_error = "MODEL_EXPLANATION_INVALID"
         except AssistantError as error:
             explanation_error = error.code
-        if plan:
-            text, fact_ids = render(evidence, plan)
-        else:
-            text, fact_ids = ["Không thể tạo giải thích bằng LLM; kết quả engine vẫn có thẩm quyền trong evidence."], []
+        text, fact_ids = render(evidence, plan)
+        if not plan:
+            text.insert(0, "Tóm tắt từ kết quả tính toán: phần giải thích của LLM chưa được xác thực.")
         response = EvaluateResponse(evidence=evidence, explanation_mode="llm_plan" if plan else "llm_failed",
             explanation=text, explanation_fact_ids=fact_ids, explanation_error=explanation_error,
-            llm_calls=2, model=explain_model or draft.model,
+            llm_calls=llm_calls, model=explain_model or draft.model,
             provider=getattr(self.llm,"last_provider",None) or draft.provider,
             trace=[*draft.trace,*list(getattr(self.llm,"events",[]))],
             prompt_version=PROMPT_VERSION, token_usage={"parse": draft.parse_usage, "explain": explain_usage},

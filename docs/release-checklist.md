@@ -1,4 +1,4 @@
-# Checklist khóa bản LunarSight
+# Checklist khóa bản HOSA
 
 ## Kỹ thuật
 

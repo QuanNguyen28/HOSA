@@ -203,11 +203,11 @@ export default function App() {
             type="button"
             onClick={() => go("explore")}
             className="flex items-center gap-3"
-            aria-label="LunarSight, explore"
+            aria-label="HOSA, explore"
           >
             <Logo size={30} />
             <span className="font-display text-[15px] font-bold tracking-[0.12em] max-sm:hidden">
-              LunarSight
+              HOSA
             </span>
           </button>
           <p className="flex items-center gap-2 font-display text-[15px] font-semibold tracking-[0.06em] text-mute max-md:hidden">

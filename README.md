@@ -1,6 +1,6 @@
-# HOSA — LunarSight
+# HOSA
 
-LunarSight là nguyên mẫu hỗ trợ so sánh điều kiện chiếu sáng Mặt Trời và đường nhìn hình học tới Trái Đất tại các vị trí ứng viên ở cực nam Mặt Trăng.
+HOSA là nguyên mẫu hỗ trợ so sánh điều kiện chiếu sáng Mặt Trời và đường nhìn hình học tới Trái Đất tại các vị trí ứng viên ở cực nam Mặt Trăng.
 
 ## MVP frontend–backend tích hợp
 
@@ -98,7 +98,7 @@ curl http://localhost:8000/api/health
 Kết quả mẫu:
 
 ```json
-{"status":"ok","service":"lunarsight-api","version":"0.1.0"}
+{"status":"ok","service":"hosa-api","version":"0.1.0"}
 ```
 
 ## Khởi chạy Moon Explorer 3D

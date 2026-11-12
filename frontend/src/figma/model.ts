@@ -47,7 +47,7 @@ const A = (
 
 const P = (id: string, name: string, lat: number, lon: number, height_m: number): Site => ({
   id, name, lat, lon, height_m, group: "illumination", kind: "exact",
-  point: "Centre pixel of the verified 5 m/pixel LOLA terrain footprint used by LunarSight",
+  point: "Centre pixel of the verified 5 m/pixel LOLA terrain footprint used by HOSA",
   source: "NASA GSFC PGDA Product 78",
   url: "https://pgda.gsfc.nasa.gov/products/78",
 });

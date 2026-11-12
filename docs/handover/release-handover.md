@@ -1,4 +1,4 @@
-# Biên bản bàn giao LunarSight
+# Biên bản bàn giao HOSA
 
 Trạng thái: **DRAFT — chưa phải biên bản khóa bản**  
 Dataset version: `v0.2.0`  
@@ -22,7 +22,7 @@ thành công, phân tích Sun/Earth cho điểm tùy ý và thay đổi ngầm c
 
 | Mã | Artifact | Trạng thái | Bằng chứng |
 |---|---|---|---|
-| BD01 | Ứng dụng LunarSight | READY FOR RC | `frontend/`, `backend/`, application acceptance |
+| BD01 | Ứng dụng HOSA | READY FOR RC | `frontend/`, `backend/`, application acceptance |
 | BD02 | Mã nguồn và môi trường | READY FOR RC | README, lockfile, pyproject, scripts |
 | BD03 | Dữ liệu và cấu hình | READY FOR RC | `data/processed/lunarsight/v0.2.0`, `manifests/lunarsight` |
 | BD04 | Hồ sơ chất lượng | READY FOR RC | scientific validation, sensitivity, pytest, release audit |

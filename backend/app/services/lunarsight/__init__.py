@@ -1,1 +1,1 @@
-"""LunarSight terrain, ephemeris and mission-window analysis."""
+"""HOSA terrain, ephemeris and mission-window analysis."""

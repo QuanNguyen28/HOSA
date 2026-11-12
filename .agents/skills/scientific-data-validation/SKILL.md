@@ -1,6 +1,6 @@
 ---
 name: scientific-data-validation
-description: Validate LunarSight ENU horizons, three-state visibility, duration bounds and numerical sensitivity. Use before exporting derived lunar terrain results.
+description: Validate HOSA ENU horizons, three-state visibility, duration bounds and numerical sensitivity. Use before exporting derived lunar terrain results.
 ---
 
 # scientific-data-validation

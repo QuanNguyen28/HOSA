@@ -1,7 +1,7 @@
 [
   {
     "id":"FOCUS-PURPOSE",
-    "text":"LunarSight giúp tôi quyết định điều gì nếu lịch nhiệm vụ ở cực Nam Mặt Trăng thay đổi? Giải thích cho người mới.",
+    "text":"HOSA giúp tôi quyết định điều gì nếu lịch nhiệm vụ ở cực Nam Mặt Trăng thay đổi? Giải thích cho người mới.",
     "expected_intents":["knowledge","explain"],"require_citation":true,
     "forbidden_terms":["typed query","arrival_utc","1.344"]
   },

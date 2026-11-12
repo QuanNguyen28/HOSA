@@ -41,6 +41,29 @@ def test_two_calls_gated_engine_and_idempotent_replay(service, request_payload):
     assert len(service.llm.calls) == 2
 
 
+def test_chat_handoff_asks_only_for_missing_start_then_keeps_sites(service, request_payload):
+    request_payload.update(text="so sánh 2 điểm 04 và 01", require_explicit_start=True)
+    service.llm = FixtureLLM(default_patch(
+        arrival_shift_days=None, site_ids=["Site04_P1", "Site01_P1"],
+        source_quotes=["04 và 01"],
+    ))
+    missing = run(service.parse(ParseRequest.model_validate(request_payload)))
+    assert missing.status == "NEEDS_INPUT"
+    assert [q.field for q in missing.questions] == ["arrival_utc"]
+    assert missing.draft_id is None
+
+    date = "2026-11-17T00:00:00Z"
+    request_payload["clarifications"] = [{"question": missing.questions[0].question, "answer": date}]
+    service.llm = FixtureLLM(default_patch(
+        arrival_shift_days=None, arrival_utc=date, site_ids=["Site04_P1", "Site01_P1"],
+        source_quotes=["04 và 01", date],
+    ))
+    ready = run(service.parse(ParseRequest.model_validate(request_payload)))
+    assert ready.status == "READY" and ready.spec.arrival_utc == date
+    assert set(ready.spec.site_ids) == {"Site04_P1", "Site01_P1"}
+    assert service.llm.calls == ["RequestPatch"]  # Review only; no evaluation.
+
+
 def test_second_call_timeout_preserves_engine_result(service, request_payload):
     original = service.llm.complete
     async def timeout(contract, messages):
@@ -52,7 +75,9 @@ def test_second_call_timeout_preserves_engine_result(service, request_payload):
     result = run(service.evaluate(confirmation(parsed, request_payload)))
     assert result.evidence.status == "INSUFFICIENT_DATA"
     assert result.explanation_mode == "llm_failed" and result.explanation_error == "OPENROUTER_TIMEOUT"
-    assert not result.explanation_fact_ids and result.llm_calls == 2
+    assert result.llm_calls == 2
+    assert result.explanation[0].startswith("Tóm tắt từ kết quả tính toán")
+    assert all(key in result.evidence.facts for key in result.explanation_fact_ids)
 
 
 def test_evidence_links_limits_and_timeline_event(service, request_payload):
@@ -100,12 +125,42 @@ def test_no_feasible_never_becomes_pass(service, request_payload):
     lambda p: p["blocks"][0].update(fact_ids=["invented.fact"]),
     lambda p: p["blocks"][0].update(fact_ids=["Site04_P1.dark"]),
 ])
-def test_invalid_explanation_falls_back_without_third_call(service, request_payload, mutation):
+def test_invalid_explanation_remains_failed_after_one_repair(service, request_payload, mutation):
     service.llm = FixtureLLM(mutate=mutation)
     parsed = run(service.parse(ParseRequest.model_validate(request_payload)))
     result = run(service.evaluate(confirmation(parsed, request_payload)))
     assert result.explanation_mode == "llm_failed" and result.explanation_error == "MODEL_EXPLANATION_INVALID"
-    assert result.evidence.status == "INSUFFICIENT_DATA" and len(service.llm.calls) == 2
+    assert result.evidence.status == "INSUFFICIENT_DATA" and len(service.llm.calls) == 3
+    assert result.llm_calls == 3
+
+
+def test_empty_explanation_is_repaired_with_all_indeterminate_candidates(service, request_payload):
+    original = service.llm.complete
+    seen = []
+
+    async def incomplete_once(contract, messages):
+        result = await original(contract, messages)
+        if contract.__name__ != "ExplainPlan":
+            return result
+        payload = json.loads(messages[-1]["content"])
+        seen.append(payload)
+        assert payload["candidate_count"] == 2
+        assert all(row["decision"] == "INDETERMINATE" and row["allowed_reasons"]
+                   for row in payload["candidates"])
+        if len(seen) == 1:
+            result.output.blocks.clear()
+        else:
+            assert "previous plan failed validation" in messages[0]["content"]
+        return result
+
+    service.llm.complete = incomplete_once
+    parsed = run(service.parse(ParseRequest.model_validate(request_payload)))
+    result = run(service.evaluate(confirmation(parsed, request_payload)))
+    assert len(seen) == 2 and result.llm_calls == 3
+    assert result.explanation_mode == "llm_plan" and result.explanation_error is None
+    assert all(any(site in line for line in result.explanation)
+               for site in ("Site01_P1", "Site04_P1"))
+    assert not result.evidence.apply_allowed
 
 
 def test_missing_baseline_uses_zero_calls(service, request_payload):

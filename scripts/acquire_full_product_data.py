@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Acquire the official raw inputs needed by the complete LunarSight product.
+"""Acquire the official raw inputs needed by the complete HOSA product.
 
 The script is intentionally conservative: it never overwrites raw data, rejects
 HTML error pages, verifies expected byte counts, writes SHA-256 receipts and
@@ -173,7 +173,7 @@ def session() -> requests.Session:
     current.mount("https://", HTTPAdapter(max_retries=retry))
     current.headers.update(
         {
-            "User-Agent": "LunarSight/0.4 official-data-acquisition (NASA Space Apps project)",
+            "User-Agent": "HOSA/0.4 official-data-acquisition (NASA Space Apps project)",
             "Accept-Encoding": "identity",
         }
     )
