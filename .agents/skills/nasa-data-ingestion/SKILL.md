@@ -12,4 +12,4 @@ Inputs: NASA product page, exact asset URL and local storage budget. Outputs: or
 3. Keep raw files immutable. Verify a cache hit against source URL, byte count and SHA-256; fail closed if the receipt is missing. Never turn a partial file or HTML error into a dataset.
 4. Record acquisition UTC, source/final URLs, byte count and checksum. Return actual downloaded assets and explicit failed/blocked rows; a discovered URL is not an acquired file.
 
-Project workflow: `src/acquire.py`, `notebooks/01_data_collection.ipynb`. Verify with a real Site01 asset and an exact cache read.
+Project workflow: `scripts/notebooks/01_data_collection.ipynb` plus the receipts and manifests in the immutable delivery folder; inspect `scripts/prepare_point_data.py` before preparing runtime copies. The delivery archive is not the engine catalog by itself. Preserve source receipts and do not relabel unavailable data. Site06 ROI is unavailable from the source delivery; Site20 and Site20v2 refer to the same location group. Verify importer changes with archive checksum, traversal, missing-receipt, byte-count, and cache-hit cases before using a real Site01 asset.

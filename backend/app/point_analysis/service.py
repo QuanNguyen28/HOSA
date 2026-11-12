@@ -5,7 +5,7 @@ import json
 import logging
 import os
 from pathlib import Path
-from threading import Lock
+from threading import Event, Lock
 from uuid import uuid4
 
 from filelock import FileLock, Timeout
@@ -21,9 +21,23 @@ def get_point_pipeline():
     return PointAnalysisPipeline(repository_root() / "data/cache/point-analysis")
 
 
-def calculate(request, pipeline, progress=lambda stage: None, timeout=0):
+def calculate(request, pipeline, progress=lambda stage: None, timeout=0, cancel_event: Event | None = None):
     """Direct and queued requests share the same process-safe scientific cache lock."""
     pipeline.root.mkdir(parents=True, exist_ok=True)
+    if cancel_event is not None:
+        lock = FileLock(str(pipeline.root / "pipeline.lock"))
+        while True:
+            if cancel_event.is_set():
+                raise DomainError("POINT_ANALYSIS_CANCELLED", 409)
+            try:
+                lock.acquire(timeout=0)
+                break
+            except Timeout:
+                cancel_event.wait(0.1)
+        try:
+            return pipeline.run(request, progress)
+        finally:
+            lock.release()
     try:
         with FileLock(str(pipeline.root / "pipeline.lock"), timeout=timeout):
             return pipeline.run(request, progress)

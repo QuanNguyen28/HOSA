@@ -8,6 +8,8 @@ Chạy từ thư mục gốc bằng `python scripts/run_lunarsight.py --help`. X
 không qua LLM. Có chế độ gọi service cục bộ và gọi HTTP bằng `--base-url`.
 Xem [ví dụ CLI](../docs/demo/planning-cli.md).
 
+`assistant_chat.py` dùng API session/run cho hội thoại thật; `/result` hiển thị số liệu theo yêu cầu và `/unicode` kiểm tra dấu tiếng Việt tại máy. `open_assistant_terminal.ps1` cấu hình UTF-8 và có thể khởi động API local chạy nền. `provider_preflight.py`, `assistant_eval.py --live` và `assistant_failover_eval.py` là các công cụ gọi API thật; xem [hướng dẫn BE/LLM](../docs/assistant/BE_LLM_RELEASE.md). Credential chỉ lấy từ môi trường hoặc `.env` bị ignore.
+
 `contact_windows.py` tính cửa sổ nhìn thấy Trái Đất, phiên đủ dài, thời gian chờ
 và khoảng mất LOS từ JSON kết quả backend hoặc CSV interval gốc. Công cụ độc
 lập với phần tính DEM/JPL. Xem [hướng dẫn và giới hạn](../docs/demo/contact-windows.md).

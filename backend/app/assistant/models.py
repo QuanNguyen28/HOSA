@@ -157,11 +157,14 @@ class EvidenceBundle(Contract):
 
 class EvaluateResponse(Contract):
     evidence: EvidenceBundle
-    explanation_mode: Literal["llm_plan", "template_fallback"]
+    explanation_mode: Literal["llm_plan", "llm_failed"]
     explanation: list[str]
     explanation_fact_ids: list[str]
+    explanation_error: str | None = None
     llm_calls: int
     model: str
+    provider: str | None = None
+    trace: list[dict] = Field(default_factory=list)
     prompt_version: str
     token_usage: dict[str, dict | None]
     timings_ms: dict[str, float]

@@ -51,7 +51,8 @@ def test_second_call_timeout_preserves_engine_result(service, request_payload):
     parsed = run(service.parse(ParseRequest.model_validate(request_payload)))
     result = run(service.evaluate(confirmation(parsed, request_payload)))
     assert result.evidence.status == "INSUFFICIENT_DATA"
-    assert result.explanation_mode == "template_fallback" and result.llm_calls == 2
+    assert result.explanation_mode == "llm_failed" and result.explanation_error == "OPENROUTER_TIMEOUT"
+    assert not result.explanation_fact_ids and result.llm_calls == 2
 
 
 def test_evidence_links_limits_and_timeline_event(service, request_payload):
@@ -103,7 +104,7 @@ def test_invalid_explanation_falls_back_without_third_call(service, request_payl
     service.llm = FixtureLLM(mutate=mutation)
     parsed = run(service.parse(ParseRequest.model_validate(request_payload)))
     result = run(service.evaluate(confirmation(parsed, request_payload)))
-    assert result.explanation_mode == "template_fallback"
+    assert result.explanation_mode == "llm_failed" and result.explanation_error == "MODEL_EXPLANATION_INVALID"
     assert result.evidence.status == "INSUFFICIENT_DATA" and len(service.llm.calls) == 2
 
 

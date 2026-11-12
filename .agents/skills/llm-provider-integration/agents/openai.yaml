@@ -1,0 +1,3 @@
+interface:
+  display_name: "LLM Provider Integration"
+  short_description: "Configure and validate NVIDIA NIM and Gemini provider adapters"

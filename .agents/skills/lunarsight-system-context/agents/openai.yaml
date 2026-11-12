@@ -1,0 +1,5 @@
+interface:
+  display_name: "LunarSight System Context"
+  short_description: "Understand LunarSight system scope and scientific limits"
+policy:
+  allow_implicit_invocation: true
