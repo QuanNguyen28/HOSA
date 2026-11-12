@@ -4,6 +4,8 @@ import {
   EXAMPLES,
   boundsText,
   intervalAt,
+  missionHours,
+  missionEnd,
   type Bounds,
   type Candidate,
   type Mission,
@@ -94,7 +96,7 @@ export function NumberField({
   label: string;
   value: number;
   min: number;
-  max: number;
+  max?: number;
   disabled?: boolean;
   onChange: (v: number) => void;
 }) {
@@ -126,11 +128,31 @@ export function MissionFields({
   onChange: (m: Mission) => void;
   disabled: boolean;
 }) {
-  const change = <K extends keyof Mission>(key: K, value: Mission[K]) =>
-    onChange({ ...m, [key]: value });
+  const change = <K extends keyof Mission>(key: K, value: Mission[K]) => {
+    const next = { ...m, [key]: value };
+    if (next.timing === "end") next.hours = missionHours(next);
+    else next.end = missionEnd(next);
+    onChange(next);
+  };
   return (
     <fieldset disabled={disabled} className="space-y-3">
-      <div className="grid grid-cols-2 gap-3">
+      <label className="block">
+        <span className="eyebrow">Define mission by</span>
+        <select
+          aria-label="Define mission by"
+          className={`${inputClass} mt-1`}
+          value={m.timing}
+          onChange={(e) =>
+            change("timing", e.target.value as Mission["timing"])
+          }
+        >
+          <option value="hours">Duration in hours</option>
+          <option value="end">Target end date (UTC)</option>
+        </select>
+      </label>
+      <div
+        className={`grid gap-3 ${m.timing === "end" ? "grid-cols-1" : "grid-cols-2"}`}
+      >
         <label>
           <span className="eyebrow">From · UTC</span>
           <input
@@ -142,14 +164,32 @@ export function MissionFields({
             onChange={(e) => change("start", e.target.value)}
           />
         </label>
-        <NumberField
-          label="Mission hours"
-          value={m.hours}
-          min={1}
-          max={72}
-          onChange={(v) => change("hours", v)}
-        />
+        {m.timing === "hours" ? (
+          <NumberField
+            label="Mission hours"
+            value={m.hours}
+            min={1}
+            onChange={(v) => change("hours", v)}
+          />
+        ) : (
+          <label>
+            <span className="eyebrow">Target end · UTC</span>
+            <input
+              className={`${inputClass} mt-1`}
+              aria-label="Mission end UTC"
+              type="datetime-local"
+              step={300}
+              value={m.end}
+              onChange={(e) => change("end", e.target.value)}
+            />
+          </label>
+        )}
       </div>
+      <p className="text-[11px] text-mute">
+        {Number.isFinite(missionHours(m)) && missionHours(m) > 0
+          ? `${Number(missionHours(m).toFixed(4))} hours · ends ${missionEnd(m).replace("T", " ")} UTC`
+          : "Choose an end after the mission start."}
+      </p>
       <details>
         <summary className="eyebrow cursor-pointer py-1">
           Mission requirements
@@ -183,14 +223,14 @@ export function MissionFields({
               label="Contact duration · min"
               value={m.contact}
               min={0.01}
-              max={4320}
+              max={missionHours(m) * 60}
               onChange={(v) => change("contact", v)}
             />
             <NumberField
               label="Setup · min"
               value={m.setup}
               min={0}
-              max={4320}
+              max={missionHours(m) * 60}
               onChange={(v) => change("setup", v)}
             />
           </div>
@@ -206,7 +246,7 @@ export function MissionFields({
               label="First contact deadline · min"
               value={m.deadline}
               min={0}
-              max={m.hours * 60}
+              max={missionHours(m) * 60}
               onChange={(v) => change("deadline", v)}
             />
           </div>
@@ -218,19 +258,32 @@ export function MissionFields({
             label="Longest darkness preference · h"
             value={m.darkness}
             min={0}
-            max={72}
             onChange={(v) => change("darkness", v)}
           />
           <NumberField
             label="Longest Earth blackout preference · h"
             value={m.blackout}
             min={0}
-            max={72}
             onChange={(v) => change("blackout", v)}
           />
           <p className="text-[11px] text-mute">
             Darkness and blackout preferences are secondary; they do not reject
             a mission that meets primary requirements.
+          </p>
+          <label className="flex gap-2 text-xs text-soft">
+            <input
+              type="checkbox"
+              checked={m.resolve_indeterminate}
+              onChange={(e) =>
+                change("resolve_indeterminate", e.target.checked)
+              }
+            />
+            Complete inconclusive validation automatically
+          </label>
+          <p className="text-[11px] text-mute">
+            Check conservative mission bounds first; refine the horizon up to
+            twice only when needed. Requirements and validation tolerances stay
+            unchanged.
           </p>
           <label className="flex gap-2 text-xs text-soft">
             <input
@@ -444,16 +497,58 @@ export function ValidationInfo({
 }) {
   return (
     <div className="text-[11px] leading-relaxed text-mute">
-      <p className={result.validation.passed ? "text-mint" : "text-amber"}>
+      <p
+        className={
+          result.validation.passed || result.validation.mission_path?.passed
+            ? "text-mint"
+            : "text-amber"
+        }
+      >
         {result.validation.passed
           ? "Numerical checks passed"
-          : "Validation incomplete or failed"}{" "}
+          : result.validation.mission_path?.passed
+            ? "Mission requirement bounds passed; full-model checks need review"
+            : "Validation incomplete or failed"}{" "}
         · PROVISIONAL
       </p>
-      {!result.validation.passed && (
+      {!result.validation.passed && !result.validation.mission_path?.passed && (
         <p>
-          Sampled decision {result.nominal_sampled_decision ?? "undecided"};
-          final decision stays INDETERMINATE until required checks pass.
+          {result.decision === "FAIL"
+            ? "A hard requirement failed. FAIL is retained with these validation warnings."
+            : `Sampled decision ${result.nominal_sampled_decision ?? "undecided"}; PASS requires full or mission-path validation.`}
+        </p>
+      )}
+      {result.validation.mission_path?.passed && (
+        <p>
+          Verified for this sampled mission only. Full-circle accuracy and
+          physical DEM uncertainty are not certified.
+        </p>
+      )}
+      {result.validation.mission_path?.metrics_hours && (
+        <p>
+          Conservative bounds: sunlight{" "}
+          {boundsText(
+            result.validation.mission_path.metrics_hours.total_sun_hours,
+          )}{" "}
+          h; Earth LOS{" "}
+          {boundsText(
+            result.validation.mission_path.metrics_hours.total_earth_los_hours,
+          )}{" "}
+          h.
+        </p>
+      )}
+      {result.resolution?.enabled && (
+        <p>
+          {result.resolution.status === "resolved"
+            ? `Revalidated: ${result.resolution.initial_decision} → ${result.decision}`
+            : result.resolution.status === "not_needed"
+              ? "No additional validation needed."
+              : result.resolution.status === "hard_requirement_failed"
+                ? "Hard requirement failed; extra validation is not required to reject this request."
+                : "Additional validation could not resolve this request."}
+          {!!result.resolution.refinement_rounds &&
+            ` · ${result.resolution.refinement_rounds} refinement round(s)`}
+          {result.resolution.error_code && ` · ${result.resolution.error_code}`}
         </p>
       )}
       {!!result.validation.reason_codes?.length && (

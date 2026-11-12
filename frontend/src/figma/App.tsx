@@ -18,6 +18,7 @@ import {
   DEFAULT_MISSION,
   boundsText,
   missionIssue,
+  missionHours,
   missionRequest,
   planningRequest,
   type Candidate,
@@ -76,8 +77,9 @@ export default function App() {
   });
   const sites = useMemo(() => [...catalog, custom], [catalog, custom]);
   const site = sites.find((x) => x.id === siteId) ?? sites[0];
+  const hours = missionHours(mission);
   const start = Date.parse(mission.start + "Z"),
-    end = start + mission.hours * HOUR;
+    end = start + hours * HOUR;
   const [cursor, setCursor] = useState(Date.parse(DEFAULT_MISSION.start + "Z"));
   const time =
     Number.isFinite(start) && Number.isFinite(end)
@@ -156,7 +158,12 @@ export default function App() {
     const known = sites.find((t) => matches(t, c));
     if (known) setSiteId(known.id);
     else coordinate(c.coordinate.latitude_deg, c.coordinate.longitude_e_deg);
-    onMission({ ...mission, start: c.start_utc.slice(0, 16) });
+    onMission({
+      ...mission,
+      start: c.start_utc.slice(0, 16),
+      end: c.end_utc.slice(0, 16),
+      hours: (Date.parse(c.end_utc) - Date.parse(c.start_utc)) / HOUR,
+    });
     setCursor(Date.parse(c.start_utc));
     go("explore");
   };
@@ -186,10 +193,11 @@ export default function App() {
     setSpeed,
     setRange: (a: number, b: number) => {
       const hours = (b - a) / HOUR;
-      if (Number.isInteger(hours) && hours >= 1 && hours <= 72)
+      if (Number.isFinite(hours) && Number.isInteger(hours * 12) && hours >= 1)
         onMission({
           ...mission,
           start: new Date(a).toISOString().slice(0, 16),
+          end: new Date(b).toISOString().slice(0, 16),
           hours,
         });
     },
@@ -344,7 +352,7 @@ export default function App() {
                     key={c.candidate_id}
                     candidate={c}
                     name={sites.find((t) => matches(t, c))?.name ?? c.site_id}
-                    hours={mission.hours}
+                    hours={missionHours(mission)}
                     onOpen={() => open(c)}
                     recommended={
                       compared.result!.recommended_candidate_id ===
@@ -554,21 +562,21 @@ function Explore({
                 <MetricBar
                   label="Sunlight"
                   pair={r?.metrics_hours.total_sun_hours}
-                  hours={mission.hours}
+                  hours={missionHours(mission)}
                   color="#FBBF24"
                   icon={<SunIcon size={14} className="text-sun" />}
                 />
                 <MetricBar
                   label="Earth in view"
                   pair={r?.metrics_hours.total_earth_los_hours}
-                  hours={mission.hours}
+                  hours={missionHours(mission)}
                   color="#06B6D4"
                   icon={<EarthIcon size={14} className="text-earth" />}
                 />
                 <MetricBar
                   label="Both at once"
                   pair={r ? jointBounds(r) : undefined}
-                  hours={mission.hours}
+                  hours={missionHours(mission)}
                   color="#10B981"
                 />
                 {(

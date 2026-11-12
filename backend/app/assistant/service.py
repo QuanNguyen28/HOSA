@@ -18,7 +18,7 @@ class AssistantService:
         self.engine = engine or PlanningAdapter()
 
     async def parse(self, request: ParseRequest) -> ParseResponse:
-        caps = await run_in_threadpool(self.engine.capabilities)
+        caps = await run_in_threadpool(self.engine.capabilities, **({"resolve_indeterminate": True} if request.resolve_indeterminate else {}))
         issue = self.engine.baseline_issue(request, caps)
         if issue:
             return ParseResponse(status="NEEDS_INPUT", issues=[issue], questions=questions_for(issue), llm_calls=0)
@@ -42,8 +42,9 @@ class AssistantService:
             raise AssistantError("SPEC_CHANGED", 409)
         if digest(request.baseline.model_dump()) != draft.spec.baseline_hash:
             raise AssistantError("STALE_BASELINE", 409)
-        caps = await run_in_threadpool(self.engine.capabilities)
-        if caps["source_hash"] != draft.spec.source_hash:
+        caps = await run_in_threadpool(self.engine.capabilities, **({"resolve_indeterminate": True} if draft.spec.resolve_indeterminate else {}))
+        source_hash = caps.get("coordinate_source_hash") if draft.spec.data_source == "coordinate" else caps["source_hash"]
+        if source_hash != draft.spec.source_hash:
             raise AssistantError("STALE_DATASET", 409)
         draft, claimed = self.drafts.claim(request.draft_id)
         if not claimed:

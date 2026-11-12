@@ -11,15 +11,19 @@ class PlanningAdapter:
     def __init__(self, planner=None):
         self.planner = planner or PlanningService()
 
-    def capabilities(self):
-        return self.planner.capabilities()
+    def capabilities(self, resolve_indeterminate=False):
+        caps = self.planner.capabilities(resolve_indeterminate=True) if resolve_indeterminate else self.planner.capabilities()
+        q = CompareRequest(site_ids=[caps['scenario']['site_ids'][0]], arrival_utc=caps['scenario']['A_utc'],
+                           data_source='coordinate', min_sunlit_fraction=0., resolve_indeterminate=resolve_indeterminate)
+        return {**caps, 'coordinate_source_hash': self.planner.source_capabilities(q)['source_hash']}
 
     index = staticmethod(start_index)
     baseline_issue = staticmethod(baseline_issue)
     normalize = staticmethod(normalize_request)
 
     def evaluate(self, spec, run_id, spec_hash):
-        query = {"scenario_id": spec.scenario_id, "site_ids": spec.site_ids,
+        query = {"resolve_indeterminate": spec.resolve_indeterminate, "scenario_id": spec.scenario_id, "site_ids": spec.site_ids,
+                 "duration_hours": spec.duration_hours, "data_source": spec.data_source,
                  "arrival_utc": spec.arrival_utc, "constraints": spec.constraints,
                  "hardware": spec.hardware, "current_site_id": spec.current_site_id,
                  "min_sunlit_fraction": spec.min_sunlit_fraction, "min_earth_los_fraction": spec.min_earth_los_fraction, "rank_by": spec.rank_by,

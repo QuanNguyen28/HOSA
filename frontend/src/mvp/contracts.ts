@@ -10,6 +10,8 @@ export type Target = {
 };
 export type Mission = {
   start: string;
+  timing: "hours" | "end";
+  end: string;
   hours: number;
   panel: number;
   antenna: number;
@@ -21,12 +23,14 @@ export type Mission = {
   darkness: number;
   blackout: number;
   offline: boolean;
+  resolve_indeterminate: boolean;
 };
 export type MissionRequest = {
   latitude_deg: number;
   longitude_e_deg: number;
   start_utc: string;
   duration_hours: number;
+  end_utc: string;
   panel_height_m: number;
   antenna_height_m: number;
   min_sunlit_fraction: number;
@@ -38,9 +42,26 @@ export type MissionRequest = {
   };
   constraints: { max_darkness_hours: number; max_earth_blackout_hours: number };
   offline: boolean;
+  resolve_indeterminate: boolean;
+};
+export type Resolution = {
+  enabled?: boolean;
+  status?: string;
+  refinement_rounds?: number;
+  initial_decision?: Decision | null;
+  final_decision?: Decision | null;
+  initial_reason_codes?: string[];
+  remaining_reason_codes?: string[];
+  error_code?: string;
 };
 export type Validation = {
   passed: boolean;
+  mission_path?: {
+    passed: boolean;
+    scope?: string;
+    reason?: string;
+    metrics_hours?: Record<string, Bounds>;
+  };
   reason_codes?: string[];
   tolerance_status?: string;
   policy_version?: string;
@@ -71,6 +92,7 @@ export type PointResult = {
   constraint_checks: Record<string, Decision>;
   soft_constraint_checks: Record<string, Decision>;
   validation: Validation;
+  resolution?: Resolution;
   timeline: Interval[];
   contact_analysis?: Contact;
   method_version: string;
@@ -92,6 +114,7 @@ export type Candidate = {
   metrics: Record<string, Bounds>;
   constraint_states: Record<string, Decision>;
   validation: Validation;
+  resolution?: Resolution;
   coordinate?: { latitude_deg: number; longitude_e_deg: number };
   analysis_result_id?: string;
 };
@@ -108,6 +131,8 @@ export type PlanningResult = {
 };
 export const DEFAULT_MISSION: Mission = {
   start: "2026-11-24T00:00",
+  timing: "hours",
+  end: "2026-11-27T00:00",
   hours: 72,
   panel: 20,
   antenna: 20,
@@ -119,7 +144,18 @@ export const DEFAULT_MISSION: Mission = {
   darkness: 12,
   blackout: 6,
   offline: false,
+  resolve_indeterminate: true,
 };
+export function missionHours(m: Mission): number {
+  return m.timing === "end"
+    ? (Date.parse(m.end + "Z") - Date.parse(m.start + "Z")) / 3600000
+    : m.hours;
+}
+export function missionEnd(m: Mission): string {
+  const end = Date.parse(m.start + "Z") + missionHours(m) * 3600000;
+  const date = new Date(end);
+  return Number.isFinite(date.valueOf()) ? date.toISOString().slice(0, 16) : "";
+}
 // Coordinates of the two documented requests, not precomputed science values.
 export const EXAMPLES: Target[] = [
   {
@@ -144,7 +180,8 @@ export function missionRequest(m: Mission, target: Target): MissionRequest {
     latitude_deg: target.latitude,
     longitude_e_deg: target.longitude,
     start_utc: new Date(m.start + "Z").toISOString(),
-    duration_hours: m.hours,
+    duration_hours: missionHours(m),
+    end_utc: new Date(missionEnd(m) + "Z").toISOString(),
     panel_height_m: m.panel,
     antenna_height_m: m.antenna,
     min_sunlit_fraction: m.sun / 100,
@@ -159,6 +196,7 @@ export function missionRequest(m: Mission, target: Target): MissionRequest {
       max_earth_blackout_hours: m.blackout,
     },
     offline: m.offline,
+    resolve_indeterminate: m.resolve_indeterminate,
   };
 }
 export function planningRequest(m: Mission, targets: Target[]) {
@@ -184,33 +222,37 @@ export function planningRequest(m: Mission, targets: Target[]) {
 }
 export function missionIssue(m: Mission): string | null {
   const stamp = new Date(m.start + "Z");
+  const hours = missionHours(m);
   if (
     !Number.isFinite(stamp.valueOf()) ||
-    stamp.getUTCFullYear() < 2000 ||
-    stamp.getUTCFullYear() > 2100 ||
     stamp.getUTCMinutes() % 5 ||
     stamp.getUTCSeconds()
   )
-    return "Use a UTC start in 2000–2100 on the 5-minute grid.";
-  if (new Date(stamp.valueOf() + m.hours * 3600000).getUTCFullYear() > 2100)
-    return "The mission must finish within 2100.";
+    return "Use a valid UTC start on the 5-minute grid.";
+  const end = new Date(stamp.valueOf() + hours * 3600000);
+  if (!Number.isFinite(end.valueOf()))
+    return "Choose a valid mission end date.";
   const limits: Array<[number, number, number, string]> = [
-    [m.hours, 1, 72, "Mission duration"],
+    [hours, 1, Infinity, "Mission duration"],
     [m.panel, 0.01, 20, "Panel height"],
     [m.antenna, 0.01, 20, "Antenna height"],
     [m.sun, 0, 100, "Minimum sunlight"],
-    [m.contact, 0.01, 4320, "Contact duration"],
-    [m.setup, 0, 4320, "Setup"],
+    [m.contact, 0.01, hours * 60, "Contact duration"],
+    [m.setup, 0, hours * 60, "Setup"],
     [m.windows, 1, 1000, "Required windows"],
-    [m.deadline, 0, m.hours * 60, "First contact deadline"],
-    [m.darkness, 0, 72, "Darkness preference"],
-    [m.blackout, 0, 72, "Blackout preference"],
+    [m.deadline, 0, hours * 60, "First contact deadline"],
+    [m.darkness, 0, Infinity, "Darkness preference"],
+    [m.blackout, 0, Infinity, "Blackout preference"],
   ];
   for (const [v, lo, hi, name] of limits)
     if (!Number.isFinite(v) || v < lo || v > hi)
-      return `${name} must be between ${lo} and ${hi}.`;
-  if (!Number.isInteger(m.hours) || !Number.isInteger(m.windows))
-    return "Mission hours and required windows must be whole numbers.";
+      return Number.isFinite(hi)
+        ? `${name} must be between ${lo} and ${hi}.`
+        : `${name} must be a finite number of at least ${lo}.`;
+  if (Math.abs(hours * 12 - Math.round(hours * 12)) > 1e-7)
+    return "Use a mission duration or end date on the 5-minute grid.";
+  if (!Number.isInteger(m.windows))
+    return "Required windows must be a whole number.";
   return null;
 }
 export const timestamp = (v: string) =>

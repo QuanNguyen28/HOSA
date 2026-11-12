@@ -1,0 +1,11 @@
+{
+  "start_utc": "2026-11-17T00:00:00Z",
+  "panel_height_m": 1,
+  "antenna_height_m": 2,
+  "min_sunlit_fraction": 0.8,
+  "min_earth_los_fraction": 0.8,
+  "resolve_indeterminate": true,
+  "latitude_deg": -89.77979955709672,
+  "longitude_e_deg": 203.7337862603575,
+  "end_utc": "2026-11-20T00:00:00Z"
+}

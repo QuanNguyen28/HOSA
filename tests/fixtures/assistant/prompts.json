@@ -183,8 +183,11 @@
         "ba ngày"
       ]
     },
-    "expected_parse_status": "UNSUPPORTED_REQUIREMENT",
-    "expected_issue": "UNSUPPORTED_DURATION"
+    "expected_parse_status": "READY",
+    "expected_spec": {
+      "duration_hours": 48,
+      "data_source": "coordinate"
+    }
   },
   {
     "id": "A09",

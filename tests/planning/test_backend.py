@@ -37,7 +37,10 @@ def query():
 
 
 def search_query(query, **updates):
-    return SearchRequest(**{**query.model_dump(), "until_utc": "2026-11-24T00:00:00Z", "max_results": 3, **updates})
+    data = query.model_dump()
+    if ("arrival_utc" in updates or "duration_hours" in updates) and "end_utc" not in updates:
+        data.pop("end_utc", None)
+    return SearchRequest(**{**data, "until_utc": "2026-11-24T00:00:00Z", "max_results": 3, **updates})
 
 
 def test_comparison_uses_same_metrics_and_events_as_legacy(planner, query):
@@ -83,11 +86,12 @@ def test_search_prefilters_failed_validation_without_loading_details(planner, qu
     assert result.status == "INSUFFICIENT_DATA" and not result.candidates
 
 
-def test_nominal_fail_without_validation_is_not_a_confirmed_near_miss(planner, query):
+def test_search_hard_failure_is_not_hidden_by_validation_preflight(planner, query):
     result = planner.search(search_query(query, arrival_utc="2026-11-14T00:00:00Z", until_utc="2026-11-14T00:15:00Z"))
-    assert result.status == "INSUFFICIENT_DATA" and not result.apply_allowed
-    assert result.coverage['indeterminate'] == 2 and result.candidates == []
-    assert result.recommended_candidate_id is None
+    assert result.status == "NO_FEASIBLE_IN_EVALUATED_SET" and not result.apply_allowed
+    assert result.coverage['fail'] == 2 and result.coverage['indeterminate'] == 0
+    assert all(c.decision == 'FAIL' and c.validation['passed'] is False for c in result.candidates)
+    assert result.recommended_candidate_id is not None  # A rejected near miss, never applicable.
 
 
 def test_missing_interval_coverage_does_not_turn_into_a_pass(planner, query, monkeypatch):
@@ -114,7 +118,6 @@ def test_all_unknown_search_has_no_recommendation(planner, query, monkeypatch):
     ({"arrival_utc":"2026-11-17T00:05:00Z"}, "OFF_START_GRID"),
     ({"until_utc":"2026-11-17T00:00:00Z"}, "INVALID_SEARCH_RANGE"),
     ({"until_utc":"2026-11-28T00:15:00Z"}, "OUTSIDE_TIME_COVERAGE"),
-    ({"duration_hours":48}, "UNSUPPORTED_DURATION"),
     ({"hardware":{"sun_panel":3,"earth_antenna":2}}, "UNSUPPORTED_HARDWARE"),
     ({"site_ids":["Site99"]}, "UNSUPPORTED_SITE_SCOPE"),
     ({"expected_source_hash":"old"}, "STALE_DATASET"),

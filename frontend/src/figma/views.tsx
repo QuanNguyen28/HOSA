@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { api, useOperation } from "../mvp/api";
 import {
   missionIssue,
+  missionHours,
   planningRequest,
   type Candidate,
   type Mission,
@@ -140,8 +141,8 @@ export function Finder({
         </div>
         <p className="text-xs leading-relaxed text-mute">
           The end is exclusive for start times. Each candidate lasts{" "}
-          {mission.hours} hours. Only validated PASS missions can be returned;
-          returned missions at the same coordinate do not overlap.
+          {missionHours(mission)} hours. Only validated PASS missions can be
+          returned; returned missions at the same coordinate do not overlap.
         </p>
         <div className="flex flex-wrap gap-x-5 gap-y-2">
           {sites.map((t) => (
@@ -245,7 +246,7 @@ export function Finder({
                 key={c.candidate_id}
                 candidate={c}
                 name={sites.find((t) => matches(t, c))?.name ?? c.site_id}
-                hours={mission.hours}
+                hours={missionHours(mission)}
                 recommended={
                   c.candidate_id === search.result!.recommended_candidate_id
                 }

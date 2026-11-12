@@ -6,6 +6,7 @@ from app.planning.repository import digest
 from .models import ParseRequest, RequestPatch, RequestSpec, utc
 from .provider import AssistantError
 from .sites import resolve_coordinates
+from app.mission.models import MissionRequest
 
 
 def baseline_issue(request: ParseRequest, caps: dict) -> str | None:
@@ -14,12 +15,14 @@ def baseline_issue(request: ParseRequest, caps: dict) -> str | None:
         return "MISSING_BASELINE"
     if b.scenario_id != scenario["scenario_id"]:
         return "UNSUPPORTED_SCENARIO"
-    if b.duration_hours != scenario["D_hours"] or b.hardware.model_dump() != scenario["device_heights_m"]:
+    if b.hardware.model_dump() != scenario["device_heights_m"]:
         return "UNSUPPORTED_BASELINE_CONFIG"
     if b.current_site_id not in scenario["site_ids"]:
         return "UNSUPPORTED_BASELINE_SITE"
     try:
-        start_index(b.arrival_utc, scenario)
+        MissionRequest(site_id=b.current_site_id, start_utc=b.arrival_utc, duration_hours=b.duration_hours)
+        if b.duration_hours == scenario["D_hours"]:
+            start_index(b.arrival_utc, scenario)
     except (ValueError, AssistantError):
         return "INVALID_BASELINE_TIME"
     return None
@@ -38,8 +41,8 @@ def normalize_request(request: ParseRequest, patch: RequestPatch, caps: dict) ->
         raise AssistantError("UNSUPPORTED_SOURCE_QUOTE")
     if patch.arrival_shift_days is not None and patch.arrival_utc is not None:
         raise AssistantError("AMBIGUOUS_ARRIVAL")
-    if patch.duration_hours is not None and patch.duration_hours != scenario["D_hours"]:
-        raise AssistantError("UNSUPPORTED_DURATION")
+    duration = patch.duration_hours if patch.duration_hours is not None else b.duration_hours
+    coordinate = duration != scenario["D_hours"] or patch.mission_end_utc is not None
     at = utc(b.arrival_utc)
     if patch.arrival_shift_days is not None:
         try:
@@ -59,8 +62,11 @@ def normalize_request(request: ParseRequest, patch: RequestPatch, caps: dict) ->
         if search_from is None or search_until is None:
             raise AssistantError("INCOMPLETE_SEARCH_RANGE")
         try:
-            first = start_index(search_from, scenario)
-            stop = start_index(search_until, scenario, allow_stop=True)
+            if coordinate:
+                first, stop = utc(search_from), utc(search_until)
+            else:
+                first = start_index(search_from, scenario)
+                stop = start_index(search_until, scenario, allow_stop=True)
         except ValueError as error:
             raise AssistantError("UNRESOLVED_SEARCH_RANGE") from error
         if stop <= first:
@@ -69,7 +75,15 @@ def normalize_request(request: ParseRequest, patch: RequestPatch, caps: dict) ->
             raise AssistantError("AMBIGUOUS_ARRIVAL")
         at = utc(search_from)
     arrival = at.isoformat().replace("+00:00", "Z")
-    index = start_index(arrival, scenario)
+    if at.minute % 5 or at.second or at.microsecond:
+        raise AssistantError("OFF_START_GRID")
+    try:
+        duration_input = {"duration_hours": duration} if patch.mission_end_utc is None or patch.duration_hours is not None else {}
+        window = MissionRequest(site_id=b.current_site_id, start_utc=arrival, end_utc=patch.mission_end_utc, **duration_input)
+    except ValueError as error:
+        raise AssistantError("UNSUPPORTED_DURATION") from error
+    coordinate = window.duration_hours != scenario["D_hours"] or patch.mission_end_utc is not None
+    index = None if coordinate else start_index(arrival, scenario)
     selected = request.selected_site_ids if request.selected_site_ids is not None else [b.current_site_id]
     if patch.site_scope == "keep_current":
         selected = [b.current_site_id]
@@ -92,8 +106,10 @@ def normalize_request(request: ParseRequest, patch: RequestPatch, caps: dict) ->
     constraints = b.constraints.model_copy(update={k: getattr(patch, k) for k in
         ("max_darkness_hours", "max_earth_blackout_hours") if getattr(patch, k) is not None})
     return RequestSpec(
+        resolve_indeterminate=request.resolve_indeterminate,
         scenario_id=b.scenario_id, arrival_utc=arrival,
-        end_utc=(at + timedelta(hours=scenario["D_hours"])).isoformat().replace("+00:00", "Z"),
+        end_utc=window.end_utc, duration_hours=window.duration_hours,
+        data_source="coordinate" if coordinate else "snapshot",
         start_index=index, site_ids=selected, hardware=b.hardware,
         constraints=constraints,
         min_sunlit_fraction=patch.min_sunlit_fraction if patch.min_sunlit_fraction is not None else b.min_sunlit_fraction,
@@ -101,5 +117,6 @@ def normalize_request(request: ParseRequest, patch: RequestPatch, caps: dict) ->
         search_from_utc=utc(search_from).isoformat().replace("+00:00", "Z") if search_from else None,
         search_until_utc=utc(search_until).isoformat().replace("+00:00", "Z") if search_until else None,
         rank_by=patch.rank_by or context.rank_by,
-        current_site_id=b.current_site_id, baseline_hash=digest(b.model_dump()), source_hash=caps["source_hash"],
+        current_site_id=b.current_site_id, baseline_hash=digest(b.model_dump()),
+        source_hash=caps["coordinate_source_hash"] if coordinate else caps["source_hash"],
     )

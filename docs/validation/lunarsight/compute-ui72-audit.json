@@ -1,0 +1,166 @@
+{
+  "cached_inputs": {
+    "geometry_seconds": 0.008309777000249596,
+    "ephemeris_seconds": 0.32591910299743176,
+    "evaluation_seconds": 0.15829002400278114,
+    "elapsed_seconds": 1.53056964300049,
+    "cached_result_seconds": 0.2287760809995234,
+    "decision": "PASS",
+    "result_id": "d224b3d3a156c5053322f600a454cac64a9b278200c94c020789de0560941b99",
+    "duration_hours": 72.0,
+    "full_validation_passed": true,
+    "mission_bounds_passed": false,
+    "refinement_rounds": 0,
+    "stages": [
+      {
+        "stage": "verify_dem",
+        "seconds": 5.931000487180427e-06
+      },
+      {
+        "stage": "cached_horizon",
+        "seconds": 0.8574869719996059
+      },
+      {
+        "stage": "horizons_5min",
+        "seconds": 0.8634214750018145
+      },
+      {
+        "stage": "horizons_5min_sun_batch_1_of_1",
+        "seconds": 0.8912782859988511
+      },
+      {
+        "stage": "horizons_5min_earth_batch_1_of_1",
+        "seconds": 0.9314207940005872
+      },
+      {
+        "stage": "horizons_1min",
+        "seconds": 0.9623888390015054
+      },
+      {
+        "stage": "horizons_1min_sun_batch_1_of_1",
+        "seconds": 0.9779603259994474
+      },
+      {
+        "stage": "horizons_1min_earth_batch_1_of_1",
+        "seconds": 1.0855321220005862
+      },
+      {
+        "stage": "metrics_and_validation",
+        "seconds": 1.1893627390018082
+      },
+      {
+        "stage": "complete",
+        "seconds": 1.5292895060010778
+      }
+    ],
+    "metrics_hours": {
+      "total_sun_hours": [
+        72.0,
+        72.0
+      ],
+      "total_earth_los_hours": [
+        72.0,
+        72.0
+      ],
+      "longest_dark_hours": [
+        0.0,
+        0.0
+      ],
+      "longest_blackout_hours": [
+        0.0,
+        0.0
+      ],
+      "longest_joint_hours": [
+        72.0,
+        72.0
+      ]
+    },
+    "reason_codes": []
+  },
+  "uncached_terrain": {
+    "geometry_seconds": 18.86999212599767,
+    "ephemeris_seconds": 0.46901630699721863,
+    "evaluation_seconds": 0.19557144999998854,
+    "elapsed_seconds": 19.978680236999935,
+    "cached_result_seconds": 0.23218795999855502,
+    "decision": "PASS",
+    "result_id": "d224b3d3a156c5053322f600a454cac64a9b278200c94c020789de0560941b99",
+    "duration_hours": 72.0,
+    "full_validation_passed": true,
+    "mission_bounds_passed": false,
+    "refinement_rounds": 0,
+    "stages": [
+      {
+        "stage": "verify_dem",
+        "seconds": 6.105001375544816e-06
+      },
+      {
+        "stage": "seam_validation",
+        "seconds": 0.17767813300088164
+      },
+      {
+        "stage": "terrain_horizon",
+        "seconds": 0.7217430679993413
+      },
+      {
+        "stage": "radius_sensitivity",
+        "seconds": 12.636808723000286
+      },
+      {
+        "stage": "horizons_5min",
+        "seconds": 19.04711685499933
+      },
+      {
+        "stage": "horizons_5min_sun_batch_1_of_1",
+        "seconds": 19.078707074000704
+      },
+      {
+        "stage": "horizons_5min_earth_batch_1_of_1",
+        "seconds": 19.115358924998873
+      },
+      {
+        "stage": "horizons_1min",
+        "seconds": 19.146294354999554
+      },
+      {
+        "stage": "horizons_1min_sun_batch_1_of_1",
+        "seconds": 19.160735416000534
+      },
+      {
+        "stage": "horizons_1min_earth_batch_1_of_1",
+        "seconds": 19.332613290000154
+      },
+      {
+        "stage": "metrics_and_validation",
+        "seconds": 19.516148686001543
+      },
+      {
+        "stage": "complete",
+        "seconds": 19.973743162001483
+      }
+    ],
+    "metrics_hours": {
+      "total_sun_hours": [
+        72.0,
+        72.0
+      ],
+      "total_earth_los_hours": [
+        72.0,
+        72.0
+      ],
+      "longest_dark_hours": [
+        0.0,
+        0.0
+      ],
+      "longest_blackout_hours": [
+        0.0,
+        0.0
+      ],
+      "longest_joint_hours": [
+        72.0,
+        72.0
+      ]
+    },
+    "reason_codes": []
+  }
+}

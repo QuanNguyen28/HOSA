@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "duration_hours": 240.0,
+  "result_id": "011ddaf0226f97d38dbecb8f20311c204ae482974079a34c51630cbfbda66c56",
+  "direct_api_seconds_while_long_job_running": 0.24061982099919987,
+  "cross_routes": [
+    "point",
+    "compare",
+    "search",
+    "csv"
+  ],
+  "decision": "PASS",
+  "validation_passed": false,
+  "mission_path_passed": true
+}

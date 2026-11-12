@@ -34,6 +34,7 @@ type Capabilities = {
   };
 };
 type ParseRequest = {
+  resolve_indeterminate: boolean;
   text: string;
   baseline: Baseline;
   selected_site_ids: string[];
@@ -65,7 +66,18 @@ type Evaluation = {
     status: string;
     apply_allowed: boolean;
     recommended_site_id: string | null;
-    candidates: { site_id: string; decision: string }[];
+    candidates: {
+      site_id: string;
+      decision: string;
+      validation?: { passed: boolean; reason_codes?: string[] };
+      resolution?: {
+        enabled?: boolean;
+        status?: string;
+        initial_decision?: string;
+        refinement_rounds?: number;
+        error_code?: string;
+      };
+    }[];
   };
 };
 type Message = { who: "user" | "assistant"; text: string };
@@ -89,6 +101,7 @@ export function useAssistant() {
     search_until_utc: null,
   });
   const [busy, setBusy] = useState(false);
+  const [resolveIndeterminate, setResolveIndeterminate] = useState(true);
   const [outcome, setOutcome] = useState<Evaluation | null>(null);
   const active = useRef<AbortController | null>(null);
   const createBaseline = (c: Capabilities): Baseline => ({
@@ -140,6 +153,7 @@ export function useAssistant() {
         }
       : {
           text: answer,
+          resolve_indeterminate: resolveIndeterminate,
           baseline,
           selected_site_ids: selectedSites,
           conversation_history: history.slice(-8),
@@ -206,7 +220,7 @@ export function useAssistant() {
       setBaseline({
         scenario_id: spec.scenario_id,
         arrival_utc: spec.arrival_utc,
-        duration_hours: request.baseline.duration_hours,
+        duration_hours: spec.duration_hours,
         hardware: spec.hardware,
         constraints: spec.constraints,
         min_sunlit_fraction: spec.min_sunlit_fraction,
@@ -263,6 +277,9 @@ export function useAssistant() {
     setReview(null);
   };
   return {
+    hasPending: pending !== null,
+    resolveIndeterminate,
+    setResolveIndeterminate,
     caps,
     error,
     baseline,

@@ -66,9 +66,9 @@ def test_invalid_ephemeris_never_becomes_visible_or_blocked(present, elevation):
 
 def test_search_rejects_out_of_range_last_mission_before_computing(planner, monkeypatch):
     monkeypatch.setattr('app.planning.service.analyze_candidate', lambda *a, **kw: pytest.fail('search must reject before first analysis'))
-    query = comparison(mission(start_utc='2100-12-31T22:00:00Z'))
+    query = comparison(mission(start_utc='2026-11-17T00:00:00Z'))
     with pytest.raises(DomainError, match='INVALID_SEARCH_RANGE'):
-        planner.search(SearchRequest(**query.model_dump(), until_utc='2101-01-01T00:00:00Z'))
+        planner.search(SearchRequest(**query.model_dump(), until_utc='2026-11-16T00:00:00Z'))
 
 
 @pytest.mark.parametrize('operation,model', [('compare', CompareRequest), ('search', SearchRequest)])

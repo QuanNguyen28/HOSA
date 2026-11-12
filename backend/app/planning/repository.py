@@ -9,12 +9,13 @@ from uuid import uuid4
 from app.core.errors import DomainError
 from app.mission.identity import digest
 from app.mission.evaluation import EVALUATION_VERSION, VALIDATION_VERSION
+from app.mission.resolution import VERSION as RESOLUTION_VERSION, FINE_AZIMUTH_STEPS
 from app.services.lunarsight.visibility import SENSITIVITY_VERSION
 from app.services.lunarsight import planning as legacy
 from .metrics import METRICS
 from .models import PlanningResult, utc
 
-METHOD_VERSION = "planning-services-3.0.1"
+METHOD_VERSION = "planning-services-3.1.0"
 
 
 class SnapshotRepository:
@@ -39,7 +40,11 @@ class SnapshotRepository:
                 "supported_operations": ["compare", "window_search"], "ranking_metrics": list(METRICS),
                 "supported_contact_requirements": ["min_contact_minutes", "setup_minutes", "required_windows", "first_contact_deadline_minutes"],
                 "data_sources": ["snapshot", "coordinate"],
-                "coordinate_analysis": {"target": "site_id or exact coordinates", "duration_hours": [1, 72],
+                "indeterminate_resolution": {"request_field": "resolve_indeterminate", "default": False,
+                    "policy_version": RESOLUTION_VERSION, "max_refinement_rounds": len(FINE_AZIMUTH_STEPS),
+                    "fine_azimuth_steps_deg": list(FINE_AZIMUTH_STEPS), "max_search_evaluations": 128},
+                "coordinate_analysis": {"target": "site_id or exact coordinates", "duration_hours": {"minimum": 1, "maximum": None},
+                    "alternative_end_field": "end_utc", "duration_step_minutes": 5,
                     "start_step_minutes": 5, "max_search_evaluations": 128},
                 "warnings": payload["warnings"]}
 
@@ -102,7 +107,7 @@ def result_csv(result: PlanningResult) -> str:
     stream = io.StringIO()
     fields = ["candidate_id", "site_id", "start_utc", "end_utc", "decision", "dataset_version", "method_version", "source_hash",
               "min_sunlit_fraction", "min_earth_los_fraction", "soft_constraint_states_json", "soft_violations_json",
-              "sensitivity_status", "sensitivity_scope_json", "sensitivity_comparisons_json"]
+              "sensitivity_status", "sensitivity_scope_json", "sensitivity_comparisons_json", "resolution_json", "validation_json"]
     fields += [metric+suffix for metric in METRICS for suffix in ("_L", "_U")]
     writer = csv.DictWriter(stream, fieldnames=fields)
     writer.writeheader()
@@ -115,6 +120,8 @@ def result_csv(result: PlanningResult) -> str:
         row.update(sensitivity_status=candidate.sensitivity.get("status", "NOT_EVALUATED"),
                    sensitivity_scope_json=json.dumps(candidate.sensitivity.get("scope", {}), separators=(",", ":")),
                    sensitivity_comparisons_json=json.dumps(candidate.sensitivity.get("comparisons", {}), separators=(",", ":")))
+        row["resolution_json"] = json.dumps(candidate.resolution, separators=(",", ":"))
+        row["validation_json"] = json.dumps(candidate.validation, separators=(",", ":"))
         for metric, pair in candidate.metrics.items():
             row[metric+"_L"], row[metric+"_U"] = pair
         writer.writerow(row)

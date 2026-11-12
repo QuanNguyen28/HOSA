@@ -89,6 +89,17 @@ def test_t06_t07_horizons_parser_and_missing():
     with pytest.raises(ValueError,match="shape"): parse(fixture(good),kw,a,b,5,R+1000)
     assert request_params(10,220,-89.5,1000,1,R,R-100,a,b,5)["SITE_COORD"].endswith(",1.101000000'")
 
+
+def test_horizons_minute_precision_calendar_keeps_grid_validation():
+    a=pd.Timestamp("2026-11-14T00:00:00Z"); b=a+pd.Timedelta(minutes=10)
+    kw=request_params(10,220,-89.5,1000,1,R,R,a,b,5)
+    rows="2026-Nov-14 00:00,*, , 359.95, 2,\n2026-Nov-14 00:05,*, , 0, 2,\n2026-Nov-14 00:10,*, , 0.05, 2,"
+    df,meta,_=parse(fixture(rows),kw,a,b,5,R)
+    assert df.index.equals(pd.date_range(a,b,freq='5min'))
+    assert meta['missing_timestamps']==meta['missing_angles']==0
+    with pytest.raises(ValueError,match='off-grid'):
+        parse(fixture(rows.replace('00:05','00:07')),kw,a,b,5,R)
+
 def test_t08_t13_last_start_and_terminal_boundary():
     a=pd.Timestamp("2026-11-14T00:00:00Z");b=a+pd.Timedelta(days=14)
     last=valid_start(a,b,1343)

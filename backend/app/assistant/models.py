@@ -50,6 +50,7 @@ class ConversationTurn(Contract):
 
 
 class ParseRequest(Contract):
+    resolve_indeterminate: bool = Field(default=False, strict=True)
     text: str = Field(min_length=1, max_length=4000)
     baseline: Baseline | None = None
     selected_site_ids: list[str] | None = Field(default=None, max_length=2)
@@ -69,6 +70,7 @@ class RequestPatch(Contract):
     arrival_shift_days: Annotated[int, Field(strict=True)] | None
     arrival_utc: str | None
     duration_hours: Annotated[float, Field(strict=True, gt=0)] | None
+    mission_end_utc: str | None = None
     hardware_change: bool = Field(strict=True)
     site_scope: Literal["selected", "keep_current", "unspecified"]
     site_ids: list[str] | None = Field(default=None, min_length=1, max_length=2)
@@ -87,11 +89,14 @@ class RequestPatch(Contract):
 
 
 class RequestSpec(Contract):
+    resolve_indeterminate: bool = Field(default=False, strict=True)
     schema_version: Literal["2.0"] = "2.0"
     scenario_id: str
     arrival_utc: str
     end_utc: str
-    start_index: int
+    start_index: int | None
+    duration_hours: float = 72
+    data_source: Literal["snapshot", "coordinate"] = "snapshot"
     site_ids: list[str]
     hardware: Hardware
     constraints: Constraints

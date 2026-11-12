@@ -11,6 +11,7 @@ from uuid import uuid4
 from filelock import FileLock, Timeout
 
 from app.core.errors import DomainError
+from app.mission.identity import digest
 from app.services.lunarsight.point import repository_root
 from .models import JobStatus
 from .pipeline import PointAnalysisPipeline, atomic_json
@@ -22,10 +23,17 @@ def get_point_pipeline():
 
 
 def calculate(request, pipeline, progress=lambda stage: None, timeout=0):
-    """Direct and queued requests share the same process-safe scientific cache lock."""
+    """Serialize identical calculations; shared terrain/raw caches lock their own writes."""
     pipeline.root.mkdir(parents=True, exist_ok=True)
+    cached = pipeline.lookup_cached(request) if hasattr(pipeline, 'lookup_cached') else None
+    if cached is not None:
+        progress("cached")
+        return cached
     try:
-        with FileLock(str(pipeline.root / "pipeline.lock"), timeout=timeout):
+        locks = pipeline.root / "request-locks"
+        locks.mkdir(exist_ok=True)
+        key = digest(request.resolved().model_dump(exclude={"offline"}))
+        with FileLock(str(locks / f"{key}.lock"), timeout=timeout):
             return pipeline.run(request, progress)
     except Timeout as error:
         raise DomainError("POINT_ANALYSIS_BUSY", 429) from error
@@ -37,48 +45,69 @@ class PointAnalysisJobs:
         self.root.mkdir(parents=True, exist_ok=True)
         self.pipeline = pipeline or PointAnalysisPipeline(self.root)
         self.executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="lunar-point")
+        self.bulk_executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="lunar-long")
         self.max_pending = max_pending
         self.lock = Lock()
         self.active = set()
+        self.active_requests = {}
         self.owner_token = uuid4().hex
         (self.root / "owners").mkdir(exist_ok=True)
         self.owner_lock = FileLock(str(self.root / "owners" / f"{self.owner_token}.lock"), thread_local=False)
         self.owner_lock.acquire(timeout=0)
 
     def submit(self, request):
+        cached = self.pipeline.lookup_cached(request) if hasattr(self.pipeline, 'lookup_cached') else None
+        if cached is not None:
+            identifier = uuid4().hex
+            status = JobStatus(job_id=identifier, status="succeeded", stage="cached",
+                result_url=f"/api/lunar/point/analyses/{identifier}/result")
+            self.write(status, result_id=cached["result_id"], execution=cached.get("execution"), request=cached.get("request"))
+            return status
+        request_key = digest(request.resolved().model_dump())
         with self.lock:
+            if request_key in self.active_requests:
+                return self.status(self.active_requests[request_key])
             if len(self.active) >= self.max_pending:
                 raise DomainError("POINT_ANALYSIS_BUSY", 429)
             identifier = uuid4().hex
             self.active.add(identifier)
+            self.active_requests[request_key] = identifier
             status = JobStatus(job_id=identifier, status="queued", stage="queued")
-            self.write(status)
+            self.write(status, request=request.model_dump())
             try:
-                self.executor.submit(self.work, identifier, request)
+                self.schedule(identifier, request, request_key)
             except RuntimeError:
                 self.active.discard(identifier)
+                self.active_requests.pop(request_key, None)
                 raise DomainError("POINT_ANALYSIS_UNAVAILABLE", 503)
             return status
 
-    def work(self, identifier, request):
+    def schedule(self, identifier, request, request_key):
+        # A separate single-worker lane prevents multi-year data acquisition
+        # from starving interactive missions. This is not a duration limit.
+        executor = self.executor if request.duration_hours <= 168 else self.bulk_executor
+        executor.submit(self.work, identifier, request, request_key)
+
+    def work(self, identifier, request, request_key=None):
         def progress(stage):
-            self.write(JobStatus(job_id=identifier, status="running", stage=stage))
+            self.write(JobStatus(job_id=identifier, status="running", stage=stage), request=request.model_dump())
         try:
             progress("waiting_for_worker")
-            # Serialize across uvicorn processes as well as within this worker.
-            # Foundation Horizons cache uses fixed .part names for identical requests.
+            # Duplicate calculations serialize across processes. Geometry and
+            # JPL writes have separate resource locks for concurrent observers.
             result = calculate(request, self.pipeline, progress, timeout=-1)
             self.write(JobStatus(job_id=identifier, status="succeeded", stage="complete",
                 result_url=f"/api/lunar/point/analyses/{identifier}/result"), result_id=result["result_id"],
                 execution=result.get("execution"), request=result.get("request"))
         except DomainError as error:
-            self.write(JobStatus(job_id=identifier, status="failed", stage="failed", error_code=error.code))
+            self.write(JobStatus(job_id=identifier, status="failed", stage="failed", error_code=error.code), request=request.model_dump())
         except Exception:
             logging.getLogger(__name__).exception("Coordinate pipeline failed: job=%s", identifier)
-            self.write(JobStatus(job_id=identifier, status="failed", stage="failed", error_code="POINT_ANALYSIS_FAILED"))
+            self.write(JobStatus(job_id=identifier, status="failed", stage="failed", error_code="POINT_ANALYSIS_FAILED"), request=request.model_dump())
         finally:
             with self.lock:
                 self.active.discard(identifier)
+                self.active_requests.pop(request_key, None)
 
     def write(self, status, **extra):
         atomic_json(self.root / "jobs" / f"{status.job_id}.json", {**status.model_dump(),
@@ -125,6 +154,7 @@ class PointAnalysisJobs:
 
     def close(self):
         self.executor.shutdown(wait=True, cancel_futures=False)
+        self.bulk_executor.shutdown(wait=True, cancel_futures=False)
         self.owner_lock.release()
 
 

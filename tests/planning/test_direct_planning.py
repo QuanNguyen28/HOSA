@@ -39,7 +39,8 @@ def query(**updates):
 
 def test_sensitivity_reassesses_user_threshold_against_real_one_minute_data(planner):
     candidate = planner.compare(query()).candidates[0]
-    assert candidate.nominal_sampled_decision == "FAIL" and candidate.decision == "INDETERMINATE"
+    assert candidate.nominal_sampled_decision == candidate.decision == "FAIL"
+    assert candidate.validation["passed"] is False
     sensitivity = candidate.sensitivity
     assert sensitivity["status"] == "REVIEW" and sensitivity["time_sensitive"] is True
     time = sensitivity["comparisons"]["time_5min_vs_1min"]
@@ -137,7 +138,7 @@ def test_cli_reads_json_file_and_stdin(planner, capsys, tmp_path, monkeypatch):
     ["--arrival", "2026-11-14T00:00:00"],
     ["--max-earth-blackout-hours", "nan"],
     ["--sun-panel-height-m", "1"],
-    ["--duration-hours", "48"],
+    ["--duration-hours", "0"],
 ])
 def test_cli_invalid_input_fails_without_result(planner, capsys, extra):
     assert planning_cli.main([*flags(), *extra], service=planner) == 2

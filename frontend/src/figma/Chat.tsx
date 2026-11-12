@@ -29,9 +29,10 @@ export function ChatThread({
         aria-live="polite"
       >
         <p className="text-xs leading-relaxed text-mute">
-          Backend snapshot: Site01/Site04, 72 hours, panel 1 m / antenna 2 m.
-          This conversation keeps its own mission context. Coordinate/contact
-          settings are in Explore, Compare and Best dates.
+          Default mission: Site01/Site04, 72 hours, panel 1 m / antenna 2 m.
+          Longer missions use verified terrain and JPL data without a duration
+          cap. This conversation keeps its own mission context.
+          Coordinate/contact settings are in Explore, Compare and Best dates.
         </p>
         {baseline && (
           <p className="break-words font-mono text-[10px] text-mute">
@@ -51,6 +52,16 @@ export function ChatThread({
             server. Other views work without an LLM.
           </p>
         )}
+        <label className="flex items-start gap-2 text-xs text-mute">
+          <input
+            type="checkbox"
+            checked={a.resolveIndeterminate}
+            disabled={busy || !!review || a.hasPending}
+            onChange={(e) => a.setResolveIndeterminate(e.target.checked)}
+          />
+          Complete inconclusive validation automatically (can take several
+          minutes).
+        </label>
         {!messages.length && (
           <div>
             <p

@@ -6,11 +6,12 @@ import pandas as pd
 
 from app.core.errors import DomainError
 from app.services.lunarsight.contact_windows import analyze_contacts
+from app.services.lunarsight.decision_policy import gated_decision
 from app.services.lunarsight.durations import bounds
 from app.services.lunarsight.visibility import sensitivity, lookup, SENSITIVITY_VERSION
 from .metrics import hard_checks, assess_soft, validate_metrics
 
-EVALUATION_VERSION = "mission-evaluation-1.0.1"
+EVALUATION_VERSION = "mission-evaluation-1.2.0"
 VALIDATION_VERSION = "mission-validation-1.0"
 REQUIRED_COMPARISONS = ("azimuth_0.25_vs_0.125", "radius_400km_vs_300km", "time_5min_vs_1min")
 TOLERANCES = {"horizon_deg": .1, "event_minutes": 5, "duration_minutes": 10}
@@ -39,9 +40,7 @@ def constraint_checks(metric, request, frame=None):
     if request.contact_requirements is not None:
         if frame is None:
             raise DomainError("ENGINE_CONTRACT_ERROR", 502)
-        contact = analyze_contacts({"request": request.model_dump(), "end_utc": request.end_utc,
-            "timeline": records(frame[["start_utc", "end_utc", "earth_state"]])},
-            **request.contact_requirements.model_dump())
+        contact = frame_contacts(request, frame)
         checks.update({"contact." + key: value for key, value in contact["requirements"]["sampled_checks"].items()})
     return checks
 
@@ -54,18 +53,29 @@ def decision(checks):
 def events(frame):
     output = []
     for key in ("sun_state", "earth_state", "joint_state"):
-        start, previous = None, None
-        for row in frame.itertuples():
-            state = getattr(row, key)
-            if state != previous:
-                if previous is not None:
-                    output.append({"target": key.removesuffix("_state"), "state": previous,
-                                   "start_utc": start.isoformat(), "end_utc": row.start_utc.isoformat()})
-                start, previous = row.start_utc, state
-        if previous is not None:
-            output.append({"target": key.removesuffix("_state"), "state": previous,
-                           "start_utc": start.isoformat(), "end_utc": frame.end_utc.iloc[-1].isoformat()})
+        state = frame[key].to_numpy()
+        starts = np.r_[0, np.flatnonzero(state[1:] != state[:-1]) + 1] if len(state) else []
+        for a, b in zip(starts, [*starts[1:], len(state)]):
+            output.append({"target": key.removesuffix("_state"), "state": str(state[a]),
+                           "start_utc": frame.start_utc.iloc[a].isoformat(),
+                           "end_utc": frame.end_utc.iloc[b-1].isoformat()})
     return output
+
+
+def frame_contacts(request, frame, payload=None):
+    """Losslessly coalesce Earth-state runs before contact analysis.
+
+    Preserve the native source step separately. This avoids serializing and
+    parsing every timestamp repeatedly during sensitivity checks.
+    """
+    state = frame.earth_state.to_numpy()
+    starts = np.r_[0, np.flatnonzero(state[1:] != state[:-1]) + 1]
+    intervals = [(frame.start_utc.iloc[a], frame.end_utc.iloc[b-1], str(state[a]))
+                 for a, b in zip(starts, [*starts[1:], len(state)])]
+    step = float((frame.end_utc-frame.start_utc).dt.total_seconds().max()/60)
+    payload = payload if payload is not None else {"request": request.model_dump(), "end_utc": request.end_utc}
+    return analyze_contacts(payload, _normalized=(intervals, pd.Timestamp(request.start_utc), pd.Timestamp(request.end_utc), step),
+                            **request.contact_requirements.model_dump())
 
 
 def angle_difference(base, alternative):
@@ -80,13 +90,14 @@ def angle_difference(base, alternative):
 
 
 def validate(request, frame, alternatives, angles, *, terrain_complete,
-             ephemeris_complete, seams, references, evidence_checks=()):
+             ephemeris_complete, seams, references, evidence_checks=(),
+             azimuth_comparison_name="azimuth_0.25_vs_0.125"):
     """Missing comparisons fail closed, regardless of nominal feasibility."""
     metric = metrics(frame)
     checks = constraint_checks(metric, request, frame)
     diagnostics = {}
     reasons = []
-    for name in REQUIRED_COMPARISONS:
+    for name in (azimuth_comparison_name, *REQUIRED_COMPARISONS[1:]):
         variant = alternatives.get(name)
         if variant is None:
             diagnostics[name] = {"passed": False, "reason": "COMPARISON_EVIDENCE_MISSING"}
@@ -100,16 +111,17 @@ def validate(request, frame, alternatives, angles, *, terrain_complete,
         angle_pass = name == "time_5min_vs_1min" or bool(angle) and all(
             item["max_abs_deg"] is not None and item["max_abs_deg"] <= TOLERANCES["horizon_deg"]
             for item in angle.values())
-        passed = (max(max(values) for values in deltas.values()) <= TOLERANCES["duration_minutes"]
+        nonangular_passed = (max(max(values) for values in deltas.values()) <= TOLERANCES["duration_minutes"]
             and all(item["events_first"] == item["events_second"]
                     and item["matched_first_within_15min"] == item["events_first"]
                     and (item["max_matched_event_shift_minutes"] or 0) <= TOLERANCES["event_minutes"]
                     for item in temporal.values())
-            and angle_pass and variant_checks == checks)
+            and variant_checks == checks)
+        passed = nonangular_passed and angle_pass
         diagnostics[name] = {"duration_delta_minutes": deltas, "temporal": temporal,
             "angles_by_height": angle, "constraint_checks": variant_checks,
             "metrics_hours": other, "soft_constraint_checks": assess_soft(other, request.constraints)[0],
-            "passed": bool(passed)}
+            "nonangular_passed": bool(nonangular_passed), "passed": bool(passed)}
         if not passed:
             reasons.append(name + ":SENSITIVITY_FAILED")
     if not terrain_complete:
@@ -137,7 +149,7 @@ def evaluate(request, frame, validation):
     metric = metrics(frame)
     checks = constraint_checks(metric, request, frame)
     nominal = decision(checks.values()) if checks else None
-    final = nominal if nominal is None or validation.get("passed") is True else "INDETERMINATE"
+    final = gated_decision(nominal, validation)
     soft, soft_violations = assess_soft(metric, request.constraints)
     result = {"metrics_hours": metric, "constraint_checks": checks,
         "nominal_sampled_decision": nominal, "decision": final,
@@ -145,9 +157,8 @@ def evaluate(request, frame, validation):
         "requirement_policy": "availability-and-contact-windows-v1" if request.contact_requirements else "availability-fractions-v1",
         "validation": validation}
     if request.contact_requirements is not None:
-        result["contact_analysis"] = analyze_contacts({"request": request.model_dump(),
-            "end_utc": request.end_utc, "timeline": records(frame[["start_utc", "end_utc", "earth_state"]]),
-            "decision": final, "validation": validation}, **request.contact_requirements.model_dump())
+        result["contact_analysis"] = frame_contacts(request, frame, {"request": request.model_dump(),
+            "end_utc": request.end_utc, "decision": final, "validation": validation})
     return result
 
 

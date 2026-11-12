@@ -8,7 +8,7 @@ TEMPLATES = {
     "timezone": "Thời gian bạn vừa nêu theo múi giờ nào? Ví dụ UTC hoặc +07:00.",
     "search_range": "Bạn cho phép đổi ngày trong khoảng nào? Nêu đủ hai mốc ISO có múi giờ; mốc cuối không bao gồm.",
     "site_scope": "Bạn muốn giữ điểm hiện tại hay chọn Site01_P1, Site04_P1 hoặc cả hai?",
-    "mission_duration": "Thời lượng nhiệm vụ là bao nhiêu? Dữ liệu demo hiện hỗ trợ 72 giờ.",
+    "mission_duration": "Bạn muốn nhiệm vụ kéo dài bao nhiêu giờ, hoặc kết thúc vào ngày/giờ UTC nào? Thời lượng cần nằm trên lưới 5 phút.",
     "constraints": "Bạn cần tối thiểu bao nhiêu % thời gian có nắng và có Earth LOS? Có muốn đặt thêm mong muốn mềm về khoảng tối hoặc mất LOS liên tục không?",
     "request": "Bạn hãy nêu lại phần cần thay đổi cụ thể hơn.",
 }

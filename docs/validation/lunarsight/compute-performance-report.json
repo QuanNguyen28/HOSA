@@ -1,0 +1,13 @@
+{
+  "result_id": "011ddaf0226f97d38dbecb8f20311c204ae482974079a34c51630cbfbda66c56",
+  "duration_hours": 240.0,
+  "native_intervals": 2880,
+  "cached_request_median_seconds": 0.229553223000039,
+  "contact_reference_median_seconds": 0.06785910200051148,
+  "contact_optimized_median_seconds": 0.0005280940004013246,
+  "contact_speedup": 128.49814985389347,
+  "contact_outputs_identical": true,
+  "timeline_dataframe_bytes_before": 996612,
+  "timeline_dataframe_bytes_with_categories": 256714,
+  "scope": "Microbenchmark only; excludes cold terrain scans and uncached JPL network time."
+}
