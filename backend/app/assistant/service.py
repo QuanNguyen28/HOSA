@@ -12,6 +12,7 @@ from .prompts import PROMPT_VERSION, explain_messages, parse_messages
 from .provider import AssistantError, JsonLLM
 from .store import Draft, DraftStore
 from .language import request_language
+from .start_time import reconcile_start, start_context
 
 
 class AssistantService:
@@ -26,18 +27,21 @@ class AssistantService:
         if issue:
             return ParseResponse(status="NEEDS_INPUT", issues=[issue], questions=questions_for(issue, language=language), llm_calls=0)
         reply = await self.llm.complete(RequestPatch, parse_messages(request, caps))
+        language = request_language(request, reply.output.response_language)
+        patch = reconcile_start(request, reply.output, caps['scenario']['D_hours'])
         try:
-            spec = self.engine.normalize(request, reply.output, caps)
+            spec = self.engine.normalize(request, patch, caps)
         except AssistantError as error:
             status = "UNSUPPORTED_REQUIREMENT" if error.code.startswith("UNSUPPORTED") else "NEEDS_INPUT"
             return ParseResponse(status=status, issues=[error.code], questions=questions_for(
-                error.code, reply.output, baseline_duration_hours=request.baseline.duration_hours, language=language), patch=reply.output, llm_calls=1)
+                error.code, patch, baseline_duration_hours=request.baseline.duration_hours, language=language,
+                start=start_context(request)), patch=patch, llm_calls=1)
         spec_hash = digest(spec.model_dump())
         identifier = self.drafts.create(Draft(spec, spec_hash, monotonic()+self.settings.assistant_draft_ttl_seconds,
             reply.latency_ms, reply.model, parse_usage=reply.usage,
             provider=getattr(self.llm,"last_provider",None),trace=list(getattr(self.llm,"events",[])), language=language),
             self.settings.assistant_max_drafts)
-        return ParseResponse(status="READY", issues=[], patch=reply.output, draft_id=identifier, spec_hash=spec_hash,
+        return ParseResponse(status="READY", issues=[], patch=patch, draft_id=identifier, spec_hash=spec_hash,
             baseline_hash=spec.baseline_hash, spec=spec, llm_calls=1)
 
     async def evaluate(self, request: EvaluateRequest) -> EvaluateResponse:

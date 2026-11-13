@@ -2,7 +2,7 @@
 from .models import ClarificationQuestion
 
 TEMPLATES = {
-    "arrival_utc": "Bạn muốn hạ cánh lúc nào? Cho biết đầy đủ năm, giờ và múi giờ; ví dụ 2026-11-17T00:00:00Z, hoặc nêu rõ lùi bao nhiêu ngày.",
+    "arrival_utc": "Bạn muốn bắt đầu nhiệm vụ lúc nào? Bạn có thể viết tự nhiên, ví dụ ngày 24 tháng 11 năm 2026 lúc 9 giờ UTC, hoặc nêu rõ lùi bao nhiêu ngày.",
     "year": "Ngày hạ cánh thuộc năm nào?",
     "time": "Bạn muốn hạ cánh lúc mấy giờ?",
     "timezone": "Thời gian bạn vừa nêu theo múi giờ nào? Ví dụ UTC hoặc +07:00.",
@@ -33,7 +33,7 @@ ALIASES = {"arrival": "arrival_utc", "date": "arrival_utc", "arrival_change": "a
 
 
 EN_TEMPLATES = {
-    'arrival_utc': 'When should the mission start? Please provide a date, time and time zone, such as 2026-11-17T00:00:00Z.',
+    'arrival_utc': 'When should the mission start? You can write a date, time and time zone naturally, for example 24 November 2026 at 9 AM UTC.',
     'year': 'Which year is the arrival date in?',
     'time': 'What time should the mission start?',
     'timezone': 'Which time zone should I use, for example UTC or +07:00?',
@@ -53,7 +53,7 @@ EN_ISSUES = {
 }
 
 
-def questions_for(issue: str, patch=None, *, baseline_duration_hours=None, language='vi'):
+def questions_for(issue: str, patch=None, *, baseline_duration_hours=None, language='vi', start=None):
     fields = ISSUE_FIELDS.get(issue, [])
     if issue == "UNRESOLVED_FIELDS" and patch:
         fields = [ALIASES.get(field, field) for field in patch.unresolved_fields] or [q.field for q in patch.clarification_questions]
@@ -63,6 +63,11 @@ def questions_for(issue: str, patch=None, *, baseline_duration_hours=None, langu
     proposals = {q.field: q.question for q in patch.clarification_questions} if patch else {}
     result = []
     for field in fields[:3]:
+        if field == 'arrival_utc' and start and start['ambiguous_date']:
+            text = ('Which day and month do you mean? For example, write 24 November 2026.' if language == 'en'
+                    else 'Bạn muốn nói ngày nào, tháng nào? Ví dụ: ngày 24 tháng 11 năm 2026.')
+            result.append(ClarificationQuestion(field=field, question=text))
+            continue
         if language == 'en':
             text = EN_ISSUES.get(issue, EN_TEMPLATES[field])
             if issue == 'DURATION_CONFIRMATION_REQUIRED':
@@ -71,7 +76,7 @@ def questions_for(issue: str, patch=None, *, baseline_duration_hours=None, langu
                         'use a different duration, or end at a specific date and time?')
             result.append(ClarificationQuestion(field=field, question=text))
             continue
-        text = TEMPLATES[field] if field == 'mission_duration' else proposals.get(field) or TEMPLATES[field]
+        text = TEMPLATES[field] if field == 'mission_duration' or start else proposals.get(field) or TEMPLATES[field]
         if issue == 'DURATION_CONFIRMATION_REQUIRED':
             prior = f'{baseline_duration_hours:g} giờ' if baseline_duration_hours is not None else 'thời lượng riêng'
             text = (f'Lượt trước dùng {prior}. Với ngày bắt đầu mới, '

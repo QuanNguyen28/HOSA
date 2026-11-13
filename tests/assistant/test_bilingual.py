@@ -13,6 +13,8 @@ from conftest import FixtureLLM, default_patch
 @pytest.mark.parametrize('text,expected', [
     ('Compare IM-1 and IM-2.', 'en'),
     ('Analyze IM-1 for 24 hours.', 'en'),
+    ('explore IM-1', 'en'),
+    ('November 24, 2026 at 09:00 UTC', 'en'),
     ('So sánh IM-1 và IM-2.', 'vi'),
     ('so sanh hai diem trong 24 gio', 'vi'),
     ('Hãy trả lời bằng tiếng Anh.', 'en'),
@@ -27,6 +29,35 @@ def test_short_followup_retains_conversation_language(request_payload):
     request_payload.update(text='24', conversation_history=[{
         'text':'Analyze IM-1.', 'outcome':'evaluated', 'summary':''}])
     assert request_language(ParseRequest.model_validate(request_payload)) == 'en'
+
+
+def test_latest_user_clarification_can_switch_language(request_payload):
+    request_payload.update(text='Phân tích IM-1', clarifications=[
+        {'question': 'Bạn muốn bắt đầu khi nào?', 'answer': 'Please answer in English.'}])
+    assert request_language(ParseRequest.model_validate(request_payload)) == 'en'
+
+
+def test_numeric_clarification_does_not_inherit_assistant_question_language(request_payload):
+    request_payload.update(text='explore IM-1', clarifications=[
+        {'question': 'Bạn muốn bắt đầu khi nào?', 'answer': '11/24/2026'}])
+    assert request_language(ParseRequest.model_validate(request_payload)) == 'en'
+
+
+def test_model_language_supports_wording_outside_detector(service, request_payload):
+    text = 'Investigate IM-1'
+    request_payload.update(text=text, require_explicit_start=True, conversation_history=[{
+        'text': 'Phân tích IM-2', 'outcome': 'evaluated', 'summary': ''}])
+    service.llm = FixtureLLM(default_patch(arrival_shift_days=None,
+        response_language='en', source_quotes=[text]))
+    result = asyncio.run(service.parse(ParseRequest.model_validate(request_payload)))
+    assert result.status == 'NEEDS_INPUT'
+    assert 'When should the mission start' in result.questions[0].question
+
+
+def test_model_language_does_not_switch_a_timestamp_only_turn(request_payload):
+    request_payload.update(text='2026-11-24T09:00:00Z', conversation_history=[{
+        'text': 'Phân tích IM-1', 'outcome': 'evaluated', 'summary': ''}])
+    assert request_language(ParseRequest.model_validate(request_payload), 'en') == 'vi'
 
 
 def test_every_known_clarification_has_an_english_response():

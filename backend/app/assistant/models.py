@@ -69,6 +69,7 @@ class ParseRequest(Contract):
 
 
 class RequestPatch(Contract):
+    response_language: Literal["en", "vi"] | None = None
     arrival_shift_days: Annotated[int, Field(strict=True)] | None
     arrival_utc: str | None
     duration_hours: Annotated[float, Field(strict=True, gt=0)] | None
