@@ -13,6 +13,9 @@ class AssistantSettings(BaseSettings):
     llm_proxy_model: str = ""
     llm_proxy_response_format: str = Field(default="json_schema", pattern="^(json_schema|json_object)$")
     llm_proxy_max_output_tokens: int | None = Field(default=None, ge=128)
+    # Passed through LiteLLM as reasoning_effort; "low" halves Gemini latency
+    # for these structured calls. Unset keeps the provider's default thinking.
+    llm_proxy_reasoning_effort: str | None = Field(default=None, pattern="^(none|minimal|low|medium|high)$")
     nvidia_api_key: SecretStr | None = None
     nvidia_model: str = "deepseek-ai/deepseek-v4.1-flash"
     nvidia_base_url: str = "https://integrate.api.nvidia.com/v1"

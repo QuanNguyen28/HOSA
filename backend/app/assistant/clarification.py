@@ -6,7 +6,7 @@ TEMPLATES = {
     "year": "Ngày hạ cánh thuộc năm nào?",
     "time": "Bạn muốn hạ cánh lúc mấy giờ?",
     "timezone": "Thời gian bạn vừa nêu theo múi giờ nào? Ví dụ UTC hoặc +07:00.",
-    "search_range": "Bạn cho phép đổi ngày trong khoảng nào? Nêu đủ hai mốc ISO có múi giờ; mốc cuối không bao gồm.",
+    "search_range": "Bạn cho phép chọn ngày bắt đầu trong khoảng nào? Ví dụ: từ 17/11/2026 00:00 UTC đến trước 24/11/2026 00:00 UTC.",
     "site_scope": "Bạn muốn phân tích hoặc so sánh điểm nào? Hãy dùng tên hoặc mã trong danh mục Compare.",
     "mission_duration": "Bạn muốn nhiệm vụ kéo dài bao nhiêu giờ, hoặc kết thúc vào ngày/giờ UTC nào? Thời lượng cần nằm trên lưới 5 phút.",
     "constraints": "Bạn cần tối thiểu bao nhiêu % thời gian có nắng và có Earth LOS? Có muốn đặt thêm mong muốn mềm về khoảng tối hoặc mất LOS liên tục không?",
@@ -20,6 +20,7 @@ ISSUE_FIELDS = {
     "INVALID_COORDINATE_ARRIVAL": ["arrival_utc"],
     "INCOMPLETE_SEARCH_RANGE": ["search_range"], "UNRESOLVED_SEARCH_RANGE": ["search_range"],
     "INVALID_SEARCH_RANGE": ["search_range"], "OUTSIDE_TIME_COVERAGE": ["arrival_utc"],
+    "SEARCH_TOO_LARGE": ["search_range"], "INVALID_SEARCH_STEP": ["search_range"],
     "OFF_START_GRID": ["arrival_utc"], "UNSUPPORTED_DURATION": ["mission_duration"],
     "DURATION_CONFIRMATION_REQUIRED": ["mission_duration"],
     "UNSUPPORTED_BASELINE_CONFIG": ["mission_duration"], "UNSUPPORTED_REQUIREMENT": ["request"],
@@ -50,6 +51,12 @@ EN_ISSUES = {
     'INVALID_COORDINATE_ARRIVAL': 'Please supply a start date and time with a time zone on the exact 5-minute grid.',
     'MISSING_BASELINE': 'Please provide the original mission start, duration, site and hardware before changing its schedule.',
     'UNSUPPORTED_SITE_COORDINATES': 'These coordinates are outside the supported chat coordinate scope. Please select a supported catalog site.',
+    'AMBIGUOUS_SITE_SELECTION': ('I am not sure which catalog site that name refers to. '
+                                 'Please write the exact name, for example Connecting Ridge, Shackleton Rim or IM-1.'),
+    'SEARCH_TOO_LARGE': ('That search is too long for one request: I can try at most 128 start times '
+                         '(64 per site when comparing two). How should I narrow the date range?'),
+    'INVALID_SEARCH_STEP': ('The search step must be a multiple of 5 minutes that divides the range evenly. '
+                            'Which step should I use, for example 30 minutes or 1 hour?'),
 }
 
 
@@ -85,6 +92,15 @@ def questions_for(issue: str, patch=None, *, baseline_duration_hours=None, langu
             text = "Dữ liệu demo chỉ nhận ngày bắt đầu từ 14/11 đến trước 28/11/2026 UTC. Bạn muốn chọn mốc nào?"
         elif issue == "OFF_START_GRID":
             text = "Mốc bắt đầu cần đúng lưới 15 phút. Bạn chọn thời điểm nào có phút 00, 15, 30 hoặc 45? Hệ thống không tự làm tròn."
+        elif issue == "AMBIGUOUS_SITE_SELECTION":
+            text = ("Mình chưa chắc tên điểm bạn nêu ứng với điểm nào trong danh mục. "
+                    "Bạn ghi lại đúng tên, ví dụ Connecting Ridge, Shackleton Rim hoặc IM-1 nhé?")
+        elif issue == "SEARCH_TOO_LARGE":
+            text = ("Khoảng tìm này quá dài cho một lượt: mỗi lượt thử tối đa 128 mốc bắt đầu "
+                    "(64 mốc cho mỗi điểm khi so hai điểm). Bạn muốn thu hẹp khoảng ngày thế nào?")
+        elif issue == "INVALID_SEARCH_STEP":
+            text = ("Bước tìm cần là bội số của 5 phút và chia hết khoảng tìm. "
+                    "Bạn muốn dùng bước nào, ví dụ 30 phút hoặc 1 giờ?")
         elif issue == "TOO_MANY_SITES":
             text = "Chat hiện so sánh tối đa hai điểm mỗi lượt. Bạn muốn chọn hai điểm nào trong danh mục Compare?"
         elif issue == "INVALID_COORDINATE_ARRIVAL":

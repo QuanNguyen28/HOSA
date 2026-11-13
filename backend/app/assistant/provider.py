@@ -260,6 +260,8 @@ class NativeLLM:
                        "stream": s.assistant_streaming, "response_format": response_format}
             if s.llm_proxy_max_output_tokens is not None:
                 payload["max_tokens"] = s.llm_proxy_max_output_tokens
+            if s.llm_proxy_reasoning_effort:
+                payload["reasoning_effort"] = s.llm_proxy_reasoning_effort
             if s.assistant_streaming:
                 payload["stream_options"] = {"include_usage": True}
             return str(base).rstrip("/") + "/chat/completions", {"Authorization": "Bearer " + key}, payload

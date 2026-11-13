@@ -163,7 +163,9 @@ export function useAssistant() {
           text: answer,
           resolve_indeterminate: resolveIndeterminate,
           baseline,
-          require_explicit_start: fromGeneral,
+          // The first planning request must name its start (or a search
+          // range); only follow-ups may inherit the previous evaluated start.
+          require_explicit_start: fromGeneral || history.length === 0,
           selected_site_ids: selectedSites,
           conversation_history: history.slice(-8),
           clarifications: [],

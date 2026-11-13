@@ -45,6 +45,12 @@ def _site_aliases() -> dict[str, str]:
     return aliases
 
 
+def site_display_name(site_id: str) -> str:
+    """Human name for prose; archived P1 observers keep their literal ID."""
+    site = compare_sites().get(site_id)
+    return site["name"] if site and site.get("name") else site_id
+
+
 def canonical_site_id(label: str) -> str:
     return _site_aliases().get(_site_label(label), label)
 

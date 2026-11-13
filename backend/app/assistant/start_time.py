@@ -39,6 +39,8 @@ def start_context(request):
     day = clock = zone = None
     ambiguous = False
     found = False
+    # Vietnamese writes numeric dates day/month/year ("3/12/2026" = 3 December).
+    day_first = bool(re.search(r'\b(?:ngay|luc|gio|thang|nam|bat dau|phan tich|so sanh)\b', joined))
     for raw in texts:
         text = plain(raw)
         matches = list(DATE.finditer(text))
@@ -52,7 +54,9 @@ def start_context(request):
                 values = int(a), int(b), int(c)
             elif d:
                 first, second = int(d), int(e)
-                if first <= 12 and second <= 12 and first != second:
+                if day_first and first <= 31 and second <= 12:
+                    values = (int(f), second, first)
+                elif first <= 12 and second <= 12 and first != second:
                     ambiguous = True
                     day = None
                     values = None
@@ -76,6 +80,7 @@ def start_context(request):
         short_time = re.search(r'\b(\d{1,2})\s*(am|pm|gio|h)\b', clock_text)
         if short_time and re.search(r'(?:for|trong|keo dai|duration(?: of)?)\s*$', clock_text[:short_time.start()]):
             short_time = None
+        named_time = re.search(r'\b(noon|midday|midnight|nua dem|giua trua)\b', clock_text)
         if time_match or short_time:
             match = time_match or short_time
             hour = int(match[1])
@@ -86,9 +91,15 @@ def start_context(request):
                 if not 1 <= hour <= 12:
                     return None
                 hour = hour % 12 + (12 if meridiem == 'pm' else 0)
+            elif re.match(r'\s*(?:gio\s*)?(?:chieu|toi)\b', clock_text[match.end():]) and 1 <= hour < 12:
+                hour += 12  # "1 giờ chiều", "8h tối"
+            elif re.match(r'\s*(?:gio\s*)?(?:dem|khuya)\b', clock_text[match.end():]) and hour == 12:
+                hour = 0  # "12 giờ đêm"
             if hour > 23 or minute > 59 or second > 59:
                 return None
             clock = f'{hour:02}:{minute:02}:{second:02}'
+        elif named_time:
+            clock = '00:00:00' if named_time[1] in ('midnight', 'nua dem') else '12:00:00'
         if offset:
             sign, hours, minutes = offset.group(1, 2, 3) if offset[1] else (offset[4], offset[5], '0')
             hours, minutes = int(hours), int(minutes)

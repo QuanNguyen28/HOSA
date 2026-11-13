@@ -15,7 +15,8 @@ def explanation_view(evidence: dict, text: str) -> dict:
     if numeric:
         return evidence
     facts={}
-    for identifier,fact in evidence.get("facts",{}).items():
+    source=evidence.get("facts",{})
+    for identifier,fact in source.items():
         core={key:fact[key] for key in ("result_id","candidate_id","kind","state") if key in fact}
         if fact.get("kind")=="decision":
             core.update({key:fact.get(key) for key in ("site_id","nominal_decision","validation_passed",
@@ -27,6 +28,7 @@ def explanation_view(evidence: dict, text: str) -> dict:
             core.update(definition=fact.get("definition"),context=fact.get("context"))
         elif fact.get("kind","").startswith(("hard.","soft.")):
             core.update(requirement_type=fact.get("requirement_type"),changes_hard_decision=fact.get("changes_hard_decision"))
+            core.update(_requirement_margin(fact,source))
         elif fact.get("kind")=="contact":
             requirements=fact.get("requirements") or {}
             core.update(scope=fact.get("scope"),checks=requirements.get("sampled_checks"),
@@ -37,7 +39,28 @@ def explanation_view(evidence: dict, text: str) -> dict:
         facts[identifier]=core
     return {**{key:value for key,value in evidence.items() if key not in {"facts","request","provenance"}},
             "facts":facts,"detail_mode":"qualitative",
-            "note":"Numerical values are available in the engine card. Explain these states and validation causes without inventing missing quantities."}
+            "note":("Detailed values are in the engine card. For a hard requirement, achieved_percent vs required_percent "
+                    "may be quoted to show how far it is from passing; otherwise explain states and validation causes "
+                    "without inventing missing quantities.")}
+
+
+HARD_METRICS={"min_sunlit_fraction":"total_sun_hours","min_earth_los_fraction":"total_earth_los_hours"}
+
+
+def _requirement_margin(fact:dict,facts:dict)->dict:
+    """Achieved vs required percentage for a hard fraction, copied from engine bounds."""
+    name=fact.get("kind","")[5:]
+    duration=fact.get("duration_hours")
+    required=fact.get("requested_value")
+    if name not in HARD_METRICS or not duration or required is None:
+        return {}
+    metric=facts.get(f"{fact.get('result_id')}/{fact.get('candidate_id')}/metric.{HARD_METRICS[name]}") or {}
+    bounds=metric.get("bounds_hours")
+    if not bounds or len(bounds)!=2:
+        return {}
+    low,high=(round(value/duration*100) for value in bounds)
+    return {"required_percent":round(required*100),
+            "achieved_percent":low if low==high else [low,high]}
 
 VALIDATION_MEANINGS = {
     "SENSITIVITY_FAILED":"A required comparison of resolutions, terrain radius or sampling did not meet the backend stability checks; do not claim which subcheck failed without its diagnostics.",

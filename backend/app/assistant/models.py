@@ -76,7 +76,9 @@ class RequestPatch(Contract):
     mission_end_utc: str | None = None
     hardware_change: bool = Field(strict=True)
     site_scope: Literal["selected", "keep_current", "unspecified"]
-    site_ids: list[str] | None = Field(default=None, min_length=1, max_length=2)
+    # Up to six so a request naming too many sites still parses; normalization
+    # then asks the user to choose two instead of the model failing validation.
+    site_ids: list[str] | None = Field(default=None, min_length=1, max_length=6)
     site_coordinates: SiteCoordinates | None = None
     max_darkness_hours: Hours | None
     max_earth_blackout_hours: Hours | None
@@ -84,6 +86,7 @@ class RequestPatch(Contract):
     min_earth_los_fraction: Fraction | None = None
     search_from_utc: str | None = None
     search_until_utc: str | None = None
+    search_step_minutes: Annotated[int, Field(strict=True, ge=5, le=1440)] | None = None
     rank_by: RankMetric | None = None
     unresolved_fields: list[str] = Field(max_length=12)
     unsupported_requirements: list[str] = Field(max_length=12)
@@ -111,6 +114,7 @@ class RequestSpec(Contract):
     source_hash: str
     search_from_utc: str | None = None
     search_until_utc: str | None = None
+    search_step_minutes: int | None = None
     rank_by: RankMetric = "total_earth_los_hours"
 
 

@@ -32,8 +32,9 @@ class PlanningAdapter:
                  "min_sunlit_fraction": spec.min_sunlit_fraction, "min_earth_los_fraction": spec.min_earth_los_fraction, "rank_by": spec.rank_by,
                  "expected_source_hash": spec.source_hash if spec.data_source == "snapshot" else None}
         if spec.search_from_utc:
+            step = {"start_step_minutes": spec.search_step_minutes} if spec.search_step_minutes else {}
             result = self.planner.search(SearchRequest(**{**query, "arrival_utc": spec.search_from_utc},
-                until_utc=spec.search_until_utc, max_results=3, non_overlapping=True))
+                until_utc=spec.search_until_utc, max_results=3, non_overlapping=True, **step))
         else:
             result = self.planner.compare(CompareRequest(**query, end_utc=spec.end_utc))
         return build_evidence(result, spec, run_id, spec_hash)

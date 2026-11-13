@@ -2,7 +2,7 @@ import json
 
 from .models import EvidenceBundle, ParseRequest
 from .explanations import explanation_options
-from .sites import available_sites, coordinate_sites_for_prompt, named_sites
+from .sites import available_sites, coordinate_sites_for_prompt, named_sites, site_display_name
 from .language import request_language
 from .start_time import start_context
 from .interpretation import ANSWER_POLICY, METRIC_MEANINGS, explanation_view, engine_evidence
@@ -19,7 +19,9 @@ def parse_messages(request: ParseRequest, capabilities: dict) -> list[dict]:
             "Recognize English beyond a list of command words, including 'explore IM-1'. Write questions in that language. "
             "Accept natural dates, not only ISO: 'November 24, 2026 at 9 AM UTC', '24 November 2026 09:00 UTC', "
             "'24/11/2026 lúc 9 giờ UTC' and '11/24/2026 09:00 UTC' all normalize to 2026-11-24T09:00:00Z. "
-            "For numeric dates, a component above 12 disambiguates month/day order; otherwise ask which day/month is meant. "
+            "noon/midday/giữa trưa => 12:00, midnight/nửa đêm => 00:00, '1 giờ chiều' => 13:00, '8 giờ tối' => 20:00. "
+            "Vietnamese numeric dates are day/month/year: '3/12/2026' => 3 December 2026. "
+            "For English numeric dates, a component above 12 disambiguates month/day order; otherwise ask which day/month is meant. "
             "A date alone supplies its year/month/day, NOT midnight or UTC. Preserve it and ask only for missing time/timezone. "
             "Combine prior date answers with later time/timezone answers; do not demand the user retype an ISO timestamp. "
             "The start_time_context contains user-supplied date components; respect its missing_fields and arrival_utc if present. "
@@ -54,13 +56,16 @@ def parse_messages(request: ParseRequest, capabilities: dict) -> list[dict]:
             "When nonempty, use those site IDs instead of the UI's selected_site_ids or baseline site. "
             "Keeping hardware or thresholds ('giữ nguyên phần cứng và ngưỡng') does not mean keeping the old site; "
             "set hardware_change=false and still select the explicitly named site. "
-            "For a site explicitly named now, set site_ids (Site01/site 01/điểm 01 => Site01_P1, "
-            "Site04/site 04/điểm 04 => Site04_P1; '2 điểm 04 và 01' means both). Otherwise leave site_ids null and inherit selected_site_ids "
+            "For sites explicitly named now, set site_ids by copying explicit_named_site_ids exactly; that backend lookup is "
+            "authoritative for names, codes and aliases (for example site01/Site01/R01 => connecting-ridge, "
+            "site04 => shackleton-rim; only the literal IDs Site01_P1/Site04_P1 select the archived P1 observers). "
+            "'2 điểm 04 và 01' means both. Otherwise leave site_ids null and inherit selected_site_ids "
             "with site_scope unspecified; use keep_current only when explicitly requested. "
             "All coordinate_sites are supported by name, ID or listed alias. Use the exact site_id, do not substitute a snapshot point. "
             "For example Connecting Ridge and Site01_P1 are distinct points. Mons Mouton and Mons Mouton Plateau are distinct. "
             "For a comparison of known sites, keep both IDs and ask only for missing inputs. "
-            "This chat compares up to two points per request. "
+            "This chat compares up to two points per request; if the user names more, still list every named site in "
+            "site_ids and leave clarification to the backend. "
             "For explicit latitude/east longitude, set site_coordinates with lat_deg and lon_e_deg; "
             "never guess coordinate order or choose a nearest site yourself. Backend only identifies "
             "processed P1 coordinates within 1 metre; arbitrary-coordinate science is unsupported. "
@@ -103,6 +108,8 @@ def parse_messages(request: ParseRequest, capabilities: dict) -> list[dict]:
             "For example, a request allowing starts from 2026-11-17T00:00:00Z until 2026-11-24T00:00:00Z "
             "sets search_from_utc/search_until_utc to those values, site_scope selected, hardware_change false, "
             "and both arrival fields null. Copy source_quotes verbatim from request.text, never translate them. "
+            "search_step_minutes is null unless the user states a search step ('bước một giờ' => 60, 'every 30 minutes' => 30); "
+            "the backend otherwise picks the finest step that fits its evaluation budget. "
             "rank_by may select total_earth_los_hours (default), total_sun_hours, longest_dark_hours, longest_blackout_hours or longest_joint_hours. "
             "No guessing new sites, dates, regions, physical battery limits or measurements."
         )},
@@ -122,6 +129,7 @@ def explain_messages(evidence: EvidenceBundle, *, repair: bool = False, natural:
         options = explanation_options(candidate, evidence.facts)
         rows.append({
             "candidate_id": candidate.candidate_id, "site_id": candidate.site_id,
+            "site_name": site_display_name(candidate.site_id),
             "start_utc": candidate.start_utc, "decision": candidate.decision,
             "issue": candidate.issue, "constraint_states": candidate.constraint_states,
             "soft_constraint_states": candidate.soft_constraint_states,
@@ -145,6 +153,21 @@ def explain_messages(evidence: EvidenceBundle, *, repair: bool = False, natural:
             mission=evidence.request.model_dump(), metric_meanings=METRIC_MEANINGS,
             recommended_candidate_id=evidence.recommended_candidate_id, apply_allowed=evidence.apply_allowed,
             explanation_evidence=focused_evidence)
+        if evidence.request.search_from_utc:
+            coverage = evidence.coverage
+            payload["search_summary"] = {
+                "operation": "best start-time search",
+                "search_from_utc": evidence.request.search_from_utc,
+                "search_until_utc_exclusive": evidence.request.search_until_utc,
+                "start_step_minutes": evidence.request.search_step_minutes or 15,
+                "start_times_evaluated": coverage.get("candidate_total"),
+                "passed": coverage.get("pass"), "failed": coverage.get("fail"),
+                "indeterminate": coverage.get("indeterminate"),
+                "returned_best_non_overlapping": coverage.get("returned", len(evidence.candidates)),
+                "ranked_by": evidence.request.rank_by,
+                "note": ("candidates are only the best non-overlapping windows from all evaluated start times, "
+                         "not the only times evaluated."),
+            }
         for row, candidate in zip(rows, evidence.candidates):
             row["nominal_sampled_decision"] = candidate.nominal_sampled_decision
             if qualitative:
@@ -163,7 +186,17 @@ def explain_messages(evidence: EvidenceBundle, *, repair: bool = False, natural:
             "or repeat the metric table. Passing an illumination threshold does not mean full or continuous illumination. "
             "The engine alone owns decisions/ranking. Hard failure is different from a soft preference. "
             "Do not invent terrain causes or physical performance, upgrade an indeterminate result, or claim a global optimum. "
-            "No automatic application; honor apply_allowed and the actual recommended candidate status. " + ANSWER_POLICY)
+            "No automatic application; honor apply_allowed and the actual recommended candidate status. "
+            "For a best start-time search (search_summary present), say how many start times were tried over which range "
+            "and step, how many met the hard requirements, and that the listed windows are the best non-overlapping ones. "
+            "If none passed, say plainly that no start in that range met the requirements and that the top-ranked window "
+            "is only the closest miss, never a recommended or proposed plan. "
+            "For a comparison, state which site fares better or that neither meets the requirements, and why, in one or two "
+            "sentences before details. For a failed hard requirement, quote achieved_percent against required_percent "
+            "when supplied. Never write code identifiers such as min_earth_los_fraction, total_sun_hours, candidate_id, "
+            "NO_FEASIBLE_IN_EVALUATED_SET, or raw ISO timestamps; write dates in natural language. "
+            "Refer to each site by its site_name, never by a site_id slug such as connecting-ridge. "
+            "Write requirement fractions as percentages (0.8 => 80%) and whole hours without a trailing .0. " + ANSWER_POLICY)
     return [
         {"role": "system", "content": (
             "Return ExplainPlan JSON only. The engine already evaluated the candidates. "

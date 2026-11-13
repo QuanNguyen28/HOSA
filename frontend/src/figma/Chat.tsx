@@ -24,6 +24,7 @@ const REQUEST_LABELS: Record<string, string> = {
   min_sunlit_fraction: "Minimum sunlight fraction", min_earth_los_fraction: "Minimum Earth visibility fraction",
   current_site_id: "Current site", data_source: "Data source", site_ids: "Selected sites",
   rank_by: "Rank by", search_from_utc: "Search from · UTC", search_until_utc: "Search until · UTC",
+  search_step_minutes: "Search step · min",
 };
 
 export function RequestDetails({ value }: { value: Record<string, unknown> }) {
@@ -262,6 +263,13 @@ export function ChatThread({
           maxLength={4000}
           rows={2}
           onChange={(e) => a.setText(e.target.value)}
+          onKeyDown={(e) => {
+            // Enter sends; Shift+Enter keeps a newline. Ignore Enter while an
+            // IME (e.g. Vietnamese Telex) is still composing a character.
+            if (e.key !== "Enter" || e.shiftKey || e.nativeEvent.isComposing) return;
+            e.preventDefault();
+            e.currentTarget.form?.requestSubmit();
+          }}
           disabled={!caps?.assistant_enabled || busy || !!review}
           placeholder={tr("Ask about a site or date")}
           className={`min-w-0 flex-1 resize-none bg-transparent py-4 text-sm text-white placeholder:text-mute focus:outline-none ${pad}`}

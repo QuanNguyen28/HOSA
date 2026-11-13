@@ -38,6 +38,32 @@ def _duration_specified(request):
     return False
 
 
+SEARCH_EVALUATION_BUDGET = 128  # Same cap as PlanningService.search.
+
+
+def search_step_minutes(search_from: str, search_until: str, targets: int, requested: int | None = None,
+                        minimum: int = 15) -> int:
+    """Smallest 5-minute-grid step that divides the range and fits the engine budget.
+
+    A requested step is honoured exactly; it is never silently coarsened.
+    """
+    elapsed = (utc(search_until) - utc(search_from)).total_seconds() / 60
+    if elapsed <= 0 or elapsed % 5:
+        raise AssistantError("INVALID_SEARCH_RANGE")
+    elapsed = int(elapsed)
+    per_target = SEARCH_EVALUATION_BUDGET // max(1, targets)
+    if requested is not None:
+        if requested % 5 or elapsed % requested:
+            raise AssistantError("INVALID_SEARCH_STEP")
+        if elapsed // requested > per_target:
+            raise AssistantError("SEARCH_TOO_LARGE")
+        return requested
+    for step in range(minimum, 1441, 5):
+        if elapsed % step == 0 and elapsed // step <= per_target:
+            return step
+    raise AssistantError("SEARCH_TOO_LARGE")
+
+
 def baseline_issue(request: ParseRequest, caps: dict) -> str | None:
     b, scenario = request.baseline, caps["scenario"]
     if b is None:
@@ -97,7 +123,7 @@ def normalize_request(request: ParseRequest, patch: RequestPatch, caps: dict) ->
         (ids for turn in reversed(request.clarifications) if (ids := named_sites(turn.answer))),
         named_sites(request.text),
     )
-    if len(named) > 2:
+    if len(named) > 2 or (patch.site_ids and len(patch.site_ids) > 2):
         raise AssistantError("TOO_MANY_SITES")
     explicit = [canonical_site_id(site_id) for site_id in patch.site_ids] if patch.site_ids else None
     if explicit and any(site_id not in supported for site_id in explicit):
@@ -106,6 +132,11 @@ def normalize_request(request: ParseRequest, patch: RequestPatch, caps: dict) ->
         explicit = named
     elif len(named) == 2 and explicit and set(explicit).issubset(named):
         # Preserve a named comparison if the model left out one target.
+        explicit = named
+    elif named and explicit and len(explicit) == len(named) and not set(named) & set(explicit):
+        # Same number of targets but resolved through a different alias table
+        # (e.g. Site01 -> Site01_P1 vs connecting-ridge): the deterministic
+        # catalog lookup of the user's own words is authoritative.
         explicit = named
     elif named and not set(named).issubset(explicit or []):
         raise AssistantError("AMBIGUOUS_SITE_SELECTION")
@@ -162,6 +193,11 @@ def normalize_request(request: ParseRequest, patch: RequestPatch, caps: dict) ->
         window = MissionRequest(site_id=b.current_site_id, start_utc=arrival, end_utc=patch.mission_end_utc, **duration_input)
     except ValueError as error:
         raise AssistantError("UNSUPPORTED_DURATION") from error
+    step = None
+    if search_from is not None and coordinate:
+        step = search_step_minutes(search_from, search_until, len(selected), patch.search_step_minutes)
+    elif search_from is not None and patch.search_step_minutes not in (None, scenario["start_step_minutes"]):
+        raise AssistantError("OFF_START_GRID")
     constraints = b.constraints.model_copy(update={k: getattr(patch, k) for k in
         ("max_darkness_hours", "max_earth_blackout_hours") if getattr(patch, k) is not None})
     return RequestSpec(
@@ -176,6 +212,7 @@ def normalize_request(request: ParseRequest, patch: RequestPatch, caps: dict) ->
         min_earth_los_fraction=patch.min_earth_los_fraction if patch.min_earth_los_fraction is not None else b.min_earth_los_fraction,
         search_from_utc=utc(search_from).isoformat().replace("+00:00", "Z") if search_from else None,
         search_until_utc=utc(search_until).isoformat().replace("+00:00", "Z") if search_until else None,
+        search_step_minutes=step,
         rank_by=patch.rank_by or context.rank_by,
         current_site_id=b.current_site_id, baseline_hash=digest(b.model_dump()),
         source_hash=caps["coordinate_source_hash"] if coordinate else caps["source_hash"],
