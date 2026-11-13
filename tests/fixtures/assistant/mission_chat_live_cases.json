@@ -1,0 +1,359 @@
+[
+ {
+  "id": "VI-EXPLORE-1",
+  "turns": [
+   {
+    "text": "Phân tích Connecting Ridge bắt đầu 24/11/2026 lúc 09:00 UTC trong 72 giờ"
+   }
+  ]
+ },
+ {
+  "id": "EN-EXPLORE-STEPS",
+  "turns": [
+   {
+    "text": "explore Haworth",
+    "answers": [
+     "11/24/2026",
+     "9 AM UTC"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "VI-COMPARE-DAY",
+  "turns": [
+   {
+    "text": "So sánh Haworth với Malapert Massif ngày 2026-11-17T00:00:00Z"
+   }
+  ]
+ },
+ {
+  "id": "VI-COMPARE-SHORT",
+  "turns": [
+   {
+    "text": "so sánh site01 và site04",
+    "answers": [
+     "bắt đầu 14/11/2026 00:00 UTC",
+     "72 giờ"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "VI-COMPARE-RANGE",
+  "turns": [
+   {
+    "text": "So sánh Shackleton Rim với Malapert Massif từ 1/12/2026 00:00 UTC đến 15/12/2026 00:00 UTC"
+   }
+  ]
+ },
+ {
+  "id": "VI-BEST-DAY",
+  "turns": [
+   {
+    "text": "Tìm ngày bắt đầu tốt nhất cho Connecting Ridge từ 14/11/2026 00:00 UTC đến 15/11/2026 00:00 UTC, nhiệm vụ 72 giờ"
+   }
+  ]
+ },
+ {
+  "id": "VI-BEST-WEEK",
+  "turns": [
+   {
+    "text": "Tìm thời điểm bắt đầu tốt nhất cho Connecting Ridge trong khoảng 17/11/2026 đến 24/11/2026 UTC, nhiệm vụ 72 giờ",
+    "answers": [
+     "từ 00:00 UTC ngày 17/11 đến 00:00 UTC ngày 24/11/2026"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "VI-FOLLOWUPS",
+  "turns": [
+   {
+    "text": "So sánh Connecting Ridge và Shackleton Rim nhiệm vụ 72 giờ bắt đầu 20/11/2026 00:00 UTC"
+   },
+   {
+    "text": "giờ hạ ngưỡng Earth LOS xuống 60% xem sao"
+   },
+   {
+    "text": "lùi ngày bắt đầu thêm 3 ngày, giữ nguyên mọi thứ khác"
+   },
+   {
+    "text": "vậy điểm nào tốt hơn và vì sao?"
+   }
+  ]
+ },
+ {
+  "id": "VI-RANK-SUN",
+  "turns": [
+   {
+    "text": "Tìm thời điểm bắt đầu có nhiều nắng nhất cho Malapert Massif từ 20/11/2026 00:00 UTC đến 21/11/2026 00:00 UTC, nhiệm vụ 48 giờ"
+   }
+  ]
+ },
+ {
+  "id": "EN-COMPARE-48H",
+  "turns": [
+   {
+    "text": "Compare Shackleton Rim and Connecting Ridge for a 48-hour mission starting November 20, 2026 at 06:00 UTC"
+   }
+  ]
+ },
+ {
+  "id": "EN-BEST-SUN",
+  "turns": [
+   {
+    "text": "Find the best start time for Malapert Massif between Nov 17 2026 00:00 UTC and Nov 18 2026 00:00 UTC for a 72-hour mission, ranked by sunlight"
+   }
+  ]
+ },
+ {
+  "id": "EN-EXPLORE-NATURAL",
+  "turns": [
+   {
+    "text": "Explore Malapert Massif",
+    "answers": [
+     "December 1, 2026",
+     "noon UTC"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "EN-COMPARE-MONTH",
+  "turns": [
+   {
+    "text": "Compare Haworth and Malapert Massif from 2027-01-01 00:00 UTC to 2027-01-31 00:00 UTC"
+   }
+  ]
+ },
+ {
+  "id": "EN-THREE-SITES",
+  "turns": [
+   {
+    "text": "Compare Shackleton Rim, Malapert Massif and Haworth starting Dec 3 2026 00:00 UTC for 72 hours"
+   }
+  ]
+ },
+ {
+  "id": "EN-HAWORTH-THRESHOLD",
+  "turns": [
+   {
+    "text": "Is Haworth OK for a 5-day mission from Dec 3 2026 00:00 UTC if I need 70% sunlight and 50% Earth line of sight?"
+   }
+  ]
+ },
+ {
+  "id": "EN-FOLLOWUP-WHY",
+  "turns": [
+   {
+    "text": "Compare Site01 and Site04 for 72 hours starting 2026-11-14T00:00:00Z"
+   },
+   {
+    "text": "Why did the worse one fail? Explain in plain words."
+   },
+   {
+    "text": "Now try starting one day later."
+   }
+  ]
+ },
+ {
+  "id": "VI-BEST-2SITES",
+  "turns": [
+   {
+    "text": "Tìm thời điểm bắt đầu tốt nhất cho Haworth và Malapert Massif từ 17/11/2026 00:00 UTC đến 18/11/2026 00:00 UTC, nhiệm vụ 72 giờ"
+   }
+  ]
+ },
+ {
+  "id": "VI-BEST-MONTH",
+  "turns": [
+   {
+    "text": "Trong tháng 12/2026 (từ 1/12/2026 00:00 UTC đến 31/12/2026 00:00 UTC), ngày nào bắt đầu tốt nhất cho Shackleton Rim với nhiệm vụ 72 giờ?"
+   }
+  ]
+ },
+ {
+  "id": "VI-BEST-STEP",
+  "turns": [
+   {
+    "text": "Với Connecting Ridge, tìm thời điểm bắt đầu tốt nhất từ 14/11/2026 00:00 UTC đến 15/11/2026 00:00 UTC, bước một giờ, nhiệm vụ 72 giờ, ưu tiên tổng Earth LOS"
+   }
+  ]
+ },
+ {
+  "id": "EN-BEST-YEAR",
+  "turns": [
+   {
+    "text": "Find the best start for Malapert Massif anywhere in 2027 (Jan 1 2027 00:00 UTC to Jan 1 2028 00:00 UTC), 72-hour mission",
+    "answers": [
+     "OK, search only January 2027, from Jan 1 00:00 UTC to Feb 1 00:00 UTC"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "VI-NO-DATE",
+  "turns": [
+   {
+    "text": "So sánh Shackleton Rim và Malapert Massif",
+    "answers": [
+     "bắt đầu ngày 5 tháng 12 năm 2026 lúc 12 giờ UTC"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "VI-TIME-CHIEU",
+  "turns": [
+   {
+    "text": "Phân tích Malapert Massif",
+    "answers": [
+     "ngày 3/12/2026 lúc 1 giờ chiều UTC"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "EN-MIDNIGHT",
+  "turns": [
+   {
+    "text": "Analyze Shackleton Rim starting December 10, 2026 at midnight UTC for 48 hours"
+   }
+  ]
+ },
+ {
+  "id": "VI-EXPLAIN-ONLY",
+  "turns": [
+   {
+    "text": "So sánh Connecting Ridge và Shackleton Rim nhiệm vụ 72 giờ bắt đầu 20/11/2026 00:00 UTC"
+   },
+   {
+    "text": "Shackleton Rim thiếu bao nhiêu so với yêu cầu chiếu sáng? giải thích dễ hiểu"
+   }
+  ]
+ },
+ {
+  "id": "VI-NUMERIC-COMPARE",
+  "turns": [
+   {
+    "text": "So sánh Haworth và Malapert Massif bắt đầu 20/11/2026 00:00 UTC trong 72 giờ, cho tôi số liệu cụ thể từng điểm: bao nhiêu giờ có nắng, bao nhiêu giờ thấy Trái Đất và khoảng tối liên tục dài nhất"
+   }
+  ]
+ },
+ {
+  "id": "VI-SOFT-LIMIT",
+  "turns": [
+   {
+    "text": "Phân tích Shackleton Rim bắt đầu 20/11/2026 00:00 UTC trong 72 giờ, mong muốn tối liên tục không quá 6 giờ"
+   }
+  ]
+ },
+ {
+  "id": "EN-NUMERIC-BEST",
+  "turns": [
+   {
+    "text": "Find the best start for Connecting Ridge between Nov 20 2026 00:00 UTC and Nov 21 2026 00:00 UTC for a 72-hour mission. How many start times passed, and exactly how many hours of Earth visibility does the top window have?"
+   }
+  ]
+ },
+ {
+  "id": "VI-THRESHOLD-PASS",
+  "turns": [
+   {
+    "text": "Phân tích Connecting Ridge bắt đầu 20/11/2026 00:00 UTC trong 72 giờ với yêu cầu nắng tối thiểu 70% và Earth LOS tối thiểu 50%"
+   }
+  ]
+ },
+ {
+  "id": "EN-COMPARE-WHICH",
+  "turns": [
+   {
+    "text": "Between Malapert Massif and Haworth, which is better for a 96-hour mission starting December 5, 2026 at 06:00 UTC, and by how much?"
+   }
+  ]
+ },
+ {
+  "id": "VI-USER-CONTACT-BEST",
+  "turns": [
+   {
+    "text": "hãy tìm thời điểm tốt nhất cho điểm connecting ridge tại 26/11/2026 00:00 UTC trong 72 giờ với thời lượng liên lạc 70 phút"
+   }
+  ]
+ },
+ {
+  "id": "VI-CONTACT-COMPARE",
+  "turns": [
+   {
+    "text": "So sánh Connecting Ridge và Shackleton Rim bắt đầu 26/11/2026 00:00 UTC trong 72 giờ, cần liên lạc liên tục ít nhất 70 phút, thời gian thiết lập 10 phút"
+   }
+  ]
+ },
+ {
+  "id": "EN-CONTACT-DEADLINE",
+  "turns": [
+   {
+    "text": "Analyze Connecting Ridge starting Nov 26 2026 00:00 UTC for 72 hours; I need 2 separate contact windows of at least 60 minutes each and the first contact within 6 hours"
+   }
+  ]
+ },
+ {
+  "id": "VI-UNSUPPORTED-DROP",
+  "turns": [
+   {
+    "text": "Phân tích Shackleton Rim bắt đầu 20/11/2026 00:00 UTC trong 72 giờ, nhiệt độ bề mặt phải trên -100 độ C",
+    "answers": [
+     "bỏ phần nhiệt độ, tính tiếp"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "VI-CONTACT-ONLY",
+  "turns": [
+   {
+    "text": "Phân tích Connecting Ridge bắt đầu 20/11/2026 00:00 UTC trong 72 giờ, chỉ cần liên lạc liên tục ít nhất 70 phút, đặt ngưỡng nắng 0% và Earth LOS 0%"
+   },
+   {
+    "text": "nếu cần liên lạc liên tục 600 phút thì sao?"
+   }
+  ]
+ },
+ {
+  "id": "VI-EXPLORE-MATCHES-TAB",
+  "turns": [
+   {
+    "text": "Phân tích Connecting Ridge bắt đầu 26/11/2026 00:00 UTC trong 72 giờ"
+   }
+  ]
+ },
+ {
+  "id": "VI-HEIGHT-OVERRIDE",
+  "turns": [
+   {
+    "text": "Phân tích Connecting Ridge bắt đầu 26/11/2026 00:00 UTC trong 72 giờ"
+   },
+   {
+    "text": "nếu tấm pin chỉ cao 1 m và ăng-ten 2 m thì sao?"
+   }
+  ]
+ },
+ {
+  "id": "EN-HIDDEN-SITE",
+  "turns": [
+   {
+    "text": "Analyze IM-1 starting Nov 24 2026 00:00 UTC for 72 hours",
+    "expect_issue": "SITE_NOT_IN_CATALOG"
+   }
+  ]
+ },
+ {
+  "id": "VI-P1-SITE",
+  "turns": [
+   {
+    "text": "Phân tích Site01_P1 bắt đầu 26/11/2026 00:00 UTC trong 72 giờ",
+    "expect_issue": "SITE_NOT_IN_CATALOG"
+   }
+  ]
+ }
+]
