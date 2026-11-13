@@ -21,7 +21,7 @@ import {
   LinearFilter,
   MathUtils,
   MeshStandardMaterial,
-  PCFSoftShadowMap,
+  PCFShadowMap,
   Quaternion,
   RepeatWrapping,
   RGBAFormat,
@@ -221,7 +221,7 @@ function useTerrainMesh(
 
 function LunarTerrainMaterial({
   color = "#c4c0b7",
-  bumpScale = 0.006,
+  bumpScale = 0.0006,
 }: {
   color?: string;
   bumpScale?: number;
@@ -230,6 +230,7 @@ function LunarTerrainMaterial({
   return (
     <meshStandardMaterial
       map={textures.albedo}
+      // Decorative relief stays sub-metre to avoid fibrous shading in grazing light.
       bumpMap={textures.microRelief}
       bumpScale={bumpScale}
       color={color}
@@ -505,6 +506,7 @@ function DynamicTerrain({
         shadow-camera-far={1_600}
         shadow-bias={-0.00008}
         shadow-normalBias={0.004}
+        shadow-radius={1.5}
       />
       <directionalLight
         position={[-lightPosition[0], Math.max(2, -lightPosition[1]), -lightPosition[2]]}
@@ -513,12 +515,12 @@ function DynamicTerrain({
       />
       {horizonTerrainMesh && (
         <mesh {...terrainInteraction} geometry={horizonTerrainMesh.geometry} position={[0, -0.012, 0]} receiveShadow castShadow>
-          <LunarTerrainMaterial color="#aaa79f" bumpScale={0.002} />
+          <LunarTerrainMaterial color="#aaa79f" bumpScale={0.0002} />
         </mesh>
       )}
       {regionalTerrainMesh && (
         <mesh {...terrainInteraction} geometry={regionalTerrainMesh.geometry} position={[0, -0.009, 0]} receiveShadow castShadow>
-          <LunarTerrainMaterial color="#b2afa7" bumpScale={0.0025} />
+          <LunarTerrainMaterial color="#b2afa7" bumpScale={0.00025} />
         </mesh>
       )}
       {contextTerrainMesh && (
@@ -529,17 +531,17 @@ function DynamicTerrain({
           castShadow
           {...terrainInteraction}
         >
-          <LunarTerrainMaterial color="#b8b5ad" bumpScale={0.003} />
+          <LunarTerrainMaterial color="#b8b5ad" bumpScale={0.0003} />
         </mesh>
       )}
       {farTerrainMesh && (
         <mesh {...terrainInteraction} geometry={farTerrainMesh.geometry} position={[0, -0.003, 0]} receiveShadow castShadow>
-          <LunarTerrainMaterial color="#bdb9b1" bumpScale={0.0035} />
+          <LunarTerrainMaterial color="#bdb9b1" bumpScale={0.00035} />
         </mesh>
       )}
       {midTerrainMesh && (
         <mesh {...terrainInteraction} geometry={midTerrainMesh.geometry} position={[0, -0.0015, 0]} receiveShadow castShadow>
-          <LunarTerrainMaterial color="#c1bdb5" bumpScale={0.0045} />
+          <LunarTerrainMaterial color="#c1bdb5" bumpScale={0.00045} />
         </mesh>
       )}
       <mesh
@@ -548,7 +550,7 @@ function DynamicTerrain({
         castShadow
         receiveShadow
       >
-        <LunarTerrainMaterial color="#c5c1b8" bumpScale={0.006} />
+        <LunarTerrainMaterial color="#c5c1b8" bumpScale={0.0006} />
       </mesh>
       {!overview && <group position={observer}>
         <mesh>
@@ -1286,7 +1288,7 @@ export function MoonScene(props: MoonSceneProps) {
       gl={{ antialias: true, powerPreference: "high-performance" }}
       onCreated={({ gl }) => {
         gl.setClearColor("#030507");
-        gl.shadowMap.type = PCFSoftShadowMap;
+        gl.shadowMap.type = PCFShadowMap;
         gl.toneMappingExposure = 1.4;
         // The renderer is already usable at this point.  Reveal the shell now
         // and let Suspense stream the lunar textures into the scene instead of

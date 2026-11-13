@@ -123,6 +123,7 @@ export function getLunarSurfaceTextures(): LunarSurfaceTextures {
   albedo.colorSpace = SRGBColorSpace;
   albedo.wrapS = RepeatWrapping;
   albedo.wrapT = RepeatWrapping;
+  albedo.generateMipmaps = true;
   albedo.minFilter = LinearMipmapLinearFilter;
   albedo.magFilter = LinearFilter;
   albedo.anisotropy = 8;
@@ -137,6 +138,7 @@ export function getLunarSurfaceTextures(): LunarSurfaceTextures {
   );
   microRelief.wrapS = RepeatWrapping;
   microRelief.wrapT = RepeatWrapping;
+  microRelief.generateMipmaps = true;
   microRelief.minFilter = LinearMipmapLinearFilter;
   microRelief.magFilter = LinearFilter;
   microRelief.anisotropy = 8;
