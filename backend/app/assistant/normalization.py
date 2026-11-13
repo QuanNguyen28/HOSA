@@ -1,5 +1,7 @@
 """Resolve the proposed language patch against a baseline and immutable capabilities."""
 from datetime import timedelta
+import re
+import unicodedata
 
 from app.core.errors import DomainError
 from app.mission.models import MissionRequest
@@ -9,6 +11,31 @@ from app.planning.repository import digest
 from .models import ParseRequest, RequestPatch, RequestSpec, utc
 from .provider import AssistantError
 from .sites import canonical_site_id, named_sites, resolve_coordinates
+
+
+def _plain(text):
+    return ''.join(c for c in unicodedata.normalize('NFD', text.casefold())
+                   if unicodedata.category(c) != 'Mn').replace('đ', 'd')
+
+
+def _duration_specified(request):
+    """Only current user words can authorize carrying a custom duration forward."""
+    texts = [request.text, *(turn.answer for turn in request.clarifications)]
+    amount = r'\d+(?:[.,]\d+)?\s*(?:gio|ngay|tuan|thang|nam|hours?|days?|weeks?|months?|years?|h)\b'
+    for text in texts:
+        plain = _plain(text)
+        if (re.search(r'\b(?:trong|keo dai|dai|nhiem vu|thoi luong(?: la)?|for|lasting|duration(?: of)?)\s+' + amount, plain)
+                or re.fullmatch(r'\s*' + amount + r'\s*[.!]?\s*', plain)):
+            return True
+        if re.search(r'\b(?:giu(?: nguyen)?|khong doi)\s+(?:thoi luong|do dai nhiem vu)\b|'
+                     r'\b(?:keep|retain)\s+(?:the\s+)?(?:same\s+|current\s+)?duration\b|'
+                     r'\b(?:same duration|nhiem vu dai nhu cu)\b', plain):
+            return True
+    for turn in request.clarifications:
+        if re.search(r'thoi luong|keo dai|bao nhieu gio|duration|how long', _plain(turn.question)):
+            if re.fullmatch(r'\s*(?:\d+(?:[.,]\d+)?|giu nguyen|nhu cu|yes|same)\s*[.!]?\s*', _plain(turn.answer)):
+                return True
+    return False
 
 
 def baseline_issue(request: ParseRequest, caps: dict) -> str | None:
@@ -119,6 +146,9 @@ def normalize_request(request: ParseRequest, patch: RequestPatch, caps: dict) ->
                 raise AssistantError("AMBIGUOUS_ARRIVAL")
             at = utc(search_from)
         arrival = at.isoformat().replace("+00:00", "Z")
+        if (at != utc(b.arrival_utc) and b.duration_hours != scenario['D_hours']
+                and patch.mission_end_utc is None and not _duration_specified(request)):
+            raise AssistantError('DURATION_CONFIRMATION_REQUIRED')
         if coordinate:
             MissionRequest.start_time(arrival)
         index = None if coordinate else start_index(arrival, scenario)

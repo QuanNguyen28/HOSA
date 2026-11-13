@@ -35,5 +35,5 @@ class PlanningAdapter:
             result = self.planner.search(SearchRequest(**{**query, "arrival_utc": spec.search_from_utc},
                 until_utc=spec.search_until_utc, max_results=3, non_overlapping=True))
         else:
-            result = self.planner.compare(CompareRequest(**query))
+            result = self.planner.compare(CompareRequest(**query, end_utc=spec.end_utc))
         return build_evidence(result, spec, run_id, spec_hash)

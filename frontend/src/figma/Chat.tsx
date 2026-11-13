@@ -139,6 +139,8 @@ export function ChatThread({
             <p className="break-words text-sm text-soft">
               {review.draft.spec.site_ids.join(", ")} ·{" "}
               {review.draft.spec.arrival_utc}
+              {" → "}{review.draft.spec.end_utc}
+              {" · "}{review.draft.spec.duration_hours} h
             </p>
             <p className="text-xs text-mute">
               Minimum mean visible Sun disc {review.draft.spec.min_sunlit_fraction * 100}% ·

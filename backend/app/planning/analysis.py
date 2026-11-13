@@ -14,6 +14,19 @@ def target_id(target):
     return target.site_id or 'coordinate-' + digest(target.model_dump(exclude_none=True))[:12]
 
 
+def coordinate_frame(result, pipeline):
+    """Verify science against lossless native samples, before JSON rounding."""
+    reference = result.get('provenance', {}).get('timeline_artifact')
+    if reference:
+        from app.point_analysis.transport import read_array, frame_from_array
+        directory = pipeline.root / 'results' / result['result_id']
+        return frame_from_array(read_array(directory, reference), reference)
+    frame = pd.DataFrame(result['timeline'])
+    for key in ('start_utc', 'end_utc'):
+        frame[key] = pd.to_datetime(frame[key], utc=True)
+    return frame
+
+
 def verify_result(result, request, frame):
     """Reject a provider/cache contract mismatch before ranking or explaining."""
     validate_metrics(result['metrics_hours'], request.duration_hours)
@@ -48,10 +61,9 @@ def analyze_candidate(query, index=None, *, target=None, snapshot=None, point_pi
     try:
         if query.data_source == 'coordinate':
             from app.point_analysis.service import calculate, get_point_pipeline
-            result = calculate(request, point_pipeline or get_point_pipeline())
-            frame = pd.DataFrame(result['timeline'])
-            for key in ('start_utc', 'end_utc'):
-                frame[key] = pd.to_datetime(frame[key], utc=True)
+            pipeline = point_pipeline or get_point_pipeline()
+            result = calculate(request, pipeline)
+            frame = coordinate_frame(result, pipeline)
             summary = sensitivity_summary(request, result)
         else:
             result = (snapshot or SnapshotProvider()).analyze(target, request)
@@ -65,15 +77,14 @@ def analyze_candidate(query, index=None, *, target=None, snapshot=None, point_pi
                 if can_recompute(result['validation']):
                     from app.point_analysis.service import calculate, get_point_pipeline
                     try:
-                        result = calculate(request, point_pipeline or get_point_pipeline())
+                        pipeline = point_pipeline or get_point_pipeline()
+                        result = calculate(request, pipeline)
                     except DomainError as error:
                         if error.code not in {'HORIZONS_CACHE_MISS', 'HORIZONS_UNAVAILABLE', 'POINT_ANALYSIS_BUSY', 'DEM_NOT_INSTALLED', 'OUTSIDE_DEM_COVERAGE'}:
                             raise
                         resolution.update(status='unresolved', error_code=error.code)
                     else:
-                        frame = pd.DataFrame(result['timeline'])
-                        for key in ('start_utc', 'end_utc'):
-                            frame[key] = pd.to_datetime(frame[key], utc=True)
+                        frame = coordinate_frame(result, pipeline)
                         summary = sensitivity_summary(request, result)
                         resolution = {**result.get('resolution', {}), 'origin': origin,
                             'initial_decision': origin['decision'], 'initial_reason_codes': origin['reason_codes'],

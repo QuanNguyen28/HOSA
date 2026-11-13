@@ -436,6 +436,32 @@ def test_merged_chat_preserves_long_end_date_and_validation_across_turns(service
     assert followup.spec.resolve_indeterminate
 
 
+@pytest.mark.parametrize('end,hours', [
+    ('2027-11-27T00:00:00Z', 240),
+    ('2028-11-17T00:00:00Z', 8784),
+])
+def test_compare_two_sites_for_entire_explicit_interval(service, request_payload, monkeypatch, end, hours):
+    start = '2027-11-17T00:00:00Z'
+    sites = ['im1-odysseus', 'im2-athena']
+    request_payload.update(text=f'So sánh IM-1 với IM-2 từ {start} đến {end}', selected_site_ids=sites)
+    service.llm = FixtureLLM(default_patch(arrival_shift_days=None, arrival_utc=start,
+        mission_end_utc=end, site_scope='selected', site_ids=sites, source_quotes=[start, end]))
+    parsed = run(service.parse(ParseRequest.model_validate(request_payload)))
+    assert parsed.status == 'READY'
+    assert parsed.spec.site_ids == sites and parsed.spec.duration_hours == hours
+    assert parsed.spec.search_from_utc is None and parsed.spec.search_until_utc is None
+    def capture(query):
+        assert query.site_ids == sites and query.data_source == 'coordinate'
+        for target in query.mission_targets():
+            mission = query.mission(target)
+            assert mission.start_utc == start and mission.end_utc == end
+            assert mission.duration_hours == hours
+        raise RuntimeError('comparison_contract_verified')
+    monkeypatch.setattr(service.engine.planner, 'compare', capture)
+    with pytest.raises(RuntimeError, match='comparison_contract_verified'):
+        service.engine.evaluate(parsed.spec, parsed.draft_id, parsed.spec_hash)
+
+
 def test_named_coordinate_catalog_change_invalidates_draft(service, request_payload, monkeypatch):
     from app.mission.targets import compare_sites
     request_payload.update(text='Phân tích Haworth lúc 2026-11-17T00:00:00Z',
