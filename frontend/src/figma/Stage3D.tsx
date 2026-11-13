@@ -236,7 +236,7 @@ export default function Stage3D({
     >
       <div className="relative h-full w-full">
         <MoonScene
-          imagery={imagery && mode !== 'surface'}
+          imagery={imagery}
           onImageryStatus={setImageryStatus}
           key={mode === "orbit" ? "globe" : "terrain"}
           time={new Date(timeMs)}
@@ -256,16 +256,28 @@ export default function Stage3D({
         />
       </div>
 
-      {mode !== 'surface' && <div className="absolute top-16 right-4 z-10 max-w-64 border border-line bg-black/85 p-2.5 text-[10px] text-soft">
-        <div className="flex gap-1" role="group" aria-label={tr('Surface appearance')}>
-          <button type="button" aria-pressed={imagery} onClick={()=>setImagery(true)} className={`border px-2 py-1.5 ${imagery?'border-mint text-mint':'border-line text-mute'}`}>{tr('NASA imagery')}</button>
-          <button type="button" aria-pressed={!imagery} onClick={()=>setImagery(false)} className={`border px-2 py-1.5 ${!imagery?'border-sun text-sun':'border-line text-mute'}`}>{tr('Sunlight simulation')}</button>
+      <div className="pointer-events-none absolute top-16 right-4 z-10 flex w-60 flex-col items-stretch gap-2">
+        <div className="pointer-events-auto border border-line bg-black/85 p-2.5 text-[10px] text-soft">
+          <div className="flex gap-1" role="group" aria-label={tr('Surface appearance')}>
+            <button type="button" aria-pressed={imagery} onClick={()=>setImagery(true)} className={`border px-2 py-1.5 ${imagery?'border-mint text-mint':'border-line text-mute'}`}>{tr('NASA imagery')}</button>
+            <button type="button" aria-pressed={!imagery} onClick={()=>setImagery(false)} className={`border px-2 py-1.5 ${!imagery?'border-sun text-sun':'border-line text-mute'}`}>{tr('Relief model')}</button>
+          </div>
+          <p className="mt-2 leading-relaxed text-mute">{tr(imagery ? 'NASA imagery shaded by the selected mission time' : 'Lighting follows the selected mission time')}</p>
+          {imagery && <p className={`mt-1 ${imageryStatus==='ready'?'text-mint':'text-sun'}`} role="status">{tr(imageryStatus==='ready'?'NASA Moon Trek · imagery loaded':imageryStatus==='loading'?'Loading NASA image tiles…':imageryStatus==='partial'?'Some image tiles unavailable · lower detail retained':'NASA imagery unavailable · local preview')}</p>}
         </div>
-        <p className="mt-2 leading-relaxed text-mute">{tr(imagery ? 'Recorded lighting · not the selected mission time' : 'Lighting follows the selected mission time')}</p>
-        {imagery && <p className={`mt-1 ${imageryStatus==='ready'?'text-mint':'text-sun'}`} role="status">{tr(imageryStatus==='ready'?'NASA Moon Trek · imagery loaded':imageryStatus==='loading'?'Loading NASA image tiles…':imageryStatus==='partial'?'Some image tiles unavailable · lower detail retained':'NASA imagery unavailable · local preview')}</p>}
-      </div>}
+        {mode === "surface" && terrainWindow?.grid && (
+          <div className="border border-line bg-black/80 px-3 py-2 font-mono text-[10px] leading-relaxed tracking-wider">
+            <div className="text-sun">{tr("☀ SUN · ")}{tr(groundSky.sun.state === "V" ? "VISIBLE" : groundSky.sun.state === "B" ? "HIDDEN" : "UNKNOWN")}</div>
+            <div className="text-mute">{tr("AZ ")}{groundSky.sun.azimuthDeg.toFixed(1)}{tr("° · EL ")}{groundSky.sun.elevationDeg.toFixed(2)}{tr("° · CLR ")}{groundSky.sun.clearanceDeg == null ? "—" : groundSky.sun.clearanceDeg.toFixed(2)}°</div>
+            <div className="mt-1 text-earth">{tr("⊕ EARTH · ")}{tr(groundSky.earth.state === "V" ? "VISIBLE" : groundSky.earth.state === "B" ? "HIDDEN" : "UNKNOWN")}</div>
+            <div className="text-mute">{tr("AZ ")}{groundSky.earth.azimuthDeg.toFixed(1)}{tr("° · EL ")}{groundSky.earth.elevationDeg.toFixed(2)}{tr("° · CLR ")}{groundSky.earth.clearanceDeg == null ? "—" : groundSky.earth.clearanceDeg.toFixed(2)}°</div>
+            <div className="mt-1 text-mute">{tr("DRAG 360° TO INSPECT THE SKY")}</div>
+          </div>
+        )}
+        <p className="text-right text-[10px] leading-snug text-mute">{tr("3D lighting is a visual preview. Metric evidence comes from backend intervals.")}</p>
+      </div>
 
-      {imagery && mode !== 'surface' && <a className="absolute bottom-4 left-4 z-10 border border-line bg-black/80 px-2 py-1 text-[10px] text-mute hover:text-soft" href="https://trek.nasa.gov/tiles/apidoc/trekAPI.html?body=moon" target="_blank" rel="noreferrer">{tr('Imagery: NASA/JPL Moon Trek · LRO/LROC')}</a>}
+      {imagery && <a className="absolute bottom-4 left-4 z-10 border border-line bg-black/80 px-2 py-1 text-[10px] text-mute hover:text-soft" href="https://trek.nasa.gov/tiles/apidoc/trekAPI.html?body=moon" target="_blank" rel="noreferrer">{tr('Imagery: NASA/JPL Moon Trek · LRO/LROC')}</a>}
 
       {!ready && (
         <div className="pointer-events-none absolute inset-0 grid place-items-center bg-black font-mono text-[11px] tracking-widest text-mute">
@@ -319,19 +331,10 @@ export default function Stage3D({
             {tr(terrainWindow.grid.rows)}{tr("² vertices")}</div>
           <div className="text-mute">
             {(terrainWindow.radius_km! * 2).toFixed(0)} {tr(" km field · curvature enabled")}</div>
+          <div className="text-mute">{tr(imagery?'NASA IMAGE OVERLAY · DISPLAY ONLY':"MICRO-RELIEF · SHADING ONLY")}</div>
           <div className={groundSky.source !== "MODEL_PREVIEW" ? "text-mint" : "text-sun"}>
             {tr("SKY · ")}{tr(groundSky.source === "SHARED_SPICE_PREVIEW" ? "SPICE · VISUAL PREVIEW" : groundSky.source === "SHARED_SPICE" ? "SPICE / JPL CHECKED" : groundSky.source === "JPL_HORIZONS" ? "JPL HORIZONS" : "MODEL PREVIEW")}
           </div>
-        </div>
-      )}
-
-      {mode === "surface" && terrainWindow?.grid && (
-        <div className="pointer-events-none absolute top-16 right-4 w-48 border border-line bg-black/80 px-3 py-2 font-mono text-[10px] leading-relaxed tracking-wider">
-          <div className="text-sun">{tr("☀ SUN · ")}{tr(groundSky.sun.state === "V" ? "VISIBLE" : groundSky.sun.state === "B" ? "HIDDEN" : "UNKNOWN")}</div>
-          <div className="text-mute">{tr("AZ ")}{groundSky.sun.azimuthDeg.toFixed(1)}{tr("° · EL ")}{groundSky.sun.elevationDeg.toFixed(2)}{tr("° · CLR ")}{groundSky.sun.clearanceDeg == null ? "—" : groundSky.sun.clearanceDeg.toFixed(2)}°</div>
-          <div className="mt-1 text-earth">{tr("⊕ EARTH · ")}{tr(groundSky.earth.state === "V" ? "VISIBLE" : groundSky.earth.state === "B" ? "HIDDEN" : "UNKNOWN")}</div>
-          <div className="text-mute">{tr("AZ ")}{groundSky.earth.azimuthDeg.toFixed(1)}{tr("° · EL ")}{groundSky.earth.elevationDeg.toFixed(2)}{tr("° · CLR ")}{groundSky.earth.clearanceDeg == null ? "—" : groundSky.earth.clearanceDeg.toFixed(2)}°</div>
-          <div className="mt-1 text-mute">{tr("DRAG 360° TO INSPECT THE SKY")}</div>
         </div>
       )}
 

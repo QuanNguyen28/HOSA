@@ -494,12 +494,12 @@ function DynamicTerrain({
       />
       {horizonTerrainMesh && (
         <mesh {...terrainInteraction} geometry={horizonTerrainMesh.geometry} position={[0, -0.012, 0]} receiveShadow castShadow>
-          {imagery && horizonTerrain ? <MoonTrekTerrainMaterial terrain={horizonTerrain} fallback={<LunarTerrainMaterial color="#aaa79f" bumpScale={0.0002}/>}/> : <LunarTerrainMaterial color="#aaa79f" bumpScale={0.0002}/>}
+          {imagery && horizonTerrain ? <MoonTrekTerrainMaterial terrain={horizonTerrain} color="#aaa79f" fallback={<LunarTerrainMaterial color="#aaa79f" bumpScale={0.0002}/>}/> : <LunarTerrainMaterial color="#aaa79f" bumpScale={0.0002}/>}
         </mesh>
       )}
       {regionalTerrainMesh && (
         <mesh {...terrainInteraction} geometry={regionalTerrainMesh.geometry} position={[0, -0.009, 0]} receiveShadow castShadow>
-          {imagery && regionalTerrain ? <MoonTrekTerrainMaterial terrain={regionalTerrain} fallback={<LunarTerrainMaterial color="#b2afa7" bumpScale={0.00025}/>}/> : <LunarTerrainMaterial color="#b2afa7" bumpScale={0.00025}/>}
+          {imagery && regionalTerrain ? <MoonTrekTerrainMaterial terrain={regionalTerrain} color="#b2afa7" fallback={<LunarTerrainMaterial color="#b2afa7" bumpScale={0.00025}/>}/> : <LunarTerrainMaterial color="#b2afa7" bumpScale={0.00025}/>}
         </mesh>
       )}
       {contextTerrainMesh && (
@@ -510,17 +510,17 @@ function DynamicTerrain({
           castShadow
           {...terrainInteraction}
         >
-          {imagery && contextTerrain ? <MoonTrekTerrainMaterial terrain={contextTerrain} fallback={<LunarTerrainMaterial color="#b8b5ad" bumpScale={0.0003}/>}/> : <LunarTerrainMaterial color="#b8b5ad" bumpScale={0.0003}/>}
+          {imagery && contextTerrain ? <MoonTrekTerrainMaterial terrain={contextTerrain} color="#b8b5ad" fallback={<LunarTerrainMaterial color="#b8b5ad" bumpScale={0.0003}/>}/> : <LunarTerrainMaterial color="#b8b5ad" bumpScale={0.0003}/>}
         </mesh>
       )}
       {farTerrainMesh && (
         <mesh {...terrainInteraction} geometry={farTerrainMesh.geometry} position={[0, -0.003, 0]} receiveShadow castShadow>
-          {imagery && farTerrain ? <MoonTrekTerrainMaterial terrain={farTerrain} fallback={<LunarTerrainMaterial color="#bdb9b1" bumpScale={0.00035}/>}/> : <LunarTerrainMaterial color="#bdb9b1" bumpScale={0.00035}/>}
+          {imagery && farTerrain ? <MoonTrekTerrainMaterial terrain={farTerrain} color="#bdb9b1" fallback={<LunarTerrainMaterial color="#bdb9b1" bumpScale={0.00035}/>}/> : <LunarTerrainMaterial color="#bdb9b1" bumpScale={0.00035}/>}
         </mesh>
       )}
       {midTerrainMesh && (
         <mesh {...terrainInteraction} geometry={midTerrainMesh.geometry} position={[0, -0.0015, 0]} receiveShadow castShadow>
-          {imagery && midTerrain ? <MoonTrekTerrainMaterial terrain={midTerrain} fallback={<LunarTerrainMaterial color="#c1bdb5" bumpScale={0.00045}/>}/> : <LunarTerrainMaterial color="#c1bdb5" bumpScale={0.00045}/>}
+          {imagery && midTerrain ? <MoonTrekTerrainMaterial terrain={midTerrain} color="#c1bdb5" fallback={<LunarTerrainMaterial color="#c1bdb5" bumpScale={0.00045}/>}/> : <LunarTerrainMaterial color="#c1bdb5" bumpScale={0.00045}/>}
         </mesh>
       )}
       <mesh
@@ -529,14 +529,15 @@ function DynamicTerrain({
         castShadow
         receiveShadow
       >
-        {imagery ? <MoonTrekTerrainMaterial terrain={terrain} onStatus={onImageryStatus} fallback={<LunarTerrainMaterial color="#c5c1b8" bumpScale={0.0006}/>}/> : <LunarTerrainMaterial color="#c5c1b8" bumpScale={0.0006}/>}
+        {imagery ? <MoonTrekTerrainMaterial terrain={terrain} onStatus={onImageryStatus} color="#c5c1b8" fallback={<LunarTerrainMaterial color="#c5c1b8" bumpScale={0.0006}/>}/> : <LunarTerrainMaterial color="#c5c1b8" bumpScale={0.0006}/>}
       </mesh>
       {!overview && <group position={observer}>
         <mesh>
           <sphereGeometry args={[0.0025, 16, 16]} />
           <meshBasicMaterial color="#dffaff" toneMapped={false} />
         </mesh>
-        <pointLight color="#6edcf4" intensity={0.08} distance={0.08} />
+        {/* Small marker glow only; a wide cyan pool tints the lit NASA imagery. */}
+        <pointLight color="#6edcf4" intensity={0.02} distance={0.012} />
         <Line points={[[0, 0, 0], [0, 0.022, 0]]} color="#7ce3ff" lineWidth={1} />
       </group>}
       {!overview && <Line

@@ -791,9 +791,6 @@ function Explore({
             ]}
           />
         </div>
-        {mode !== "horizon" && <p className="pointer-events-none absolute top-16 right-4 max-w-[240px] text-right text-[10px] text-mute">
-          {tr("3D lighting is a visual preview. Metric evidence comes from backend intervals.")}
-        </p>}
         <LiveBar s={s} {...ctl} overlay={mode !== "horizon"}>
           <BackendTimeline
             result={r}

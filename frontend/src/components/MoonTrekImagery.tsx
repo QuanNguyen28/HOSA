@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { BufferGeometry, CanvasTexture, Float32BufferAttribute, SRGBColorSpace, Texture, Vector2, Vector3, Vector4 } from 'three';
+import { BufferGeometry, CanvasTexture, DoubleSide, Float32BufferAttribute, SRGBColorSpace, Texture, Vector2, Vector3, Vector4 } from 'three';
 import { coordinateToVector, MOON_SCENE_RADIUS } from '../lib/lunar';
+import { terrainShadowFragment } from '../lib/terrainShadowShader';
+
+// NASA mosaics are darker than the procedural albedo; scale them so the same
+// Sun intensity gives a comparable surface brightness in both appearances.
+const ALBEDO_GAIN = 1.6;
 import { globeBounds, polarAtlas, tileImage, tileUrl, trekCatalog, type TrekLayer, type TrekTile } from '../lib/moonTrek';
 import type { TerrainWindow } from '../hooks/useTerrainWindow';
 
@@ -48,8 +53,11 @@ function GlobeTile({tile,heightMap,onState}: {tile:TrekTile;heightMap:Texture;on
     return ()=>{cancelled=true;owned?.dispose();};
   },[key,onState]);
   if (!texture) return null;
+  // NASA imagery is an albedo layer: the mission-time Sun shades it like the
+  // LOLA globe instead of the photo glowing with its recorded lighting.
   return <mesh geometry={geometry} raycast={()=>{}}>
-    <meshStandardMaterial color="black" emissive="white" emissiveMap={texture} emissiveIntensity={1} toneMapped={false}
+    <meshStandardMaterial color="#e4e1da" map={texture} roughness={1} metalness={0}
+      bumpMap={heightMap} bumpScale={0.004}
       displacementMap={heightMap} displacementScale={0.022906066536203522} displacementBias={-0.0105047772533671}
       polygonOffset polygonOffsetFactor={-1-tile.level} polygonOffsetUnits={-1-tile.level} />
   </mesh>;
@@ -100,8 +108,8 @@ export function MoonTrekGlobe({elevationMap,onBaseReady,onStatus}: {
   return <group>{tiles.map(tile=><GlobeTile key={`${tile.level}/${tile.row}/${tile.column}`} tile={tile} heightMap={heightMap} onState={onState}/>)}</group>;
 }
 
-export function MoonTrekTerrainMaterial({terrain,fallback,onStatus}: {
-  terrain:TerrainWindow;fallback:ReactNode;onStatus?:(status:ImageryStatus)=>void;
+export function MoonTrekTerrainMaterial({terrain,fallback,onStatus,color='#ffffff'}: {
+  terrain:TerrainWindow;fallback:ReactNode;onStatus?:(status:ImageryStatus)=>void;color?:string;
 }) {
   const [atlas,setAtlas]=useState<{texture:CanvasTexture;bounds:[number,number,number,number]}|null>(null);
   const x=terrain.geometry?.center_x_m, y=terrain.geometry?.center_y_m, radius=(terrain.radius_km??1.5)*1000;
@@ -126,12 +134,20 @@ export function MoonTrekTerrainMaterial({terrain,fallback,onStatus}: {
     return ()=>{cancelled=true;owned?.dispose();};
   },[x,y,radius,terrain.geometry?.projection,onStatus]);
   if(!atlas)return <>{fallback}</>;
-  return <meshBasicMaterial key={atlas.texture.uuid} map={atlas.texture} toneMapped={false} onBeforeCompile={shader=>{
+  // Lit like the relief model: the DEM normals, mission-time Sun and terrain
+  // shadow map shade the photo, so Pole and Ground show the selected time.
+  return <meshStandardMaterial key={atlas.texture.uuid} map={atlas.texture} color={color}
+    roughness={0.98} metalness={0} shadowSide={DoubleSide}
+    customProgramCacheKey={()=>'trek-terrain-lit-v1'} onBeforeCompile={shader=>{
     const b=atlas.bounds;
     shader.uniforms.trekBounds={value:new Vector4(b[0],b[1],b[2]-b[0],b[3]-b[1])};
     shader.uniforms.trekOrigin={value:new Vector2(x,y)};
     shader.vertexShader='uniform vec4 trekBounds;\nuniform vec2 trekOrigin;\n'+shader.vertexShader;
     shader.vertexShader=shader.vertexShader.replace('#include <uv_vertex>',`#include <uv_vertex>
       vMapUv = (vec2(trekOrigin.x + position.x * 1000.0, trekOrigin.y - position.z * 1000.0) - trekBounds.xy) / trekBounds.zw;`);
+    // Lift the darkest recorded shadows so the simulated shadows decide
+    // where terrain is dark, while keeping the photo's albedo detail.
+    shader.fragmentShader=terrainShadowFragment(shader.fragmentShader).replace('#include <map_fragment>',`#include <map_fragment>
+      diffuseColor.rgb = max(diffuseColor.rgb, vec3(0.035)) * ${ALBEDO_GAIN.toFixed(2)};`);
   }}/>;
 }
