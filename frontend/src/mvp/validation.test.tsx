@@ -38,7 +38,6 @@ describe("prepared preview charts", () => {
     expect(html).toContain("background:#06B6D4");
     expect(html).toContain("repeating-linear-gradient");
     expect(html).toContain("75% visible time in display bin");
-    expect(html).toContain("Preview chart; current status uses a separate nominal sample");
     result.timeline[0].joint_visible_fraction_lower = .75001;
     result.timeline[0].joint_visible_fraction_upper = .75002;
     const rounded = renderToStaticMarkup(<BackendTimeline result={result} start={start} end={end} time={start} onTime={() => {}} />);

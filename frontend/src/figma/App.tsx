@@ -604,14 +604,14 @@ function Explore({
                   <div data-testid="point-result" className="space-y-3">
                     <DecisionBadge value={r.evaluation_status === "pending" ? point.error ? "EVALUATION FAILED" : point.busy ? "EVALUATING" : "METRICS READY" : r.decision} />
                     <ValidationInfo result={r} pendingError={point.error} onTime={ctl.setTime} />
-                    <button
+                    {r.evaluation_status !== "pending" && <button
                       className="text-xs text-mute underline underline-offset-2 hover:text-white"
                       onClick={() =>
                         downloadJson(r, `point-${r.result_id}.json`)
                       }
                     >
-                      {tr(r.evaluation_status === "pending" ? "Download initial metrics" : r.timeline_transport?.mode === "aggregated" ? "Download summary JSON" : "Download JSON")}
-                    </button>
+                      {tr(r.timeline_transport?.mode === "aggregated" ? "Download summary JSON" : "Download JSON")}
+                    </button>}
                   </div>
                 )}
                 <MetricBar
@@ -727,9 +727,6 @@ function Explore({
                     </div>
                   </details>
                 )}
-                <p className="text-[10px] leading-relaxed text-mute">
-                  {tr("NASA LOLA + SPICE/JPL · mean solar-disc visibility / Earth-centre LOS · PROVISIONAL. No RF link or landing-safety certification.")}
-                </p>
                 {catalogError && (
                   <p role="alert" className="text-xs text-rose">
                     {tr("Catalog: ")}{tr(catalogError)}
@@ -791,9 +788,6 @@ function Explore({
             ]}
           />
         </div>
-        {mode !== "horizon" && <p className="pointer-events-none absolute top-16 right-4 max-w-[240px] text-right text-[10px] text-mute">
-          {tr("3D lighting is a visual preview. Metric evidence comes from backend intervals.")}
-        </p>}
         <LiveBar s={s} {...ctl} overlay={mode !== "horizon"}>
           <BackendTimeline
             result={r}

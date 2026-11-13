@@ -261,7 +261,6 @@ export default function Stage3D({
           <button type="button" aria-pressed={imagery} onClick={()=>setImagery(true)} className={`border px-2 py-1.5 ${imagery?'border-mint text-mint':'border-line text-mute'}`}>{tr('NASA imagery')}</button>
           <button type="button" aria-pressed={!imagery} onClick={()=>setImagery(false)} className={`border px-2 py-1.5 ${!imagery?'border-sun text-sun':'border-line text-mute'}`}>{tr('Sunlight simulation')}</button>
         </div>
-        <p className="mt-2 leading-relaxed text-mute">{tr(imagery ? 'Recorded lighting · not the selected mission time' : 'Lighting follows the selected mission time')}</p>
         {imagery && <p className={`mt-1 ${imageryStatus==='ready'?'text-mint':'text-sun'}`} role="status">{tr(imageryStatus==='ready'?'NASA Moon Trek · imagery loaded':imageryStatus==='loading'?'Loading NASA image tiles…':imageryStatus==='partial'?'Some image tiles unavailable · lower detail retained':'NASA imagery unavailable · local preview')}</p>}
       </div>}
 
