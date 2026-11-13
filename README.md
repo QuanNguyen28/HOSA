@@ -10,13 +10,13 @@ Nếu đã có cache từ máy đang chạy, làm bước 1–3, chuyển cache 
 
 ## 1. Cài công cụ trên máy mới
 
-| Công cụ | Phiên bản dùng cho hướng dẫn |
-|---|---|
-| Hệ điều hành / shell | Ubuntu 24.04, Bash; Windows dùng Ubuntu trong WSL2 |
-| Python | 3.11 trở lên; có thể dùng Python 3.12 của Ubuntu 24.04 |
-| Node.js | Nhánh 22, ít nhất 22.12 |
-| npm | Ít nhất 10.5.1 |
-| Khác | Git, Make, curl, kết nối mạng để cài dependency và tải kernel lần đầu |
+| Công cụ                | Phiên bản dùng cho hướng dẫn                                               |
+| ------------------------ | -------------------------------------------------------------------------------- |
+| Hệ điều hành / shell | Ubuntu 24.04, Bash; Windows dùng Ubuntu trong WSL2                              |
+| Python                   | 3.11 trở lên; có thể dùng Python 3.12 của Ubuntu 24.04                     |
+| Node.js                  | Nhánh 22, ít nhất 22.12                                                       |
+| npm                      | Ít nhất 10.5.1                                                                 |
+| Khác                    | Git, Make, curl, kết nối mạng để cài dependency và tải kernel lần đầu |
 
 Trên Ubuntu, chạy:
 
@@ -88,14 +88,14 @@ Trong lần chạy đầu, giữ `ASSISTANT_ENABLED=false` trong `.env`. Explore
 
 ### 4.1. Thành phần nào có sẵn?
 
-| Thành phần | Đường dẫn | Có trong Git? | Máy mới cần làm gì? |
-|---|---|---|---|
-| Horizon và mesh địa hình | `data/processed/site-precompute/v1/` | Có, gồm manifest và blobs | Giữ nguyên cả gói |
-| Catalog và dữ liệu snapshot phiên bản cũ | `manifests/`, `data/processed/lunarsight/`, phần cache legacy được theo dõi trong Git | Có | Được tải cùng source |
-| Kernel và bảng vector dùng chung | `data/cache/shared-ephemeris/` | Không | Chạy bước 4.2 hoặc chuyển cache ở bước 11 |
-| Chỉ mục metrics/chart 2000–2100 | `data/cache/point-analysis/prepared-metrics/` | Không | Chạy bước 4.3 hoặc chuyển cache ở bước 11 |
-| DEM NASA gốc và receipt | `data/raw/nasa/` | Không | Chỉ cần tải ở bước 8 khi tính ngoài gói địa hình |
-| Bằng chứng validation, chuỗi native, kết quả và lịch sử chat | `data/cache/` | Không | Backend tạo khi sử dụng; có thể giữ trên ổ persistent |
+| Thành phần                                                         | Đường dẫn                                                                                  | Có trong Git?               | Máy mới cần làm gì?                                      |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ---------------------------- | ------------------------------------------------------------- |
+| Horizon và mesh địa hình                                         | `data/processed/site-precompute/v1/`                                                         | Có, gồm manifest và blobs | Giữ nguyên cả gói                                         |
+| Catalog và dữ liệu snapshot phiên bản cũ                       | `manifests/`, `data/processed/lunarsight/`, phần cache legacy được theo dõi trong Git | Có                          | Được tải cùng source                                     |
+| Kernel và bảng vector dùng chung                                  | `data/cache/shared-ephemeris/`                                                               | Không                       | Chạy bước 4.2 hoặc chuyển cache ở bước 11             |
+| Chỉ mục metrics/chart 2000–2100                                   | `data/cache/point-analysis/prepared-metrics/`                                                | Không                       | Chạy bước 4.3 hoặc chuyển cache ở bước 11             |
+| DEM NASA gốc và receipt                                            | `data/raw/nasa/`                                                                             | Không                       | Chỉ cần tải ở bước 8 khi tính ngoài gói địa hình  |
+| Bằng chứng validation, chuỗi native, kết quả và lịch sử chat | `data/cache/`                                                                                | Không                       | Backend tạo khi sử dụng; có thể giữ trên ổ persistent |
 
 **Không cần tải lại DEM hoặc chạy `make precompute-catalog` để dùng 19 điểm mặc định ở các mức viewer đã có.** Gói trong Git đã chứa horizon cần thiết, gồm cả 30 m.
 
@@ -121,11 +121,11 @@ OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONPATH=backend \
 Lệnh chuẩn bị **76 cấu hình**, từ `2000-01-01T00:00:00Z` đến **trước** `2101-01-01T00:00:00Z`, tức bao gồm toàn bộ năm 2100. Mỗi cấu hình đặt **panel và antenna cùng độ cao**:
 
 | Viewer | Panel | Antenna |
-|---|---:|---:|
-| Lander | 2 m | 2 m |
-| 10 m | 10 m | 10 m |
-| 20 m | 20 m | 20 m |
-| 30 m | 30 m | 30 m |
+| ------ | ----: | ------: |
+| Lander |   2 m |     2 m |
+| 10 m   |  10 m |    10 m |
+| 20 m   |  20 m |    20 m |
+| 30 m   |  30 m |    30 m |
 
 Đây là bước tốn thời gian và CPU nhất khi cài mới. Script tính trên lưới 5 phút, lưu checkpoint từng năm; một cấu hình chỉ được công bố khi đủ khoảng yêu cầu. Nếu bị ngắt, chạy lại nguyên lệnh để tiếp tục các phần còn tương thích. Dùng `--workers 1` nếu máy ít tài nguyên.
 
@@ -269,14 +269,14 @@ PY
 
 Frontend chạy nền bằng POST cùng body tới `/api/lunar/point/analyses`. Luồng API tương ứng:
 
-| Method | Endpoint | Nội dung |
-|---|---|---|
-| POST | `/api/lunar/point/analyses` | Tạo job, nhận `job_id` |
-| GET | `/api/lunar/point/analyses/{job_id}` | Trạng thái và stage hiện tại |
-| GET | `/api/lunar/point/analyses/{job_id}/preview` | Metrics ban đầu khi đã sẵn sàng |
-| GET | `/api/lunar/point/analyses/{job_id}/result?view=display` | Kết quả cuối và chart |
-| GET | `/api/lunar/point/analyses/{job_id}/interval?at_utc=2026-11-24T00:00:00Z` | Khoảng native tại một thời điểm |
-| GET | `/api/lunar/point/analyses/{job_id}/intervals.csv` | CSV native sau khi job hoàn tất |
+| Method | Endpoint                                                                    | Nội dung                             |
+| ------ | --------------------------------------------------------------------------- | ------------------------------------- |
+| POST   | `/api/lunar/point/analyses`                                               | Tạo job, nhận `job_id`            |
+| GET    | `/api/lunar/point/analyses/{job_id}`                                      | Trạng thái và stage hiện tại     |
+| GET    | `/api/lunar/point/analyses/{job_id}/preview`                              | Metrics ban đầu khi đã sẵn sàng |
+| GET    | `/api/lunar/point/analyses/{job_id}/result?view=display`                  | Kết quả cuối và chart             |
+| GET    | `/api/lunar/point/analyses/{job_id}/interval?at_utc=2026-11-24T00:00:00Z` | Khoảng native tại một thời điểm |
+| GET    | `/api/lunar/point/analyses/{job_id}/intervals.csv`                        | CSV native sau khi job hoàn tất     |
 
 Preview/result/interval có thể trả 409 khi phần tương ứng chưa sẵn sàng; xem status job trước. Schema đầu vào và response đầy đủ nằm ở `/docs` và [docs/examples](docs/examples/).
 
@@ -413,21 +413,21 @@ Khi deploy, phục vụ `frontend/dist/` bằng web server, cấu hình `/api` r
 
 ## 13. Xử lý lỗi thường gặp
 
-| Hiện tượng | Cách xử lý |
-|---|---|
-| `python3 -m venv` thiếu `ensurepip` | Cài `python3-venv` đúng phiên bản Python rồi tạo lại venv |
-| Node/npm quá cũ, `EBADENGINE` | Nạp nvm, chạy `nvm install 22`, `nvm use 22`, rồi `npm --prefix frontend ci` |
-| `ModuleNotFoundError: app` | Chạy từ gốc repo bằng Python trong venv; với uvicorn dùng `--app-dir backend`, với script dùng `PYTHONPATH=backend` như ví dụ |
-| Cổng bận hoặc web không gọi được API | Kiểm tra cả hai health URL; dùng thống nhất 8000/5173 hoặc đổi cả cặp theo bước 5 |
-| `EPHEMERIS_NOT_PREPARED` | Chạy bước 4.2 hoặc chuyển đủ kernel cùng receipt |
-| `METRICS_NOT_PREPARED` (409) | Kiểm tra đã build đúng điểm, hai độ cao, model và khoảng ngày chưa. Request Site04 cũ không được chuẩn bị bởi lệnh mặc định mới; dùng request Haworth ở bước 6 |
-| Có cache nhưng khoảng giờ lẻ không đọc được | Chỉ mục nhanh cần biên thời gian được hỗ trợ; khoảng trong năm 2000–2100 chưa chắc khớp biên chỉ mục. Dùng Analyze để tính đúng khoảng, không tự làm tròn |
-| `DEM_NOT_INSTALLED`, `DEM_RECEIPT_MISSING`, ngoài DEM coverage | Cài/kiểm tra nguồn ở bước 8; dữ liệu chỉ được dùng trong coverage thực |
-| `OUTSIDE_EPHEMERIS_COVERAGE` | Khoảng yêu cầu nằm ngoài kernel đã cài; không kẹp ngày để tạo kết quả |
-| `*_INTEGRITY_FAILED` | Kiểm tra đúng phiên bản, file và receipt; cài lại artifact hợp lệ hoặc rebuild, không bỏ qua checksum |
-| Preview/result chưa sẵn sàng (409) | Xem status và stage của job; chờ phần dữ liệu tương ứng hoàn tất |
-| INDETERMINATE sau Analyze | Đọc `validation.reason_codes`, bounds và `resolution`; đây có thể là thiếu bằng chứng hoặc gate chưa đạt, không phải lỗi setup mặc định |
-| Assistant disabled hoặc OpenRouter chưa cấu hình | Kiểm tra `.env` gốc repo, enable/provider/key/model, restart backend rồi đọc capabilities |
+| Hiện tượng                                                       | Cách xử lý                                                                                                                                                                                |
+| ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `python3 -m venv` thiếu `ensurepip`                            | Cài `python3-venv` đúng phiên bản Python rồi tạo lại venv                                                                                                                          |
+| Node/npm quá cũ, `EBADENGINE`                                   | Nạp nvm, chạy `nvm install 22`, `nvm use 22`, rồi `npm --prefix frontend ci`                                                                                                        |
+| `ModuleNotFoundError: app`                                        | Chạy từ gốc repo bằng Python trong venv; với uvicorn dùng `--app-dir backend`, với script dùng `PYTHONPATH=backend` như ví dụ                                                 |
+| Cổng bận hoặc web không gọi được API                        | Kiểm tra cả hai health URL; dùng thống nhất 8000/5173 hoặc đổi cả cặp theo bước 5                                                                                                |
+| `EPHEMERIS_NOT_PREPARED`                                          | Chạy bước 4.2 hoặc chuyển đủ kernel cùng receipt                                                                                                                                     |
+| `METRICS_NOT_PREPARED` (409)                                      | Kiểm tra đã build đúng điểm, hai độ cao, model và khoảng ngày chưa. Request Site04 cũ không được chuẩn bị bởi lệnh mặc định mới; dùng request Haworth ở bước 6 |
+| Có cache nhưng khoảng giờ lẻ không đọc được              | Chỉ mục nhanh cần biên thời gian được hỗ trợ; khoảng trong năm 2000–2100 chưa chắc khớp biên chỉ mục. Dùng Analyze để tính đúng khoảng, không tự làm tròn      |
+| `DEM_NOT_INSTALLED`, `DEM_RECEIPT_MISSING`, ngoài DEM coverage | Cài/kiểm tra nguồn ở bước 8; dữ liệu chỉ được dùng trong coverage thực                                                                                                         |
+| `OUTSIDE_EPHEMERIS_COVERAGE`                                      | Khoảng yêu cầu nằm ngoài kernel đã cài; không kẹp ngày để tạo kết quả                                                                                                        |
+| `*_INTEGRITY_FAILED`                                              | Kiểm tra đúng phiên bản, file và receipt; cài lại artifact hợp lệ hoặc rebuild, không bỏ qua checksum                                                                           |
+| Preview/result chưa sẵn sàng (409)                               | Xem status và stage của job; chờ phần dữ liệu tương ứng hoàn tất                                                                                                                  |
+| INDETERMINATE sau Analyze                                           | Đọc `validation.reason_codes`, bounds và `resolution`; đây có thể là thiếu bằng chứng hoặc gate chưa đạt, không phải lỗi setup mặc định                             |
+| Assistant disabled hoặc OpenRouter chưa cấu hình                | Kiểm tra `.env` gốc repo, enable/provider/key/model, restart backend rồi đọc capabilities                                                                                             |
 
 ## 14. Quy tắc đầu vào và ý nghĩa kết quả
 
