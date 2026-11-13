@@ -60,7 +60,7 @@ describe("Vietnamese display coverage", () => {
     const empty = localized(<CurrentStatus time={0} />);
     expect(empty).toContain("Chưa có dữ liệu khoảng thời gian");
     expect(empty).not.toContain("No interval evidence");
-    const result = { instant: { sun_state: "V", earth_state: "B", sun_visible_fraction: 0.75 } } as unknown as PointResult;
+    const result = { timeline: [], instant: { start_utc: "1970-01-01T00:00:00Z", end_utc: "1970-01-01T00:05:00Z", sun_state: "V", earth_state: "B", sun_visible_fraction: 0.75 } } as unknown as PointResult;
     const populated = localized(<CurrentStatus result={result} time={0} />);
     expect(populated).toContain("Nhìn thấy 75.0% đĩa");
     expect(populated).toContain("Khoảng thời gian từ máy chủ");

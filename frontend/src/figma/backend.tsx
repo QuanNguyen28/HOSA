@@ -1,21 +1,22 @@
 import { useTranslation } from "../i18n/LanguageProvider";
-import { useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import { api } from "../mvp/api";
 import {
   boundsText,
-  intervalAt,
+  currentInterval,
   missionHours,
   missionEnd,
   timelineBins,
   type Bounds,
   type Candidate,
   type Mission,
+  type Interval,
   type PlanningResult,
   type PointResult,
   type Target,
 } from "../mvp/contracts";
 import { DecisionBadge } from "../mvp/DecisionBadge";
-import { SITES, HIDDEN_DEFAULT_SITE_IDS, fmtTime, type Site } from "./model";
+import { SITES, STEP, HIDDEN_DEFAULT_SITE_IDS, fmtTime, type Site } from "./model";
 import { SunIcon, EarthIcon } from "./ui";
 
 export const toTarget = (site: Site): Target => ({
@@ -366,35 +367,40 @@ export function CurrentStatus({
   time: number;
 }) {
   const { t: tr } = useTranslation();
-  const row = result && (result.instant ?? intervalAt(result.timeline, time));
+  const row = result && currentInterval(result, time);
   return (
-    <div className="flex gap-2">
-      {(["sun", "earth"] as const).map((body) => {
-        const state = row?.[`${body}_state`] ?? "?";
-        return (
-          <div
-            key={body}
-            className={`flex flex-1 items-center gap-2 border px-3 py-2.5 ${state === "V" ? "border-mint/30 bg-mint/[0.06] text-mint" : state === "B" ? "border-rose/25 bg-rose/[0.05] text-rose" : "border-line text-mute"}`}
-          >
-            {body === "sun" ? <SunIcon size={20} /> : <EarthIcon size={20} />}
-            <div>
-              <p className="font-display text-sm font-semibold">
-                {tr(body === "sun" ? "Sun" : "Earth")}{" "}
-                {tr(state === "V"
-                  ? "visible"
-                  : state === "B"
-                    ? "blocked"
-                    : "unknown")}
-              </p>
-              <p className="font-mono text-[10px]">
-                {body === "sun" && row?.sun_visible_fraction != null
-                  ? tr("{0}% of disc visible", [(row.sun_visible_fraction * 100).toFixed(1)])
-                  : tr(row ? "Backend interval" : "No interval evidence")}
-              </p>
+    <div>
+      <div className="flex gap-2">
+        {(["sun", "earth"] as const).map((body) => {
+          const state = row?.[`${body}_state`] ?? "?";
+          return (
+            <div
+              key={body}
+              className={`flex flex-1 items-center gap-2 border px-3 py-2.5 ${state === "V" ? "border-mint/30 bg-mint/[0.06] text-mint" : state === "B" ? "border-rose/25 bg-rose/[0.05] text-rose" : "border-line text-mute"}`}
+            >
+              {body === "sun" ? <SunIcon size={20} /> : <EarthIcon size={20} />}
+              <div>
+                <p className="font-display text-sm font-semibold">
+                  {tr(body === "sun" ? "Sun" : "Earth")}{" "}
+                  {tr(state === "V"
+                    ? body === "sun" && row?.sun_visible_fraction != null && row.sun_visible_fraction > 0 && row.sun_visible_fraction < 1
+                      ? "partly visible" : "visible"
+                    : state === "B"
+                      ? "blocked"
+                      : "unknown")}
+                </p>
+                <p className="font-mono text-[10px]">
+                  {body === "sun" && row?.sun_visible_fraction != null
+                    ? tr("{0}% of disc visible", [row.sun_visible_fraction > 0 && row.sun_visible_fraction < .001 ? "<0.1"
+                      : row.sun_visible_fraction > .999 && row.sun_visible_fraction < 1 ? ">99.9" : (row.sun_visible_fraction * 100).toFixed(1)])
+                    : tr(row ? "Backend interval" : "No interval evidence")}
+                </p>
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
+      {row?.evidence_source === "prepared_nominal" && <p className="mt-1 text-[9px] text-mute">{tr("Nominal 5-minute sample · PROVISIONAL")}</p>}
     </div>
   );
 }
@@ -404,11 +410,36 @@ export function jointBounds(result: PointResult): Bounds {
     hi = 0;
   for (const row of result.timeline) {
     const h = (Date.parse(row.end_utc) - Date.parse(row.start_utc)) / 3600000;
-    if (row.joint_state === "V") lo += h;
-    if (row.joint_state !== "B") hi += h;
+    lo += h * (row.joint_visible_fraction_lower ?? (row.joint_state === "V" ? 1 : 0));
+    hi += h * (row.joint_visible_fraction_upper ?? (row.joint_state !== "B" ? 1 : 0));
   }
   return [lo, hi];
 }
+// Cursor animation must not recreate up to 2,400 unchanged chart cells per frame.
+const TimelineCells = memo(function TimelineCells({ bins, body }: {
+  bins: Interval[]; body: "sun" | "earth" | "joint";
+}) {
+  const { t: tr } = useTranslation();
+  return <>{bins.map((r, i) => {
+    const lo = r[`${body}_visible_fraction_lower`] ?? 0;
+    const hi = r[`${body}_visible_fraction_upper`] ?? 1;
+    const uncertain = hi-lo > 1e-9;
+    return <span
+      aria-hidden="true"
+      key={i}
+      title={tr("{0}: {1}{2}% {3} in display bin", [fmtTime(Date.parse(r.start_utc)), boundsText([lo * 100, hi * 100], 1), "", body === "sun" ? "mean Sun disc" : "visible time"])}
+      style={{
+        alignSelf: "flex-end",
+        height: uncertain ? "100%" : `${Math.max(0, lo) * 100}%`,
+        flexGrow: Date.parse(r.end_utc) - Date.parse(r.start_utc),
+        flexBasis: 0,
+        flexShrink: 0,
+        background: uncertain ? "repeating-linear-gradient(45deg,#666 0 2px,#333 2px 5px)"
+          : hi > 0 ? { sun: "#FBBF24", earth: "#06B6D4", joint: "#10B981" }[body] : "#222",
+      }}
+    />;
+  })}</>;
+});
 export function BackendTimeline({
   result,
   start,
@@ -423,12 +454,13 @@ export function BackendTimeline({
   onTime: (v: number) => void;
 }) {
   const { t: tr } = useTranslation();
-  const bins = useMemo(() => timelineBins(result?.timeline ?? [], start, end), [result, start, end]);
+  const timeline = result?.timeline;
+  const bins = useMemo(() => timelineBins(timeline ?? [], start, end), [timeline, start, end]);
   return (
     <div className="space-y-1.5" aria-label={tr("Backend visibility timeline")}>
       {(["sun", "earth", "joint"] as const).map((body) => (
         <div key={body} className="flex items-center gap-3">
-          <span className="w-10 font-mono text-[10px] uppercase text-mute">
+          <span className="w-10 font-mono text-[10px] uppercase text-mute" title={body === "joint" ? tr("Joint = any visible Sun disc AND Earth line of sight") : undefined}>
             {tr(body)}
           </span>
           <div
@@ -439,36 +471,20 @@ export function BackendTimeline({
               const box = e.currentTarget.getBoundingClientRect();
               onTime(
                 Math.min(
-                  end - 300000,
+                  end - STEP,
                   Math.max(
                     start,
                     Math.floor(
                       (start +
                         ((e.clientX - box.left) / box.width) * (end - start)) /
-                        300000,
-                    ) * 300000,
+                        STEP,
+                    ) * STEP,
                   ),
                 ),
               );
             }}
           >
-            {bins.map((r, i) => {
-              const lo = r[`${body}_visible_fraction_lower`] ?? 0;
-              const hi = r[`${body}_visible_fraction_upper`] ?? 1;
-              const uncertain = hi-lo > 1e-9;
-              return <span
-                aria-hidden="true"
-                key={i}
-                title={tr("{0}: {1}{2}% {3} in display bin", [fmtTime(Date.parse(r.start_utc)), boundsText([lo * 100, hi * 100], 1), "", body === "sun" ? "mean Sun disc" : "visible time"])}
-                style={{
-                  alignSelf: "flex-end",
-                  height: uncertain ? "100%" : `${Math.max(0, lo) * 100}%`,
-                  flexGrow: Date.parse(r.end_utc) - Date.parse(r.start_utc),
-                  background: uncertain ? "repeating-linear-gradient(45deg,#666 0 2px,#333 2px 5px)"
-                    : hi > 0 ? { sun: "#FBBF24", earth: "#06B6D4", joint: "#10B981" }[body] : "#222",
-                }}
-              />;
-            })}
+            <TimelineCells bins={bins} body={body} />
             <i
               className="pointer-events-none absolute inset-y-0 w-px bg-white"
               style={{ left: `${((time - start) / (end - start)) * 100}%` }}
@@ -477,7 +493,9 @@ export function BackendTimeline({
         </div>
       ))}
       <p className="text-right font-mono text-[9px] text-mute">
-        {tr("HEIGHT = MEAN SUN DISC / EARTH & JOINT VISIBLE TIME · HATCHED = UNCERTAIN · DISPLAY BIN AVERAGES")}{tr(result?.timeline_transport?.exact_intervals_ready === false && " · Preview chart; exact instants available after Analyze")}
+        {tr("HEIGHT = MEAN SUN DISC / EARTH & JOINT VISIBLE TIME · HATCHED = UNCERTAIN · DISPLAY BIN AVERAGES")}
+        <span className="block">{tr("Joint = any visible Sun disc AND Earth line of sight")}</span>
+        {tr(result?.timeline_transport?.exact_intervals_ready === false && " · Preview chart; current status uses a separate nominal sample")}
         {tr(result?.timeline_transport?.mode === "aggregated" && result.timeline_transport.exact_intervals_ready !== false && " · Current status uses exact native intervals")}
         {tr(!result && " · Run Analyze to load evidence")}
         {tr(result?.timeline_transport?.mode === "pending" && (result.evaluation_stages?.validation === "not_started"

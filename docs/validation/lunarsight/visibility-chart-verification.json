@@ -1,0 +1,689 @@
+{
+  "scope": "Real verified packaged NASA terrain and shared SPICE; nominal 5-minute model. No change to science algorithms or validation gates.",
+  "api_fraction_serialization_tolerance": 5.1e-11,
+  "cases": [
+    {
+      "site": "connecting-ridge",
+      "window": [
+        "2026-01-01T00:00:00Z",
+        "2027-01-01T00:00:00Z"
+      ],
+      "native_samples": 105120,
+      "chart_bins": 800,
+      "index_query_ms": 119.02,
+      "native_joint_hours": [
+        4430.916666666666,
+        4430.916666666666
+      ],
+      "chart_integral_error_hours": {
+        "sun": 9.094947017729282e-13,
+        "earth": 0.0,
+        "joint": 0.0
+      },
+      "partial_disc_samples": 7245,
+      "instant_checks": [
+        {
+          "at_utc": "2026-01-01T00:02:00+00:00",
+          "sun": "V",
+          "earth": "V",
+          "joint": "V",
+          "sun_disc": 1.0,
+          "ms": 49.75
+        },
+        {
+          "at_utc": "2026-01-07T14:07:00+00:00",
+          "sun": "V",
+          "earth": "V",
+          "joint": "V",
+          "sun_disc": 1.0,
+          "ms": 47.72
+        },
+        {
+          "at_utc": "2026-01-07T14:12:00+00:00",
+          "sun": "V",
+          "earth": "B",
+          "joint": "B",
+          "sun_disc": 1.0,
+          "ms": 56.32
+        },
+        {
+          "at_utc": "2026-03-03T10:52:00+00:00",
+          "sun": "V",
+          "earth": "B",
+          "joint": "B",
+          "sun_disc": 0.0105027022,
+          "ms": 85.1
+        },
+        {
+          "at_utc": "2026-03-03T10:57:00+00:00",
+          "sun": "B",
+          "earth": "B",
+          "joint": "B",
+          "sun_disc": 0.0,
+          "ms": 72.19
+        },
+        {
+          "at_utc": "2026-05-27T16:47:00+00:00",
+          "sun": "B",
+          "earth": "B",
+          "joint": "B",
+          "sun_disc": 0.0,
+          "ms": 47.95
+        },
+        {
+          "at_utc": "2026-05-29T08:57:00+00:00",
+          "sun": "V",
+          "earth": "B",
+          "joint": "B",
+          "sun_disc": 0.0122676061,
+          "ms": 81.3
+        },
+        {
+          "at_utc": "2026-06-27T23:02:00+00:00",
+          "sun": "V",
+          "earth": "B",
+          "joint": "B",
+          "sun_disc": 0.7199145462,
+          "ms": 82.54
+        },
+        {
+          "at_utc": "2026-06-28T14:52:00+00:00",
+          "sun": "V",
+          "earth": "B",
+          "joint": "B",
+          "sun_disc": 1.0,
+          "ms": 53.49
+        },
+        {
+          "at_utc": "2026-07-07T06:57:00+00:00",
+          "sun": "V",
+          "earth": "V",
+          "joint": "V",
+          "sun_disc": 1.0,
+          "ms": 59.85
+        },
+        {
+          "at_utc": "2026-07-08T02:12:00+00:00",
+          "sun": "V",
+          "earth": "V",
+          "joint": "V",
+          "sun_disc": 1.0,
+          "ms": 58.87
+        },
+        {
+          "at_utc": "2026-07-09T17:37:00+00:00",
+          "sun": "V",
+          "earth": "V",
+          "joint": "V",
+          "sun_disc": 1.0,
+          "ms": 53.35
+        },
+        {
+          "at_utc": "2026-12-31T23:57:00+00:00",
+          "sun": "V",
+          "earth": "B",
+          "joint": "B",
+          "sun_disc": 1.0,
+          "ms": 102.78
+        }
+      ],
+      "identity": {
+        "method_version": "coordinate-enu-0.1.1",
+        "metrics_version": "coordinate-metrics-1.0.0",
+        "result_schema_version": "progressive-point-3",
+        "execution_policy_version": "hard-first-temporal-confirmation-2.0",
+        "sensitivity_version": "ordered-events-1.0",
+        "evaluation_version": "mission-evaluation-2.1.0",
+        "validation_version": "mission-validation-1.0",
+        "contact_method_version": null,
+        "horizons_adapter_version": "0.1.0",
+        "request": {
+          "site_id": null,
+          "latitude_deg": -89.4398,
+          "longitude_e_deg": 222.83,
+          "evaluation_policy": "hard_first",
+          "illumination_model": "solar_disc",
+          "start_utc": "2026-01-01T00:00:00Z",
+          "duration_hours": 8760.0,
+          "end_utc": "2027-01-01T00:00:00Z",
+          "panel_height_m": 20.0,
+          "antenna_height_m": 20.0,
+          "constraints": {
+            "max_darkness_hours": null,
+            "max_earth_blackout_hours": null
+          },
+          "min_sunlit_fraction": null,
+          "min_earth_los_fraction": null,
+          "contact_requirements": null
+        },
+        "datasets": [
+          {
+            "dataset_id": "Site01_dem",
+            "sha256": "3ba7b97cb00a2bcf21189c3aeb535f65afc21207154ab9f0d43c5bdc1f7e747e",
+            "bytes": 40980810,
+            "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site01/Site01_final_adj_5mpp_surf.tif",
+            "frame": "MOON_ME/DE421",
+            "unit": "m",
+            "resolution_m": 5
+          },
+          {
+            "dataset_id": "dem80",
+            "sha256": "82030dcbdd7c4bb0c7d858e9b4b293b9f2cda5a543ba31ec0f42784bd6beee5a",
+            "bytes": 189158392,
+            "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_80S_80MPP_ADJ.TIF",
+            "frame": "MOON_ME/DE421",
+            "unit": "m",
+            "resolution_m": 80
+          },
+          {
+            "dataset_id": "dem240",
+            "sha256": "3f9663257b63022f2b0d5a623482ff3cadddceb91594a4e4ca14a94d8cec8b34",
+            "bytes": 218961039,
+            "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_60S_240MPP_ADJ.TIF",
+            "frame": "MOON_ME/DE421",
+            "unit": "m",
+            "resolution_m": 240
+          }
+        ],
+        "radius_m": 1737400.0,
+        "az_step_deg": 0.25,
+        "fine_az_step_deg": 0.125,
+        "scan_radii_m": [
+          400000,
+          300000
+        ],
+        "time_steps_minutes": [
+          5,
+          1
+        ],
+        "solar_disc_method": "solar-disc-mean-1.0",
+        "shared_ephemeris": {
+          "method_version": "shared-spice-hourly-1.0",
+          "kernels": [
+            {
+              "name": "naif0012.tls",
+              "sha256": "678e32bdb5a744117a467cd9601cd6b373f0e9bc9bbde1371d5eee39600a039b"
+            },
+            {
+              "name": "pck00011.tpc",
+              "sha256": "3dff7b1dbeceaa01f25467767d3fa25816051c85d162d1edf04acb310ee28bb1"
+            },
+            {
+              "name": "de440s.bsp",
+              "sha256": "c1c7feeab882263fc493a9d5a5b2ddd71b54826cdf65d8d17a76126b260a49f2"
+            },
+            {
+              "name": "moon_pa_de440_200625.bpc",
+              "sha256": "60cd55aa401ea2ea97360636f567554bfe4e37bb829f901b4460a455dfaf783f"
+            },
+            {
+              "name": "moon_de440_250416.tf",
+              "sha256": "a47c71e9c9f33796bdafb2c9d69a7ee447b6016ecad80f71cd6f3e479f9cf768"
+            }
+          ],
+          "frame": "MOON_ME",
+          "correction": "LT+S",
+          "step_seconds": 3600,
+          "units": "km",
+          "storage": "float64"
+        }
+      },
+      "metrics_source": null
+    },
+    {
+      "site": "shackleton-rim",
+      "window": [
+        "2026-01-01T00:00:00Z",
+        "2027-01-01T00:00:00Z"
+      ],
+      "native_samples": 105120,
+      "chart_bins": 800,
+      "index_query_ms": 76.7,
+      "native_joint_hours": [
+        3985.916666666667,
+        3985.916666666667
+      ],
+      "chart_integral_error_hours": {
+        "sun": 2.7284841053187847e-12,
+        "earth": 1.8189894035458565e-12,
+        "joint": 0.0
+      },
+      "partial_disc_samples": 8860,
+      "instant_checks": [
+        {
+          "at_utc": "2026-01-01T00:02:00+00:00",
+          "sun": "V",
+          "earth": "V",
+          "joint": "V",
+          "sun_disc": 1.0,
+          "ms": 49.98
+        },
+        {
+          "at_utc": "2026-01-07T21:47:00+00:00",
+          "sun": "V",
+          "earth": "V",
+          "joint": "V",
+          "sun_disc": 1.0,
+          "ms": 49.82
+        },
+        {
+          "at_utc": "2026-01-07T21:52:00+00:00",
+          "sun": "V",
+          "earth": "B",
+          "joint": "B",
+          "sun_disc": 1.0,
+          "ms": 54.31
+        },
+        {
+          "at_utc": "2026-02-10T23:22:00+00:00",
+          "sun": "V",
+          "earth": "B",
+          "joint": "B",
+          "sun_disc": 0.0006542913,
+          "ms": 81.09
+        },
+        {
+          "at_utc": "2026-02-10T23:27:00+00:00",
+          "sun": "B",
+          "earth": "B",
+          "joint": "B",
+          "sun_disc": 0.0,
+          "ms": 78.42
+        },
+        {
+          "at_utc": "2026-05-27T00:17:00+00:00",
+          "sun": "V",
+          "earth": "B",
+          "joint": "B",
+          "sun_disc": 1.0,
+          "ms": 79.53
+        },
+        {
+          "at_utc": "2026-05-28T19:02:00+00:00",
+          "sun": "B",
+          "earth": "B",
+          "joint": "B",
+          "sun_disc": 0.0,
+          "ms": 47.05
+        },
+        {
+          "at_utc": "2026-06-28T20:12:00+00:00",
+          "sun": "V",
+          "earth": "B",
+          "joint": "B",
+          "sun_disc": 1.0,
+          "ms": 49.64
+        },
+        {
+          "at_utc": "2026-06-29T18:42:00+00:00",
+          "sun": "B",
+          "earth": "B",
+          "joint": "B",
+          "sun_disc": 0.0,
+          "ms": 48.99
+        },
+        {
+          "at_utc": "2026-07-06T17:17:00+00:00",
+          "sun": "V",
+          "earth": "V",
+          "joint": "V",
+          "sun_disc": 0.5617777777,
+          "ms": 73.24
+        },
+        {
+          "at_utc": "2026-07-10T15:57:00+00:00",
+          "sun": "V",
+          "earth": "V",
+          "joint": "V",
+          "sun_disc": 1.0,
+          "ms": 47.41
+        },
+        {
+          "at_utc": "2026-07-16T05:07:00+00:00",
+          "sun": "V",
+          "earth": "V",
+          "joint": "V",
+          "sun_disc": 1.0,
+          "ms": 43.73
+        },
+        {
+          "at_utc": "2026-12-31T23:57:00+00:00",
+          "sun": "V",
+          "earth": "B",
+          "joint": "B",
+          "sun_disc": 1.0,
+          "ms": 54.77
+        }
+      ],
+      "identity": {
+        "method_version": "coordinate-enu-0.1.1",
+        "metrics_version": "coordinate-metrics-1.0.0",
+        "result_schema_version": "progressive-point-3",
+        "execution_policy_version": "hard-first-temporal-confirmation-2.0",
+        "sensitivity_version": "ordered-events-1.0",
+        "evaluation_version": "mission-evaluation-2.1.0",
+        "validation_version": "mission-validation-1.0",
+        "contact_method_version": null,
+        "horizons_adapter_version": "0.1.0",
+        "request": {
+          "site_id": null,
+          "latitude_deg": -89.6866,
+          "longitude_e_deg": 197.19,
+          "evaluation_policy": "hard_first",
+          "illumination_model": "solar_disc",
+          "start_utc": "2026-01-01T00:00:00Z",
+          "duration_hours": 8760.0,
+          "end_utc": "2027-01-01T00:00:00Z",
+          "panel_height_m": 20.0,
+          "antenna_height_m": 20.0,
+          "constraints": {
+            "max_darkness_hours": null,
+            "max_earth_blackout_hours": null
+          },
+          "min_sunlit_fraction": null,
+          "min_earth_los_fraction": null,
+          "contact_requirements": null
+        },
+        "datasets": [
+          {
+            "dataset_id": "Site04_dem",
+            "sha256": "38ff70dbdf2f066c2cfa94a646c3a59d653ce7f6b4528b15fc1b43ee397ce758",
+            "bytes": 40980806,
+            "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site04/Site04_final_adj_5mpp_surf.tif",
+            "frame": "MOON_ME/DE421",
+            "unit": "m",
+            "resolution_m": 5
+          },
+          {
+            "dataset_id": "dem80",
+            "sha256": "82030dcbdd7c4bb0c7d858e9b4b293b9f2cda5a543ba31ec0f42784bd6beee5a",
+            "bytes": 189158392,
+            "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_80S_80MPP_ADJ.TIF",
+            "frame": "MOON_ME/DE421",
+            "unit": "m",
+            "resolution_m": 80
+          },
+          {
+            "dataset_id": "dem240",
+            "sha256": "3f9663257b63022f2b0d5a623482ff3cadddceb91594a4e4ca14a94d8cec8b34",
+            "bytes": 218961039,
+            "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_60S_240MPP_ADJ.TIF",
+            "frame": "MOON_ME/DE421",
+            "unit": "m",
+            "resolution_m": 240
+          }
+        ],
+        "radius_m": 1737400.0,
+        "az_step_deg": 0.25,
+        "fine_az_step_deg": 0.125,
+        "scan_radii_m": [
+          400000,
+          300000
+        ],
+        "time_steps_minutes": [
+          5,
+          1
+        ],
+        "solar_disc_method": "solar-disc-mean-1.0",
+        "shared_ephemeris": {
+          "method_version": "shared-spice-hourly-1.0",
+          "kernels": [
+            {
+              "name": "naif0012.tls",
+              "sha256": "678e32bdb5a744117a467cd9601cd6b373f0e9bc9bbde1371d5eee39600a039b"
+            },
+            {
+              "name": "pck00011.tpc",
+              "sha256": "3dff7b1dbeceaa01f25467767d3fa25816051c85d162d1edf04acb310ee28bb1"
+            },
+            {
+              "name": "de440s.bsp",
+              "sha256": "c1c7feeab882263fc493a9d5a5b2ddd71b54826cdf65d8d17a76126b260a49f2"
+            },
+            {
+              "name": "moon_pa_de440_200625.bpc",
+              "sha256": "60cd55aa401ea2ea97360636f567554bfe4e37bb829f901b4460a455dfaf783f"
+            },
+            {
+              "name": "moon_de440_250416.tf",
+              "sha256": "a47c71e9c9f33796bdafb2c9d69a7ee447b6016ecad80f71cd6f3e479f9cf768"
+            }
+          ],
+          "frame": "MOON_ME",
+          "correction": "LT+S",
+          "step_seconds": 3600,
+          "units": "km",
+          "storage": "float64"
+        }
+      },
+      "metrics_source": null
+    },
+    {
+      "site": "haworth",
+      "window": [
+        "2026-01-01T00:00:00Z",
+        "2027-01-01T00:00:00Z"
+      ],
+      "native_samples": 105120,
+      "chart_bins": 800,
+      "index_query_ms": 66.8,
+      "native_joint_hours": [
+        4624.166666666666,
+        4624.166666666666
+      ],
+      "chart_integral_error_hours": {
+        "sun": 4.547473508864641e-12,
+        "earth": 9.094947017729282e-13,
+        "joint": 9.094947017729282e-13
+      },
+      "partial_disc_samples": 6876,
+      "instant_checks": [
+        {
+          "at_utc": "2026-01-01T00:02:00+00:00",
+          "sun": "V",
+          "earth": "V",
+          "joint": "V",
+          "sun_disc": 1.0,
+          "ms": 54.21
+        },
+        {
+          "at_utc": "2026-01-11T03:42:00+00:00",
+          "sun": "V",
+          "earth": "V",
+          "joint": "V",
+          "sun_disc": 1.0,
+          "ms": 58.09
+        },
+        {
+          "at_utc": "2026-01-11T03:47:00+00:00",
+          "sun": "V",
+          "earth": "B",
+          "joint": "B",
+          "sun_disc": 1.0,
+          "ms": 58.88
+        },
+        {
+          "at_utc": "2026-01-27T07:17:00+00:00",
+          "sun": "V",
+          "earth": "V",
+          "joint": "V",
+          "sun_disc": 5.60892e-05,
+          "ms": 91.23
+        },
+        {
+          "at_utc": "2026-01-27T07:22:00+00:00",
+          "sun": "B",
+          "earth": "V",
+          "joint": "B",
+          "sun_disc": 0.0,
+          "ms": 85.23
+        },
+        {
+          "at_utc": "2026-05-25T09:27:00+00:00",
+          "sun": "B",
+          "earth": "V",
+          "joint": "B",
+          "sun_disc": 0.0,
+          "ms": 50.75
+        },
+        {
+          "at_utc": "2026-05-29T21:42:00+00:00",
+          "sun": "V",
+          "earth": "B",
+          "joint": "B",
+          "sun_disc": 1.0,
+          "ms": 50.8
+        },
+        {
+          "at_utc": "2026-06-27T02:02:00+00:00",
+          "sun": "V",
+          "earth": "B",
+          "joint": "B",
+          "sun_disc": 1.0,
+          "ms": 51.38
+        },
+        {
+          "at_utc": "2026-07-06T13:42:00+00:00",
+          "sun": "V",
+          "earth": "V",
+          "joint": "V",
+          "sun_disc": 1.0,
+          "ms": 52.39
+        },
+        {
+          "at_utc": "2026-07-19T23:42:00+00:00",
+          "sun": "V",
+          "earth": "V",
+          "joint": "V",
+          "sun_disc": 8.18066e-05,
+          "ms": 80.81
+        },
+        {
+          "at_utc": "2026-07-31T05:17:00+00:00",
+          "sun": "V",
+          "earth": "V",
+          "joint": "V",
+          "sun_disc": 1.0,
+          "ms": 47.5
+        },
+        {
+          "at_utc": "2026-08-10T19:47:00+00:00",
+          "sun": "V",
+          "earth": "V",
+          "joint": "V",
+          "sun_disc": 0.9883196619,
+          "ms": 82.89
+        },
+        {
+          "at_utc": "2026-12-31T23:57:00+00:00",
+          "sun": "V",
+          "earth": "B",
+          "joint": "B",
+          "sun_disc": 1.0,
+          "ms": 54.41
+        }
+      ],
+      "identity": {
+        "method_version": "coordinate-enu-0.1.1",
+        "metrics_version": "coordinate-metrics-1.0.0",
+        "result_schema_version": "progressive-point-3",
+        "execution_policy_version": "hard-first-temporal-confirmation-2.0",
+        "sensitivity_version": "ordered-events-1.0",
+        "evaluation_version": "mission-evaluation-2.1.0",
+        "validation_version": "mission-validation-1.0",
+        "contact_method_version": null,
+        "horizons_adapter_version": "0.1.0",
+        "request": {
+          "site_id": null,
+          "latitude_deg": -86.36428,
+          "longitude_e_deg": 336.79186,
+          "evaluation_policy": "hard_first",
+          "illumination_model": "solar_disc",
+          "start_utc": "2026-01-01T00:00:00Z",
+          "duration_hours": 8760.0,
+          "end_utc": "2027-01-01T00:00:00Z",
+          "panel_height_m": 20.0,
+          "antenna_height_m": 20.0,
+          "constraints": {
+            "max_darkness_hours": null,
+            "max_earth_blackout_hours": null
+          },
+          "min_sunlit_fraction": null,
+          "min_earth_los_fraction": null,
+          "contact_requirements": null
+        },
+        "datasets": [
+          {
+            "dataset_id": "dem80",
+            "sha256": "82030dcbdd7c4bb0c7d858e9b4b293b9f2cda5a543ba31ec0f42784bd6beee5a",
+            "bytes": 189158392,
+            "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_80S_80MPP_ADJ.TIF",
+            "frame": "MOON_ME/DE421",
+            "unit": "m",
+            "resolution_m": 80
+          },
+          {
+            "dataset_id": "dem240",
+            "sha256": "3f9663257b63022f2b0d5a623482ff3cadddceb91594a4e4ca14a94d8cec8b34",
+            "bytes": 218961039,
+            "url": "https://pgda.gsfc.nasa.gov/data/LOLA_20mpp/LDEM_60S_240MPP_ADJ.TIF",
+            "frame": "MOON_ME/DE421",
+            "unit": "m",
+            "resolution_m": 240
+          }
+        ],
+        "radius_m": 1737400.0,
+        "az_step_deg": 0.25,
+        "fine_az_step_deg": 0.125,
+        "scan_radii_m": [
+          400000,
+          300000
+        ],
+        "time_steps_minutes": [
+          5,
+          1
+        ],
+        "solar_disc_method": "solar-disc-mean-1.0",
+        "shared_ephemeris": {
+          "method_version": "shared-spice-hourly-1.0",
+          "kernels": [
+            {
+              "name": "naif0012.tls",
+              "sha256": "678e32bdb5a744117a467cd9601cd6b373f0e9bc9bbde1371d5eee39600a039b"
+            },
+            {
+              "name": "pck00011.tpc",
+              "sha256": "3dff7b1dbeceaa01f25467767d3fa25816051c85d162d1edf04acb310ee28bb1"
+            },
+            {
+              "name": "de440s.bsp",
+              "sha256": "c1c7feeab882263fc493a9d5a5b2ddd71b54826cdf65d8d17a76126b260a49f2"
+            },
+            {
+              "name": "moon_pa_de440_200625.bpc",
+              "sha256": "60cd55aa401ea2ea97360636f567554bfe4e37bb829f901b4460a455dfaf783f"
+            },
+            {
+              "name": "moon_de440_250416.tf",
+              "sha256": "a47c71e9c9f33796bdafb2c9d69a7ee447b6016ecad80f71cd6f3e479f9cf768"
+            }
+          ],
+          "frame": "MOON_ME",
+          "correction": "LT+S",
+          "step_seconds": 3600,
+          "units": "km",
+          "storage": "float64"
+        }
+      },
+      "metrics_source": null
+    }
+  ],
+  "long_window": {
+    "start": "2000-01-01T00:00:00Z",
+    "end": "2101-01-01T00:00:00Z",
+    "chart_bins": 800,
+    "query_ms": 424.32,
+    "all_integrals_match": true
+  },
+  "passed": true
+}

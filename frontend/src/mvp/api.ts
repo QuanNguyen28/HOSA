@@ -169,21 +169,36 @@ export function useOperation<T>(key: string) {
 
 export function usePointInstant(result: PointResult | undefined, time: number) {
   const [stored, setStored] = useState<{ key: string; row: Interval }>();
+  const cache = useRef(new Map<string, Interval>());
   const native = result && intervalAt(result.timeline, time);
   const url = result?.interval_url;
-  const key = `${url}|${result?.evaluation_status}|${time}`;
+  const request = result ? JSON.stringify(result.request) : undefined;
+  // A refined result may use one-minute intervals; a five-minute request key
+  // would keep reusing its first minute and leave the other four minutes wrong.
+  const step = url ? 60000 : 300000;
+  const tick = Math.floor(time / step) * step;
+  const key = `${result?.result_id}|${url}|${result?.evaluation_status}|${tick}`;
+  const cached = cache.current.get(key) ?? (stored?.key === key ? stored.row : undefined);
+  const inWindow = result && time >= Date.parse(result.request.start_utc) && time < Date.parse(result.request.end_utc);
   useEffect(() => {
-    if (!result || native || !url || !Number.isFinite(time)) return;
+    if (!request || native || cached || !inWindow || !Number.isFinite(tick)) return;
     const controller = new AbortController();
     // Scrubbing is coalesced; stale responses never replace the selected instant.
     const timer = setTimeout(() => {
-      void api<Interval>(`${url}?at_utc=${encodeURIComponent(new Date(time).toISOString())}`, controller.signal)
-        .then((row) => { if (!controller.signal.aborted) setStored({ key, row }); })
+      const query = `?at_utc=${encodeURIComponent(new Date(tick).toISOString())}`;
+      void api<Interval>(`${url ?? "/lunar/point/instant"}${query}`, controller.signal, url ? undefined : JSON.parse(request))
+        .then((row) => {
+          if (!controller.signal.aborted && intervalAt([row], tick)) {
+            cache.current.set(key, row);
+            if (cache.current.size > 64) cache.current.delete(cache.current.keys().next().value!);
+            setStored({ key, row });
+          }
+        })
         .catch(() => { /* Unknown until exact evidence is available. */ });
     }, 150);
     return () => { clearTimeout(timer); controller.abort(); };
-  }, [key, native, url, result, time]);
-  return native ?? (stored?.key === key ? stored.row : undefined);
+  }, [key, native, cached, url, request, tick, inWindow]);
+  return native ?? (inWindow && cached ? intervalAt([cached], time) : undefined);
 }
 
 const preparedMetricCache = new Map<string, PointResult>();

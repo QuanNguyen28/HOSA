@@ -1,0 +1,180 @@
+{
+  "scope": "Real checked shared-SPICE vectors and backend topocentric reference, visualization transform regression only.",
+  "identity": {
+    "method_version": "shared-spice-hourly-1.0",
+    "kernels": [
+      {
+        "name": "naif0012.tls",
+        "sha256": "678e32bdb5a744117a467cd9601cd6b373f0e9bc9bbde1371d5eee39600a039b"
+      },
+      {
+        "name": "pck00011.tpc",
+        "sha256": "3dff7b1dbeceaa01f25467767d3fa25816051c85d162d1edf04acb310ee28bb1"
+      },
+      {
+        "name": "de440s.bsp",
+        "sha256": "c1c7feeab882263fc493a9d5a5b2ddd71b54826cdf65d8d17a76126b260a49f2"
+      },
+      {
+        "name": "moon_pa_de440_200625.bpc",
+        "sha256": "60cd55aa401ea2ea97360636f567554bfe4e37bb829f901b4460a455dfaf783f"
+      },
+      {
+        "name": "moon_de440_250416.tf",
+        "sha256": "a47c71e9c9f33796bdafb2c9d69a7ee447b6016ecad80f71cd6f3e479f9cf768"
+      }
+    ],
+    "frame": "MOON_ME",
+    "correction": "LT+S",
+    "step_seconds": 3600,
+    "units": "km",
+    "storage": "float64"
+  },
+  "cases": [
+    {
+      "at_utc": "2026-01-27T07:16:00Z",
+      "coordinate": {
+        "latitude": -86.36428,
+        "longitude": 336.79186
+      },
+      "altitude_m": 2860.77490234375,
+      "table": {
+        "start_utc": "2026-01-27T07:00:00+00:00",
+        "end_utc": "2026-01-27T08:00:00+00:00",
+        "step_seconds": 3600,
+        "vectors_km": [
+          [
+            43601656.83652505,
+            140789490.9878327,
+            -2206522.831232257,
+            366383.93413299514,
+            -17794.53304606921,
+            -41056.56215294298
+          ],
+          [
+            44845228.12786572,
+            140402668.8517911,
+            -2203532.9820324257,
+            366291.06874660304,
+            -17487.638715117642,
+            -41182.7556845549
+          ]
+        ]
+      },
+      "expected": {
+        "sun": {
+          "azimuthDeg": 95.9080571410266,
+          "elevationDeg": 0.4837042542662009
+        },
+        "earth": {
+          "azimuthDeg": 20.621573753785537,
+          "elevationDeg": 9.53055495391223
+        }
+      },
+      "tables": [
+        {
+          "month": "2026-01-01",
+          "sha256": "747c90b7fc2e565a78d6515af7b7d8fe13df4d2f4bdb2962b7e00ebdd679d3ac"
+        }
+      ]
+    },
+    {
+      "at_utc": "2026-01-31T23:59:30Z",
+      "coordinate": {
+        "latitude": -86.36428,
+        "longitude": 336.79186
+      },
+      "altitude_m": 2860.77490234375,
+      "table": {
+        "start_utc": "2026-01-31T23:00:00+00:00",
+        "end_utc": "2026-02-01T00:00:00+00:00",
+        "step_seconds": 3600,
+        "vectors_km": [
+          [
+            141913840.3844631,
+            41095289.843204536,
+            -1850665.3204231933,
+            366677.0665085893,
+            22302.602321818933,
+            -27826.592280981145
+          ],
+          [
+            142272518.74768156,
+            39842405.80751173,
+            -1847354.793208681,
+            366789.4517711895,
+            22625.844202373246,
+            -27486.73739252954
+          ]
+        ]
+      },
+      "expected": {
+        "sun": {
+          "azimuthDeg": 38.94187034872616,
+          "elevationDeg": 3.545577067309913
+        },
+        "earth": {
+          "azimuthDeg": 26.907216757152703,
+          "elevationDeg": 7.2543813679425355
+        }
+      },
+      "tables": [
+        {
+          "month": "2026-01-01",
+          "sha256": "747c90b7fc2e565a78d6515af7b7d8fe13df4d2f4bdb2962b7e00ebdd679d3ac"
+        },
+        {
+          "month": "2026-02-01",
+          "sha256": "5470df109d89d11a6da719f0d8da67828d5bbc2e34b0d7aecb1f6cbce6858694"
+        }
+      ]
+    },
+    {
+      "at_utc": "2026-02-01T00:00:30Z",
+      "coordinate": {
+        "latitude": -86.36428,
+        "longitude": 336.79186
+      },
+      "altitude_m": 2860.77490234375,
+      "table": {
+        "start_utc": "2026-02-01T00:00:00+00:00",
+        "end_utc": "2026-02-01T01:00:00+00:00",
+        "step_seconds": 3600,
+        "vectors_km": [
+          [
+            142272518.74768156,
+            39842405.80751173,
+            -1847354.793208681,
+            366789.4517711895,
+            22625.844202373246,
+            -27486.73739252954
+          ],
+          [
+            142620105.6330059,
+            38586388.21660635,
+            -1844044.1789807975,
+            366903.7181760027,
+            22946.773692830237,
+            -27143.974132829506
+          ]
+        ]
+      },
+      "expected": {
+        "sun": {
+          "azimuthDeg": 38.93343765258308,
+          "elevationDeg": 3.545891233874402
+        },
+        "earth": {
+          "azimuthDeg": 26.908012101780663,
+          "elevationDeg": 7.2534513700117715
+        }
+      },
+      "tables": [
+        {
+          "month": "2026-02-01",
+          "sha256": "5470df109d89d11a6da719f0d8da67828d5bbc2e34b0d7aecb1f6cbce6858694"
+        }
+      ]
+    }
+  ]
+}

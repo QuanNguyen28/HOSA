@@ -209,7 +209,10 @@ export default function App() {
     return () => cancelAnimationFrame(raf);
   }, [playing, speed, start, end]);
   const ctl = {
-    setTime: setCursor,
+    setTime: (value: number | ((previous: number) => number)) => {
+      setPlaying(false);
+      setCursor(value);
+    },
     setPlaying,
     setSpeed,
     setRange: (a: number, b: number) => {

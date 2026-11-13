@@ -10,6 +10,16 @@ from .pipeline import PointAnalysisPipeline
 router = APIRouter(prefix="/lunar/point", tags=["coordinate analysis"])
 
 
+@router.get("/sky-vectors", summary="Checked hourly Moon-frame vectors for smooth 3D playback")
+def sky_vectors(at_utc: str = Query(), pipeline: PointAnalysisPipeline = Depends(get_point_pipeline)):
+    try:
+        return pipeline.shared_ephemeris.preview_table(at_utc)
+    except DomainError as error:
+        raise HTTPException(status_code=error.status_code, detail={"code": error.code}) from error
+    except (ValueError, OverflowError) as error:
+        raise HTTPException(status_code=400, detail={"code": "INVALID_INTERVAL_TIME"}) from error
+
+
 @router.post("/metrics", response_model=PointAnalysisResult,
              summary="Prepared nominal metrics only; no timeline scan or validation job")
 def prepared_metrics(request: PointAnalysisRequest,
@@ -18,6 +28,17 @@ def prepared_metrics(request: PointAnalysisRequest,
         return pipeline.indexed_metrics(request)
     except DomainError as error:
         raise HTTPException(status_code=error.status_code, detail={"code": error.code}) from error
+
+
+@router.post("/instant", summary="Nominal five-minute instant using prepared terrain; no mission evaluation")
+def prepared_instant(request: PointAnalysisRequest, at_utc: str = Query(),
+                     pipeline: PointAnalysisPipeline = Depends(get_point_pipeline)):
+    try:
+        return pipeline.prepared_instant(request, at_utc)
+    except DomainError as error:
+        raise HTTPException(status_code=error.status_code, detail={"code": error.code}) from error
+    except (ValueError, OverflowError) as error:
+        raise HTTPException(status_code=400, detail={"code": "INVALID_INTERVAL_TIME"}) from error
 
 
 @router.post("/analyze", response_model=PointAnalysisResult,

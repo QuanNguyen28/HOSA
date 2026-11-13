@@ -241,6 +241,17 @@ Kết quả mong đợi: `metrics_index_hit=true`, `decision=null`, `evaluation_
 
 Đổi cả hai chiều cao sang 2, 10 hoặc 30 để thử các preset khác. Đổi `site_id` sang một trong 19 điểm đang hiện trên web, hoặc gửi cặp `latitude_deg` / `longitude_e_deg` thay cho `site_id`. Đường đọc nhanh chỉ có khi tọa độ, hardware, mô hình và khoảng ngày khớp cache đã chuẩn bị.
 
+Để lấy trạng thái tại một thời điểm mà không chạy Analyze:
+
+```bash
+curl --fail-with-body --silent --show-error \
+  'http://127.0.0.1:8000/api/lunar/point/instant?at_utc=2026-11-24T00:02:00Z' \
+  -H 'Content-Type: application/json' \
+  --data-binary @docs/examples/point-haworth-evaluation-request.json
+```
+
+Endpoint trả đúng một khoảng cơ sở 5 phút chứa thời điểm yêu cầu, dùng địa hình đã chuẩn bị và SPICE cục bộ; không quét toàn nhiệm vụ hay đánh giá requirements. `evidence_source="prepared_nominal"` nghĩa là mẫu tạm thời, chưa tinh chỉnh/validation. Thiếu địa hình phù hợp trả `INSTANT_NOT_PREPARED`; thời điểm ngoài khoảng `[start_utc, end_utc)` trả `OUTSIDE_MISSION_WINDOW`. Sau Analyze, dùng endpoint interval của job để đọc mẫu từ kết quả đã tinh chỉnh.
+
 ### 6.2. Đánh giá requirements và validation cho nhiệm vụ 72 giờ
 
 Request: [point-haworth-evaluation-request.json](docs/examples/point-haworth-evaluation-request.json), dùng ngày 24–27/11/2026 UTC, panel/antenna 20 m và tỷ lệ đĩa Mặt Trời trung bình tối thiểu 80%.
@@ -289,6 +300,14 @@ Preview/result/interval có thể trả 409 khi phần tương ứng chưa sẵn
 5. Đổi lại nhiệm vụ ngắn 72 giờ rồi bấm **Analyze point** để thử requirements/validation. Compare và Best dates cũng tính đánh giá theo request, không được preapprove bởi cache metrics.
 
 Nhãn có thể được dịch nếu đang dùng bản giao diện đa ngôn ngữ. Màu chiếu sáng 3D là preview; metrics và quyết định lấy từ backend. Chart cả thế kỷ là trung bình theo cột hiển thị, không phải trạng thái tức thời tại từng phút.
+
+Sun chart thể hiện diện tích đĩa nhìn thấy trung bình; Earth và Joint chart thể hiện tỷ lệ thời gian. **Joint = thấy ít nhất một phần đĩa Sun đồng thời có đường nhìn tới tâm Earth**; không nhân hai giá trị trung bình của Sun và Earth. Vì vậy Joint có thể cao hơn Sun chart khi chỉ thấy một phần đĩa. Ô Sun/Earth hiện tại dùng mẫu riêng theo con trỏ, có thể khác trung bình cả cột chart. Sun nhìn thấy rất ít được hiển thị `<0.1%`, thay vì làm tròn thành `0.0%` rồi vẫn ghi visible. Bằng chứng đối chiếu: [visibility-chart-verification.json](docs/validation/lunarsight/visibility-chart-verification.json).
+
+Simulation dùng **Play → Pause → Continue / Replay**; khi tới phút cuối, nút chính thành **Replay**. Chọn thời điểm trên thanh kéo/chart hoặc từ bằng chứng sẽ dừng phát để kiểm tra mẫu đó. Replay đặt con trỏ về đầu nhiệm vụ và chạy lại.
+
+Hướng sáng 3D dùng bảng vector SPICE theo tháng qua `/api/lunar/point/sky-vectors?at_utc=...`, nội suy vector theo thời gian rồi chuyển sang cùng hệ tọa độ địa hình. Bảng tháng được dùng chung khi đổi điểm, lưu tạm trên trình duyệt và tải trước tháng tiếp theo. Không cần build thêm cache hay gọi LLM. Trong Ground, nhãn **SPICE · VISUAL PREVIEW** phân biệt hướng hình học với kết luận V/B/? từ backend. Shadow map phủ toàn bộ các lớp địa hình hiển thị, bao gồm lớp xa, để mép vùng shadow không tạo dải tối quay quanh điểm chọn; camera mặt đất không tự quay theo Sun trong lúc chạy. Tăng sáng và tương phản chỉ áp dụng cho renderer. Đây vẫn là preview trên mesh và shadow map, không phải mô phỏng bức xạ/penumbra hay chứng nhận độ chính xác của mọi pixel bóng đổ.
+
+Kiểm thử simulation, phép đổi hệ tọa độ và lỗi projection khi tải LOD: [simulation-render-verification.json](docs/validation/lunarsight/simulation-render-verification.json).
 
 ## 8. Tùy chọn: phân tích tọa độ hoặc độ cao ngoài gói
 

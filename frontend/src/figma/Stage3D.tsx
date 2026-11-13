@@ -3,8 +3,10 @@ import { useEffect, useMemo, useState } from "react";
 
 import { MoonScene, type GroundSky } from "../components/MoonScene";
 import { useSiteAnalysis } from "../hooks/useSiteAnalysis";
-import { intervalAt, type PointResult } from "../mvp/contracts";
+import { currentInterval, type PointResult } from "../mvp/contracts";
 import { useSouthPolarTerrain } from "../hooks/useSouthPolarTerrain";
+import { useSkyEphemeris } from "../hooks/useSkyEphemeris";
+import { sampleSky } from "../lib/skyEphemeris";
 import { useTerrainWindow, type TerrainWindow } from "../hooks/useTerrainWindow";
 import type {
   CameraPreset,
@@ -119,6 +121,11 @@ export default function Stage3D({
     : selectedSiteId === "Site04_P1" ? "Site04_P1"
     : null;
   const { analysis } = useSiteAnalysis(analysisSiteId, new Date(timeMs));
+  const skyTable = useSkyEphemeris(timeMs);
+  const elevation = pointAnalysis?.coordinate.dem_elevation_m ?? terrainWindow?.geometry?.center_elevation_m ??
+    (Number.isFinite(activeSite.elevationM) ? activeSite.elevationM! : 0);
+  const continuousSky = useMemo(() => skyTable ? sampleSky(skyTable, timeMs, selected, elevation+(heightM ?? 2)) : undefined,
+    [skyTable, timeMs, selected, elevation, heightM]);
   const groundSky = useMemo<GroundSky>(() => {
     const templateSite = catalog.find((site) => site.id === siteId) ?? catalog[0];
     const pointSite = {
@@ -129,9 +136,14 @@ export default function Stage3D({
     };
     const model = liveState(pointSite, timeMs, heightM ?? 2);
     const coordinateExact = pointAnalysis?.request.panel_height_m === pointAnalysis?.request.antenna_height_m
-      ? pointAnalysis?.instant ?? (pointAnalysis && intervalAt(pointAnalysis.timeline, timeMs))
+      ? pointAnalysis && currentInterval(pointAnalysis, timeMs)
       : undefined;
     const exact = analysis?.availability === "AVAILABLE" ? analysis.instant : undefined;
+    if (continuousSky) return {
+      source: "SHARED_SPICE_PREVIEW", observerHeightM: heightM ?? 2,
+      sun: { ...continuousSky.sun, angularRadiusDeg: SUN_R, state: coordinateExact?.sun_state ?? "?" },
+      earth: { ...continuousSky.earth, angularRadiusDeg: EARTH_R, state: coordinateExact?.earth_state ?? "?" },
+    };
     if (coordinateExact) {
       const sunAz = coordinateExact.sun_az_deg;
       const sunEl = coordinateExact.sun_el_deg;
@@ -182,7 +194,7 @@ export default function Stage3D({
         state: exactEarth ? exact!.earth.state : model.earthUp ? "V" : "B",
       },
     };
-  }, [analysis, catalog, heightM, pointAnalysis, selected, selectedSiteId, siteId, timeMs]);
+  }, [analysis, catalog, heightM, pointAnalysis, selected, selectedSiteId, siteId, timeMs, continuousSky]);
 
   const terrainLods = useMemo(() => [
     terrainWindow, midTerrainWindow, farTerrainWindow, contextTerrainWindow,
@@ -223,6 +235,7 @@ export default function Stage3D({
         <MoonScene
           key={mode === "surface" ? "terrain" : "globe"}
           time={new Date(timeMs)}
+          sunVector={continuousSky?.worldSun}
           cameraPreset={modeToPreset(mode)}
           layers={LAYERS}
           sites={sites}
@@ -285,7 +298,7 @@ export default function Stage3D({
           <div className="text-mute">
             {(terrainWindow.radius_km! * 2).toFixed(0)} {tr(" km field · curvature enabled")}</div>
           <div className={groundSky.source !== "MODEL_PREVIEW" ? "text-mint" : "text-sun"}>
-            {tr("SKY · ")}{tr(groundSky.source === "SHARED_SPICE" ? "SPICE / JPL CHECKED" : groundSky.source === "JPL_HORIZONS" ? "JPL HORIZONS" : "MODEL PREVIEW")}
+            {tr("SKY · ")}{tr(groundSky.source === "SHARED_SPICE_PREVIEW" ? "SPICE · VISUAL PREVIEW" : groundSky.source === "SHARED_SPICE" ? "SPICE / JPL CHECKED" : groundSky.source === "JPL_HORIZONS" ? "JPL HORIZONS" : "MODEL PREVIEW")}
           </div>
         </div>
       )}
@@ -293,9 +306,9 @@ export default function Stage3D({
       {mode === "surface" && terrainWindow?.grid && (
         <div className="pointer-events-none absolute top-16 right-4 w-48 border border-line bg-black/80 px-3 py-2 font-mono text-[10px] leading-relaxed tracking-wider">
           <div className="text-sun">{tr("☀ SUN · ")}{tr(groundSky.sun.state === "V" ? "VISIBLE" : groundSky.sun.state === "B" ? "HIDDEN" : "UNKNOWN")}</div>
-          <div className="text-mute">{tr("AZ ")}{groundSky.sun.azimuthDeg.toFixed(1)}{tr("° · EL ")}{groundSky.sun.elevationDeg.toFixed(2)}{tr("° · CLR ")}{(groundSky.sun.clearanceDeg ?? 0).toFixed(2)}°</div>
+          <div className="text-mute">{tr("AZ ")}{groundSky.sun.azimuthDeg.toFixed(1)}{tr("° · EL ")}{groundSky.sun.elevationDeg.toFixed(2)}{tr("° · CLR ")}{groundSky.sun.clearanceDeg == null ? "—" : groundSky.sun.clearanceDeg.toFixed(2)}°</div>
           <div className="mt-1 text-earth">{tr("⊕ EARTH · ")}{tr(groundSky.earth.state === "V" ? "VISIBLE" : groundSky.earth.state === "B" ? "HIDDEN" : "UNKNOWN")}</div>
-          <div className="text-mute">{tr("AZ ")}{groundSky.earth.azimuthDeg.toFixed(1)}{tr("° · EL ")}{groundSky.earth.elevationDeg.toFixed(2)}{tr("° · CLR ")}{(groundSky.earth.clearanceDeg ?? 0).toFixed(2)}°</div>
+          <div className="text-mute">{tr("AZ ")}{groundSky.earth.azimuthDeg.toFixed(1)}{tr("° · EL ")}{groundSky.earth.elevationDeg.toFixed(2)}{tr("° · CLR ")}{groundSky.earth.clearanceDeg == null ? "—" : groundSky.earth.clearanceDeg.toFixed(2)}°</div>
           <div className="mt-1 text-mute">{tr("DRAG 360° TO INSPECT THE SKY")}</div>
         </div>
       )}

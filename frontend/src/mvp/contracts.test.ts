@@ -43,6 +43,20 @@ describe("shared backend mission contracts", () => {
     expect(bin.joint_visible_fraction_lower).toBe(.75);
     expect(intervalAt([bin], start+1800000)).toBeUndefined();
   });
+  it("preserves unequal backend bin boundaries without inventing transition times", () => {
+    const start = Date.parse("2026-11-17T00:00:00Z");
+    const rows: Interval[] = [10, 30].map((minute, i) => ({
+      start_utc: new Date(start+(i ? 10 : 0)*60000).toISOString(), end_utc: new Date(start+minute*60000).toISOString(),
+      aggregated: true, sun_state: "V", earth_state: i ? "V" : "B", joint_state: i ? "V" : "B",
+      sun_visible_fraction_lower: .5, sun_visible_fraction_upper: .5,
+      earth_visible_fraction_lower: i, earth_visible_fraction_upper: i,
+      joint_visible_fraction_lower: i, joint_visible_fraction_upper: i,
+    }));
+    expect(timelineBins(rows, start, start+1800000)).toBe(rows);
+    expect(timelineBins(rows, start, start+1800000)[0].end_utc).toBe(rows[0].end_utc);
+    // Joint is overlap time, not the product of the Sun-area and Earth-time averages.
+    expect(timelineBins(rows, start, start+1800000)[1].joint_visible_fraction_lower).toBe(1);
+  });
   it("uses identical mission requirements for direct analysis and comparison", () => {
     const direct = missionRequest(DEFAULT_MISSION, EXAMPLES[0]);
     const compare = planningRequest(DEFAULT_MISSION, EXAMPLES);

@@ -173,6 +173,36 @@ class PointAnalysisPipeline:
             result["evaluation_stages"] = {"hard": "not_started", "validation": "not_started", "soft": "not_started"}
             return result
 
+    def prepared_instant(self, request, at_utc):
+        """One nominal five-minute interval, without a mission scan or evaluation.
+
+        Only verified packaged terrain and local shared ephemeris are used. This
+        is preview evidence, not a substitute for a refined analysis interval.
+        """
+        request = request.resolved()
+        stamp = pd.Timestamp(at_utc)
+        if pd.isna(stamp) or stamp.tz is None:
+            raise DomainError("INVALID_INTERVAL_TIME", 400)
+        stamp = stamp.tz_convert("UTC")
+        if not pd.Timestamp(request.start_utc) <= stamp < pd.Timestamp(request.end_utc):
+            raise DomainError("OUTSIDE_MISSION_WINDOW", 409)
+        if request.illumination_model != "solar_disc":
+            raise DomainError("INSTANT_NOT_PREPARED", 409)
+        from app.precompute.geometry import prepared_terrain
+        prepared = prepared_terrain(request)
+        if prepared is None:
+            raise DomainError("INSTANT_NOT_PREPARED", 409)
+        start = stamp.floor("5min")
+        # Internal sampling window only: mission requirements remain untouched.
+        sample = request.model_copy(update={"start_utc": start.isoformat(),
+            "end_utc": (start+pd.Timedelta(minutes=5)).isoformat()})
+        with prepared as terrain:
+            fine, _, _, _ = self.geometry(terrain, {request.panel_height_m, request.antenna_height_m}, lambda _: None)
+            base = {h: p.iloc[::2].reset_index(drop=True).assign(az_step_deg=.25) for h, p in fine.items()}
+            sun, earth, _ = self.ephemerides(sample, terrain.site, 5)
+            row = records(visibility(sun, earth, base[request.panel_height_m], base[request.antenna_height_m], solar_disc=True))[0]
+        return {**row, "evidence_source": "prepared_nominal", "sampling_minutes": 5}
+
     def run(self, request, progress=lambda stage: None, *, preview=None, display=False):
         request = request.resolved()
         progress("verify_dem")

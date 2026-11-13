@@ -272,6 +272,10 @@ export function LiveBar({
     .toUpperCase();
   const time = d.toISOString().slice(11, 19);
   const idx = SPEEDS.indexOf(s.speed);
+  const ended = s.timeMs >= s.endMs-STEP;
+  const pausedMidway = !s.playing && !ended && s.timeMs > s.startMs;
+  const primaryLabel = s.playing ? "Pause" : ended ? "Replay" : pausedMidway ? "Continue" : "Play";
+  const replay = () => { setTime(s.startMs); setPlaying(true); };
   return (
     <section
       aria-label={tr("Time")}
@@ -285,18 +289,27 @@ export function LiveBar({
         <span className="font-display text-base font-semibold tracking-[0.08em] tabular">
           {date}
         </span>
-        <button
-          type="button"
-          aria-pressed={s.playing}
-          aria-label={tr(s.playing ? "Pause" : "Play")}
-          onClick={() => {
-            if (!s.playing && s.timeMs >= s.endMs) setTime(s.startMs);
-            setPlaying(!s.playing);
-          }}
-          className="flex size-11 items-center justify-center rounded-full border-2 border-mint text-mint hover:bg-mint/15"
-        >
-          <PlayIcon playing={s.playing} />
-        </button>
+        <div className="flex items-start gap-3">
+          <div className="flex flex-col items-center gap-1">
+            <button
+              type="button"
+              aria-pressed={ended ? undefined : s.playing}
+              aria-label={tr(primaryLabel)}
+              onClick={() => ended && !s.playing ? replay() : setPlaying(!s.playing)}
+              className="flex size-11 items-center justify-center rounded-full border-2 border-mint text-mint hover:bg-mint/15"
+            >
+              {ended && !s.playing ? <ReplayIcon /> : <PlayIcon playing={s.playing} />}
+            </button>
+            <span className="font-mono text-[9px] text-mint">{tr(primaryLabel)}</span>
+          </div>
+          {pausedMidway && <div className="flex flex-col items-center gap-1">
+            <button type="button" aria-label={tr("Replay")} onClick={replay}
+              className="flex size-11 items-center justify-center rounded-full border border-white/40 text-soft hover:bg-white/10">
+              <ReplayIcon />
+            </button>
+            <span className="font-mono text-[9px] text-soft">{tr("Replay")}</span>
+          </div>}
+        </div>
         <button
           type="button"
           onClick={() => setSpeed(SPEEDS[(idx + 1) % SPEEDS.length])}
@@ -315,11 +328,11 @@ export function LiveBar({
       <input
         id="live-scrub"
         type="range"
-        min={s.startMs}
-        max={s.endMs}
-        step={STEP}
-        value={s.timeMs}
-        onChange={(e) => setTime(Number(e.target.value))}
+        min={0}
+        max={Math.max(0, Math.round((s.endMs - s.startMs) / STEP) - 1)}
+        step={1}
+        value={Math.round((s.timeMs - s.startMs) / STEP)}
+        onChange={(e) => setTime(s.startMs + Number(e.target.value) * STEP)}
         className="mx-auto mt-3 block w-full max-w-3xl"
       />
       {children && (
@@ -329,4 +342,10 @@ export function LiveBar({
       )}
     </section>
   );
+}
+
+function ReplayIcon() {
+  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+    <path d="M4 10a8 8 0 1 1 .5 6M4 4v6h6" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>;
 }

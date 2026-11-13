@@ -42,7 +42,9 @@ export const speedLabel = (h: number) =>
 
 export const HOUR = 3600e3;
 export const DAY = 24 * HOUR;
-export const STEP = 5 * 60e3;
+// Viewer seeks must represent refined one-minute evidence. Mission inputs
+// independently retain the backend's five-minute boundary requirement.
+export const STEP = 60e3;
 export const MIN_MS = Date.UTC(2024, 0, 1);
 export const MAX_MS = Date.UTC(2031, 0, 1);
 

@@ -71,6 +71,8 @@ export type Validation = {
   policy_version?: string;
 };
 export type Interval = {
+  evidence_source?: "prepared_nominal";
+  sampling_minutes?: number;
   aggregated?: boolean;
   earth_visible_fraction_lower?: number;
   earth_visible_fraction_upper?: number;
@@ -97,6 +99,11 @@ export type Interval = {
 // Unknown evidence stays hatched; aggregation never affects engine decisions.
 export function timelineBins(rows: Interval[], start: number, end: number, columns = 800): Interval[] {
   if (!rows.length || !(end > start)) return [];
+  // Backend bins may have different widths. Re-splitting their averages would
+  // invent detail inside a bin and smear transitions into neighbouring bins.
+  if (rows.length <= columns && rows.every((row, i) => row.aggregated &&
+      Date.parse(row.start_utc) === (i ? Date.parse(rows[i-1].end_utc) : start)) &&
+      Date.parse(rows.at(-1)!.end_utc) === end) return rows;
   const count = Math.max(1, Math.min(columns, rows.length));
   const width = (end - start) / count;
   const bins: Interval[] = [];
@@ -181,6 +188,7 @@ export type PointResult = {
   method_version: string;
   warnings: string[];
   coordinate: {
+    dem_elevation_m?: number;
     latitude_deg: number;
     longitude_e_deg: number;
     observer_resolution_m: number;
@@ -353,4 +361,8 @@ export function intervalAt(
   }
   const row = rows[low - 1];
   return row && !row.aggregated && time < Date.parse(row.end_utc) ? row : undefined;
+}
+
+export function currentInterval(result: PointResult, time: number): Interval | undefined {
+  return (result.instant && intervalAt([result.instant], time)) ?? intervalAt(result.timeline, time);
 }

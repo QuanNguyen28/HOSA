@@ -140,6 +140,19 @@ class SharedEphemeris:
             receipts.append(receipt)
         return output, receipts
 
+    def preview_table(self, at_utc):
+        """Checked monthly vectors for smooth visual playback, not visibility decisions."""
+        stamp = pd.Timestamp(at_utc)
+        if pd.isna(stamp) or stamp.tz is None:
+            raise DomainError("INVALID_INTERVAL_TIME", 400)
+        start = stamp.tz_convert("UTC").normalize().replace(day=1)
+        stop = start+pd.offsets.MonthBegin(1)
+        identity = self.identity()
+        values, receipt = self.chunk(start.date().isoformat(), identity)
+        return {"start_utc": start.isoformat(), "end_utc": stop.isoformat(),
+            "step_seconds": 3600, "vectors_km": values.tolist(), "identity": identity,
+            "table": receipt, "scope": "Interpolated geometric directions for visual playback only; no terrain visibility or requirement decision."}
+
     @staticmethod
     def topocentric(vectors, site, height, target):
         lon, lat = np.deg2rad([site["lon_e_deg"], site["lat_deg"]])

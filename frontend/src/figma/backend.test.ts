@@ -44,4 +44,9 @@ describe("Figma shell backend adapters", () => {
     expect(matches({ ...site, lat: -87 }, candidate)).toBe(false);
     expect(matches(site, {} as Candidate)).toBe(false);
   });
+  it("summarizes joint time from aggregated fraction bounds rather than mixed states", () => {
+    const result = { timeline: [{ start_utc: "2026-11-24T00:00:00Z", end_utc: "2026-11-25T00:00:00Z",
+      aggregated: true, joint_state: "?", joint_visible_fraction_lower: .5, joint_visible_fraction_upper: .75 }] } as PointResult;
+    expect(jointBounds(result)).toEqual([12, 18]);
+  });
 });

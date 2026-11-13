@@ -1,0 +1,53 @@
+{
+  "scope": "UI and renderer regression checks; physical visibility algorithms and requirements remain unchanged.",
+  "backend_tests": {
+    "passed": 449,
+    "skipped": 1
+  },
+  "frontend_tests": {
+    "passed": 76,
+    "files": 12
+  },
+  "production_build": "passed",
+  "live_llm_calls": 0,
+  "sky_reference": {
+    "fixture": "frontend/src/lib/skyEphemeris.fixture.json",
+    "sha256": "ed790acc0a3ba40cb01eb4d94cb19726a8096d6ef0e9cb6ee8e0f15db60fa0ec",
+    "epochs": 3,
+    "backend_ENU_matches": true,
+    "month_boundaries_included": true
+  },
+  "shadow_regressions": [
+    "Projection updated when near-only terrain expands to distant LODs",
+    "Texture reallocated if existing shadow resolution differs",
+    "Full curved terrain inside rotating light frustum"
+  ],
+  "browser": {
+    "site": "connecting-ridge",
+    "mission_start_utc": "2026-11-24T00:00:00Z",
+    "duration_hours": 72,
+    "paused_time_utc": "2026-11-24T07:12:00Z",
+    "paused_buttons": [
+      "Continue",
+      "Replay"
+    ],
+    "completed_button": "Replay",
+    "completed_time_utc": "2026-11-26T23:59:00Z",
+    "fixed_frame_ROI_mean_absolute_difference": 0.0,
+    "fixed_frame_ROI_changed_pixels": 0,
+    "ROI_pixels": [
+      600,
+      220,
+      1200,
+      470
+    ]
+  },
+  "screenshots": [
+    "output/playwright/simulation-continue-replay-final.png",
+    "output/playwright/simulation-lighting-replay-final.png"
+  ],
+  "limitations": [
+    "3D illumination is a mesh/shadow-map preview, not certified per-pixel visibility or solar-disc penumbra.",
+    "Instant nominal preview samples remain provisional; analyzed intervals take precedence."
+  ]
+}

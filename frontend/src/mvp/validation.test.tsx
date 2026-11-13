@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import { ValidationInfo, BackendTimeline } from "../figma/backend";
+import { ValidationInfo, BackendTimeline, CurrentStatus } from "../figma/backend";
 import type { PointResult } from "./contracts";
+import { LiveBar } from "../figma/ui";
 
 describe("hard-first explanation", () => {
   it("shows the failed threshold and evidence dates without claiming validation ran", () => {
@@ -37,11 +38,71 @@ describe("prepared preview charts", () => {
     expect(html).toContain("background:#06B6D4");
     expect(html).toContain("repeating-linear-gradient");
     expect(html).toContain("75% visible time in display bin");
-    expect(html).toContain("Preview chart; exact instants available after Analyze");
+    expect(html).toContain("Preview chart; current status uses a separate nominal sample");
     result.timeline[0].joint_visible_fraction_lower = .75001;
     result.timeline[0].joint_visible_fraction_upper = .75002;
     const rounded = renderToStaticMarkup(<BackendTimeline result={result} start={start} end={end} time={start} onTime={() => {}} />);
     expect(rounded).not.toContain("75–75");
     expect(rounded).toContain("repeating-linear-gradient");
+  });
+});
+
+describe("instant visibility", () => {
+  it("offers Continue plus Replay while paused, and only Replay at the final minute", () => {
+    const start = Date.parse("2026-01-27T00:00:00Z");
+    const s = { startMs: start, endMs: start+72*3600000, timeMs: start+60000,
+      playing: false, speed: 24, dark: 0, margin: 0, hIdx: 2 };
+    const render = () => renderToStaticMarkup(<LiveBar s={s} setTime={() => {}} setPlaying={() => {}} setSpeed={() => {}} setRange={() => {}} />);
+    const paused = render();
+    expect(paused).toContain('aria-label="Continue"');
+    expect(paused).toContain('aria-label="Replay"');
+    s.timeMs = s.endMs-60000;
+    const complete = render();
+    expect(complete).toContain('aria-label="Replay"');
+    expect(complete).not.toContain('aria-label="Continue"');
+    expect(complete).not.toContain('aria-label="Play"');
+    s.timeMs = start;
+    expect(render()).toContain('aria-label="Play"');
+    expect(render()).not.toContain('aria-label="Replay"');
+  });
+  it("keeps a 07:16 evidence seek on the one-minute slider and includes the last mission minute", () => {
+    const start = Date.parse("2026-01-27T00:00:00Z");
+    const html = renderToStaticMarkup(<LiveBar s={{ startMs: start, endMs: start+72*3600000,
+      timeMs: start+436*60000, playing: false, speed: 24, dark: 0, margin: 0, hIdx: 2 }}
+      setTime={() => {}} setPlaying={() => {}} setSpeed={() => {}} setRange={() => {}} />);
+    expect(html).toContain('min="0"');
+    expect(html).toContain('max="4319"');
+    expect(html).toContain('step="1"');
+    expect(html).toContain('value="436"');
+    expect(html).toContain('07:16:00');
+  });
+  it("does not round a positive partial Sun disc to a misleading zero or full disc", () => {
+    const result = { timeline: [], instant: { start_utc: "2026-11-17T00:00:00Z", end_utc: "2026-11-17T00:05:00Z",
+      sun_state: "V", earth_state: "V", joint_state: "V", sun_visible_fraction: .0000560892 } } as unknown as PointResult;
+    const time = Date.parse(result.instant!.start_utc);
+    const html = renderToStaticMarkup(<CurrentStatus result={result} time={time} />);
+    expect(html).toContain("Sun partly visible");
+    expect(html).toContain("&lt;0.1% of disc visible");
+    expect(html).not.toContain("0.0% of disc visible");
+    result.instant!.sun_visible_fraction = .99999;
+    const almost = renderToStaticMarkup(<CurrentStatus result={result} time={time} />);
+    expect(almost).toContain("&gt;99.9% of disc visible");
+    expect(almost).not.toContain("100.0% of disc visible");
+  });
+  it("discards a stale visible instant at its end and uses the blocked native interval", () => {
+    const start = Date.parse("2026-11-17T00:00:00Z");
+    const instant = { start_utc: new Date(start).toISOString(), end_utc: new Date(start+300000).toISOString(),
+      sun_state: "V", earth_state: "V", joint_state: "V", sun_visible_fraction: .5 };
+    const result = { instant, timeline: [{ ...instant, start_utc: instant.end_utc, end_utc: new Date(start+600000).toISOString(),
+      sun_state: "B", earth_state: "B", joint_state: "B", sun_visible_fraction: 0 }] } as PointResult;
+    const html = renderToStaticMarkup(<CurrentStatus result={result} time={start+300000} />);
+    expect(html).toContain("Sun blocked");
+    expect(html).toContain("Earth blocked");
+    expect(html).toContain("0.0% of disc visible");
+    expect(html).not.toContain("50.0%");
+    result.timeline = [];
+    const missing = renderToStaticMarkup(<CurrentStatus result={result} time={start+300000} />);
+    expect(missing).toContain("Sun unknown");
+    expect(missing).toContain("Earth unknown");
   });
 });

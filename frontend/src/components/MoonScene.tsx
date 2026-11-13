@@ -1,5 +1,5 @@
 import { useTranslation } from "../i18n/LanguageProvider";
-import { Suspense, useEffect, useMemo, useRef } from "react";
+import { Suspense, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { Canvas, type ThreeEvent, useFrame, useThree } from "@react-three/fiber";
 import {
   Billboard,
@@ -16,6 +16,7 @@ import {
   BufferGeometry,
   Color,
   DataTexture,
+  DirectionalLight,
   Float32BufferAttribute,
   LinearFilter,
   MathUtils,
@@ -58,9 +59,11 @@ import type {
 } from "../types";
 import type { TerrainWindow } from "../hooks/useTerrainWindow";
 import { getLunarSurfaceTextures } from "../lib/lunarSurfaceTextures";
+import { TERRAIN_SHADOW_SIZE, terrainShadowHalfSize, updateTerrainShadow } from "../lib/terrainLighting";
 
 type MoonSceneProps = {
   time: Date;
+  sunVector?: Vector3;
   cameraPreset: CameraPreset;
   layers: LayerState;
   sites: Site[];
@@ -85,7 +88,7 @@ export type GroundSkyBody = {
 };
 
 export type GroundSky = {
-  source: "JPL_HORIZONS" | "SHARED_SPICE" | "MODEL_PREVIEW";
+  source: "JPL_HORIZONS" | "SHARED_SPICE" | "SHARED_SPICE_PREVIEW" | "MODEL_PREVIEW";
   observerHeightM: number;
   sun: GroundSkyBody;
   earth: GroundSkyBody;
@@ -114,8 +117,12 @@ function SceneRig({
   const desired = useRef(new Vector3(0, 0.3, 6.4));
   const target = useRef(new Vector3(0, 0, 0));
   const transitioning = useRef(false);
-  const viewX = preset === "surface" ? surfaceViewDirection?.[0] ?? -0.55 : -0.55;
-  const viewZ = preset === "surface" ? surfaceViewDirection?.[2] ?? -0.84 : -0.84;
+  // Choose an initial sky-facing view on entry. Moving sunlight must not keep
+  // rotating the camera or undo the user's inspection of terrain shadows.
+  const entry = useRef({ preset, direction: surfaceViewDirection });
+  if (entry.current.preset !== preset) entry.current = { preset, direction: surfaceViewDirection };
+  const viewX = preset === "surface" ? entry.current.direction?.[0] ?? -0.55 : -0.55;
+  const viewZ = preset === "surface" ? entry.current.direction?.[2] ?? -0.84 : -0.84;
 
   useEffect(() => {
     const viewLength = Math.hypot(viewX, viewZ) || 1;
@@ -301,9 +308,8 @@ function CelestialMarker({
   const localHorizon = horizonAtAzimuth(horizonProfile, body.azimuthDeg);
   const horizon = body.horizonDeg ?? localHorizon;
   const clearance = body.clearanceDeg ?? body.elevationDeg - horizon;
-  const visible = body.state
-    ? body.state === "V"
-    : clearance + body.angularRadiusDeg > 0;
+  const state = body.state ?? (clearance + body.angularRadiusDeg > 0 ? "V" : "B");
+  const visible = state === "V";
   const distance = name === "Sun" ? 1.72 : 1.56;
   const position: [number, number, number] = [
     observer[0] + direction.x * distance,
@@ -348,13 +354,10 @@ function CelestialMarker({
             </mesh>
           </Billboard>
         )}
-        {name === "Sun" && visible && (
-          <pointLight color={color} intensity={0.9} distance={0.55} />
-        )}
         <Html center position={[0, 0.082, 0]} zIndexRange={[20, 10]}>
           <div className={`ground-sky-label ground-sky-label-${name.toLowerCase()}`}>
             <strong>{tr(name)}</strong>
-            <span>{tr(visible ? "visible" : "terrain hidden")}</span>
+            <span>{tr(state === "?" ? "unknown" : visible ? "visible" : "terrain hidden")}</span>
             <small>
               {tr("az ")}{body.azimuthDeg.toFixed(1)}{tr("° · el ")}{body.elevationDeg.toFixed(2)}° · {tr(clearance >= 0 ? "+" : "")}{clearance.toFixed(2)}°
             </small>
@@ -392,6 +395,7 @@ function DynamicTerrain({
   onHover?: (coordinate: LunarCoordinate | null) => void;
   onReady: () => void;
 }) {
+  const sunLight = useRef<DirectionalLight>(null);
   const terrainMesh = useTerrainMesh(terrain);
   const midTerrain = terrainLods?.[1] ?? null;
   const farTerrain = terrainLods?.[2] ?? null;
@@ -441,24 +445,26 @@ function DynamicTerrain({
       : new Float32Array(),
     [overview, terrainMesh, terrain.geometry, observerHeightM],
   );
+  const shadowHalfSize = terrainShadowHalfSize([
+    terrainMesh?.mesh, midTerrainMesh?.mesh, farTerrainMesh?.mesh, contextTerrainMesh?.mesh,
+    regionalTerrainMesh?.mesh, horizonTerrainMesh?.mesh,
+  ]);
+  useLayoutEffect(() => {
+    if (sunLight.current) updateTerrainShadow(sunLight.current, shadowHalfSize);
+  }, [shadowHalfSize]);
   if (!terrainMesh || !terrain.grid) return null;
   const observer: [number, number, number] = [
     0,
     terrainMesh.mesh.centerYSceneUnits + observerHeightM / 1_000,
     0,
   ];
-  const lightDistance = overview ? 720 : 24;
+  // Distant ridges must remain shadow casters in Ground as well as Pole.
+  const lightDistance = 720;
   const lightPosition: [number, number, number] = [
     localSun[0] * lightDistance,
     localSun[1] * lightDistance,
     localSun[2] * lightDistance,
   ];
-  const shadowHalfSize = overview
-    ? Math.max(
-        horizonTerrainMesh?.mesh.widthSceneUnits ?? 0,
-        horizonTerrainMesh?.mesh.depthSceneUnits ?? 0,
-      ) * 0.5
-    : Math.max(terrainMesh.mesh.widthSceneUnits, terrainMesh.mesh.depthSceneUnits) * 0.58;
   const handleTerrainPointer = (event: ThreeEvent<PointerEvent>) => {
     if (!terrain.geometry) return;
     event.stopPropagation();
@@ -477,40 +483,41 @@ function DynamicTerrain({
 
   return (
     <group>
-      <ambientLight intensity={enhancedLight ? (overview ? 0.095 : 0.045) : 0.008} />
+      <ambientLight intensity={enhancedLight ? (overview ? 0.11 : 0.055) : 0.008} />
       <hemisphereLight
         color="#d8d8d3"
         groundColor="#030405"
-        intensity={enhancedLight ? (overview ? 0.07 : 0.035) : 0.006}
+        intensity={enhancedLight ? (overview ? 0.075 : 0.04) : 0.006}
       />
       <directionalLight
+        ref={sunLight}
         castShadow
         position={lightPosition}
-        intensity={localSun[1] > -0.005 ? 4.4 : 0.012}
+        intensity={enhancedLight ? 8 : 4.4}
         color="#fff2d9"
-        shadow-mapSize-width={overview ? 2048 : 4096}
-        shadow-mapSize-height={overview ? 2048 : 4096}
+        shadow-mapSize-width={TERRAIN_SHADOW_SIZE}
+        shadow-mapSize-height={TERRAIN_SHADOW_SIZE}
         shadow-camera-left={-shadowHalfSize}
         shadow-camera-right={shadowHalfSize}
         shadow-camera-top={shadowHalfSize}
         shadow-camera-bottom={-shadowHalfSize}
-        shadow-camera-near={overview ? 1 : 0.1}
-        shadow-camera-far={overview ? 1_600 : 60}
+        shadow-camera-near={1}
+        shadow-camera-far={1_600}
         shadow-bias={-0.00008}
         shadow-normalBias={0.004}
       />
       <directionalLight
         position={[-lightPosition[0], Math.max(2, -lightPosition[1]), -lightPosition[2]]}
-        intensity={enhancedLight ? 0.055 : 0.012}
+        intensity={enhancedLight ? 0.035 : 0.012}
         color="#769ab1"
       />
       {horizonTerrainMesh && (
-        <mesh {...terrainInteraction} geometry={horizonTerrainMesh.geometry} position={[0, -0.012, 0]} receiveShadow>
+        <mesh {...terrainInteraction} geometry={horizonTerrainMesh.geometry} position={[0, -0.012, 0]} receiveShadow castShadow>
           <LunarTerrainMaterial color="#aaa79f" bumpScale={0.002} />
         </mesh>
       )}
       {regionalTerrainMesh && (
-        <mesh {...terrainInteraction} geometry={regionalTerrainMesh.geometry} position={[0, -0.009, 0]} receiveShadow>
+        <mesh {...terrainInteraction} geometry={regionalTerrainMesh.geometry} position={[0, -0.009, 0]} receiveShadow castShadow>
           <LunarTerrainMaterial color="#b2afa7" bumpScale={0.0025} />
         </mesh>
       )}
@@ -519,6 +526,7 @@ function DynamicTerrain({
           geometry={contextTerrainMesh.geometry}
           position={[0, -0.0045, 0]}
           receiveShadow
+          castShadow
           {...terrainInteraction}
         >
           <LunarTerrainMaterial color="#b8b5ad" bumpScale={0.003} />
@@ -1118,6 +1126,7 @@ function SelectedMarker({ coordinate }: { coordinate: LunarCoordinate }) {
 
 function Moon({
   time,
+  sunVector,
   cameraPreset,
   layers,
   sites,
@@ -1135,7 +1144,7 @@ function Moon({
     "/assets/nasa/lola_global_ldem64_4k.png",
   ]);
   const material = useRef<MeshStandardMaterial>(null);
-  const sun = useMemo(() => approximateSunVector(time), [time]);
+  const sun = useMemo(() => sunVector ?? approximateSunVector(time), [sunVector, time]);
 
   useEffect(() => {
     colorMap.colorSpace = SRGBColorSpace;
@@ -1159,7 +1168,7 @@ function Moon({
 
   return (
     <>
-      <ambientLight intensity={layers.enhancedLight ? 0.11 : 0.035} />
+      <ambientLight intensity={layers.enhancedLight ? 0.12 : 0.035} />
       <hemisphereLight
         color="#fff8ec"
         groundColor="#050607"
@@ -1168,7 +1177,7 @@ function Moon({
       <directionalLight
         castShadow
         color="#fff6e7"
-        intensity={layers.enhancedLight ? 3.25 : 2.4}
+        intensity={layers.enhancedLight ? 4.8 : 2.4}
         position={[sun.x * 8, sun.y * 8, sun.z * 8]}
         shadow-mapSize-width={4096}
         shadow-mapSize-height={4096}
@@ -1183,7 +1192,7 @@ function Moon({
       />
       <directionalLight
         color="#769ab1"
-        intensity={layers.enhancedLight ? 0.045 : 0.015}
+        intensity={layers.enhancedLight ? 0.035 : 0.015}
         position={[sun.x * -6, sun.y * -6, sun.z * -6]}
       />
       <mesh
@@ -1278,7 +1287,7 @@ export function MoonScene(props: MoonSceneProps) {
       onCreated={({ gl }) => {
         gl.setClearColor("#030507");
         gl.shadowMap.type = PCFSoftShadowMap;
-        gl.toneMappingExposure = 1.12;
+        gl.toneMappingExposure = 1.4;
         // The renderer is already usable at this point.  Reveal the shell now
         // and let Suspense stream the lunar textures into the scene instead of
         // keeping the whole application behind a texture-loading overlay.
