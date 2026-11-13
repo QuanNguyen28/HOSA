@@ -1,5 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { useTranslation } from "../i18n/LanguageProvider";
+import { useTranslation } from "../i18n/language";
 import { useHorizonView } from "../hooks/useHorizonView";
 import { useSkyEphemeris } from "../hooks/useSkyEphemeris";
 import { sampleSky } from "../lib/skyEphemeris";

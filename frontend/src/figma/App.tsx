@@ -1,4 +1,4 @@
-import { useTranslation } from "../i18n/LanguageProvider";
+import { useTranslation } from "../i18n/language";
 import { LanguageSwitcher } from "../i18n/LanguageSwitcher";
 import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import { SITES, HEIGHTS, HIDDEN_DEFAULT_SITE_IDS, HOUR, STEP, fmtTime, type Site } from "./model";

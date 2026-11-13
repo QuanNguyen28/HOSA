@@ -393,7 +393,7 @@ OPENROUTER_MODEL=YOUR_OPENROUTER_MODEL_ID
 OPENROUTER_RESPONSE_FORMAT=json_schema
 ```
 
-`.env.example` chọn provider NVIDIA; muốn dùng OpenRouter phải đổi rõ `ASSISTANT_PROVIDER`. Có thể để `OPENROUTER_MAX_TOKENS` không được khai báo nếu không đặt ngân sách output riêng. Key chỉ nằm ở backend, không đưa vào frontend, `VITE_*` hoặc Git.
+`.env.example` chọn proxy tương thích OpenAI/LiteLLM (`ASSISTANT_PROVIDER=openai`); cấu hình `LLM_PROXY_API_KEY`, `LLM_PROXY_BASE_URL` và `LLM_PROXY_MODEL` theo gateway của bạn. Xem [hướng dẫn LiteLLM và grounded chat](docs/decisions/litellm-grounded-chat.md). Muốn dùng OpenRouter thì đổi rõ `ASSISTANT_PROVIDER=openrouter` theo ví dụ trên. Có thể để `OPENROUTER_MAX_TOKENS` không được khai báo nếu không đặt ngân sách output riêng. Key chỉ nằm ở backend, không đưa vào frontend, `VITE_*` hoặc Git.
 
 Dừng backend bằng Ctrl+C và chạy lại lệnh ở bước 5 để nạp cấu hình. Kiểm tra mà không gọi model:
 

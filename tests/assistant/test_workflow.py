@@ -402,6 +402,11 @@ def test_revalidation_is_sealed_in_draft_and_missing_network_stays_unknown(servi
     parsed = run(service.parse(ParseRequest.model_validate(request_payload)))
     assert parsed.status == 'READY' and parsed.spec.resolve_indeterminate is True
     assert parsed.spec.source_hash == service.engine.capabilities(resolve_indeterminate=True)['source_hash']
+    from app.planning.models import CompareRequest
+    for selected in [['Site01_P1'], ['Site04_P1'], ['Site01_P1', 'Site04_P1']]:
+        query = CompareRequest(site_ids=selected, arrival_utc=parsed.spec.arrival_utc,
+            min_sunlit_fraction=0.8, illumination_model='sun_center', resolve_indeterminate=True)
+        assert service.engine.planner.source_capabilities(query)['source_hash'] == parsed.spec.source_hash
     result = run(service.evaluate(confirmation(parsed, request_payload)))
     assert len(service.llm.calls) == 2 and result.llm_calls == 2
     assert not result.evidence.apply_allowed

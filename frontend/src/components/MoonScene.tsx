@@ -1,5 +1,5 @@
-import { useTranslation } from "../i18n/LanguageProvider";
-import { Suspense, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { useTranslation } from "../i18n/language";
+import { Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Canvas, type ThreeEvent, useThree } from "@react-three/fiber";
 import {
   Billboard,
@@ -64,8 +64,11 @@ import { terrainShadowFragment } from "../lib/terrainShadowShader";
 import { TERRAIN_SHADOW_SIZE, terrainShadowHalfSize, terrainShadowVerticalHalfSize, updateTerrainShadow } from "../lib/terrainLighting";
 import { sceneContent, terrainCameraPose } from "../lib/terrainCamera";
 import type { TerrainGeometryMetadata } from "../lib/terrainGeometry";
+import { MoonTrekGlobe, MoonTrekTerrainMaterial, type ImageryStatus } from './MoonTrekImagery';
 
 type MoonSceneProps = {
+  imagery?: boolean;
+  onImageryStatus?: (status: ImageryStatus) => void;
   time: Date;
   sunVector?: Vector3;
   cameraPreset: CameraPreset;
@@ -352,6 +355,8 @@ function DynamicTerrain({
   onSelect,
   onHover,
   onReady,
+  imagery = false,
+  onImageryStatus,
 }: {
   terrain: TerrainWindow;
   terrainLods?: Array<TerrainWindow | null>;
@@ -365,6 +370,8 @@ function DynamicTerrain({
   onSelect?: (coordinate: LunarCoordinate, siteId?: string) => void;
   onHover?: (coordinate: LunarCoordinate | null) => void;
   onReady: () => void;
+  imagery?: boolean;
+  onImageryStatus?: (status: ImageryStatus) => void;
 }) {
   const sunLight = useRef<DirectionalLight>(null);
   const terrainMesh = useTerrainMesh(terrain);
@@ -487,12 +494,12 @@ function DynamicTerrain({
       />
       {horizonTerrainMesh && (
         <mesh {...terrainInteraction} geometry={horizonTerrainMesh.geometry} position={[0, -0.012, 0]} receiveShadow castShadow>
-          <LunarTerrainMaterial color="#aaa79f" bumpScale={0.0002} />
+          {imagery && horizonTerrain ? <MoonTrekTerrainMaterial terrain={horizonTerrain} fallback={<LunarTerrainMaterial color="#aaa79f" bumpScale={0.0002}/>}/> : <LunarTerrainMaterial color="#aaa79f" bumpScale={0.0002}/>}
         </mesh>
       )}
       {regionalTerrainMesh && (
         <mesh {...terrainInteraction} geometry={regionalTerrainMesh.geometry} position={[0, -0.009, 0]} receiveShadow castShadow>
-          <LunarTerrainMaterial color="#b2afa7" bumpScale={0.00025} />
+          {imagery && regionalTerrain ? <MoonTrekTerrainMaterial terrain={regionalTerrain} fallback={<LunarTerrainMaterial color="#b2afa7" bumpScale={0.00025}/>}/> : <LunarTerrainMaterial color="#b2afa7" bumpScale={0.00025}/>}
         </mesh>
       )}
       {contextTerrainMesh && (
@@ -503,17 +510,17 @@ function DynamicTerrain({
           castShadow
           {...terrainInteraction}
         >
-          <LunarTerrainMaterial color="#b8b5ad" bumpScale={0.0003} />
+          {imagery && contextTerrain ? <MoonTrekTerrainMaterial terrain={contextTerrain} fallback={<LunarTerrainMaterial color="#b8b5ad" bumpScale={0.0003}/>}/> : <LunarTerrainMaterial color="#b8b5ad" bumpScale={0.0003}/>}
         </mesh>
       )}
       {farTerrainMesh && (
         <mesh {...terrainInteraction} geometry={farTerrainMesh.geometry} position={[0, -0.003, 0]} receiveShadow castShadow>
-          <LunarTerrainMaterial color="#bdb9b1" bumpScale={0.00035} />
+          {imagery && farTerrain ? <MoonTrekTerrainMaterial terrain={farTerrain} fallback={<LunarTerrainMaterial color="#bdb9b1" bumpScale={0.00035}/>}/> : <LunarTerrainMaterial color="#bdb9b1" bumpScale={0.00035}/>}
         </mesh>
       )}
       {midTerrainMesh && (
         <mesh {...terrainInteraction} geometry={midTerrainMesh.geometry} position={[0, -0.0015, 0]} receiveShadow castShadow>
-          <LunarTerrainMaterial color="#c1bdb5" bumpScale={0.00045} />
+          {imagery && midTerrain ? <MoonTrekTerrainMaterial terrain={midTerrain} fallback={<LunarTerrainMaterial color="#c1bdb5" bumpScale={0.00045}/>}/> : <LunarTerrainMaterial color="#c1bdb5" bumpScale={0.00045}/>}
         </mesh>
       )}
       <mesh
@@ -522,7 +529,7 @@ function DynamicTerrain({
         castShadow
         receiveShadow
       >
-        <LunarTerrainMaterial color="#c5c1b8" bumpScale={0.0006} />
+        {imagery ? <MoonTrekTerrainMaterial terrain={terrain} onStatus={onImageryStatus} fallback={<LunarTerrainMaterial color="#c5c1b8" bumpScale={0.0006}/>}/> : <LunarTerrainMaterial color="#c5c1b8" bumpScale={0.0006}/>}
       </mesh>
       {!overview && <group position={observer}>
         <mesh>
@@ -1112,7 +1119,11 @@ function Moon({
   onSelect,
   onHover,
   onReady,
+  imagery = false,
+  onImageryStatus,
 }: MoonSceneProps) {
+  const [imageryBaseReady,setImageryBaseReady]=useState(false);
+  const markImageryReady=useCallback(()=>setImageryBaseReady(true),[]);
   const [colorMap, elevationMap] = useTexture([
     "/assets/nasa/lroc_color_2k.jpg",
     "/assets/nasa/lola_global_ldem64_4k.png",
@@ -1181,6 +1192,7 @@ function Moon({
       >
         <sphereGeometry args={[MOON_SCENE_RADIUS, 768, 384]} />
         <meshStandardMaterial
+          visible={!imagery || !imageryBaseReady}
           ref={material}
           map={colorMap}
           displacementMap={elevationMap}
@@ -1193,6 +1205,7 @@ function Moon({
           color={new Color("#d7d5cf")}
         />
       </mesh>
+      {imagery && <MoonTrekGlobe elevationMap={elevationMap} onBaseReady={markImageryReady} onStatus={onImageryStatus}/>}
       <mesh scale={1.014}>
         <sphereGeometry args={[MOON_SCENE_RADIUS, 96, 64]} />
         <meshBasicMaterial
@@ -1203,7 +1216,7 @@ function Moon({
           side={1}
         />
       </mesh>
-      {southPolarTerrain && (
+      {southPolarTerrain && !imagery && (
         <SouthPolarCap
           terrain={southPolarTerrain}
           selectedTerrains={terrainLods?.filter((item): item is TerrainWindow => item !== null) ?? (terrainWindow ? [terrainWindow] : [])}
@@ -1280,6 +1293,8 @@ export function MoonScene(props: MoonSceneProps) {
             onSelect={props.onSelect}
             onHover={props.onHover}
             onReady={props.onReady}
+            imagery={props.imagery}
+            onImageryStatus={props.onImageryStatus}
           />
         ) : content === "moon" ? (
           <Moon {...props} />

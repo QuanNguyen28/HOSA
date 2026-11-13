@@ -194,3 +194,17 @@ class ProjectKnowledge:
                     "source_version": row[4], "source_status": row[5], "excerpt": row[6]} if row else None
         finally:
             con.close()
+
+    def context_sources(self) -> list[dict]:
+        """Current project orientation, with the same addressable citations as search."""
+        con = self._connect()
+        try:
+            rows = con.execute(
+                "SELECT source_id,path,offset,source_hash,source_version,source_status,body FROM passages "
+                "WHERE path IN (?,?) AND source_status='current' ORDER BY path,offset LIMIT 8",
+                ("docs/assistant/lunarsight-current-context.md", "docs/assistant/decision-support-guide.md"),
+            ).fetchall()
+            return [{"source_id": row[0], "path": row[1], "offset": row[2], "source_hash": row[3],
+                     "source_version": row[4], "source_status": row[5], "excerpt": row[6]} for row in rows]
+        finally:
+            con.close()

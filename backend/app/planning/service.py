@@ -47,7 +47,11 @@ class PlanningService:
             caps = self.capabilities()
             if not query.resolve_indeterminate:
                 return caps
-            coordinate = self.source_capabilities(query.model_copy(update={"data_source": "coordinate"}))
+            # Snapshot capabilities describe the whole snapshot, including every
+            # observer that may be revalidated. A selected subset must not change
+            # the dataset fingerprint sealed before the user's LLM turn.
+            coordinate = self.source_capabilities(query.model_copy(update={
+                "data_source": "coordinate", "site_ids": caps["scenario"]["site_ids"], "targets": []}))
             return {**caps, "source_hash": digest({"snapshot": caps["source_hash"], "coordinate": coordinate["source_hash"],
                 "resolution": RESOLUTION_VERSION}), "resolution_policy": RESOLUTION_VERSION}
         from app.point_analysis.sources import installed_sources

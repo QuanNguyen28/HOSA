@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 import unicodedata
 
-INTERPRETATION_VERSION = "mission-interpretation-2.0"
+INTERPRETATION_VERSION = "mission-interpretation-2.1-contextual"
 
 
 def explanation_view(evidence: dict, text: str) -> dict:
@@ -91,6 +91,15 @@ METRIC_MEANINGS = {
 }
 
 ANSWER_POLICY = (
+    "Understand the user's underlying decision or confusion, rather than matching a command word. "
+    "Choose the explanation structure from that intent; do not fill a fixed introduction/metrics/limits/next-steps template. "
+    "Synthesize relevant sources into a causal explanation: what matters to this question, why it matters, and what follows. "
+    "Distinguish observed facts, supported interpretation and missing evidence; frame hypothetical examples explicitly as hypothetical. "
+    "Use measured, literal language: do not dramatize environmental danger or assert timing, temperature, perfect precision, "
+    "universal visibility geometry or an optimum that the supplied evidence does not establish. "
+    "Describe geometric opportunities as such; do not turn them into guaranteed power supply or radio performance. "
+    "A PASS on a fraction threshold only establishes that threshold; it does not by itself establish full or continuous visibility. "
+    "Do not claim an effect size, best site/date, battery endurance or successful radio link without the corresponding engine/model evidence. "
     "Answer the user's actual question in the first sentence, then explain only the relevant reason and mission implication. "
     "Use plain prose without Markdown headings or field dumps, with connected paragraphs and enough explanation to resolve the question. "
     "Do not enumerate every metric or repeat a project overview for a focused follow-up. Lists/tables are useful when the user asks for a comparison or a list. "

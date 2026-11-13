@@ -30,6 +30,8 @@ def identity(block):
 
 
 def valid_plan(plan, evidence):
+    if hasattr(plan, "answer") and not plan.answer.strip():
+        return False
     if (plan.run_id, plan.spec_hash, plan.lead_code) != (evidence.run_id, evidence.spec_hash, evidence.status):
         return False
     candidates = {c.candidate_id: c for c in evidence.candidates}
@@ -38,6 +40,8 @@ def valid_plan(plan, evidence):
     for block in plan.blocks:
         key = identity(block)
         candidate = candidates[key]
+        if hasattr(block, "decision") and block.decision != candidate.decision:
+            return False
         if block.site_id != candidate.site_id:
             return False
         if explanation_options(candidate, evidence.facts).get(block.reason_code) not in block.fact_ids:

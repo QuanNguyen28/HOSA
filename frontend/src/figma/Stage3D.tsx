@@ -1,4 +1,4 @@
-import { useTranslation } from "../i18n/LanguageProvider";
+import { useTranslation } from "../i18n/language";
 import { useEffect, useMemo, useState } from "react";
 
 import { MoonScene, type GroundSky } from "../components/MoonScene";
@@ -7,6 +7,7 @@ import { currentInterval, type PointResult } from "../mvp/contracts";
 import { useSouthPolarTerrain } from "../hooks/useSouthPolarTerrain";
 import { useSkyEphemeris } from "../hooks/useSkyEphemeris";
 import { sampleSky } from "../lib/skyEphemeris";
+import type { ImageryStatus } from '../components/MoonTrekImagery';
 import { useTerrainWindow, type TerrainWindow } from "../hooks/useTerrainWindow";
 import type {
   CameraPreset,
@@ -84,6 +85,8 @@ export default function Stage3D({
   const selectedSiteId = activeSite.id === "custom" ? null : activeSite.id;
   const [hovered, setHovered] = useState<LunarCoordinate | null>(null);
   const [ready, setReady] = useState(false);
+  const [imagery,setImagery]=useState(true);
+  const [imageryStatus,setImageryStatus]=useState<ImageryStatus>('loading');
   const { result: southPolarTerrain, loading: polarTerrainLoading } =
     useSouthPolarTerrain(mode === "orbit");
   const { result: terrainWindow, loading: terrainLoading } = useTerrainWindow(
@@ -233,6 +236,8 @@ export default function Stage3D({
     >
       <div className="relative h-full w-full">
         <MoonScene
+          imagery={imagery && mode !== 'surface'}
+          onImageryStatus={setImageryStatus}
           key={mode === "orbit" ? "globe" : "terrain"}
           time={new Date(timeMs)}
           sunVector={continuousSky?.worldSun}
@@ -250,6 +255,17 @@ export default function Stage3D({
           onReady={() => setReady(true)}
         />
       </div>
+
+      {mode !== 'surface' && <div className="absolute top-16 right-4 z-10 max-w-64 border border-line bg-black/85 p-2.5 text-[10px] text-soft">
+        <div className="flex gap-1" role="group" aria-label={tr('Surface appearance')}>
+          <button type="button" aria-pressed={imagery} onClick={()=>setImagery(true)} className={`border px-2 py-1.5 ${imagery?'border-mint text-mint':'border-line text-mute'}`}>{tr('NASA imagery')}</button>
+          <button type="button" aria-pressed={!imagery} onClick={()=>setImagery(false)} className={`border px-2 py-1.5 ${!imagery?'border-sun text-sun':'border-line text-mute'}`}>{tr('Sunlight simulation')}</button>
+        </div>
+        <p className="mt-2 leading-relaxed text-mute">{tr(imagery ? 'Recorded lighting · not the selected mission time' : 'Lighting follows the selected mission time')}</p>
+        {imagery && <p className={`mt-1 ${imageryStatus==='ready'?'text-mint':'text-sun'}`} role="status">{tr(imageryStatus==='ready'?'NASA Moon Trek · imagery loaded':imageryStatus==='loading'?'Loading NASA image tiles…':imageryStatus==='partial'?'Some image tiles unavailable · lower detail retained':'NASA imagery unavailable · local preview')}</p>}
+      </div>}
+
+      {imagery && mode !== 'surface' && <a className="absolute bottom-4 left-4 z-10 border border-line bg-black/80 px-2 py-1 text-[10px] text-mute hover:text-soft" href="https://trek.nasa.gov/tiles/apidoc/trekAPI.html?body=moon" target="_blank" rel="noreferrer">{tr('Imagery: NASA/JPL Moon Trek · LRO/LROC')}</a>}
 
       {!ready && (
         <div className="pointer-events-none absolute inset-0 grid place-items-center bg-black font-mono text-[11px] tracking-widest text-mute">
@@ -287,7 +303,7 @@ export default function Stage3D({
           <div className="text-mute">{tr("6 circular LOD rings · south-pole flight view")}</div>
           <div className="text-sun">{tr("FOCUS LOD · 1.5 / 6 / 24 / 48 / 120 / 300 km")}</div>
           <div className="text-mute">{tr("SOURCE · ")}{tr(visibleTerrain.dataset_id ?? "regional terrain")}</div>
-          <div className="text-mute">{tr("MICRO-RELIEF · SHADING ONLY")}</div>
+          <div className="text-mute">{tr(imagery?'NASA IMAGE OVERLAY · DISPLAY ONLY':"MICRO-RELIEF · SHADING ONLY")}</div>
           <div className="mt-1 text-mint">{tr("MOUSE · LEFT DRAG MOVE · RIGHT DRAG TILT · WHEEL ZOOM")}</div>
         </div>
       )}

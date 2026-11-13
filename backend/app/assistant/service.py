@@ -7,12 +7,13 @@ from .config import AssistantSettings
 from .clarification import questions_for
 from .engine import PlanningAdapter, digest
 from .explanations import valid_plan, render
-from .models import EvaluateRequest, EvaluateResponse, ExplainPlan, ParseRequest, ParseResponse, RequestPatch
+from .models import EvaluateRequest, EvaluateResponse, ExplainPlan, NaturalExplainPlan, ParseRequest, ParseResponse, RequestPatch
 from .prompts import PROMPT_VERSION, explain_messages, parse_messages
 from .provider import AssistantError, JsonLLM
 from .store import Draft, DraftStore
 from .language import request_language
 from .start_time import reconcile_start, start_context
+from .answer_review import review_messages
 
 
 class AssistantService:
@@ -39,7 +40,8 @@ class AssistantService:
         spec_hash = digest(spec.model_dump())
         identifier = self.drafts.create(Draft(spec, spec_hash, monotonic()+self.settings.assistant_draft_ttl_seconds,
             reply.latency_ms, reply.model, parse_usage=reply.usage,
-            provider=getattr(self.llm,"last_provider",None),trace=list(getattr(self.llm,"events",[])), language=language),
+            provider=getattr(self.llm,"last_provider",None),trace=list(getattr(self.llm,"events",[])), language=language,
+            user_text=request.text),
             self.settings.assistant_max_drafts)
         return ParseResponse(status="READY", issues=[], patch=patch, draft_id=identifier, spec_hash=spec_hash,
             baseline_hash=spec.baseline_hash, spec=spec, llm_calls=1)
@@ -78,13 +80,26 @@ class AssistantService:
         try:
             for repair in (False, True):
                 llm_calls += 1
-                reply = await self.llm.complete(ExplainPlan, explain_messages(evidence, repair=repair))
+                natural = self.settings.assistant_natural_explanations
+                reply = await self.llm.complete(NaturalExplainPlan if natural else ExplainPlan,
+                    explain_messages(evidence, repair=repair, natural=natural, question=draft.user_text, language=draft.language))
                 if explain_usage is None:
                     explain_usage = {}
                 for name, value in reply.usage.items():
                     if isinstance(value, (int, float)):
                         explain_usage[name] = explain_usage.get(name, 0) + value
                 if valid_plan(reply.output, evidence):
+                    if natural and self.settings.assistant_answer_review:
+                        llm_calls += 1
+                        edited = await self.llm.complete(NaturalExplainPlan, review_messages(
+                            explain_messages(evidence,natural=True,question=draft.user_text,language=draft.language),reply.output))
+                        for name, value in edited.usage.items():
+                            if isinstance(value,(int,float)):
+                                explain_usage[name] = explain_usage.get(name,0) + value
+                        if not valid_plan(edited.output,evidence):
+                            explanation_error = "MODEL_EXPLANATION_INVALID"
+                            continue
+                        reply = edited
                     plan = reply.output
                     explain_model = reply.model
                     explanation_error = None
@@ -92,7 +107,11 @@ class AssistantService:
                 explanation_error = "MODEL_EXPLANATION_INVALID"
         except AssistantError as error:
             explanation_error = error.code
-        text, fact_ids = render(evidence, plan, language=draft.language)
+        if isinstance(plan, NaturalExplainPlan):
+            text = [plan.answer]
+            fact_ids = list(dict.fromkeys(identifier for block in plan.blocks for identifier in block.fact_ids))
+        else:
+            text, fact_ids = render(evidence, plan, language=draft.language)
         if not plan:
             text.insert(0, "Computed-result summary: the LLM explanation could not be validated." if draft.language == 'en'
                         else "Tóm tắt từ kết quả tính toán: phần giải thích của LLM chưa được xác thực.")

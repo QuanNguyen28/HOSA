@@ -1,7 +1,8 @@
-import { useTranslation } from "../i18n/LanguageProvider";
+import { useTranslation } from "../i18n/language";
 import { useEffect, useRef, useState } from "react";
 import { useAssistant } from "../mvp/useAssistant";
 import { DecisionBadge } from "../mvp/DecisionBadge";
+import { assistantErrorMessage } from "../mvp/assistantErrors";
 export { useAssistant };
 export type Assistant = ReturnType<typeof useAssistant>;
 const SUGGEST = [
@@ -231,9 +232,13 @@ export function ChatThread({
           </div>
         )}
         {error && (
-          <p role="alert" className="break-words text-sm text-rose">
-            {tr(error)}
-          </p>
+          <div role="alert" className="break-words text-sm text-rose">
+            <p>{tr(assistantErrorMessage(error))}</p>
+            {assistantErrorMessage(error) !== error && <details className="mt-2 text-xs text-mute">
+              <summary className="cursor-pointer">{tr("Technical details")}</summary>
+              <code>{error}</code>
+            </details>}
+          </div>
         )}
         <div ref={end} />
       </div>

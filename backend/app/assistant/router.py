@@ -47,8 +47,12 @@ def capabilities(settings: AssistantSettings = Depends(get_assistant_settings)) 
                           if settings.assistant_provider=="nvidia" else
                           bool(settings.gemini_api_key and settings.gemini_api_key.get_secret_value().strip())
                           if settings.assistant_provider=="gemini" else
+                          bool(settings.llm_proxy_api_key and settings.llm_proxy_api_key.get_secret_value().strip()
+                               and settings.llm_proxy_model and settings.llm_proxy_base_url)
+                          if settings.assistant_provider=="openai" else
                           bool(settings.openrouter_api_key and settings.openrouter_model))
         primary_model = (settings.nvidia_model if settings.assistant_provider=="nvidia" else
+                         settings.llm_proxy_model if settings.assistant_provider=="openai" else
                          settings.gemini_model if settings.assistant_provider=="gemini" else settings.openrouter_model)
         return {"assistant_enabled":settings.assistant_enabled,"provider":settings.assistant_provider,
                 "provider_configured":provider_ready,"primary_model":primary_model,
@@ -128,7 +132,8 @@ async def _run_chat(store_: ChatStore, run_id: str, session_id: str, settings: A
                        "history_archive":history_archive[-50:]}
         llm=ResilientLLM(settings,clients=clients,
             on_attempt=lambda provider,stage,attempt:store_.set_stage(run_id,"running",f"generating_{provider}"))
-        chat=ChatService(llm,ProjectKnowledge(raw_root=settings.lunarsight_raw_dataset_path or None))
+        chat=ChatService(llm,ProjectKnowledge(raw_root=settings.lunarsight_raw_dataset_path or None),
+                         retrieval_llm=llm,review_answers=settings.assistant_answer_review)
         store_.set_stage(run_id,"running","understanding")
         result=await chat.respond(user_text,history,working_state,
                                   progress=lambda stage:store_.set_stage(run_id,"running",stage),

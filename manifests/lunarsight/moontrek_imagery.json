@@ -1,0 +1,385 @@
+{
+  "schema_version": "1.0",
+  "verified_at_utc": "2026-11-13T07:40:49.466106+00:00",
+  "documentation_url": "https://trek.nasa.gov/tiles/apidoc/trekAPI.html?body=moon",
+  "usage": "Observational imagery for display only. Scientific terrain and mission calculations remain NASA LOLA and the existing engine.",
+  "layers": [
+    {
+      "id": "wac-global",
+      "label": "LRO_WAC_Mosaic_Global_303ppd_v02",
+      "title": "LROC WAC global mosaic",
+      "provider": "NASA/JPL Moon Trek · LRO/LROC",
+      "projection": "equirectangular",
+      "crs": "urn:ogc:def:crs:EPSG::104903",
+      "radius_m": 1737400,
+      "extent": [
+        -180.0,
+        -90.0,
+        180.0,
+        90.0
+      ],
+      "format": "image/jpeg",
+      "tile_template": "https://trek.nasa.gov/tiles/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd_v02/1.0.0/default/default028mm/{TileMatrix}/{TileRow}/{TileCol}.jpg",
+      "capabilities_url": "https://trek.nasa.gov/tiles/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd_v02/1.0.0/WMTSCapabilities.xml",
+      "capabilities_sha256": "44ea74fb169734a5f84d637083968bc27a523e7eb6cce20c340d4798c194cf4c",
+      "native_resolution_m": 100,
+      "matrices": [
+        {
+          "level": 0,
+          "width": 2,
+          "height": 1,
+          "tile_size": 256,
+          "origin": [
+            -180.0,
+            90.0
+          ],
+          "resolution": 0.703125
+        },
+        {
+          "level": 1,
+          "width": 4,
+          "height": 2,
+          "tile_size": 256,
+          "origin": [
+            -180.0,
+            90.0
+          ],
+          "resolution": 0.3515625
+        },
+        {
+          "level": 2,
+          "width": 8,
+          "height": 4,
+          "tile_size": 256,
+          "origin": [
+            -180.0,
+            90.0
+          ],
+          "resolution": 0.17578125
+        },
+        {
+          "level": 3,
+          "width": 16,
+          "height": 8,
+          "tile_size": 256,
+          "origin": [
+            -180.0,
+            90.0
+          ],
+          "resolution": 0.087890625
+        },
+        {
+          "level": 4,
+          "width": 32,
+          "height": 16,
+          "tile_size": 256,
+          "origin": [
+            -180.0,
+            90.0
+          ],
+          "resolution": 0.0439453125
+        },
+        {
+          "level": 5,
+          "width": 64,
+          "height": 32,
+          "tile_size": 256,
+          "origin": [
+            -180.0,
+            90.0
+          ],
+          "resolution": 0.02197265625
+        },
+        {
+          "level": 6,
+          "width": 128,
+          "height": 64,
+          "tile_size": 256,
+          "origin": [
+            -180.0,
+            90.0
+          ],
+          "resolution": 0.010986328125
+        },
+        {
+          "level": 7,
+          "width": 256,
+          "height": 128,
+          "tile_size": 256,
+          "origin": [
+            -180.0,
+            90.0
+          ],
+          "resolution": 0.0054931640625
+        },
+        {
+          "level": 8,
+          "width": 512,
+          "height": 256,
+          "tile_size": 256,
+          "origin": [
+            -180.0,
+            90.0
+          ],
+          "resolution": 0.00274658203125
+        }
+      ],
+      "observation_note": "Archived LROC observations; illumination is baked into imagery, not the selected mission time."
+    },
+    {
+      "id": "wac-south",
+      "label": "LRO_WAC_Mosaic_SPole60_100m_v02",
+      "title": "LRO WAC Mosaic, S Pole v2",
+      "provider": "NASA/JPL Moon Trek · LRO/LROC",
+      "projection": "south_polar",
+      "crs": "urn:ogc:def:crs:IAU2000::30120",
+      "radius_m": 1737400,
+      "extent": [
+        -1095700.0,
+        -1095600.0,
+        1095600.0,
+        1095700.0
+      ],
+      "format": "image/png",
+      "tile_template": "https://trek.nasa.gov/tiles/Moon/SP/LRO_WAC_Mosaic_SPole60_100m_v02/1.0.0/default/default028mm/{TileMatrix}/{TileRow}/{TileCol}.png",
+      "capabilities_url": "https://trek.nasa.gov/tiles/Moon/SP/LRO_WAC_Mosaic_SPole60_100m_v02/1.0.0/WMTSCapabilities.xml",
+      "capabilities_sha256": "88dc1f7ef0acb72d104f77b7de7c1903445ba2c98d2e9119619664483f6318b3",
+      "native_resolution_m": 100.0,
+      "matrices": [
+        {
+          "level": 0,
+          "width": 2,
+          "height": 1,
+          "tile_size": 256,
+          "origin": [
+            -1095930.0,
+            1095930.0
+          ],
+          "resolution": 8561.953124999987
+        },
+        {
+          "level": 1,
+          "width": 4,
+          "height": 2,
+          "tile_size": 256,
+          "origin": [
+            -1095930.0,
+            1095930.0
+          ],
+          "resolution": 4280.976562499994
+        },
+        {
+          "level": 2,
+          "width": 8,
+          "height": 4,
+          "tile_size": 256,
+          "origin": [
+            -1095930.0,
+            1095930.0
+          ],
+          "resolution": 2140.488281249997
+        },
+        {
+          "level": 3,
+          "width": 16,
+          "height": 8,
+          "tile_size": 256,
+          "origin": [
+            -1095930.0,
+            1095930.0
+          ],
+          "resolution": 1070.2441406249984
+        },
+        {
+          "level": 4,
+          "width": 32,
+          "height": 16,
+          "tile_size": 256,
+          "origin": [
+            -1095930.0,
+            1095930.0
+          ],
+          "resolution": 535.1220703124992
+        },
+        {
+          "level": 5,
+          "width": 64,
+          "height": 32,
+          "tile_size": 256,
+          "origin": [
+            -1095930.0,
+            1095930.0
+          ],
+          "resolution": 267.5610351562496
+        }
+      ],
+      "observation_note": "Archived LROC observations; illumination is baked into imagery, not the selected mission time."
+    },
+    {
+      "id": "nac-south",
+      "label": "LRO_NAC_Mosaic_1mpp_SP",
+      "title": "LRO NAC Mosaic 1mpp, S Pole",
+      "provider": "NASA/JPL Moon Trek · LRO/LROC",
+      "projection": "south_polar",
+      "crs": "urn:ogc:def:crs:IAU2000::30120",
+      "radius_m": 1737400,
+      "extent": [
+        -136716.373,
+        -136875.424,
+        136862.627,
+        136745.576
+      ],
+      "format": "image/png",
+      "tile_template": "https://trek.nasa.gov/tiles/Moon/SP/LRO_NAC_Mosaic_1mpp_SP/1.0.0/default/default028mm/{TileMatrix}/{TileRow}/{TileCol}.png",
+      "capabilities_url": "https://trek.nasa.gov/tiles/Moon/SP/LRO_NAC_Mosaic_1mpp_SP/1.0.0/WMTSCapabilities.xml",
+      "capabilities_sha256": "c947088cbf67b5167ca4c3757088b509c94fc2297cd1f31c9ab9749bf6500bc4",
+      "native_resolution_m": 1.0,
+      "matrices": [
+        {
+          "level": 0,
+          "width": 2,
+          "height": 1,
+          "tile_size": 256,
+          "origin": [
+            -1095930.0,
+            1095930.0
+          ],
+          "resolution": 8561.953124999987
+        },
+        {
+          "level": 1,
+          "width": 4,
+          "height": 2,
+          "tile_size": 256,
+          "origin": [
+            -1095930.0,
+            1095930.0
+          ],
+          "resolution": 4280.976562499994
+        },
+        {
+          "level": 2,
+          "width": 8,
+          "height": 4,
+          "tile_size": 256,
+          "origin": [
+            -1095930.0,
+            1095930.0
+          ],
+          "resolution": 2140.488281249997
+        },
+        {
+          "level": 3,
+          "width": 16,
+          "height": 8,
+          "tile_size": 256,
+          "origin": [
+            -1095930.0,
+            1095930.0
+          ],
+          "resolution": 1070.2441406249984
+        },
+        {
+          "level": 4,
+          "width": 32,
+          "height": 16,
+          "tile_size": 256,
+          "origin": [
+            -1095930.0,
+            1095930.0
+          ],
+          "resolution": 535.1220703124992
+        },
+        {
+          "level": 5,
+          "width": 64,
+          "height": 32,
+          "tile_size": 256,
+          "origin": [
+            -1095930.0,
+            1095930.0
+          ],
+          "resolution": 267.5610351562496
+        },
+        {
+          "level": 6,
+          "width": 128,
+          "height": 64,
+          "tile_size": 256,
+          "origin": [
+            -1095930.0,
+            1095930.0
+          ],
+          "resolution": 133.7805175781248
+        },
+        {
+          "level": 7,
+          "width": 256,
+          "height": 128,
+          "tile_size": 256,
+          "origin": [
+            -1095930.0,
+            1095930.0
+          ],
+          "resolution": 66.8902587890624
+        },
+        {
+          "level": 8,
+          "width": 512,
+          "height": 256,
+          "tile_size": 256,
+          "origin": [
+            -1095930.0,
+            1095930.0
+          ],
+          "resolution": 33.4451293945312
+        },
+        {
+          "level": 9,
+          "width": 1024,
+          "height": 512,
+          "tile_size": 256,
+          "origin": [
+            -1095930.0,
+            1095930.0
+          ],
+          "resolution": 16.7225646972656
+        },
+        {
+          "level": 10,
+          "width": 2048,
+          "height": 1024,
+          "tile_size": 256,
+          "origin": [
+            -1095930.0,
+            1095930.0
+          ],
+          "resolution": 8.3612823486328
+        },
+        {
+          "level": 11,
+          "width": 4096,
+          "height": 2048,
+          "tile_size": 256,
+          "origin": [
+            -1095930.0,
+            1095930.0
+          ],
+          "resolution": 4.1806411743164
+        },
+        {
+          "level": 12,
+          "width": 8192,
+          "height": 4096,
+          "tile_size": 256,
+          "origin": [
+            -1095930.0,
+            1095930.0
+          ],
+          "resolution": 2.0903205871582
+        }
+      ],
+      "observation_note": "2010 south-solstice mosaic; uncontrolled images manually tied to WAC; display overlay only."
+    }
+  ]
+}

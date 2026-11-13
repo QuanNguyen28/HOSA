@@ -10,13 +10,13 @@ HOSA dùng NASA LOLA/PGDA, JPL Horizons và terrain horizon. Engine xác định
 
 ## Ý nghĩa chỉ số
 
-Total sun hours / tổng thời gian có nắng: tổng thời gian tâm Mặt Trời khả kiến trong cửa sổ nhiệm vụ. Các khoảng có thể rời nhau. Chỉ số mô tả cơ hội chiếu sáng; không cho biết điện năng hoặc an toàn nhiệt. Tổng nắng đủ không chứng minh có nắng liên tục.
+Total sun hours / tổng thời gian nắng tương đương: với mô hình mặc định solar_disc, đây là tích phân phần diện tích đĩa Mặt Trời khả kiến theo thời gian, có tính che khuất bởi Trái Đất. Chia cho thời lượng nhiệm vụ sẽ ra phần đĩa khả kiến trung bình. Chỉ mô hình legacy sun_center mới dùng tổng thời gian tâm Mặt Trời khả kiến. Chỉ số mô tả cơ hội chiếu sáng; không cho biết điện năng hoặc an toàn nhiệt. Tổng nắng đủ không chứng minh có nắng liên tục.
 
 Total Earth LOS / tổng thời gian nhìn thấy Trái Đất: tổng thời gian tâm Trái Đất khả kiến về mặt hình học. Các khoảng có thể rời nhau. Tổng thời gian cao không chứng minh có cửa sổ liên tục đủ dài, chất lượng sóng vô tuyến hay lịch trạm mặt đất.
 
 Longest darkness / khoảng tối liên tục dài nhất và longest blackout / khoảng mất Earth LOS liên tục dài nhất: đánh giá tính liên tục trong đúng cửa sổ nhiệm vụ. Giới hạn tối đa do người dùng đặt là mong muốn mềm; vượt nó không tự tạo hard FAIL. Sự kiện chạm biên có thể kéo dài ra ngoài khoảng đã đánh giá. Không suy ra thời lượng pin từ thời gian tối.
 
-Longest joint visibility: khoảng liên tục dài nhất có cả Sun và Earth khả kiến, không phải điểm chất lượng tổng hợp hay chứng nhận điện và liên lạc.
+Longest joint visibility: với solar_disc, khoảng liên tục dài nhất có một phần đĩa Mặt Trời và tâm Trái Đất khả kiến; legacy sun_center dùng tâm Mặt Trời. Đây không phải điểm chất lượng tổng hợp hay chứng nhận điện và liên lạc.
 
 Contact window / cửa sổ liên lạc: khoảng Earth LOS liên tục còn dùng được sau setup. Yêu cầu có thể gồm thời lượng tối thiểu, số cửa sổ riêng biệt, hạn hoàn tất liên lạc đầu tiên. Số cửa sổ không phải số phiên nhét vào cùng cửa sổ. Engine contact đánh giá yêu cầu cứng này; chatbot dùng sampled_checks và quyết định đã qua validation.
 

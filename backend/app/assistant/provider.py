@@ -221,7 +221,7 @@ async def _sse_payloads(response: httpx.Response) -> AsyncIterator[dict]:
 
 
 class NativeLLM:
-    """Streaming JSON adapter for NVIDIA NIM or the native Gemini API."""
+    """Streaming JSON adapters for NIM, native Gemini and OpenAI-compatible APIs."""
     def __init__(self, provider: str, settings: AssistantSettings, transport=None,
                  client: httpx.AsyncClient | None = None):
         self.provider, self.settings, self.transport, self.client = provider, settings, transport, client
@@ -242,6 +242,27 @@ class NativeLLM:
     def _request(self, contract: type[BaseModel], messages: list[dict]) -> tuple[str, dict, dict]:
         s = self.settings
         wire = _schema_prompt(contract, messages)
+        if self.provider == "openai":
+            key = s.llm_proxy_api_key.get_secret_value().strip() if s.llm_proxy_api_key else ""
+            if not key or not s.llm_proxy_model.strip():
+                raise AssistantError("OPENAI_NOT_CONFIGURED", 503)
+            try:
+                base = httpx.URL(s.llm_proxy_base_url)
+            except httpx.InvalidURL as error:
+                raise AssistantError("OPENAI_INVALID_BASE_URL", 503) from error
+            if base.scheme != "https" or not base.host or base.userinfo or base.query or base.fragment:
+                raise AssistantError("OPENAI_INVALID_BASE_URL", 503)
+            response_format = {"type": "json_object"}
+            if s.llm_proxy_response_format == "json_schema":
+                response_format = {"type": "json_schema", "json_schema": {
+                    "name": contract.__name__, "strict": True, "schema": wire_schema(contract)}}
+            payload = {"model": s.llm_proxy_model, "messages": wire,
+                       "stream": s.assistant_streaming, "response_format": response_format}
+            if s.llm_proxy_max_output_tokens is not None:
+                payload["max_tokens"] = s.llm_proxy_max_output_tokens
+            if s.assistant_streaming:
+                payload["stream_options"] = {"include_usage": True}
+            return str(base).rstrip("/") + "/chat/completions", {"Authorization": "Bearer " + key}, payload
         if self.provider == "nvidia":
             key = s.nvidia_api_key.get_secret_value().strip() if s.nvidia_api_key else ""
             if not key or not s.nvidia_model.strip():
@@ -299,14 +320,14 @@ class NativeLLM:
                         response_context = client.stream("POST", endpoint,
                             headers={**headers, "Content-Type": "application/json"}, json=payload, timeout=timeout)
                         async with response_context as response:
-                            content, usage, finish, actual_model = await self._read_response(response)
-                            request_id = self._request_id(response)
+                            content, usage, finish, actual_model, body_id = await self._read_response(response)
+                            request_id = self._request_id(response) or body_id
                 else:
                     response_context = self.client.stream("POST", endpoint,
                         headers={**headers, "Content-Type": "application/json"}, json=payload, timeout=timeout)
                     async with response_context as response:
-                        content, usage, finish, actual_model = await self._read_response(response)
-                        request_id = self._request_id(response)
+                        content, usage, finish, actual_model, body_id = await self._read_response(response)
+                        request_id = self._request_id(response) or body_id
             output = contract.model_validate_json(content)
         except AssistantError:
             raise
@@ -315,14 +336,17 @@ class NativeLLM:
             logging.getLogger(__name__).warning("Structured output rejected: provider=%s contract=%s fields=%s",
                                                 self.provider, contract.__name__, fields)
             raise AssistantError("MODEL_OUTPUT_INVALID", 502) from error
-        except (httpx.ConnectError, httpx.NetworkError) as error:
-            raise AssistantError(f"{self.provider.upper()}_UNAVAILABLE", 502) from error
+        except (httpx.NetworkError, httpx.RemoteProtocolError) as error:
+            failure = AssistantError(f"{self.provider.upper()}_UNAVAILABLE", 502)
+            failure.transport_error = type(error).__name__
+            raise failure from error
         except (httpx.TimeoutException, TimeoutError) as error:
             # Connection establishment is bounded; a slow generation is deliberately not.
             raise AssistantError(f"{self.provider.upper()}_CONNECT_TIMEOUT", 504) from error
         except (httpx.HTTPError, json.JSONDecodeError, KeyError, IndexError, TypeError, ValueError) as error:
             raise AssistantError("MODEL_OUTPUT_INVALID", 502) from error
-        configured_model = self.settings.nvidia_model if self.provider == "nvidia" else self.settings.gemini_model
+        configured_model = {"nvidia": self.settings.nvidia_model, "gemini": self.settings.gemini_model,
+                            "openai": self.settings.llm_proxy_model}[self.provider]
         return Completion(output, actual_model or configured_model,
                           (perf_counter() - started) * 1000, usage, request_id, finish)
 
@@ -331,19 +355,21 @@ class NativeLLM:
         return next((response.headers.get(name) for name in ("x-request-id", "request-id", "x-goog-request-id")
                      if response.headers.get(name)), None)
 
-    async def _read_response(self, response: httpx.Response) -> tuple[str, dict, str, str | None]:
+    async def _read_response(self, response: httpx.Response) -> tuple[str, dict, str, str | None, str | None]:
         if response.status_code != 200:
             raise _http_error(self.provider, response)
         if not self.settings.assistant_streaming:
             decoded = json.loads(await response.aread())
-            content, finish, usage = _extract_openai(decoded) if self.provider == "nvidia" else _extract_gemini(decoded)
+            content, finish, usage = _extract_gemini(decoded) if self.provider == "gemini" else _extract_openai(decoded)
             model = decoded.get("model") or decoded.get("modelVersion")
-            return content, usage, finish, model
+            return content, usage, finish, model, decoded.get("id") or decoded.get("responseId")
         chunks, usage, finish = [], {}, ""
         actual_model = None
+        body_id = None
         async for body in _sse_payloads(response):
+            body_id = body.get("id") or body.get("responseId") or body_id
             actual_model = body.get("model") or body.get("modelVersion") or actual_model
-            if self.provider == "nvidia":
+            if self.provider != "gemini":
                 choices = body.get("choices") or []
                 if choices:
                     choice = choices[0]
@@ -367,7 +393,7 @@ class NativeLLM:
             raise AssistantError("MODEL_OUTPUT_TRUNCATED", 502)
         if not content.strip() or finish not in {"stop", "STOP"}:
             raise AssistantError("MODEL_OUTPUT_INVALID", 502)
-        return content, usage, finish, actual_model
+        return content, usage, finish, actual_model, body_id
 
 
 class ResilientLLM:
@@ -379,6 +405,7 @@ class ResilientLLM:
         clients = clients or {}
         self.primary = NativeLLM("nvidia", settings, transports.get("nvidia"), clients.get("nvidia"))
         self.secondary = NativeLLM("gemini", settings, transports.get("gemini"), clients.get("gemini"))
+        self.compatible = NativeLLM("openai", settings, transports.get("openai"), clients.get("openai"))
         self.events: list[dict] = []
         self.last_provider = None
         self._forced_provider: str | None = None
@@ -411,8 +438,13 @@ class ResilientLLM:
                                     "outcome": "error", "error_code": error.code,
                                     "retry_after_seconds": getattr(error, "retry_after_seconds", None),
                                     "upstream_status":getattr(error,"upstream_status",None),
+                                    "transport_error":getattr(error,"transport_error",None),
                                     "request_id":getattr(error,"request_id",None),
                                     "timestamp_utc":datetime.now(timezone.utc).isoformat()})
+                logging.getLogger(__name__).warning(
+                    "LLM request failed: provider=%s stage=%s attempt=%s code=%s upstream_status=%s transport=%s request_id=%s",
+                    adapter.provider, stage, attempt, error.code, getattr(error,"upstream_status",None),
+                    getattr(error,"transport_error",None), getattr(error,"request_id",None))
                 # A rate limit is a routing signal: switch providers immediately.
                 if error.code.endswith("_RATE_LIMIT") or not self._retryable(error) or attempt == 3:
                     break
@@ -427,10 +459,16 @@ class ResilientLLM:
                     if retry_used:
                         break
                     retry_used = True
+                    if adapter.provider == "openai":
+                        # Give a transient gateway/network failure time to recover before the one permitted retry.
+                        await asyncio.sleep(1)
         raise last
 
     async def complete(self, contract: type[BaseModel], messages: list[dict]) -> Completion:
         provider = self._forced_provider or self.settings.assistant_provider
+        if provider == "openai":
+            # A configured proxy is tested and served on its own; never hide errors behind another account.
+            return await self._attempt(self.compatible, contract, messages, contract.__name__)
         primary = self.primary if provider == "nvidia" else self.secondary if provider == "gemini" else None
         if primary is None:
             if not self.settings.openrouter_api_key or not self.settings.openrouter_model:
@@ -504,7 +542,7 @@ def wire_schema(contract: type[BaseModel]) -> dict:
             # across model endpoints' supported JSON Schema subsets.
             for key in ("default", "minimum", "maximum", "exclusiveMinimum", "maxItems", "minItems", "format"):
                 node.pop(key, None)
-            if node.get("type") == "object":
+            if node.get("type") == "object" and "properties" in node:
                 node["additionalProperties"] = False
                 node["required"] = list(node.get("properties", {}))
             for value in node.values():
