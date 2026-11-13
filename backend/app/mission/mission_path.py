@@ -8,26 +8,49 @@ import pandas as pd
 
 from app.services.lunarsight.visibility import lookup
 from app.services.lunarsight.durations import combine
-from .evaluation import TOLERANCES, metrics, constraint_checks, decision
+from .evaluation import TOLERANCES, metrics, constraint_checks, decision, contact_evidence
 
-VERSION = "sampled-mission-path-envelope-3.0"
+VERSION = "sampled-mission-path-envelope-3.1"
 
 
-def validate_mission_path(request, validation, base, fine, shorter, ephemerides):
+def validate_mission_path(request, validation, base, fine, shorter, ephemerides, *, numerical=None, publish=None):
     result = {"passed": False, "policy_version": VERSION,
         "scope": "requested_sampled_sun_and_earth_paths_only",
         "tolerance_status": "PROVISIONAL", "targets": {},
         "limitations": ["Empirical numerical envelope; not a bound on physical DEM uncertainty or unsampled events.",
                         "Full-circle horizon validation remains unchanged."]}
-    reasons = validation.get("reason_codes", [])
-    diagnostics = validation.get("sensitivity", {})
-    # Only numerical sensitivity failures are eligible. Missing comparisons,
-    # missing data, ENU, seams and evidence-integrity failures remain blocking.
+    reasons, diagnostics = validation.get("reason_codes", []), validation.get("sensitivity", {})
+    # Missing data, source integrity, ENU and seams remain blocking even when
+    # numerical envelope evidence was prepared by an earlier request.
     if not reasons or not all(reason.endswith(":SENSITIVITY_FAILED") and
                               reason.rsplit(":", 1)[0] in diagnostics for reason in reasons):
         result["reason"] = "GLOBAL_FAILURE_NOT_NUMERICAL_ONLY"
         return result
-    spatial = [d for name, d in diagnostics.items() if not name.startswith("time_")]
+    if numerical is None:
+        inputs = ephemerides() if callable(ephemerides) else ephemerides
+        numerical = path_evidence(request, validation, base, fine, shorter, inputs)
+        if publish is not None:
+            publish(numerical)
+    for label, target in numerical["targets"].items():
+        required = ((request.min_sunlit_fraction or 0) > 0 if label == "sun" else
+                    (request.min_earth_los_fraction or 0) > 0 or request.contact_requirements is not None)
+        result["targets"][label] = {**target, "required_for_decision": required}
+    if "reason" in numerical:
+        result["reason"] = numerical["reason"]
+        return result
+    metric = numerical["metrics_hours"]
+    checks = constraint_checks(metric, request, contact_evidence=numerical["contact_evidence"])
+    result.update(metrics_hours=metric, constraint_checks=checks,
+                  bounded_decision=decision(checks.values()) if checks else None)
+    result["passed"] = result["bounded_decision"] == "PASS"
+    result["reason"] = "ROBUST_REQUIREMENT_BOUNDS" if result["passed"] else "REQUIREMENT_BOUNDS_NOT_CONCLUSIVE"
+    return result
+
+
+def path_evidence(request, validation, base, fine, shorter, ephemerides):
+    """Threshold-independent empirical envelope, including exact Earth runs."""
+    result = {"targets": {}}
+    spatial = [d for name, d in validation["sensitivity"].items() if not name.startswith("time_")]
     sun, earth, sun1, earth1 = ephemerides[:4]
     index = sun1.index
     frame = pd.DataFrame(index=index)
@@ -83,9 +106,7 @@ def validate_mission_path(request, validation, base, fine, shorter, ephemerides)
             frame["sun_visible_fraction_lower"] = (state == "V").astype(float)
             frame["sun_visible_fraction_upper"] = (state != "B").astype(float)
         finite = bool(np.isfinite(margins).all() and np.isfinite(spreads).all())
-        required = ((request.min_sunlit_fraction or 0) > 0 if label == "sun" else
-                    (request.min_earth_los_fraction or 0) > 0 or request.contact_requirements is not None)
-        result["targets"][label] = {"required_for_decision": required, "height_m": height,
+        result["targets"][label] = {"height_m": height,
             "state": str(state[0]) if len(set(state)) == 1 else "MIXED",
             "native_sample_counts_5min_1min": [len(coarse), len(native)],
             "state_counts_1min": {s: int((state[:-1] == s).sum()) for s in ("V", "B", "?")},
@@ -100,11 +121,5 @@ def validate_mission_path(request, validation, base, fine, shorter, ephemerides)
     frame["end_utc"] = index.to_series().shift(-1)
     intervals = frame.iloc[:-1]
     metric = metrics(intervals)
-    checks = constraint_checks(metric, request, intervals)
-    result.update(metrics_hours=metric, constraint_checks=checks,
-                  bounded_decision=decision(checks.values()) if checks else None)
-    # Unknown samples are allowed only when even the pessimistic bounds meet
-    # every requested hard requirement, including continuous contact/deadline.
-    result["passed"] = result["bounded_decision"] == "PASS"
-    result["reason"] = "ROBUST_REQUIREMENT_BOUNDS" if result["passed"] else "REQUIREMENT_BOUNDS_NOT_CONCLUSIVE"
+    result.update(metrics_hours=metric, contact_evidence=contact_evidence(intervals))
     return result

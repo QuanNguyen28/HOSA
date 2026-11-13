@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../mvp/api";
 import {
-  EXAMPLES,
   boundsText,
   intervalAt,
   missionHours,
@@ -15,7 +14,7 @@ import {
   type Target,
 } from "../mvp/contracts";
 import { DecisionBadge } from "../mvp/DecisionBadge";
-import { SITES, fmtTime, type Site } from "./model";
+import { SITES, HIDDEN_DEFAULT_SITE_IDS, fmtTime, type Site } from "./model";
 import { SunIcon, EarthIcon } from "./ui";
 
 export const toTarget = (site: Site): Target => ({
@@ -26,19 +25,6 @@ export const toTarget = (site: Site): Target => ({
   elevationM: NaN,
   status: "provisional",
 });
-const exampleSites: Site[] = EXAMPLES.map((t) => ({
-  id: t.id,
-  name: t.name,
-  lat: t.latitude,
-  lon: t.longitude,
-  height_m: NaN,
-  group: "illumination",
-  kind: "exact",
-  point:
-    "Documented backend verification coordinate; click Analyze to calculate.",
-  source: "HOSA coordinate API",
-  url: "",
-}));
 export function useCatalog() {
   const [catalog, setCatalog] = useState<Site[]>([]);
   const [error, setError] = useState("");
@@ -57,7 +43,7 @@ export function useCatalog() {
     }>("/lunar/sites", controller.signal)
       .then((data) =>
         setCatalog(
-          data.features.map(({ properties: p }) => ({
+          data.features.filter(({ properties: p }) => !HIDDEN_DEFAULT_SITE_IDS.has(p.site_id)).map(({ properties: p }) => ({
             id: p.site_id,
             name: `${p.site_id} · ${p.region}`,
             lat: p.lat_deg,
@@ -78,7 +64,7 @@ export function useCatalog() {
     return () => controller.abort();
   }, []);
   return {
-    sites: useMemo(() => [...SITES, ...catalog, ...exampleSites], [catalog]),
+    sites: useMemo(() => [...SITES, ...catalog], [catalog]),
     error,
   };
 }
@@ -208,14 +194,14 @@ export function MissionFields({
               label="Panel height · m"
               value={m.panel}
               min={0.01}
-              max={20}
+              max={30}
               onChange={(v) => change("panel", v)}
             />
             <NumberField
               label="Antenna height · m"
               value={m.antenna}
               min={0.01}
-              max={20}
+              max={30}
               onChange={(v) => change("antenna", v)}
             />
           </div>
@@ -516,7 +502,9 @@ export function ValidationInfo({
         Required {(failure.limit * 100).toFixed(2)}%; upper bound {(failure.observed_bounds[1] * 100).toFixed(2)}%.
         {failure.shortfall_hours_bounds && ` At least ${boundsText(failure.shortfall_hours_bounds)} h short.`}
       </p>}
-      <p>Validation and soft preferences skipped. Sampled model · PROVISIONAL.</p>
+      <p>{failure.confirmed_sampling_minutes?.length
+        ? `Hard failure confirmed on ${failure.confirmed_sampling_minutes.join("/")}-minute grids. Full validation and soft preferences skipped.`
+        : "Validation and soft preferences skipped. Sampled model · PROVISIONAL."}</p>
       <p>Window: {failure.window.start_utc.replace("T", " ")} → {failure.window.end_utc.replace("T", " ")}</p>
       {failure.deadline_utc && <p>Contact must finish by {failure.deadline_utc.replace("T", " ")}.</p>}
       <p className="text-mute">{failure.explanation}</p>

@@ -94,8 +94,8 @@ class MissionRequest(MissionTarget):
         description="At least 1 hour, in 5-minute increments; no application maximum; may be omitted with end_utc")
     end_utc: str | None = Field(default=None, description="Alternative UTC end date; must agree with duration_hours if both are supplied",
                                json_schema_extra={"format": "date-time"})
-    panel_height_m: float = Field(default=1.0, gt=0, le=20)
-    antenna_height_m: float = Field(default=2.0, gt=0, le=20)
+    panel_height_m: float = Field(default=1.0, gt=0, le=30)
+    antenna_height_m: float = Field(default=2.0, gt=0, le=30)
     constraints: Constraints = Field(default_factory=Constraints)
     min_sunlit_fraction: float | None = Field(default=None, ge=0, le=1,
         description="Minimum time-mean visible solar-disc fraction (0–1) under the default solar_disc model")

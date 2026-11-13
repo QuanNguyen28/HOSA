@@ -5,7 +5,7 @@ export { useAssistant };
 export type Assistant = ReturnType<typeof useAssistant>;
 const SUGGEST = [
   "So sánh Haworth và Nobile Rim 1.",
-  "Chỉ chọn Site04_P1, giữ nguyên lịch và phần cứng.",
+  "Chỉ chọn Haworth, giữ nguyên lịch và phần cứng.",
   "Set minimum sunlight to 90%, keep the site and arrival.",
 ];
 const GENERAL_SUGGEST = [

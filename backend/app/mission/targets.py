@@ -11,6 +11,11 @@ def compare_sites() -> dict:
     return {site["id"]: site for site in json.loads(path.read_text(encoding="utf-8"))}
 
 
+def default_sites() -> dict:
+    """Public default selection; archived verification targets stay addressable."""
+    return {key: site for key, site in compare_sites().items() if site.get("default_visible", True)}
+
+
 def coordinates_for_site(site_id):
     site = compare_sites().get(site_id)
     if site:

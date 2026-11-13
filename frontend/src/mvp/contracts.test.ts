@@ -69,7 +69,7 @@ describe("shared backend mission contracts", () => {
     { hours: -1 },
     { hours: 1.01 },
     { start: "2026-11-24T00:01" },
-    { panel: 30 },
+    { panel: 31 },
     { antenna: 0 },
     { deadline: 4321 },
     { windows: 1.5 },

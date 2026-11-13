@@ -85,22 +85,28 @@ if __name__ == "__main__":
     parser.add_argument("--start", default="2000-01-01T00:00:00Z")
     parser.add_argument("--end", default="2101-01-01T00:00:00Z")
     parser.add_argument("--sites", nargs="+")
+    parser.add_argument("--viewer-heights", nargs="+", type=float, choices=(2., 10., 20., 30.),
+                        help="Prepare equal panel/antenna heights for each selected viewer preset")
     parser.add_argument("--panel", type=float, default=20.)
     parser.add_argument("--antenna", type=float, default=20.)
     parser.add_argument("--workers", type=int, choices=(1, 2, 3), default=2)
     parser.add_argument("--root", type=Path, default=ROOT/"data/cache/point-analysis")
     parser.add_argument("--report", type=Path, required=True)
     args = parser.parse_args()
-    selected = [t for t in targets() if not args.sites or set(args.sites)&set(t["site_ids"])]
+    selected = [t for t in targets(include_legacy=bool(args.sites)) if not args.sites or set(args.sites)&set(t["site_ids"])]
     if not selected or (args.sites and set(args.sites)-{s for t in selected for s in t["site_ids"]}):
         parser.error("Unknown site ID")
     records = []
     with ProcessPoolExecutor(max_workers=args.workers) as pool:
-        pending = [pool.submit(prepare, target, args.start, args.end, args.panel, args.antenna, args.root) for target in selected]
+        hardware = [(h, h) for h in args.viewer_heights] if args.viewer_heights else [(args.panel, args.antenna)]
+        total = len(selected)*len(hardware)
+        pending = [pool.submit(prepare, target, args.start, args.end, panel, antenna, args.root)
+                   for panel, antenna in hardware for target in selected]
         for future in as_completed(pending):
             row = future.result()
             records.append(row)
             print(json.dumps({"site_complete": row}), flush=True)
-            atomic_json(args.report, {"passed": len(records)==len(selected), "records": records, "sites_total": len(selected),
+            atomic_json(args.report, {"passed": len(records)==total, "records": records, "sites_total": len(selected),
+                "configurations_total": total, "hardware_pairs_m": hardware,
                 "start_utc": args.start, "end_utc": args.end, "live_llm_calls": 0,
                 "scope": "Compact nominal five-minute metrics/charts only; yearly source hashes and interpolation checks retained. Full native timelines and mission validation are computed on demand."})

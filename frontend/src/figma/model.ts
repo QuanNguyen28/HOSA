@@ -28,8 +28,10 @@ export const GROUP_ORDER: Site["group"][] = [
 ];
 
 export const SITES = compareSites
-  .filter((site) => !site.id.startsWith("example-"))
+  .filter((site) => !("default_visible" in site) || site.default_visible !== false)
   .map((site) => ({ ...site, height_m: site.height_m ?? NaN })) as Site[];
+
+export const HIDDEN_DEFAULT_SITE_IDS = new Set(["Site01_P1", "Site04_P1", "example-a", "example-b"]);
 
 export const HEIGHTS = [2, 10, 20, 30];
 export const SPEEDS = [1, 6, 24, 72];

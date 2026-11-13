@@ -129,6 +129,26 @@
       "default": null,
       "title": "Longitude E Deg"
     },
+    "evaluation_policy": {
+      "default": "hard_first",
+      "description": "hard_first stops on a proven sampled hard failure; complete retains all diagnostics for comparison",
+      "enum": [
+        "hard_first",
+        "complete"
+      ],
+      "title": "Evaluation Policy",
+      "type": "string"
+    },
+    "illumination_model": {
+      "default": "solar_disc",
+      "description": "solar_disc: time-mean visible solar-disc area including Earth occultation; sun_center: explicit legacy geometric centre model",
+      "enum": [
+        "solar_disc",
+        "sun_center"
+      ],
+      "title": "Illumination Model",
+      "type": "string"
+    },
     "start_utc": {
       "description": "Timezone-aware ISO 8601 on an exact 5-minute UTC grid",
       "examples": [
@@ -162,14 +182,14 @@
     "panel_height_m": {
       "default": 1.0,
       "exclusiveMinimum": 0,
-      "maximum": 20,
+      "maximum": 30,
       "title": "Panel Height M",
       "type": "number"
     },
     "antenna_height_m": {
       "default": 2.0,
       "exclusiveMinimum": 0,
-      "maximum": 20,
+      "maximum": 30,
       "title": "Antenna Height M",
       "type": "number"
     },
@@ -188,6 +208,7 @@
         }
       ],
       "default": null,
+      "description": "Minimum time-mean visible solar-disc fraction (0–1) under the default solar_disc model",
       "title": "Min Sunlit Fraction"
     },
     "min_earth_los_fraction": {

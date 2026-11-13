@@ -39,7 +39,8 @@ def query(**updates):
 
 def test_sensitivity_reassesses_user_threshold_against_real_one_minute_data(planner):
     candidate = planner.compare(query()).candidates[0]
-    assert candidate.nominal_sampled_decision == candidate.decision == "FAIL"
+    assert candidate.nominal_sampled_decision == "FAIL"
+    assert candidate.decision == "INDETERMINATE"  # One-minute evidence contradicts the coarse hard rejection.
     assert candidate.validation["passed"] is False
     sensitivity = candidate.sensitivity
     assert sensitivity["status"] == "REVIEW" and sensitivity["time_sensitive"] is True

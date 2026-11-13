@@ -264,7 +264,8 @@
     "kind": "exact",
     "point": "Documented backend verification coordinate; click Analyze to calculate.",
     "source": "HOSA coordinate API",
-    "url": ""
+    "url": "",
+    "default_visible": false
   },
   {
     "id": "example-b",
@@ -276,6 +277,7 @@
     "kind": "exact",
     "point": "Documented backend verification coordinate; click Analyze to calculate.",
     "source": "HOSA coordinate API",
-    "url": ""
+    "url": "",
+    "default_visible": false
   }
 ]

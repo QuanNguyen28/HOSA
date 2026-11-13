@@ -1,5 +1,5 @@
 import { Suspense, lazy, useEffect, useMemo, useState } from "react";
-import { SITES, HEIGHTS, HOUR, STEP, fmtTime, type Site } from "./model";
+import { SITES, HEIGHTS, HIDDEN_DEFAULT_SITE_IDS, HOUR, STEP, fmtTime, type Site } from "./model";
 import {
   Logo,
   SunIcon,
@@ -64,8 +64,20 @@ export default function App() {
   const [viewerHeight, setViewerHeight] = useState(DEFAULT_MISSION.panel);
   const { sites: catalog, error: catalogError } = useCatalog();
   const [siteId, setSiteId] = useState(
-    () => new URLSearchParams(location.search).get("site") ?? SITES[0].id,
+    () => {
+      const requested = new URLSearchParams(location.search).get("site");
+      return requested && !HIDDEN_DEFAULT_SITE_IDS.has(requested) ? requested : SITES[0].id;
+    },
   );
+  useEffect(() => {
+    const selected = HIDDEN_DEFAULT_SITE_IDS.has(siteId) ? SITES[0].id : siteId;
+    if (selected !== siteId) setSiteId(selected);
+    const url = new URL(location.href);
+    if (HIDDEN_DEFAULT_SITE_IDS.has(url.searchParams.get("site") ?? "")) {
+      url.searchParams.set("site", selected);
+      history.replaceState(null, "", url);
+    }
+  }, [siteId]);
   const [custom, setCustom] = useState<Site>({
     ...SITES[0],
     id: "custom",
@@ -89,7 +101,7 @@ export default function App() {
       : Date.parse(DEFAULT_MISSION.start + "Z");
   const [playing, setPlaying] = useState(false),
     [speed, setSpeed] = useState(24);
-  const [selected, setSelected] = useState(["example-a", "example-b"]);
+  const [selected, setSelected] = useState(SITES.slice(0, 2).map((site) => site.id));
   const targets = useMemo(
     () =>
       selected
@@ -153,7 +165,7 @@ export default function App() {
   const setH = (i: number) => {
     const height = HEIGHTS[i];
     setViewerHeight(height);
-    if (height <= 20) onMission({ ...mission, panel: height, antenna: height });
+    onMission({ ...mission, panel: height, antenna: height });
   };
   const coordinate = (latitude: number, longitude: number) => {
     setCustom((old) => ({ ...old, lat: latitude, lon: longitude }));
@@ -642,8 +654,7 @@ function Explore({
                   }))}
                 />
                 <p className="mt-2 text-[10px] text-mute">
-                  Up to 20 m sets panel and antenna together. The 30 m option is
-                  a viewer preview; calculation heights stay in Mission requirements.
+                  Lander uses 2 m. Viewer presets set panel and antenna together to 2, 10, 20 or 30 m.
                 </p>
               </div>
               <div className="space-y-3 p-5">

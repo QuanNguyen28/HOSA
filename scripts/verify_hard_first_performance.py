@@ -35,7 +35,7 @@ def measured(root, request):
 
 def verify(long=True):
     report = {"passed": False, "cases": [], "live_llm_calls": 0,
-        "scope": "Local timings; isolated completed-result caches, installed verified terrain/kernel data. Physical cache is persistent and prepared for catalog 2026–2028. complete includes numerical validation; hard_first skips it only after a sampled hard upper-bound failure. Neither path writes CSV automatically."}
+        "scope": "Local timings; isolated completed-result caches, installed verified terrain/kernel data. Physical cache is persistent. complete includes numerical validation; hard_first skips full validation only after the SAME hard requirement fails 5/1-minute grids. Final hard-fail metrics use 1-minute samples. Neither path writes CSV automatically."}
     with TemporaryDirectory(prefix="hard-first-acceptance-", dir=SOURCE) as temporary:
         root = Path(temporary)
         seed(root)
@@ -48,11 +48,14 @@ def verify(long=True):
             before, baseline = measured(root, request.model_copy(update={"evaluation_policy": "complete"}))
             after, optimized = measured(root, request)
             assert before["decision"] == after["decision"] == "FAIL"
-            assert before["metrics_hours"] == after["metrics_hours"] and before["joint_hours"] == after["joint_hours"]
+            confirmation = after["validation"]["temporal_confirmation"]
+            assert confirmation["confirmed"] and confirmation["sampling_minutes"] == [5, 1]
+            assert before["metrics_hours"] == confirmation["metrics_5min_hours"]
+            assert after["metrics_hours"] == confirmation["metrics_1min_hours"]
             assert after["validation"]["status"] == "skipped_hard_failure" and after["hard_failure"]
-            assert not any("1min" in s["stage"] or s["stage"] == "soft_preferences" for s in optimized["stages"])
+            assert not any(s["stage"] in ("scientific_validation", "soft_preferences") for s in optimized["stages"])
             case = {"name": name, "request": request.model_dump(), "complete": baseline, "hard_first": optimized,
-                "same_native_metrics_and_decision": True, "hard_failure": after["hard_failure"], "speedup": baseline["seconds"]/optimized["seconds"]}
+                "same_coarse_metrics_and_confirmed_decision": True, "hard_failure": after["hard_failure"], "speedup": baseline["seconds"]/optimized["seconds"]}
             report["cases"].append(case)
             print(json.dumps({"case": name, "complete_seconds": baseline["seconds"], "hard_first_seconds": optimized["seconds"],
                 "preview_seconds": optimized["preview"]["seconds"], "speedup": case["speedup"]}), flush=True)

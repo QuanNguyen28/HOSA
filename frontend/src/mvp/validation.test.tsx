@@ -15,6 +15,10 @@ describe("hard-first explanation", () => {
     expect(html).toContain("Validation and soft preferences skipped");
     expect(html).toContain("2026-11-17 00:00:00Z");
     expect(html).not.toContain("Validation incomplete or failed");
+    result.hard_failure!.confirmed_sampling_minutes = [5, 1];
+    const confirmed = renderToStaticMarkup(<ValidationInfo result={result} />);
+    expect(confirmed).toContain("Hard failure confirmed on 5/1-minute grids");
+    expect(confirmed).toContain("Full validation and soft preferences skipped");
   });
 });
 

@@ -21,11 +21,17 @@ def verify_result(result, request, frame):
         skipped = result['validation'].get('status') == 'skipped_hard_failure'
         expected = evaluate(request, frame, result['validation'], include_soft=not skipped)
         if skipped:
-            from app.point_analysis.hard_first import check
-            checks, failure, _ = check(request, expected['metrics_hours'], frame)
-            if failure is None or (result.get('hard_failure') or {}).get('constraint') != failure['constraint']:
+            checks = expected['constraint_checks']
+            name = (result.get('hard_failure') or {}).get('constraint')
+            confirmation = result['validation'].get('temporal_confirmation', {})
+            if (checks.get(name) != 'FAIL' or not confirmation.get('confirmed')
+                    or confirmation.get('constraint') != name
+                    or any(confirmation.get('checks_'+step, {}).get(name) != 'FAIL' for step in ('5min', '1min'))):
                 raise DomainError('ENGINE_CONTRACT_ERROR', 502)
-            expected['constraint_checks'] = checks
+            prefix = result['constraint_checks']
+            if not prefix or name not in prefix or any(checks.get(key) != value for key, value in prefix.items()):
+                raise DomainError('ENGINE_CONTRACT_ERROR', 502)
+            expected['constraint_checks'] = prefix
     except DomainError as error:
         raise DomainError('ENGINE_CONTRACT_ERROR', 502) from error
     for key in ('metrics_hours', 'constraint_checks', 'nominal_sampled_decision', 'decision', 'soft_constraint_checks'):

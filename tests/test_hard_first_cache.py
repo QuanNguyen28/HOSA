@@ -16,12 +16,11 @@ from app.point_analysis.physics_cache import PhysicalSeriesCache
 from app.point_analysis.service import PointAnalysisJobs, get_point_jobs
 
 
-def test_hard_failure_stops_before_one_minute_validation_and_soft(pipeline, monkeypatch):
+def test_hard_failure_confirms_one_minute_before_skipping_full_validation_and_soft(pipeline, monkeypatch):
     import app.point_analysis.pipeline as module
     old, calls = pipeline.ephemerides, []
     def no_sun(request, site, step, **kwargs):
         calls.append(step)
-        assert step == 5, "Hard failure must not compute 1-minute ephemerides"
         sun, earth, receipts = old(request, site, step, **kwargs)
         sun["el_deg"] = -10.
         return sun, earth, receipts
@@ -30,13 +29,53 @@ def test_hard_failure_stops_before_one_minute_validation_and_soft(pipeline, monk
     monkeypatch.setattr(module, "assess_soft", lambda *a, **k: pytest.fail("soft evaluation ran after hard fail"))
     result = pipeline.run(query(evaluation_policy="hard_first", min_sunlit_fraction=.8,
         min_earth_los_fraction=.8, constraints={"max_darkness_hours": 0.}))
-    assert calls == [5] and result["decision"] == "FAIL"
+    assert calls == [5, 1] and result["decision"] == "FAIL"
     assert result["constraint_checks"] == {"min_sunlit_fraction": "FAIL"}
     assert result["soft_constraint_checks"] == {}
     assert result["evaluation_stages"]["validation"] == "skipped_hard_failure"
     assert result["hard_failure"]["observed_bounds"] == [0, 0]
     assert result["hard_failure"]["shortfall_hours_bounds"] == [.8, .8]
+    assert result["hard_failure"]["sampling_minutes"] == 1
+    assert result["hard_failure"]["confirmed_sampling_minutes"] == [5, 1]
+    assert result["validation"]["temporal_confirmation"]["confirmed"]
     assert result["hard_failure"]["evidence_intervals"][0]["start_utc"].startswith("2026-11-17T00:00")
+
+
+@pytest.mark.parametrize("policy", ["hard_first", "complete"])
+@pytest.mark.parametrize("requirement", ["availability", "contact_deadline"])
+def test_coarse_failure_contradicted_by_fine_grid_is_not_rejected(pipeline, monkeypatch, policy, requirement):
+    old = pipeline.ephemerides
+    def crossing(request, site, step, **kwargs):
+        sun, earth, receipts = old(request, site, step, **kwargs)
+        minutes = (earth.index-earth.index[0]).total_seconds()/60
+        earth["el_deg"] = __import__("numpy").where(minutes < 12, -10., 5.)
+        return sun, earth, receipts
+    monkeypatch.setattr(pipeline, "ephemerides", crossing)
+    fields = ({"min_earth_los_fraction": .8} if requirement == "availability" else
+              {"contact_requirements": {"min_contact_minutes": 1., "first_contact_deadline_minutes": 13.}})
+    result = pipeline.run(query(evaluation_policy=policy, **fields))
+    assert result["nominal_sampled_decision"] == "FAIL"
+    assert result["decision"] == "INDETERMINATE"
+    assert result.get("hard_failure") is None
+    name = "min_earth_los_fraction" if requirement == "availability" else "contact.first_contact_deadline_minutes"
+    assert result["constraint_checks"][name] == "FAIL"
+    assert result["validation"]["sensitivity"]["time_5min_vs_1min"]["constraint_checks"][name] == "PASS"
+    if requirement == "contact_deadline":
+        assert result["contact_analysis"]["requirements"]["decision"] == "INDETERMINATE"
+
+
+def test_coarse_failure_with_unknown_fine_evidence_stays_indeterminate(pipeline, monkeypatch):
+    old = pipeline.ephemerides
+    def unknown_fine(request, site, step, **kwargs):
+        sun, earth, receipts = old(request, site, step, **kwargs)
+        sun["el_deg"] = -10.
+        if step == 1:
+            sun["row_present"] = False
+            receipts[0]["missing_timestamps"] = len(sun)
+        return sun, earth, receipts
+    monkeypatch.setattr(pipeline, "ephemerides", unknown_fine)
+    result = pipeline.run(query(evaluation_policy="hard_first", min_sunlit_fraction=.8))
+    assert result["decision"] == "INDETERMINATE" and result.get("hard_failure") is None
 
 
 def test_unknown_upper_bound_is_not_a_hard_rejection(pipeline, monkeypatch):

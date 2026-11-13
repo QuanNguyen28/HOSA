@@ -17,7 +17,7 @@ from precompute_catalog import targets
 
 def prepare(root, sites=None, panel=20., antenna=20.):
     pipeline, output = PointAnalysisPipeline(root), []
-    for target in targets():
+    for target in targets(include_legacy=bool(sites)):
         if sites and not set(target["site_ids"])&set(sites):
             continue
         request = MissionRequest(latitude_deg=target["latitude_deg"], longitude_e_deg=target["longitude_e_deg"],

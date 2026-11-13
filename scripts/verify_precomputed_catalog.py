@@ -25,11 +25,15 @@ from precompute_catalog import targets, MESHES
 def verify(base_url=None):
     store = Store()
     manifest = store.manifest()
-    assert len(manifest["sites"]) == len(targets()) == 23
+    assert len(manifest["sites"]) == len(targets(include_legacy=True)) == 23
+    active_keys = {coordinate_key(t["latitude_deg"], t["longitude_e_deg"]) for t in targets()}
+    assert len(active_keys) == 19
     assert len(manifest["meshes"]) == 23*len(MESHES)+2
     profiles, meshes, byte_count = 0, 0, 0
-    for record in manifest["sites"].values():
-        assert record["heights_m"] == [1., 2., 10., 20.]
+    for key, record in manifest["sites"].items():
+        assert set(record["heights_m"]) >= {1., 2., 10., 20.}
+        if key in active_keys:
+            assert 30. in record["heights_m"]
         for name, reference in record["profiles"].items():
             content = store.read(reference)
             frame = decode_profile(content)
@@ -101,7 +105,7 @@ def verify(base_url=None):
     finally:
         pipeline_module.scan_horizons = original_scan
     # The transported numbers must remain identical to direct native DEM display resampling.
-    target = next(item for item in targets() if "Site04_P1" in item["site_ids"])
+    target = next(item for item in targets(include_legacy=True) if "Site04_P1" in item["site_ids"])
     started = perf_counter()
     original = _terrain_window_uncached(target["latitude_deg"], target["longitude_e_deg"], 300., 257, "regional")
     report["direct_mesh_seconds"] = perf_counter()-started

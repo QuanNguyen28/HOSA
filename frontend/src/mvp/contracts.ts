@@ -156,6 +156,8 @@ export type PointResult = {
     window: { start_utc: string; end_utc: string };
     coordinate: { latitude_deg: number; longitude_e_deg: number };
     explanation: string;
+    sampling_minutes?: number;
+    confirmed_sampling_minutes?: number[];
     deadline_utc?: string;
     evidence_intervals: Array<{ target: string; start_utc: string; end_utc: string; at_utc?: string }>;
   } | null;
@@ -310,8 +312,8 @@ export function missionIssue(m: Mission): string | null {
     return "Choose a valid mission end date.";
   const limits: Array<[number, number, number, string]> = [
     [hours, 1, Infinity, "Mission duration"],
-    [m.panel, 0.01, 20, "Panel height"],
-    [m.antenna, 0.01, 20, "Antenna height"],
+    [m.panel, 0.01, 30, "Panel height"],
+    [m.antenna, 0.01, 30, "Antenna height"],
     [m.sun, 0, 100, "Minimum sunlight"],
     [m.contact, 0.01, hours * 60, "Contact duration"],
     [m.setup, 0, hours * 60, "Setup"],

@@ -15,7 +15,7 @@ from time import perf_counter
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT/"backend"))
 from app.mission.models import MissionRequest
-from app.mission.targets import compare_sites, coordinates_for_site
+from app.mission.targets import compare_sites, coordinates_for_site, default_sites
 from app.services.lunarsight.point import _terrain_window_uncached as terrain_window, _south_polar_cap_uncached as south_polar_cap, METHOD_VERSION as DISPLAY_VERSION
 from app.point_analysis.sources import TerrainInputs, installed_sources
 from app.point_analysis.geometry import scan_horizons, seam_checks, verify_profiles, METHOD_VERSION
@@ -26,8 +26,9 @@ MESHES = [(1.5, 401, "best"), (6., 257, "best"), (6., 401, "best")]
 MESHES += [(radius, samples, "regional") for radius in (24., 48., 120., 300.) for samples in (257, 401)]
 
 
-def targets():
-    sites = {key: coordinates_for_site(key) for key in ("Site01_P1", "Site04_P1", *compare_sites())}
+def targets(include_legacy=False):
+    keys = ("Site01_P1", "Site04_P1", *compare_sites()) if include_legacy else default_sites()
+    sites = {key: coordinates_for_site(key) for key in keys}
     groups = {}
     for key, coordinate in sites.items():
         identity = coordinate_key(coordinate["latitude_deg"], coordinate["longitude_e_deg"])
@@ -102,7 +103,7 @@ def main():
     parser.add_argument("--list", action="store_true")
     parser.add_argument("--global-only", action="store_true", help="Build just the two polar-cap display grids")
     args = parser.parse_args()
-    selected = [target for target in targets() if not args.sites or set(args.sites)&set(target["site_ids"])]
+    selected = [target for target in targets(include_legacy=bool(args.sites)) if not args.sites or set(args.sites)&set(target["site_ids"])]
     if args.sites and set(args.sites)-{key for item in selected for key in item["site_ids"]}:
         parser.error("Unknown site ID")
     if args.list:

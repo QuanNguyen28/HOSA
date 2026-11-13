@@ -192,7 +192,8 @@ def analyze_contacts(payload, *, start_utc=None, end_utc=None, min_contact_minut
                          "required_windows": required_windows,
                          "first_contact_deadline_minutes": deadline, "max_gap_minutes": gap_limit,
                          "sampled_checks": checks, "nominal_sampled_decision": nominal,
-                         "decision": gated_decision(nominal, validation)},
+                         "decision": gated_decision(nominal, validation,
+                             checks={"contact."+name: state for name, state in checks.items()})},
         "limitations": [
             "Geometric visibility of the Earth centre; no ground-station schedule or RF link budget.",
             "Half-open sampled intervals; bounds do not include unsampled events or DEM uncertainty.",

@@ -3,7 +3,7 @@ from math import asin, cos, radians, sin, sqrt
 import re
 import unicodedata
 
-from app.mission.targets import compare_sites
+from app.mission.targets import compare_sites, default_sites
 from app.services.lunarsight.catalog import site_catalog
 from .models import SiteCoordinates
 from .provider import AssistantError
@@ -19,7 +19,7 @@ def available_sites() -> list[dict]:
 
 def coordinate_sites_for_prompt() -> list[dict]:
     return [{"site_id": site_id, "name": site["name"], "aliases": site.get("aliases", [])}
-            for site_id, site in compare_sites().items()]
+            for site_id, site in default_sites().items()]
 
 
 def _site_label(text: str) -> str:
@@ -29,8 +29,8 @@ def _site_label(text: str) -> str:
 
 
 def _site_aliases() -> dict[str, str]:
-    aliases = {_site_label(alias): site["site_id"] for site in coordinate_sites_for_prompt()
-               for alias in [site["site_id"], site["name"], *site["aliases"]]}
+    aliases = {_site_label(alias): site_id for site_id, site in compare_sites().items()
+               for alias in [site_id, site["name"], *site.get("aliases", [])]}
     for site in available_sites():
         site_id = site["site_id"]
         aliases[_site_label(site_id)] = site_id

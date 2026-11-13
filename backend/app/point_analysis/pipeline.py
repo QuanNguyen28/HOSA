@@ -32,6 +32,9 @@ from app.services.lunarsight.solar_disc import VERSION as SOLAR_DISC_VERSION
 from .transport import VERSION as RESULT_SCHEMA_VERSION, display_timeline, write_frame, full_timeline
 from .physics_cache import PhysicalSeriesCache, identity as physical_identity
 from .hard_first import check as check_hard_first, VERSION as HARD_FIRST_VERSION
+from .hard_first import failure as hard_failure_evidence
+from .validation_cache import ValidationEvidenceCache, VERSION as EVIDENCE_VERSION
+from app.mission.evaluation import numerical_evidence
 from app.mission.metrics import assess_soft
 
 METRICS_VERSION = "coordinate-metrics-1.0.0"
@@ -44,6 +47,7 @@ class PointAnalysisPipeline:
         self._visibility_cache = OrderedDict()
         self._visibility_lock = Lock()
         self.physics = PhysicalSeriesCache(self.root)
+        self.validation_evidence = ValidationEvidenceCache(self.root)
 
     def terrain(self, request):
         from app.precompute.geometry import prepared_terrain
@@ -89,17 +93,17 @@ class PointAnalysisPipeline:
         return physical_identity(json.loads(sun.attrs["physical_source"]), json.loads(earth.attrs["physical_source"]), profiles,
                                  request.panel_height_m, request.antenna_height_m, request.illumination_model)
 
-    def initial_source(self, request, terrain, profiles):
+    def initial_source(self, request, terrain, profiles, step=5):
         if request.illumination_model != "solar_disc":
             return None
         provider = self.shared_ephemeris.identity()
         def source(target, height):
-            return {"provider": provider, "site": terrain.site, "target": target, "height_m": height, "step_minutes": 5}
+            return {"provider": provider, "site": terrain.site, "target": target, "height_m": height, "step_minutes": step}
         return physical_identity(source(10, request.panel_height_m), source(399, request.antenna_height_m),
             profiles, request.panel_height_m, request.antenna_height_m, request.illumination_model)
 
-    def initial_cached(self, request, terrain, profiles):
-        key = self.initial_source(request, terrain, profiles)
+    def initial_cached(self, request, terrain, profiles, step=5):
+        key = self.initial_source(request, terrain, profiles, step)
         if key is None:
             return None
         return self.physics.load(key, request.start_utc, request.end_utc)
@@ -191,7 +195,8 @@ class PointAnalysisPipeline:
                 progress("indexed_metrics")
                 preview(self.initial_result(request, terrain, identity, summary=summary), None)
             initial = self.initial_cached(request, terrain, base)
-            sun = earth = None
+            sun = earth = sun1 = earth1 = None
+            records1 = []
             if initial is None:
                 progress("horizons_5min")
                 sun, earth, records5 = self.ephemerides(request, terrain.site, 5, progress=progress)
@@ -210,32 +215,61 @@ class PointAnalysisPipeline:
             if save_source is not None:
                 # Persistence and indexing are deliberately after metrics publication.
                 self.physics.save(save_source, initial, records5, index=True)
+            def get_ephemerides():
+                nonlocal sun, earth, sun1, earth1, records5, records1
+                if sun is None:
+                    sun, earth, records5 = self.ephemerides(request, terrain.site, 5, progress=progress)
+                if sun1 is None:
+                    progress("horizons_1min")
+                    sun1, earth1, records1 = self.ephemerides(request, terrain.site, 1, progress=progress)
+                return sun, earth, sun1, earth1, records5, records1
             progress("hard_requirements")
             if request.evaluation_policy == "hard_first":
                 checks, failure, contact = check_hard_first(request, initial_result["metrics_hours"], initial)
+                confirmed = False
                 if failure:
-                    timeline, transport = display_timeline(initial)
+                    progress("confirming_hard_failure_1min")
+                    refined = self.initial_cached(request, terrain, base, step=1)
+                    if refined is None:
+                        if sun1 is None:
+                            sun1, earth1, records1 = self.ephemerides(request, terrain.site, 1, progress=progress)
+                        refined = self.visible(sun1, earth1, base, request)
+                    else:
+                        records1 = json.loads(refined.attrs.get("physical_receipts", "[]"))
+                    refined_metric = metrics(refined)
+                    refined_checks = constraint_checks(refined_metric, request, refined)
+                    confirmed = refined_checks.get(failure["constraint"]) == "FAIL"
+                    confirmation = {"sampling_minutes": [5, 1], "confirmed": confirmed,
+                        "constraint": failure["constraint"], "checks_5min": checks, "checks_1min": refined_checks,
+                        "metrics_5min_hours": initial_result["metrics_hours"], "metrics_1min_hours": refined_metric,
+                        "scope": "Same hard requirement fails both sampled grids; not a continuous-time error bound."}
+                if failure and confirmed:
+                    checks = {name: refined_checks[name] for name in checks}
+                    failure = hard_failure_evidence(request, refined_metric, refined, failure["constraint"])
+                    failure["confirmed_sampling_minutes"] = [5, 1]
+                    contact = frame_contacts(request, refined) if request.contact_requirements is not None and failure["constraint"].startswith("contact.") else None
+                    if contact is not None:
+                        failure["contact_metrics"] = contact["metrics"]
+                    initial_result = self.initial_result(request, terrain, identity, refined)
+                    timeline, transport = display_timeline(refined)
                     initial_result.update(evaluation_status="complete", decision="FAIL", nominal_sampled_decision="FAIL",
                         timeline=timeline, timeline_transport=transport,
                         constraint_checks=checks, hard_failure=failure, contact_analysis=contact,
                         evaluation_stages={"hard": "failed", "validation": "skipped_hard_failure", "soft": "skipped_hard_failure"},
                         validation={"passed": False, "status": "skipped_hard_failure", "policy_version": VALIDATION_VERSION,
                             "reason_codes": [], "sensitivity": {}, "seams": seams, "tolerance_status": "PROVISIONAL",
-                            "scope": "Hard rejection on sampled upper bounds; numerical sensitivity was not run."},
+                            "temporal_confirmation": confirmation,
+                            "scope": "Hard rejection confirmed on 5/1-minute upper bounds; full spatial validation was skipped."},
                         resolution={"enabled": request.resolve_indeterminate, "status": "hard_requirement_failed", "refinement_rounds": 0},
                         horizons={str(h): records(p) for h, p in base.items()}, events=events(initial),
-                        warnings=["PROVISIONAL: sampled hard failure; validation and soft preferences skipped.",
+                        warnings=["PROVISIONAL: hard failure confirmed on 5/1-minute grids; full validation and soft preferences skipped.",
                                   "Unknown samples retain their optimistic upper bounds. This is not a continuous-time or physical uncertainty certificate."])
-                    initial_result["provenance"].update(ephemerides=records5, geometry=geometry_receipt)
-                    return self.commit_result(directory, initial_result, initial, progress, display)
+                    initial_result["provenance"].update(ephemerides=records5+records1, geometry=geometry_receipt)
+                    return self.commit_result(directory, initial_result, refined, progress, display)
             del initial_result, initial
             progress("scientific_validation")
-            if sun is None:
-                sun, earth, records5 = self.ephemerides(request, terrain.site, 5, progress=progress)
-            progress("horizons_1min")
-            sun1, earth1, records1 = self.ephemerides(request, terrain.site, 1, progress=progress)
             progress("metrics_and_validation")
-            ephemerides = (sun, earth, sun1, earth1, records5, records1)
+            ephemerides = get_ephemerides
             v, base, validation, evaluation, complete_terrain, complete_ephemerides = self.evaluate_geometry(
                 request, terrain, fine, shorter, seams, ephemerides, .125)
             resolution = {"enabled": request.resolve_indeterminate, "policy_version": RESOLUTION_VERSION,
@@ -250,8 +284,8 @@ class PointAnalysisPipeline:
                 # prove every hard requirement. Refinement is only needed
                 # when those conservative bounds remain inconclusive.
                 progress("checking_mission_bounds")
-                validation["mission_path"] = validate_mission_path(
-                    request, validation, base, fine, shorter, ephemerides)
+                validation["mission_path"] = self.checked_mission_path(
+                    request, terrain, validation, base, fine, shorter, get_ephemerides)
                 evaluation = evaluate(request, v, validation, include_soft=False)
                 if evaluation["decision"] != "INDETERMINATE":
                     resolution["status"] = "resolved"
@@ -265,8 +299,8 @@ class PointAnalysisPipeline:
                     v, base, validation, evaluation, complete_terrain, complete_ephemerides = self.evaluate_geometry(
                         request, terrain, fine, shorter, seams, ephemerides, fine_step)
                     if evaluation["decision"] == "INDETERMINATE":
-                        validation["mission_path"] = validate_mission_path(
-                            request, validation, base, fine, shorter, ephemerides)
+                        validation["mission_path"] = self.checked_mission_path(
+                            request, terrain, validation, base, fine, shorter, get_ephemerides)
                         evaluation = evaluate(request, v, validation, include_soft=False)
                     resolution["refinement_rounds"] += 1
                     resolution["attempts"].append(attempt(evaluation, fine_step*2, fine_step))
@@ -276,8 +310,8 @@ class PointAnalysisPipeline:
                 # Radius/time sensitivity may be decision-irrelevant even if
                 # angular refinement cannot address that global diagnostic.
                 if evaluation["decision"] == "INDETERMINATE":
-                    validation["mission_path"] = validate_mission_path(
-                        request, validation, base, fine, shorter, ephemerides)
+                    validation["mission_path"] = self.checked_mission_path(
+                        request, terrain, validation, base, fine, shorter, get_ephemerides)
                     evaluation = evaluate(request, v, validation, include_soft=False)
                     if evaluation["decision"] != "INDETERMINATE":
                         resolution["status"] = "resolved"
@@ -309,7 +343,9 @@ class PointAnalysisPipeline:
                 "evaluation_status": "complete", "timeline_transport": transport,
                 "evaluation_stages": {"hard": "complete", "validation": "complete", "soft": "complete"},
                 "joint_hours": joint_hours,
-                "execution": {"result_cache_hit": False, "offline": request.offline, "physical_series_cache_hit": initial_cache_hit},
+                "execution": {"result_cache_hit": False, "offline": request.offline, "physical_series_cache_hit": initial_cache_hit,
+                    "validation_evidence_cache_hit": v.attrs.get("validation_evidence_cache_hit", False),
+                    "mission_path_evidence_cache_hit": validation.get("mission_path", {}).get("evidence_cache_hit", False)},
                 "request": request.model_dump(), "end_utc": request.end_utc,
                 "coordinate": {"latitude_deg": request.latitude_deg, "longitude_e_deg": request.longitude_e_deg,
                                "dem_elevation_m": terrain.site["dem_z_m"],
@@ -337,7 +373,8 @@ class PointAnalysisPipeline:
                 "validation": validation, "resolution": resolution,
                 "timeline": timeline, "events": events(v),
                 "horizons": {str(h): records(p) for h, p in base.items()},
-                "provenance": {"identity": identity, "ephemerides": records5 + records1, "geometry": geometry_receipt,
+                "provenance": {"identity": identity,
+                               "ephemerides": json.loads(v.attrs.get("validation_ephemerides", json.dumps(records5+records1))), "geometry": geometry_receipt,
                                "frame": "MOON_ME", "ephemeris_provider": "shared_spice_DE440" if request.illumination_model == "solar_disc" else "JPL_Horizons",
                                "radial_reference_radius_m": R},
                 "warnings": warnings}
@@ -387,11 +424,63 @@ class PointAnalysisPipeline:
         progress("complete")
         return result if display else full_timeline(directory, result)
 
+    def checked_mission_path(self, request, terrain, validation, base, fine, shorter, ephemerides):
+        from app.mission.mission_path import VERSION as PATH_VERSION
+        from app.mission.evaluation import TOLERANCES
+        source = self.numerical_identity(request, terrain, base, fine, shorter)
+        if source is None:
+            inputs = ephemerides() if callable(ephemerides) else ephemerides
+            return validate_mission_path(request, validation, base, fine, shorter, inputs)
+        identity = {"kind": "mission-path-envelope", "source": source,
+            "path_version": PATH_VERSION, "tolerances": TOLERANCES}
+        evidence = self.validation_evidence.load(identity)
+        result = validate_mission_path(request, validation, base, fine, shorter, ephemerides,
+            numerical=evidence, publish=lambda value: self.validation_evidence.save(identity, value))
+        result["evidence_cache_hit"] = evidence is not None
+        return result
+
+    def numerical_identity(self, request, terrain, base, fine, shorter):
+        source = self.initial_source(request, terrain, base)
+        if source is None:
+            return None  # Legacy Horizons already has its own observer cache.
+        from app.services.lunarsight.solar_disc import STRIPS
+        return {"version": EVIDENCE_VERSION, "physical_source": source,
+            "start_utc": request.start_utc, "end_utc": request.end_utc,
+            "geometry_version": METHOD_VERSION, "evaluation_version": EVALUATION_VERSION,
+            "validation_version": VALIDATION_VERSION, "quadrature_strips": [STRIPS, 2*STRIPS],
+            "profiles": {name: {str(h): digest(pd.util.hash_pandas_object(p, index=True).values.tolist())
+                         for h, p in group.items()} for name, group in (("fine", fine), ("short", shorter))}}
+
     def evaluate_geometry(self, request, terrain, fine, shorter, seams, ephemerides, fine_step):
+        base = {h: p.iloc[::2].reset_index(drop=True).assign(az_step_deg=fine_step*2) for h, p in fine.items()}
+        identity = self.numerical_identity(request, terrain, base, fine, shorter)
+        evidence = self.validation_evidence.load(identity)
+        v = self.initial_cached(request, terrain, base) if evidence is not None else None
+        hit = evidence is not None and v is not None
+        if not hit:
+            inputs = ephemerides() if callable(ephemerides) else ephemerides
+            v, evidence = self.build_numerical_evidence(request, terrain, base, fine, shorter, inputs, fine_step)
+            self.validation_evidence.save(identity, evidence)
+        name = f"azimuth_{fine_step*2:g}_vs_{fine_step:g}"
+        validation = validate(request, v, {}, evidence["angles"], terrain_complete=evidence["terrain_complete"],
+            ephemeris_complete=evidence["ephemeris_complete"], seams=seams, references=evidence["references"],
+            azimuth_comparison_name=name, evidence_checks=evidence["evidence_checks"], include_soft=False,
+            numerical=evidence["numerical"])
+        if request.illumination_model == "solar_disc":
+            validation["ephemeris"] = {"provider": "shared_spice", "sampling_comparison": "1/5-minute resampling of shared hourly vectors",
+                "independent_reference": "exact SPICE at per-request probe epochs; external JPL check is release evidence",
+                "checks": [r["interpolation_validation"] for r in evidence["ephemerides"]]}
+        validation["configuration"] = {"coarse_az_step_deg": fine_step*2, "fine_az_step_deg": fine_step,
+            "scan_radii_m": [400000, 300000], "time_steps_minutes": [5, 1]}
+        validation["evidence_cache"] = {"hit": hit, "identity_sha256": digest(identity) if identity is not None else None,
+            "version": EVIDENCE_VERSION, "scope": "Numerical evidence only; requirements and gates reassessed for this request."}
+        v.attrs.update(validation_evidence_cache_hit=hit, validation_ephemerides=json.dumps(evidence["ephemerides"]))
+        return v, base, validation, evaluate(request, v, validation, include_soft=False), evidence["terrain_complete"], evidence["ephemeris_complete"]
+
+    def build_numerical_evidence(self, request, terrain, base, fine, shorter, ephemerides, fine_step):
         sun, earth, sun1, earth1, records5, records1 = ephemerides
         references = verify_profiles(fine, terrain.site)
         references.update({"short:"+key: value for key, value in verify_profiles(shorter, terrain.site).items()})
-        base = {h: p.iloc[::2].reset_index(drop=True).assign(az_step_deg=fine_step*2) for h, p in fine.items()}
         def visible(s, e, profiles):
             return self.visible(s, e, profiles, request)
         v = visible(sun, earth, base)
@@ -418,16 +507,9 @@ class PointAnalysisPipeline:
                 "max_fraction_difference": float(disc_difference.max()), "tolerance_fraction": .002,
                 "passed": bool(disc_difference.max() <= .002)}
             evidence_checks.append(quadrature)
-        validation = validate(request, v, alternatives, angles, terrain_complete=complete_terrain,
-            ephemeris_complete=complete_ephemerides, seams=seams, references=references, azimuth_comparison_name=name,
-            evidence_checks=evidence_checks, include_soft=False)
-        if request.illumination_model == "solar_disc":
-            validation["ephemeris"] = {"provider": "shared_spice", "sampling_comparison": "1/5-minute resampling of shared hourly vectors",
-                "independent_reference": "exact SPICE at per-request probe epochs; external JPL check is release evidence",
-                "checks": [r["interpolation_validation"] for r in records5+records1]}
-        validation["configuration"] = {"coarse_az_step_deg": fine_step*2, "fine_az_step_deg": fine_step,
-            "scan_radii_m": [400000, 300000], "time_steps_minutes": [5, 1]}
-        return v, base, validation, evaluate(request, v, validation, include_soft=False), complete_terrain, complete_ephemerides
+        return v, {"numerical": numerical_evidence(v, alternatives), "angles": angles, "references": references,
+            "terrain_complete": complete_terrain, "ephemeris_complete": complete_ephemerides,
+            "evidence_checks": evidence_checks, "ephemerides": records5+records1}
 
     def geometry(self, terrain, heights, progress, az_step=.125):
         identity = {"method_version": METHOD_VERSION, "site": terrain.site,

@@ -44,9 +44,9 @@ Có ba lớp dữ liệu khác nhau; clone source không đồng nghĩa đã có
 
 | Thành phần | Nằm ở đâu | Có sẵn trong Git? | Cách chuẩn bị |
 |---|---|---|---|
-| Horizon và mesh cho 23 tọa độ mặc định | `data/processed/site-precompute/v1/` | Có, cả manifest và blobs | Dùng nguyên gói; chỉ rebuild khi đổi nguồn/thuật toán |
+| Horizon và mesh cho 19 điểm mặc định + 4 điểm cũ | `data/processed/site-precompute/v1/` | Có, cả manifest và blobs | Dùng nguyên gói; chỉ rebuild khi đổi nguồn/thuật toán |
 | Kernel thiên văn chính thức và bảng vector dùng chung | `data/cache/shared-ephemeris/` | Không | `make ephemeris-prepare`; bảng vector được sinh khi cần |
-| Metrics và chart cho 2000–2100, panel/antenna 20 m | `data/cache/point-analysis/prepared-metrics/` | Không | `make metrics-century-prepare` hoặc chép bộ cache tương thích |
+| Metrics và chart cho 2000–2100, viewer 2/10/20/30 m | `data/cache/point-analysis/prepared-metrics/` | Không | `make metrics-century-prepare` hoặc chép bộ cache tương thích |
 | DEM NASA gốc và receipt | `data/raw/nasa/` | Không | `scripts/prepare_point_data.py` |
 
 ### 3.1. Cài kernel SPICE — cần cho chế độ solar-disc
@@ -63,22 +63,24 @@ Lệnh tải kernel chính thức NAIF/JPL và lưu receipt/checksum. Có thể 
 make metrics-century-prepare
 ```
 
-Lệnh tính trước **23 tọa độ mặc định**, **panel 20 m + antenna 20 m**, từ `2000-01-01T00:00:00Z` đến **trước** `2101-01-01T00:00:00Z`, bao gồm toàn bộ năm 2100. Gói horizon có sẵn trong Git đủ để chuẩn bị các điểm này; không cần tải lại DEM chỉ để build metrics mặc định.
+Lệnh tính trước **19 tọa độ mặc định**, lần lượt **panel + antenna cùng ở 2, 10, 20 và 30 m**, từ `2000-01-01T00:00:00Z` đến **trước** `2101-01-01T00:00:00Z`, bao gồm toàn bộ năm 2100. Gói horizon có sẵn trong Git đủ để chuẩn bị các điểm này; không cần tải lại DEM chỉ để build metrics mặc định.
+
+Nếu đang dùng gói địa hình cũ chưa có 30 m, cài đúng DEM gốc rồi chạy `make viewer-horizons-prepare` trước. Chi tiết và lệnh kiểm chứng: [viewer-height-precompute.md](docs/decisions/viewer-height-precompute.md).
 
 Pipeline dùng lưới vật lý 5 phút, tạo checkpoint từng năm rồi ghép chỉ mục. Chạy lại sẽ tiếp tục các phần tương thích đã hoàn tất. Gói được công bố khi một tọa độ đã đủ toàn khoảng. Thời gian chuẩn bị phụ thuộc máy; đây là bước làm một lần trước khi phục vụ người dùng.
 
-Bản đã kiểm chứng chiếm khoảng **585 MiB** gồm checkpoint; riêng các chỉ mục tổng hợp khoảng **280 MiB**. Dung lượng này chưa gồm kernel, bảng vector và các cache khác. Báo cáo của lần chạy được ghi vào `docs/validation/lunarsight/century-metrics-build.json`.
+Cache được tách theo tọa độ và cặp độ cao, tổng cộng **76 cấu hình**. Bộ 76 cấu hình đã kiểm chứng dùng khoảng **1,76 GiB** chỉ mục tổng hợp và checkpoint năm; cache 20 m trước đây của các điểm cũ có thể vẫn nằm cạnh chúng. Dung lượng này chưa gồm kernel, bảng vector và các cache khác. Báo cáo của lần chạy được ghi vào `docs/validation/lunarsight/viewer-metrics-build.json`.
 
 Nếu muốn thử một điểm trước hoặc giảm số process trên máy ít tài nguyên:
 
 ```bash
 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONPATH=backend \
   backend/.venv/bin/python scripts/prepare_long_range_metrics.py \
-  --sites Site04_P1 --workers 1 \
-  --report /tmp/hosa-site04-century-build.json
+  --sites haworth --viewer-heights 2 10 20 30 --workers 1 \
+  --report /tmp/hosa-haworth-century-build.json
 ```
 
-Lệnh trên chỉ chuẩn bị Site04. Chạy `make metrics-century-prepare` sau đó để hoàn tất các điểm còn lại. Mốc 2000–2100 là phạm vi **đã chuẩn bị nhanh**, không phải giới hạn thời lượng của API.
+Lệnh trên chỉ chuẩn bị Haworth ở bốn mức viewer. Chạy `make metrics-century-prepare` sau đó để hoàn tất các điểm còn lại. Mốc 2000–2100 là phạm vi **đã chuẩn bị nhanh**, không phải giới hạn thời lượng của API.
 
 ### 3.3. Cài DEM để phân tích tọa độ/độ cao ngoài gói có sẵn
 
@@ -99,7 +101,7 @@ make metrics-century-prepare
 
 ### 3.4. Tùy chọn: chuẩn bị chuỗi native cho Analyze
 
-Cache cả thế kỷ ở bước 3.2 phục vụ metrics/chart; nó không lưu toàn bộ timeline native. Nếu thường đánh giá nhiệm vụ trong 2026–2028, có thể chuẩn bị thêm chuỗi vật lý của 23 điểm, thiết bị 20 m:
+Cache cả thế kỷ ở bước 3.2 phục vụ metrics/chart; nó không lưu toàn bộ timeline native. Nếu thường đánh giá nhiệm vụ trong 2026–2028, có thể chuẩn bị thêm chuỗi vật lý của 19 điểm mặc định, thiết bị 20 m:
 
 ```bash
 make physics-prepare
@@ -108,6 +110,17 @@ make metrics-prepare
 ```
 
 Bước này tốn thêm dung lượng, không bắt buộc để gọi metrics cả thế kỷ và không thay validation theo từng request. Script `scripts/prepare_physical_series.py --help` có tùy chọn site, khoảng ngày, hardware và số worker.
+
+Để chuẩn bị cả bằng chứng validation cho một khoảng nhiệm vụ cụ thể, dùng schema request hiện có:
+
+```bash
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 PYTHONPATH=backend \
+  backend/.venv/bin/python scripts/prepare_validation_evidence.py \
+  --request docs/examples/point-site04-evaluation-request.json \
+  --all-refinements --report /tmp/hosa-site04-validation-prepared.json
+```
+
+Cache này giữ số liệu so sánh và bằng chứng, không giữ PASS/FAIL theo ngưỡng. Đổi requirement trong cùng tọa độ, phần cứng và khoảng ngày sẽ kiểm tra lại từ bằng chứng đã có. Nó tách biệt với gói metrics 2000–2100; không có nghĩa mọi khoảng trong cả thế kỷ đã được validation trước. Xem [thiết kế và kiểm chứng cache validation](docs/decisions/validation-evidence-and-temporal-confirmation.md).
 
 ## 4. Khởi động backend và frontend
 
@@ -232,13 +245,14 @@ curl --fail-with-body --silent --show-error \
 | GET | `/api/lunar/point/analyses/{job_id}/interval?at_utc=2026-11-24T00:00:00Z` | Khoảng lấy mẫu gốc tại thời điểm yêu cầu, khi đã sẵn sàng |
 | GET | `/api/lunar/point/analyses/{job_id}/intervals.csv` | CSV native sinh theo yêu cầu sau khi job thành công |
 
-`hard_first` kiểm tra hard requirements trước; một hard FAIL trên cận trên của mô hình lấy mẫu sẽ dừng đánh giá và trả `hard_failure` cùng khoảng hỗ trợ. Nếu chưa có hard fail, backend tiếp tục validation rồi soft preferences. `evaluation_policy="complete"` giữ toàn bộ chẩn đoán. `resolve_indeterminate=true` cho phép kiểm tra mission-path bounds và các bước refinement đã có, không bảo đảm mọi điểm đều thành PASS/FAIL.
+`hard_first` kiểm tra hard requirements trước; hard FAIL ở lưới 5 phút phải được xác nhận ở **cùng requirement trên lưới 1 phút** trước khi dừng và trả `hard_failure`. Kết quả loại sớm dùng metric/timeline 1 phút, kèm `validation.temporal_confirmation` của cả hai lưới. Nếu bất đồng hoặc chưa có hard fail được xác nhận, backend tiếp tục validation rồi soft preferences; FAIL chỉ có ở lưới 5 phút không được chốt thành loại bỏ cuối cùng. `evaluation_policy="complete"` giữ toàn bộ chẩn đoán. `resolve_indeterminate=true` cho phép kiểm tra mission-path bounds và các bước refinement đã có, không bảo đảm mọi điểm đều thành PASS/FAIL.
 
 ### 5.3. Quy tắc đầu vào và cách đọc số liệu
 
 - Chọn **một** `site_id` hoặc **cả cặp** tọa độ. Kinh độ đông được chuẩn hóa về `[0,360)`; vĩ độ phải lớn hơn −90 và nhỏ hơn 90.
 - `start_utc` và `end_utc` cần timezone rõ ràng, đúng lưới 5 phút. Dùng `duration_hours` hoặc `end_utc`; nếu gửi cả hai phải khớp. Thời lượng ít nhất 1 giờ, theo bước 5 phút, **không có giới hạn trên ở ứng dụng**; vẫn phải trong coverage nguồn và khả năng tài nguyên thực tế.
-- Chiều cao panel/antenna của coordinate API là `>0` đến `20 m`. Gói địa hình mặc định có `1/2/10/20 m`; gói metrics cả thế kỷ hiện là `20/20 m`. Mức 30 m trên viewer là preview hiển thị.
+- Chiều cao panel/antenna của coordinate API là `>0` đến `30 m`. Gói địa hình của 19 điểm mặc định có `1/2/10/20/30 m`; cache metrics cả thế kỷ chuẩn bị riêng cho `2/2`, `10/10`, `20/20`, `30/30 m`. **Lander = 2 m**. Đổi viewer sẽ đổi đồng thời chiều cao panel và antenna để lấy đúng cache. Cặp độ cao khác vẫn tính được bằng Analyze khi đủ DEM, nhưng không mặc nhiên có metrics đã chuẩn bị.
+- Danh sách mặc định có 19 điểm; đã bỏ `Site01_P1 · Connecting Ridge`, `Site04_P1 · Shackleton Rim`, `Example A`, `Example B`. Các ID cũ vẫn được API nhận khi chỉ định trực tiếp để giữ tương thích và các bài kiểm chứng; chúng không đồng nhất tọa độ với các điểm tên gần giống.
 - Chỉ mục metrics nhanh hiện truy vấn trên biên ngày UTC đã lập chỉ mục. Khoảng có giờ đầu/cuối khác biên chỉ mục có thể trả `METRICS_NOT_PREPARED` dù vẫn nằm trong 2000–2100; dùng Analyze để tính đúng khoảng, backend không tự làm tròn.
 - `min_sunlit_fraction=0.8` nghĩa là trung bình diện tích đĩa Mặt Trời nhìn thấy đạt 80%. Thấy nửa đĩa trong 100 giờ cho 50 giờ tương đương toàn đĩa. `total_sun_hours` dùng đơn vị giờ tương đương này; `total_earth_los_hours` và `joint_hours` là thời gian LOS/đồng thời nhìn thấy.
 - Các cặp metric `[lower,upper]` là cận dưới/trên của mô hình lấy mẫu. `longest_dark_hours` đo khoảng không thấy phần nào của đĩa Mặt Trời; `longest_blackout_hours` đo khoảng mất Earth-centre LOS.
@@ -251,7 +265,7 @@ Các API bổ sung: `/api/planning/compare`, `/api/planning/windows/search`, `/a
 
 ## 6. Kiểm tra bằng giao diện
 
-1. Mở **Explore → All sites**, chọn Site04 hoặc một điểm mặc định; chọn viewer **20 m**.
+1. Mở **Explore → All sites**, chọn Haworth hoặc một điểm mặc định; thử lần lượt viewer **Lander / 10 m / 20 m / 30 m**.
 2. Chọn **Define mission by → Target end date (UTC)**, nhập start `2000-01-01 00:00`, end `2101-01-01 00:00`.
 3. Nếu cache đã chuẩn bị đúng, metrics và cả ba chart hiện với **METRICS READY**, không cần Analyze.
 4. Muốn thử đánh giá, đổi sang khoảng ngắn như 72 giờ rồi bấm **Analyze point**: UI hiện tiến độ, metrics ban đầu và cuối cùng là kết luận hoặc hard failure.
@@ -290,18 +304,18 @@ make verify
 
 Lệnh chạy pytest, frontend tests, TypeScript typecheck và production build. Không cần key LLM cho bộ kiểm thử thông thường. Kết quả lần kiểm chứng tính năng 2000–2100: **423 backend tests pass, 1 skip; 47 frontend tests pass; build thành công**.
 
-Sau khi chuẩn bị đầy đủ 23 điểm và khởi động backend, kiểm tra HTTP và đối chiếu native trên dữ liệu thật:
+Sau khi chuẩn bị đủ 19 điểm × 4 mức viewer và khởi động backend, kiểm tra HTTP và đối chiếu native trên dữ liệu thật:
 
 ```bash
 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 PYTHONPATH=backend \
   backend/.venv/bin/python scripts/verify_long_range_metrics.py \
-  --base-url http://127.0.0.1:8000 \
-  --output /tmp/hosa-century-metrics-http.json
+  --viewer-heights 2 10 20 30 --base-url http://127.0.0.1:8000 \
+  --output /tmp/hosa-viewer-metrics-http.json
 ```
 
-Script kiểm tra cả thế kỷ cho 23 điểm, 69 khoảng native ở hai đầu và qua năm, năm nhuận 2000, năm không nhuận 2100, tích phân chart và từ chối khoảng ngoài gói. Không tạo job phân tích hoặc gọi LLM. Lần đo local đã ghi nhận **23–185 ms/request** gồm metrics và ba chart; đây không phải cam kết latency trên mọi máy.
+Script kiểm tra 76 cấu hình cả thế kỷ, 228 khoảng native ở hai đầu và qua năm, năm nhuận 2000, năm không nhuận 2100, tích phân chart và từ chối khoảng ngoài gói. Mỗi mức độ cao phải có source identity riêng; tăng độ cao không được làm giảm Sun/Earth/Joint visibility trong cùng mô hình. Không tạo job phân tích hoặc gọi LLM. Báo cáo viewer mới: [HTTP/native](docs/validation/lunarsight/viewer-metrics-http.json), [horizon 30 m](docs/validation/lunarsight/viewer-horizons-build.json).
 
-Bằng chứng đã commit: [build](docs/validation/lunarsight/century-metrics-build.json), [HTTP/native](docs/validation/lunarsight/century-metrics-http.json), [coverage kernel](docs/validation/lunarsight/century-kernel-coverage.json), [đối chiếu JPL](docs/validation/lunarsight/century-jpl-validation.json). JPL chỉ được đối chiếu ở các cửa sổ chọn mẫu, không phải chứng nhận liên tục toàn thế kỷ.
+Bằng chứng bản 20 m trước đây: [build](docs/validation/lunarsight/century-metrics-build.json), [HTTP/native](docs/validation/lunarsight/century-metrics-http.json), [coverage kernel](docs/validation/lunarsight/century-kernel-coverage.json), [đối chiếu JPL](docs/validation/lunarsight/century-jpl-validation.json). JPL chỉ được đối chiếu ở các cửa sổ chọn mẫu, không phải chứng nhận liên tục toàn thế kỷ.
 
 ## 9. Đưa sang máy khác hoặc deploy
 
@@ -310,6 +324,7 @@ Bằng chứng đã commit: [build](docs/validation/lunarsight/century-metrics-b
 3. Cài kernel bằng `make ephemeris-prepare` và build metrics bằng `make metrics-century-prepare`, hoặc chép nguyên các thư mục runtime tương thích từ máy đã build:
    - `data/cache/shared-ephemeris/` — kernel **kèm receipt**, và bảng vector nếu có;
    - `data/cache/point-analysis/prepared-metrics/` — chỉ mục, receipt và `.parts/` để truy vấn ngắn nhanh/tiếp tục build;
+   - `data/cache/point-analysis/validation-evidence/` cùng `physical-series/` nếu muốn dùng lại bằng chứng đánh giá đã tính;
    - `data/raw/nasa/` **kèm receipt** nếu cần tính điểm/độ cao ngoài gói.
 4. Cấp persistent writable storage cho `data/cache/`; giữ SQLite nếu cần bảo toàn chat. Các cache khớp theo tọa độ, hardware, source hash và method version, không chỉ tên site.
 5. Build frontend bằng `npm --prefix frontend run build`; phục vụ `frontend/dist/` bằng web server, cấu hình `/api` reverse proxy tới backend và fallback route về `index.html` cho SPA.
@@ -332,7 +347,7 @@ PYTHONPATH=backend backend/.venv/bin/python -m uvicorn app.main:app \
 |---|---|
 | Không gọi được backend / UI không có số liệu | Kiểm tra `/api/health`, log uvicorn và proxy Vite; tránh nhầm cặp 8000/5173 với 8001/5174 |
 | `EPHEMERIS_NOT_PREPARED` | Chạy `make ephemeris-prepare` trong đúng repo đang phục vụ |
-| `METRICS_NOT_PREPARED` (409) | Chưa build/chép gói, sai tọa độ/độ cao/model, ngoài band hoặc không khớp biên chỉ mục; kiểm tra 20/20 m và chạy bước 3.2, hoặc dùng Analyze |
+| `METRICS_NOT_PREPARED` (409) | Chưa build/chép gói, sai tọa độ/độ cao/model, ngoài band hoặc không khớp biên chỉ mục; kiểm tra tọa độ, cặp độ cao 2/2, 10/10, 20/20 hoặc 30/30 m và chạy bước 3.2, hoặc dùng Analyze |
 | `DEM_NOT_INSTALLED`, `DEM_RECEIPT_MISSING` | Cài DEM theo bước 3.3 và giữ receipt bên cạnh file |
 | `OUTSIDE_DEM_COVERAGE` | Tọa độ không được nguồn hiện có bao phủ; cần ingest nguồn phù hợp, không đổi nhầm sang site gần nhất |
 | `OUTSIDE_EPHEMERIS_COVERAGE` | Ngoài coverage kernel thực tế; phải chuẩn bị nguồn phù hợp, không kéo dài bằng cách lặp giá trị cuối |

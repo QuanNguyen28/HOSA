@@ -1,0 +1,1325 @@
+{
+  "passed": true,
+  "sites_total": 19,
+  "configurations_total": 76,
+  "hardware_pairs_m": [
+    [
+      2.0,
+      2.0
+    ],
+    [
+      10.0,
+      10.0
+    ],
+    [
+      20.0,
+      20.0
+    ],
+    [
+      30.0,
+      30.0
+    ]
+  ],
+  "start_utc": "2000-01-01T00:00:00Z",
+  "end_utc": "2101-01-01T00:00:00Z",
+  "records": [
+    {
+      "site_ids": [
+        "connecting-ridge"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13826964,
+      "source_identity_sha256": "f3e787ef1ea3366fa1f3f46e0511c56947971b89e8cf1ffad5694a9b2e250279",
+      "index_sha256": "295c00db9ac75cd62979c7539ed75132fc854de8d604c07f87334ba561c250b9",
+      "build_seconds": 170.35817272499844,
+      "first_query_seconds": 0.526193712001259,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "peak-near-cabeus-b"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 14043680,
+      "source_identity_sha256": "e8a7842dfc0b8874ee284ee472c38278e97eeac8c0d815fa336c5f828811de7f",
+      "index_sha256": "13740ecaa9f0ebecd29679fba398ec844a3a8e96cf026cb131a0cf04e808f284",
+      "build_seconds": 106.00261352999951,
+      "first_query_seconds": 0.48955028999989736,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "shackleton-rim"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13565542,
+      "source_identity_sha256": "2ebedfe6e2d0b4c5f2f0c36feba308a1cdb06340671f81a342b68df21f2a5588",
+      "index_sha256": "fe069507c11547240201eb3b3bcfb8a7238a0d277ada06520f21dfd12fd48e22",
+      "build_seconds": 112.95056315300099,
+      "first_query_seconds": 0.4067534700006945,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "haworth"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 14083431,
+      "source_identity_sha256": "0d17f50a14b0c193d215903614699cfac2678f5af7e7233c13826ce38cfa9639",
+      "index_sha256": "63751aeb54c1f8ebac86573de1dfb4e0cb4807df51885190059c9177164b896a",
+      "build_seconds": 112.69196966000163,
+      "first_query_seconds": 0.44262264499775483,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "malapert-massif"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 15299652,
+      "source_identity_sha256": "6d6941e9ba0feb06c8b09572971eacb855852acb125e9d8d6ee5b31876ff791d",
+      "index_sha256": "b39b079c7b8694ac54447f8c82c0b104b2603aec77d890eb275b566c4c423734",
+      "build_seconds": 111.09912622500269,
+      "first_query_seconds": 0.4669754339993233,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "mons-mouton-plateau"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13591692,
+      "source_identity_sha256": "465dcfa0482aac6ee8b59e3b42c3deabae6f371dd489043e0ea6978c55c0e3c9",
+      "index_sha256": "3a757c93a182518e5afa3ceac3e7517d21527c5cf070bb812b751e8948aee948",
+      "build_seconds": 106.13126148900119,
+      "first_query_seconds": 0.5018364639981883,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "mons-mouton"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 15031097,
+      "source_identity_sha256": "2e15480832bde7952ee05727926740d2b2a3c89a95d6950d3a37b42edc3f6999",
+      "index_sha256": "bbec4da9e54f731e43d9daa715e8859b1a74c0924a124289e0a3457a6024f4da",
+      "build_seconds": 113.16113903299993,
+      "first_query_seconds": 0.5172042420017533,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "nobile-rim-2"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 12583230,
+      "source_identity_sha256": "4458d43657e6661370f4a1b3757b6b5e52cbabde2f710224bf8452004400a40f",
+      "index_sha256": "c3137f1d3e9976da6d33a35744c2641f26c63b0f2941c3ddce9300787927c222",
+      "build_seconds": 111.20849592800005,
+      "first_query_seconds": 0.40055866399779916,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "nobile-rim-1"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 14181386,
+      "source_identity_sha256": "e86f576e4570036a75d60a47140b05e76d956003999ae89d529e6b67475bd121",
+      "index_sha256": "2fa8d63b7968605953898abf3c43cb0b738e08bb7d1b05a79e47de15dac5e571",
+      "build_seconds": 113.3259592530012,
+      "first_query_seconds": 0.43320164599936106,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "de-gerlache-rim-2"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13520883,
+      "source_identity_sha256": "769a5e0fc73df32ec084d42f00fa5b5c040a2750eede6f8cc607f8581b36757e",
+      "index_sha256": "d723bb62ce44e2c8e511ada042882f2a9a1a524fa009e97b293ea06272e8331f",
+      "build_seconds": 114.03375019000305,
+      "first_query_seconds": 0.5020053019979969,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "im1-odysseus"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 12698194,
+      "source_identity_sha256": "737136d9da8cd36b074a8073363d62d3e107ff33fe0bb736b7f40471ab8841c9",
+      "index_sha256": "40e2144b2ff99ed9ea785805dd9b909102fda05fdeac82eaad9e270eb04d634d",
+      "build_seconds": 115.88800981299937,
+      "first_query_seconds": 0.42196065400275984,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "im2-athena"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 12668716,
+      "source_identity_sha256": "ca2dd629b5df3ad5f247ce131a2286afb0b648c75f86d1619c07aa72da831e42",
+      "index_sha256": "94a709d0b745b6893ac5ef2952d3006eea9d9023a960bea4ad42d5d8bc3f5863",
+      "build_seconds": 123.05298442599815,
+      "first_query_seconds": 0.6734161410022352,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "viper"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 14416079,
+      "source_identity_sha256": "1537a8993852e2b283ce26fd4a941268df664e4edb9f7365350d8c94930a0cf1",
+      "index_sha256": "ba2e845ca0f03a2ce6e9430e8b784390fbf38050866e5cfb29337070f84c9a3e",
+      "build_seconds": 120.12587673999951,
+      "first_query_seconds": 0.39770638100162614,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "shackleton-floor"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 5507846,
+      "source_identity_sha256": "121fbbd8329e6bf85f841651a35491658b8e3a7d7b9f78c90371512bca23550c",
+      "index_sha256": "08aaf0c48f7cb9ebf64b8058fd2b8806d86b1df0c47868155e813a54645e7d39",
+      "build_seconds": 132.1758608759992,
+      "first_query_seconds": 0.31933355599903734,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "peak-near-shackleton"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13564178,
+      "source_identity_sha256": "8956867ea86de11026e6f2d231ad35e3fd7e96a0139fd81a93858e13062542a1",
+      "index_sha256": "a7e9b8df29fc8f17ed74993ddfa8a2a6b7f881738691d2dd78d603b83e4e9705",
+      "build_seconds": 156.14086131400109,
+      "first_query_seconds": 1.352690204999817,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "leibnitz-beta-plateau"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 11944958,
+      "source_identity_sha256": "5dd8e634eb16254c6578f01e5654c28910f4eaf16bc744d0fa941a29fc70c511",
+      "index_sha256": "657a03b71647cba003fa2e8d14f243ca1fc8ebb79b4039e0ec3731f310c8ee0e",
+      "build_seconds": 173.90183449199685,
+      "first_query_seconds": 0.5291731920005986,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "de-gerlache-kocher"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13306639,
+      "source_identity_sha256": "d6feb00ef1aa0b9296d4e674ec266fea7d63b1d66e1f02a2273fe5d2dd8e7a0c",
+      "index_sha256": "7ff895fe6173b523388fff5f7ef5cb5b1932f9f345177ad87c230389795e8ecb",
+      "build_seconds": 132.14312049400178,
+      "first_query_seconds": 0.5331974079999782,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "shoemaker"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 10142693,
+      "source_identity_sha256": "80c684d24816015481928bc1fd6c7ba0388de086ae02a3a490761365f9d81a36",
+      "index_sha256": "eab2471c28d7ba8ee87f29d811466bd4824a7d3fb46d75424cc232ebf4cc3f4a",
+      "build_seconds": 128.82322798699897,
+      "first_query_seconds": 0.5208758230000967,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "amundsen-rim"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 20.0,
+      "antenna_m": 20.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 10967469,
+      "source_identity_sha256": "870ea5e21b6992d3f6c98ee6cdda8a7c1ec575649d64476504a61826f37e8369",
+      "index_sha256": "565fc8a82b237ff0e43623dad0458aa0a9778ab3d7473dc908865a9bf5e33fa3",
+      "build_seconds": 112.87387017299989,
+      "first_query_seconds": 0.48007639900242793,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "shackleton-rim"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 2.0,
+      "antenna_m": 2.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13614050,
+      "source_identity_sha256": "61568270c8c9bdc92e4f06d0b56ef6f77ae15e75f718e9a5210671faccd4cd91",
+      "index_sha256": "fae28fa9f60cd309a8912b60dbaad9de7e100869dfbf67d2d781ff3a2798689d",
+      "build_seconds": 76.96865388300012,
+      "first_query_seconds": 0.27339398100002654,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "connecting-ridge"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 2.0,
+      "antenna_m": 2.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13580609,
+      "source_identity_sha256": "25fdb698353dfce7842f432d242a2d3ba5a287a918197c2a43a49acf47fa03dd",
+      "index_sha256": "536e3cbc9c7d7e103c1a79195ee2cc6ff6083f015edea0690b2fe209007c424b",
+      "build_seconds": 77.16231046599978,
+      "first_query_seconds": 0.24935664500026178,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "peak-near-cabeus-b"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 2.0,
+      "antenna_m": 2.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 12893113,
+      "source_identity_sha256": "7ddf7762bd441cddb5d1d0ba65937b0c7b82d40b47862db2c1bf2bcf1e30053d",
+      "index_sha256": "bf350ddfb648bee4ea794913701ac1ab8842666bbae935aa6a4da0dcc768033a",
+      "build_seconds": 98.45078263100004,
+      "first_query_seconds": 0.4350536850001845,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "haworth"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 2.0,
+      "antenna_m": 2.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13469735,
+      "source_identity_sha256": "1a33f8c9bcf8d32edc3a3bbed1e384e99fbbe97d355b73c129dad44fb43cb9b9",
+      "index_sha256": "0c6a91caadd1208a8c23355ef8ed987bb8269a9f56f24c3248e963580b257ff5",
+      "build_seconds": 109.05418055799964,
+      "first_query_seconds": 1.2433206660002725,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "malapert-massif"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 2.0,
+      "antenna_m": 2.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13529331,
+      "source_identity_sha256": "6e28002494fdb319f90561cf0d114025c7225676a0fe2a774d0e8e16eb9ac0b9",
+      "index_sha256": "5c998797c6ccc7313605e320929c123f6b7b635a5882a78b1514a3b3f95b7f79",
+      "build_seconds": 91.98722870099982,
+      "first_query_seconds": 0.3301834530002452,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "mons-mouton-plateau"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 2.0,
+      "antenna_m": 2.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13126961,
+      "source_identity_sha256": "53111627d3d636ed3260914ab671ff0859eafbd84bdd2bba6baa5658fb1e3bb5",
+      "index_sha256": "0a2f52a56211180fa89941d6fac4ae674f348f535e6707d9ba49aeac392942ec",
+      "build_seconds": 84.39835500699974,
+      "first_query_seconds": 0.3528204449999066,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "mons-mouton"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 2.0,
+      "antenna_m": 2.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 12406683,
+      "source_identity_sha256": "3908543061079eea38bc4b24b081dd611f1cce7def8763b1803f3610faf832a7",
+      "index_sha256": "985069fa9420cea81ad8a8d9dcb737b5c0661547aeb04643504d7457356f0ed6",
+      "build_seconds": 105.74082755600011,
+      "first_query_seconds": 0.3317198139998254,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "nobile-rim-1"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 2.0,
+      "antenna_m": 2.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13177936,
+      "source_identity_sha256": "2bc0b835b8c481ef4be9e1847497791246206ff59d8f8dd8c647cd1443121a81",
+      "index_sha256": "4b66f87c590debd7fb90261eb85f12cbad9b13a90b0b7ebe49e8ed19ec8b0b28",
+      "build_seconds": 104.4085709359997,
+      "first_query_seconds": 0.3199929570000677,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "nobile-rim-2"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 2.0,
+      "antenna_m": 2.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 12291278,
+      "source_identity_sha256": "63b17d9dc6c6163ad7c998f9e7ac3dde66d66bb4dabde7b0c7c6cb7b6ae8f1c2",
+      "index_sha256": "ed77ef9bc8b9b5f4f0a45dcabdd61541b721a9d2e00038330f626eac99534d83",
+      "build_seconds": 149.942281999,
+      "first_query_seconds": 0.39740622999988773,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "de-gerlache-rim-2"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 2.0,
+      "antenna_m": 2.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13339455,
+      "source_identity_sha256": "784952fec9133a68b532b5dbb13826b9934979ad77f4fbfa471223f44e49f69d",
+      "index_sha256": "24e7e45d77989e2b131f0e96cb266b41e890610dccf3e5ecefd0832196731166",
+      "build_seconds": 157.3618812939999,
+      "first_query_seconds": 0.827494158999798,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "im1-odysseus"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 2.0,
+      "antenna_m": 2.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 12333309,
+      "source_identity_sha256": "3f7c77094f2f09ee8980cc2e9f7319b3c47d82fc531d7f31efb21d3477060090",
+      "index_sha256": "637f7eaf4b38a3e27f84a8e8b4c627c12bbb4062f7fa17c3bd7c2925925f4bf0",
+      "build_seconds": 168.0176096309997,
+      "first_query_seconds": 0.38226938300022084,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "im2-athena"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 2.0,
+      "antenna_m": 2.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 12512629,
+      "source_identity_sha256": "858859c0ae11e6c8da1c037fa60642f229885308ca042b0b910ab6b8b6498106",
+      "index_sha256": "337fe0f233822b7915f3a7e7993f48d2ff6a504d7b1cf37f87d368ed761d6f05",
+      "build_seconds": 193.75322395400008,
+      "first_query_seconds": 0.36767686299981506,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "shackleton-floor"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 2.0,
+      "antenna_m": 2.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 5507846,
+      "source_identity_sha256": "80565f058e94b570c6e1476ceef5a69f1b6401504e26547321d26b34de88910d",
+      "index_sha256": "08aaf0c48f7cb9ebf64b8058fd2b8806d86b1df0c47868155e813a54645e7d39",
+      "build_seconds": 107.05163699399964,
+      "first_query_seconds": 0.2603647139999339,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "viper"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 2.0,
+      "antenna_m": 2.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 10917833,
+      "source_identity_sha256": "ac5bf482b4427f6d7f6497284c2cfe54beb0a37e3c91022212ac02f051e40592",
+      "index_sha256": "519fd465da4ab257bb4e8fa53519e90a106c413552ac3091ac2e80df3cd960be",
+      "build_seconds": 144.20980232600004,
+      "first_query_seconds": 0.4973014299998795,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "peak-near-shackleton"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 2.0,
+      "antenna_m": 2.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 11155004,
+      "source_identity_sha256": "88b2177613ef60ea5ff59bf780f660d461860bed18f2e7dd7057c81059373a56",
+      "index_sha256": "3688a2f19365cb786ec283cfcd7157765576fb0b9bb65703d1ab078c27f8d515",
+      "build_seconds": 136.462464233,
+      "first_query_seconds": 0.35357291099990107,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "leibnitz-beta-plateau"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 2.0,
+      "antenna_m": 2.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 7326809,
+      "source_identity_sha256": "879dc6785964e893c8c3f15bd55ef33d17c7512be44f0941da9e340195c21728",
+      "index_sha256": "ce7fa75f442c683d136e8a5386a5e050e5dff6527730a595188c468e8b63adec",
+      "build_seconds": 135.94085797599973,
+      "first_query_seconds": 0.24896976500031087,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "shoemaker"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 2.0,
+      "antenna_m": 2.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 9492877,
+      "source_identity_sha256": "6757227945143e5efc79cf4e1ebd69683bb2955ef6087f8a5ef3e2dc2003a14e",
+      "index_sha256": "095bf7399af9665849bb7e1074867d656639404c2f7ec077cd01cae2b30943ba",
+      "build_seconds": 148.86826410100002,
+      "first_query_seconds": 0.9086866689995077,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "de-gerlache-kocher"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 2.0,
+      "antenna_m": 2.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13311465,
+      "source_identity_sha256": "f25dd5b3b4b9412377ccd97adecf92a8cb00ebd5fceb5fffe40915b5f37851eb",
+      "index_sha256": "a7923fb6c05388dd9e33869d965a04fa9bf5c52c6b04dc200799c278fcb8e070",
+      "build_seconds": 169.3724224080006,
+      "first_query_seconds": 0.8343903759996465,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "amundsen-rim"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 2.0,
+      "antenna_m": 2.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 9527243,
+      "source_identity_sha256": "828e70bf4e42bf6827f9ec5204588a8368a451b9d5ee33e7dc33cc0d2a099e90",
+      "index_sha256": "063136eae544d16dc5b620b36066c416aaaf1676020ba1b3a389fbabc377b2b8",
+      "build_seconds": 157.102686403,
+      "first_query_seconds": 1.0696629650001341,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "connecting-ridge"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 10.0,
+      "antenna_m": 10.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13751250,
+      "source_identity_sha256": "58857f8f02ec5a7ed1f264f2277234a83bfe0e79af74b9e29e3569505da520b7",
+      "index_sha256": "e1e4f9f1e816b2e65e2a1e959186b6d84f825d50b152dd3a6859f7c0448b4c24",
+      "build_seconds": 187.84828556899993,
+      "first_query_seconds": 0.42820200999994995,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "shackleton-rim"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 10.0,
+      "antenna_m": 10.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13529374,
+      "source_identity_sha256": "31d359dd123f5d09f17a0ce2e0a6cdfad220e3a4795ca0f28aa239f94a86ec73",
+      "index_sha256": "4681c47b48c3b6d1f300e9cbdffed9672fbd9964bd6f73b186a78f664bc9e5c4",
+      "build_seconds": 184.78146115900017,
+      "first_query_seconds": 1.369750226999713,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "peak-near-cabeus-b"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 10.0,
+      "antenna_m": 10.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13962753,
+      "source_identity_sha256": "67a89d543596904c23d80c23ab024a62cb38815a7eb7b0085e790d87ed0e604b",
+      "index_sha256": "cf6fe1ec84c1e681125832801e543cbf6aa6424a019b848ff1465c035d9ad2d2",
+      "build_seconds": 178.25540493400058,
+      "first_query_seconds": 0.960520016999908,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "haworth"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 10.0,
+      "antenna_m": 10.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 14072561,
+      "source_identity_sha256": "6a0311671ddad7a5d32446b0659450d07a7dabb2c0fbc42b939634cd55cc5e7a",
+      "index_sha256": "aeec2ed9258d9b9e9e755f1a6eba6d2973dac0342ab2072a3b6f643e461a06ce",
+      "build_seconds": 166.0194248379994,
+      "first_query_seconds": 0.3319221430001562,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "malapert-massif"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 10.0,
+      "antenna_m": 10.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 14898028,
+      "source_identity_sha256": "010fc71040e6485efecb0a7d2f00e3f8ad9cc9b18b3d4c46bdeaa2ddcf5204bf",
+      "index_sha256": "d0204ac8fc79bbd44a50deb7a61d6fa36fff350d6f79439e3f6a404f42514cf6",
+      "build_seconds": 165.02376327500042,
+      "first_query_seconds": 0.31997021499955736,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "mons-mouton-plateau"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 10.0,
+      "antenna_m": 10.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13504963,
+      "source_identity_sha256": "fb602dabfc84afaaef4fbc3b73b885f30c4f7ad6ccb57a83f2cda08159293297",
+      "index_sha256": "8c333393574d62afcca72ca2141d8340987143166b626f421f5d0409de5cf01f",
+      "build_seconds": 115.42939459199988,
+      "first_query_seconds": 0.44903192199944897,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "mons-mouton"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 10.0,
+      "antenna_m": 10.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 14956376,
+      "source_identity_sha256": "2ab43342706483a6fe4812194ca10f6b3c170190b90d2b0775af620548bfd89b",
+      "index_sha256": "cf796cae586f8f9cf86ea824629766f41be3122bdf70da7819d59a60705771fc",
+      "build_seconds": 107.1698026920003,
+      "first_query_seconds": 0.3392144929994174,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "nobile-rim-1"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 10.0,
+      "antenna_m": 10.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13977134,
+      "source_identity_sha256": "c3e14a110c9595e3fb872d5a56ca0f181c468663769fc1109fdcb051b406671a",
+      "index_sha256": "0de96916f750abf8d4dfbc8f28af6b1863147ad4a140e53a01fbbbe3a8495f44",
+      "build_seconds": 81.32987195700025,
+      "first_query_seconds": 0.35783272000026045,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "nobile-rim-2"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 10.0,
+      "antenna_m": 10.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 12578889,
+      "source_identity_sha256": "da0cee6de05154e45ae3865277d66576e78a1da8745c6b264d40d835369ea3b2",
+      "index_sha256": "554bf71461e6162a9d9dd5381600e77fdac78b657575545f8d27261dba6a2d65",
+      "build_seconds": 82.94981628999994,
+      "first_query_seconds": 0.3291046539998206,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "de-gerlache-rim-2"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 10.0,
+      "antenna_m": 10.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13478181,
+      "source_identity_sha256": "39787b37e9c4e7a4aab557553f6dccf5a5895fb8c920e4ea0a23f7e278e496da",
+      "index_sha256": "8184ec7c7adcf0dfb3d33d30fe52b8abeb3da379a7f78917fbabb15276aedee7",
+      "build_seconds": 87.96569881100004,
+      "first_query_seconds": 0.3348235579996981,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "im1-odysseus"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 10.0,
+      "antenna_m": 10.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 12622720,
+      "source_identity_sha256": "a350abb22e0a3079c4ab47b3706329c4208d58cf20786bd3bb1f2d37a1676457",
+      "index_sha256": "0ce02236869322b453ab201436b8ea2a2e6d26975c7cb3bc597c2287aac248d7",
+      "build_seconds": 80.46488840999973,
+      "first_query_seconds": 0.422642026000176,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "im2-athena"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 10.0,
+      "antenna_m": 10.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 12584753,
+      "source_identity_sha256": "0f883069b2a70e9311ab3d842c901c05232ce8894c4033aa4f6b18cd688e4062",
+      "index_sha256": "0ae0982784a2469c00ffd3a9efb20de4070502d8cb8daf30f87b4382d489fd1b",
+      "build_seconds": 84.29604263300007,
+      "first_query_seconds": 0.31008590900000854,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "viper"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 10.0,
+      "antenna_m": 10.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13556724,
+      "source_identity_sha256": "11197ddeaa8e4d941ab9b1447a85404154505d70d10e31585ada6b20ec0c29d7",
+      "index_sha256": "2497e9e0ed53f4474bacf41971d0b3184a62432471bea7f7cab253d0a92686d1",
+      "build_seconds": 82.56625068999983,
+      "first_query_seconds": 0.33560792800017225,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "shackleton-floor"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 10.0,
+      "antenna_m": 10.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 5507846,
+      "source_identity_sha256": "76e6cbba944e916e4b017058da37d9381fa03f122239de79f2e6812e3ad3df7c",
+      "index_sha256": "08aaf0c48f7cb9ebf64b8058fd2b8806d86b1df0c47868155e813a54645e7d39",
+      "build_seconds": 62.99698325600002,
+      "first_query_seconds": 0.2194869570002993,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "peak-near-shackleton"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 10.0,
+      "antenna_m": 10.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13544939,
+      "source_identity_sha256": "60ceeb6d01f56e2dfea2a40e0c49c30c36df20777cab50035cb01bb90562c878",
+      "index_sha256": "fa634b9931dcd03502aa917302790fece1888f352455a720ce459bd12f258639",
+      "build_seconds": 83.81378413099992,
+      "first_query_seconds": 0.32687166600044293,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "leibnitz-beta-plateau"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 10.0,
+      "antenna_m": 10.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 9865085,
+      "source_identity_sha256": "a4019831d67faaa08c09a40af95c16bd77c55858fc65101adba88aff6ab5d61b",
+      "index_sha256": "acceda9409fc7dda4f2e946cfe45f25d29fe8aecf063a34638671958259f0c5e",
+      "build_seconds": 75.30987904099948,
+      "first_query_seconds": 0.20283579800070584,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "shoemaker"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 10.0,
+      "antenna_m": 10.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 9948201,
+      "source_identity_sha256": "fcefcb5206cd1b4dcdd9abd01573fa6bc0b2cdbe5cb26ec59ac256853ddaaca8",
+      "index_sha256": "3954b67ff530163341749f46e9d42851b4426bf40883ce17851daad09a00e864",
+      "build_seconds": 25.25634039400029,
+      "first_query_seconds": 0.2480436349997035,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "amundsen-rim"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 10.0,
+      "antenna_m": 10.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 10641207,
+      "source_identity_sha256": "c24443165b5668e0b506c566b1775ceb9707b49d75495f06735a3667274692d3",
+      "index_sha256": "5456d0abc5d113362cda6038513086ac7df0332056d63b806988b4122360b9d7",
+      "build_seconds": 6.332103850999374,
+      "first_query_seconds": 0.30394208600046113,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "de-gerlache-kocher"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 10.0,
+      "antenna_m": 10.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13319211,
+      "source_identity_sha256": "cb907b939055aa219fdd2063bfa12cb4d163bb798b5cc70a37c1ad233fb6bc32",
+      "index_sha256": "b1c62cd106d4ac5dd35abe9f23b709539902a3057f094623839a8da7127bd9ed",
+      "build_seconds": 63.100776821999716,
+      "first_query_seconds": 0.18591178899987426,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "connecting-ridge"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 30.0,
+      "antenna_m": 30.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13801123,
+      "source_identity_sha256": "d413d8e7c63ccfa7a6063eb2a048d050fd58d3f59306aec3afcad0fa8b182181",
+      "index_sha256": "c98d90fdd14f30685c57273f47afb5cc7f78abb367bd6edec8b8a0346a7adc35",
+      "build_seconds": 192.52386271900014,
+      "first_query_seconds": 1.2822959059999448,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "shackleton-rim"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 30.0,
+      "antenna_m": 30.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13599353,
+      "source_identity_sha256": "b2494b7df77e5a0599d1fcde253c1e1cbb7feeea6f384239abe907f890f1c714",
+      "index_sha256": "d23e69a5036d1770c03b618170469a976ccab0b68e6bdbfe05ed9843dbb5d61a",
+      "build_seconds": 153.50912150900012,
+      "first_query_seconds": 0.7327703989999463,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "peak-near-cabeus-b"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 30.0,
+      "antenna_m": 30.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 14076921,
+      "source_identity_sha256": "d0b481d31345694fdcb19f6c319ab898fa4ff82ea72df440ece24f9fcb2582a8",
+      "index_sha256": "2e21736524e19598e9fe76acbc0e87fbd9894aa71fec0211f01382499140e015",
+      "build_seconds": 134.3619672750001,
+      "first_query_seconds": 0.3459255799998573,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "haworth"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 30.0,
+      "antenna_m": 30.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 14097823,
+      "source_identity_sha256": "60c5aa5f860e73c4bf00f04250a7938fd2360cfb555b8d938f81b04c898da2e3",
+      "index_sha256": "35f66e55ec7e13aff0a8e8a2478aefbc39f36196289c6673ab1615369a8a7edd",
+      "build_seconds": 162.86027147299956,
+      "first_query_seconds": 0.7646213050002189,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "malapert-massif"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 30.0,
+      "antenna_m": 30.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 15382567,
+      "source_identity_sha256": "a3cdb7da624813b2b7beb2c070222175bdd9a90772bb52035aa705dac6b5ba30",
+      "index_sha256": "4fd91ac7a43e864bf50742cd21094df9a323c0825197acadddc182400ee4ff49",
+      "build_seconds": 187.8815707419999,
+      "first_query_seconds": 0.4962302190006085,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "mons-mouton-plateau"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 30.0,
+      "antenna_m": 30.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13585362,
+      "source_identity_sha256": "5d3c1dcd9142a18e59528fe538d6535d7f58fe70b4bd98a77c0579d1e087aaf0",
+      "index_sha256": "c4c91d772ee6ddb2727b9808a3c60f307f7ea7b3f2f44bccf7ef1a90b8311528",
+      "build_seconds": 159.9802096509993,
+      "first_query_seconds": 0.45967744200061134,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "mons-mouton"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 30.0,
+      "antenna_m": 30.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 15142082,
+      "source_identity_sha256": "060d1e5e10e221192dd02a431c255d164d299115a80280a2e94470fdaf2ea8db",
+      "index_sha256": "ba40165e44d4cb6eafd55db1fc849073d6047fca9cd2c8d46226548c4ade706a",
+      "build_seconds": 178.8512498579994,
+      "first_query_seconds": 0.949223413999789,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "nobile-rim-1"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 30.0,
+      "antenna_m": 30.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 14310866,
+      "source_identity_sha256": "889c7ff6ef2b9719093db2c47b8181b16056ebff8c51376be51ee1ad4b59800b",
+      "index_sha256": "e7a98f7e7a47ce280c6dd0b9ab0e905833fd644becbce103f62f9fd1653a3711",
+      "build_seconds": 122.4917353259998,
+      "first_query_seconds": 0.3401985139998942,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "nobile-rim-2"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 30.0,
+      "antenna_m": 30.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 12591517,
+      "source_identity_sha256": "47cdda1d83aba49a0a155a79228b5bfdf5c96f3d6f68b926db7bd1795c4667e8",
+      "index_sha256": "4f4bddb06a53de058970085f8aa143f218e6dcdddd1a88b83c414e7ca883363c",
+      "build_seconds": 80.9466583250005,
+      "first_query_seconds": 0.3055398429996785,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "de-gerlache-rim-2"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 30.0,
+      "antenna_m": 30.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13567925,
+      "source_identity_sha256": "c46e57f16ffe8dbe9e2bc7db957f840025fcdaf6879274299e40c31d80157ee0",
+      "index_sha256": "657b51d16eba2b0f0e5e9345a4fea4356d7c213d4cbdf4a7a01c4a2b321d37e7",
+      "build_seconds": 86.26658410500022,
+      "first_query_seconds": 0.37748881700008496,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "im1-odysseus"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 30.0,
+      "antenna_m": 30.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 12754472,
+      "source_identity_sha256": "e3798ef785173629ecc2641f3794b96bf0905813c72609f306e3f7d79198294e",
+      "index_sha256": "680a45e9acaeb1722a206311836c8a9d188ed5de6efd960fea1561fc353cad6a",
+      "build_seconds": 13.518011422999734,
+      "first_query_seconds": 0.5214249410000775,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "im2-athena"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 30.0,
+      "antenna_m": 30.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 12754953,
+      "source_identity_sha256": "7a465b9ecd2fba9899a699f9a480d6ca421126bcb3934de1d820ffccd07276c4",
+      "index_sha256": "79d507fb6d4ecc6dbd706e1d89e294d26029ab309ebe0a0e9602cd5be69adbc8",
+      "build_seconds": 8.304507275000105,
+      "first_query_seconds": 0.47647541699916474,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "viper"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 30.0,
+      "antenna_m": 30.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 15030350,
+      "source_identity_sha256": "534875797d2f7f18cd462ee71c1e4f4df5eb16b79fc71861054136dd9687b154",
+      "index_sha256": "d17592e7d08f78c59d791ca3a5e0761db455412dbb6c356395de43f7d5c5d721",
+      "build_seconds": 10.568344295000315,
+      "first_query_seconds": 0.34563164799965307,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "shackleton-floor"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 30.0,
+      "antenna_m": 30.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 5507846,
+      "source_identity_sha256": "30a96287b8d45ac83bd2b857de99988280da67ebe6b327e6d24a48ddf7533a7b",
+      "index_sha256": "08aaf0c48f7cb9ebf64b8058fd2b8806d86b1df0c47868155e813a54645e7d39",
+      "build_seconds": 4.694451956999728,
+      "first_query_seconds": 0.23138484599985532,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "peak-near-shackleton"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 30.0,
+      "antenna_m": 30.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13570829,
+      "source_identity_sha256": "56efd168c9a649d4923cd9217591ac74467efbe6904d970b6d49c1ce1d02728a",
+      "index_sha256": "326a73818581bc64c0f4c8e17261c0db5ff0f450f61b34c6b04547d0e9543b81",
+      "build_seconds": 7.195131523999407,
+      "first_query_seconds": 0.3470841990001645,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "leibnitz-beta-plateau"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 30.0,
+      "antenna_m": 30.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 12816279,
+      "source_identity_sha256": "8d4c25420ae266c67e5fc698d256c7c616528eb285076fbb1a14b91791f31099",
+      "index_sha256": "5a11ccc02658ed1cd0460013a16e478df508b6ecd7060c017872b295c05aa1b3",
+      "build_seconds": 8.180638507999902,
+      "first_query_seconds": 0.34456377900005464,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "de-gerlache-kocher"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 30.0,
+      "antenna_m": 30.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 13278822,
+      "source_identity_sha256": "fb42ae4d5657f96b70abd143a088635fbbc0e32a6fbff66f46217747bcc0068d",
+      "index_sha256": "f711b2889ac575c95d01f00ead5d3570ff0668e53cca0e74f1f31c847dca0935",
+      "build_seconds": 8.446865410999635,
+      "first_query_seconds": 0.6436862460004704,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "shoemaker"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 30.0,
+      "antenna_m": 30.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 10257654,
+      "source_identity_sha256": "6ddfae74667c93f8235b7e275ff0a9bd8592b0d14190d0c674655e2bf6ebff6b",
+      "index_sha256": "cd7d01fc94037ae712079f970537033db5d29398f7fd2487a2f334fb46d555eb",
+      "build_seconds": 9.821455891000369,
+      "first_query_seconds": 0.40147444699960033,
+      "display_intervals": 800
+    },
+    {
+      "site_ids": [
+        "amundsen-rim"
+      ],
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2101-01-01T00:00:00Z",
+      "panel_m": 30.0,
+      "antenna_m": 30.0,
+      "native_intervals": 10624320,
+      "parts": 101,
+      "index_bytes": 11058527,
+      "source_identity_sha256": "01ff2eddb12fd511b75e225030c5d8ce566fb05c5be1b9571c8152621d0d7d4b",
+      "index_sha256": "ecb6d223d2ceca87d5ed68b143a264899d7c3e1af387f7388da844a97effb845",
+      "build_seconds": 75.13344298399988,
+      "first_query_seconds": 0.4217545940000491,
+      "display_intervals": 800
+    }
+  ],
+  "compact_indices_bytes": 955943961,
+  "yearly_indices_bytes": 929061042,
+  "total_index_bytes": 1885005003,
+  "live_llm_calls": 0,
+  "scope": "Nominal five-minute metrics/charts. Original 20 m caches reused; 2/10/30 m caches prepared independently. No mission decision or validation is preapproved.",
+  "timing_scope": "Per-record build timings describe the last resumable invocation, which may reuse yearly or complete caches; they are not total preparation wall time."
+}

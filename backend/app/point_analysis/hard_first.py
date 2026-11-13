@@ -5,7 +5,7 @@ import pandas as pd
 from app.mission.metrics import hard_checks
 from app.mission.evaluation import frame_contacts
 
-VERSION = "hard-first-1.3"
+VERSION = "hard-first-temporal-confirmation-2.0"
 
 
 def check(request, metric, frame):
@@ -34,7 +34,8 @@ def failure(request, metric, frame, name):
     result = {"constraint": name, "scope": "requested_sampled_mission", "policy_version": VERSION,
         "coordinate": {"latitude_deg": request.latitude_deg, "longitude_e_deg": request.longitude_e_deg},
         "window": {"start_utc": request.start_utc, "end_utc": request.end_utc},
-        "evidence_intervals": [], "sampling_minutes": 5}
+        "evidence_intervals": [],
+        "sampling_minutes": float((frame.end_utc-frame.start_utc).dt.total_seconds().max()/60)}
     if not name.startswith("contact."):
         hours = metric["total_sun_hours" if body == "sun" else "total_earth_los_hours"]
         limit = getattr(request, name)

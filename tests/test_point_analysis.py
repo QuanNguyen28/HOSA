@@ -413,8 +413,8 @@ def test_contact_deadline_is_included_in_sensitivity_gate(pipeline, monkeypatch)
     assert result['constraint_checks']['contact.first_contact_deadline_minutes'] == 'FAIL'
     assert diagnostics['constraint_checks']['contact.first_contact_deadline_minutes'] == 'PASS'
     assert diagnostics['passed'] is False
-    assert result['decision'] == 'FAIL'  # Hard rejection is retained despite numerical disagreement.
-    assert result['contact_analysis']['requirements']['decision'] == 'FAIL'
+    assert result['decision'] == 'INDETERMINATE'  # Fine-grid disagreement prevents coarse-only rejection.
+    assert result['contact_analysis']['requirements']['decision'] == 'INDETERMINATE'
 
 
 @pytest.mark.parametrize('contact', [

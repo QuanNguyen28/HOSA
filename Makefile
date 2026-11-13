@@ -46,7 +46,11 @@ metrics-prepare:
 
 .PHONY: metrics-century-prepare
 metrics-century-prepare:
-	OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONPATH=backend backend/.venv/bin/python scripts/prepare_long_range_metrics.py --workers 3 --report docs/validation/lunarsight/century-metrics-build.json
+	OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONPATH=backend backend/.venv/bin/python scripts/prepare_long_range_metrics.py --viewer-heights 2 10 20 30 --workers 3 --report docs/validation/lunarsight/viewer-metrics-build.json
+
+.PHONY: viewer-horizons-prepare
+viewer-horizons-prepare:
+	PYTHONPATH=backend backend/.venv/bin/python scripts/prepare_viewer_horizons.py --workers 1 --report docs/validation/lunarsight/viewer-horizons-build.json
 
 data-windows-plan:
 	backend/.venv/bin/python scripts/materialize_dem_windows.py --dry-run

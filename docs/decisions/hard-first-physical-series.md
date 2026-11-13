@@ -6,12 +6,12 @@ The default MissionRequest and coordinate Planning policy is `evaluation_policy:
 
 1. Verify source evidence and terrain geometry; obtain initial native five-minute Sun/Earth/Joint samples. Publish initial metrics to asynchronous clients.
 2. Check requested sunlight availability, then Earth availability, then contact requirements. A fractional hard failure requires the **upper** duration bound to fall below the requested minimum. Missing samples remain optimistic in that bound. An unknown-only interval does not become a proven failure.
-3. At the first proven sampled hard failure, return FAIL, the evaluated prefix of `constraint_checks`, and `hard_failure`. The remaining validation and soft preferences are explicitly `skipped_hard_failure` in `evaluation_stages`, rather than incorrectly reported as passed or failed validation.
+3. Confirm the same failed requirement on the one-minute grid before returning FAIL, the evaluated prefix of `constraint_checks`, and `hard_failure`. The final early-failure metrics and evidence use one-minute samples. Full spatial validation and soft preferences are explicitly `skipped_hard_failure`; a temporal contradiction continues evaluation and cannot become a coarse-only hard rejection. See [temporal confirmation and reusable evidence](validation-evidence-and-temporal-confirmation.md).
 4. Otherwise perform the existing native 5/1-minute, radius, angular, quadrature and eligible refinement checks. Assess soft preferences after validation. Validation failure still withholds PASS; a soft preference failure does not reject the mission.
 
 `hard_failure` records the failed requirement, threshold, optimistic/pessimistic observed bounds, whole-window duration shortfall where applicable, exact coordinate, analysis window and up to three supporting time intervals. Contact failures also retain contact metrics and the completion deadline when present. A dark interval contributes to a whole-window fractional shortfall; it is not presented as a single instant that alone proves the whole mission failed. Supporting intervals are ranked by integrated sunlight deficit (or blocked Earth duration); each retains its worst native sample. The UI can jump to that sample and request its exact values, avoiding tiny nearly full-disc numerical dips as the primary visual evidence.
 
-The short-circuit is a rejection in the declared sampled model. It does not claim continuous-time or physical uncertainty certification. Corrupt input/checksum failures remain errors. A PASS still requires the existing full or conservative mission-path validation. `complete` retains the numerical diagnostic path even for a sampled hard failure.
+The short-circuit is a rejection in both declared sampled time grids. It does not claim continuous-time or physical uncertainty certification. Corrupt input/checksum failures remain errors. A PASS still requires the existing full or conservative mission-path validation. `complete` retains the numerical diagnostic path even for a sampled hard failure. Threshold-independent validation/envelope evidence is now persisted separately from physical samples and reassessed for changed requirements.
 
 ## Physical cache
 
@@ -40,7 +40,7 @@ Run this during deployment preparation with the verified horizon package and SPI
 
 The committed source timeline is the lossless binary artifact. Normal analysis no longer writes a second, large `intervals.csv` before signaling completion. `GET /api/lunar/point/analyses/{job_id}/intervals.csv` verifies that artifact and streams CSV in chunks only when requested. Full native JSON remains available through the compatible full-result API, while the UI uses the bounded display result and exact-instant endpoint.
 
-## Measured comparison
+## Historical measured comparison
 
 [Real-data report](../validation/lunarsight/hard-first-performance.json), reproduced with:
 
@@ -49,7 +49,7 @@ PYTHONPATH=backend backend/.venv/bin/python scripts/verify_hard_first_performanc
   --output docs/validation/lunarsight/hard-first-performance.json
 ```
 
-The benchmark isolates completed-result caches, uses installed verified terrain/kernel data and a persistent physical cache, and compares `complete` with `hard_first` on the same physical request and hard thresholds. These are local timings rather than a deployment latency guarantee. Both final metric sets and FAIL decisions matched exactly.
+This archived report measured the original five-minute-only early rejection, before one-minute confirmation was added. Both final metric sets and FAIL decisions matched in that version. New runs of the script compare the five-minute baseline with the confirmation's five-minute evidence and the final early-rejection metrics with its one-minute evidence. Current reuse measurements are in the [new evidence report](../validation/lunarsight/validation-evidence-reuse.json).
 
 | Case | Complete diagnostics | Hard-first | Initial metrics in hard-first |
 | --- | ---: | ---: | ---: |

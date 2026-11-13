@@ -1,0 +1,141 @@
+{
+  "passed": true,
+  "live_llm_calls": 0,
+  "cases": [
+    {
+      "name": "prepare_evidence",
+      "elapsed_seconds": 0.5157463900000039,
+      "decision": "PASS",
+      "result_id": "6ef76fb9a86d06c48ab6878c8eef5aadde2167c389aa9b936ec5ead4e31f1216",
+      "execution": {
+        "result_cache_hit": false,
+        "offline": false,
+        "physical_series_cache_hit": false,
+        "validation_evidence_cache_hit": false,
+        "mission_path_evidence_cache_hit": false
+      }
+    },
+    {
+      "name": "stricter_requirement",
+      "astronomy_and_visibility_calls": 0,
+      "elapsed_seconds": 0.17183207900006892,
+      "decision": "FAIL",
+      "result_id": "5cba7cf55ab6efe5cb597d2d0d921b0fc4ee9ce6da9908751217d8406640d72c",
+      "execution": {
+        "result_cache_hit": false,
+        "offline": false,
+        "physical_series_cache_hit": true,
+        "validation_evidence_cache_hit": true,
+        "mission_path_evidence_cache_hit": false
+      }
+    },
+    {
+      "name": "relaxed_requirement",
+      "astronomy_and_visibility_calls": 0,
+      "elapsed_seconds": 0.22147465399984867,
+      "decision": "PASS",
+      "result_id": "a8e093f171b70f5be43df9b32aa8d8fecbf84e5219f6dec455a0ff8c3370bed0",
+      "execution": {
+        "result_cache_hit": false,
+        "offline": false,
+        "physical_series_cache_hit": true,
+        "validation_evidence_cache_hit": true,
+        "mission_path_evidence_cache_hit": false
+      }
+    },
+    {
+      "name": "fresh_evidence_matches_reused",
+      "elapsed_seconds": 0.41878181300035067,
+      "decision": "FAIL",
+      "result_id": "5cba7cf55ab6efe5cb597d2d0d921b0fc4ee9ce6da9908751217d8406640d72c",
+      "execution": {
+        "result_cache_hit": false,
+        "offline": false,
+        "physical_series_cache_hit": false,
+        "validation_evidence_cache_hit": false,
+        "mission_path_evidence_cache_hit": false
+      }
+    },
+    {
+      "name": "hard_fail_confirmed",
+      "confirmation": {
+        "sampling_minutes": [
+          5,
+          1
+        ],
+        "confirmed": true,
+        "constraint": "min_sunlit_fraction",
+        "checks_5min": {
+          "min_sunlit_fraction": "FAIL"
+        },
+        "checks_1min": {
+          "min_sunlit_fraction": "FAIL"
+        },
+        "metrics_5min_hours": {
+          "total_sun_hours": [
+            0.0,
+            0.0
+          ],
+          "total_earth_los_hours": [
+            0.0,
+            0.0
+          ],
+          "longest_dark_hours": [
+            72.0,
+            72.0
+          ],
+          "longest_blackout_hours": [
+            72.0,
+            72.0
+          ],
+          "longest_joint_hours": [
+            0.0,
+            0.0
+          ]
+        },
+        "metrics_1min_hours": {
+          "total_sun_hours": [
+            0.0,
+            0.0
+          ],
+          "total_earth_los_hours": [
+            0.0,
+            0.0
+          ],
+          "longest_dark_hours": [
+            71.999999999997,
+            71.999999999997
+          ],
+          "longest_blackout_hours": [
+            71.999999999997,
+            71.999999999997
+          ],
+          "longest_joint_hours": [
+            0.0,
+            0.0
+          ]
+        },
+        "scope": "Same hard requirement fails both sampled grids; not a continuous-time error bound."
+      },
+      "elapsed_seconds": 0.24137594300009368,
+      "decision": "FAIL",
+      "result_id": "9837c95b3c04c886a951b70d91c8900afed3d020a5ae6c05ae555d156d66f42b",
+      "execution": {
+        "result_cache_hit": false,
+        "offline": false,
+        "physical_series_cache_hit": false,
+        "metrics_index_hit": false
+      }
+    }
+  ],
+  "prepared_century_metrics": {
+    "elapsed_seconds": 0.18148910499985504,
+    "display_intervals": 800,
+    "evaluation_stages": {
+      "hard": "not_started",
+      "validation": "not_started",
+      "soft": "not_started"
+    }
+  },
+  "scope": "Selected real NASA/SPICE windows, isolated result/evidence caches and zero LLM calls. Local timings; no full-century validation or continuous-time certificate."
+}

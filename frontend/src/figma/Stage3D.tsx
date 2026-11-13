@@ -113,8 +113,8 @@ export default function Stage3D({
     { radiusKm: 300, samples: mode === "pole" ? 257 : 401, regionalOnly: true },
   );
   const analysisSiteId =
-    selectedSiteId === "Site01_P1" || selectedSiteId === "connecting-ridge" ? "Site01_P1"
-    : selectedSiteId === "Site04_P1" || selectedSiteId === "shackleton-rim" ? "Site04_P1"
+    selectedSiteId === "Site01_P1" ? "Site01_P1"
+    : selectedSiteId === "Site04_P1" ? "Site04_P1"
     : null;
   const { analysis } = useSiteAnalysis(analysisSiteId, new Date(timeMs));
   const groundSky = useMemo<GroundSky>(() => {

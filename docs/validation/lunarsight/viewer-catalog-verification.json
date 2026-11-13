@@ -1,0 +1,185 @@
+{
+  "passed": true,
+  "package": {
+    "schema_version": "site-precompute-1.0",
+    "manifest_hash": "a66e5973d99cc910466b1eb6b20178ee052c407c549a47e18c09cf1c2fcf98b6",
+    "sites": 23,
+    "meshes": 255
+  },
+  "verified_profiles": 222,
+  "verified_meshes": 255,
+  "referenced_bytes": 143328914,
+  "native_geometry_comparisons": [
+    {
+      "site": "Site01_P1",
+      "profile": "fine_h1",
+      "max_horizon_difference_deg": 0.0,
+      "identical_coverage": true,
+      "native_receipt": "data/cache/point-analysis/geometry/1c66740d77597b5a78699bc96c89f8219f1bf8f6b7d9ecf6675b16aa0d19866e/receipt.json"
+    },
+    {
+      "site": "Site01_P1",
+      "profile": "fine_h2",
+      "max_horizon_difference_deg": 0.0,
+      "identical_coverage": true,
+      "native_receipt": "data/cache/point-analysis/geometry/1c66740d77597b5a78699bc96c89f8219f1bf8f6b7d9ecf6675b16aa0d19866e/receipt.json"
+    },
+    {
+      "site": "Site01_P1",
+      "profile": "short_h1",
+      "max_horizon_difference_deg": 0.0,
+      "identical_coverage": true,
+      "native_receipt": "data/cache/point-analysis/geometry/1c66740d77597b5a78699bc96c89f8219f1bf8f6b7d9ecf6675b16aa0d19866e/receipt.json"
+    },
+    {
+      "site": "Site01_P1",
+      "profile": "short_h2",
+      "max_horizon_difference_deg": 0.0,
+      "identical_coverage": true,
+      "native_receipt": "data/cache/point-analysis/geometry/1c66740d77597b5a78699bc96c89f8219f1bf8f6b7d9ecf6675b16aa0d19866e/receipt.json"
+    },
+    {
+      "site": "Site04_P1",
+      "profile": "fine_h1",
+      "max_horizon_difference_deg": 0.0,
+      "identical_coverage": true,
+      "native_receipt": "data/cache/point-analysis/geometry/80cffa22a4d4e0930d01d075d6b4235516fbd95252da86be6d0b650ce2ef1966/receipt.json"
+    },
+    {
+      "site": "Site04_P1",
+      "profile": "fine_h2",
+      "max_horizon_difference_deg": 0.0,
+      "identical_coverage": true,
+      "native_receipt": "data/cache/point-analysis/geometry/80cffa22a4d4e0930d01d075d6b4235516fbd95252da86be6d0b650ce2ef1966/receipt.json"
+    },
+    {
+      "site": "Site04_P1",
+      "profile": "short_h1",
+      "max_horizon_difference_deg": 0.0,
+      "identical_coverage": true,
+      "native_receipt": "data/cache/point-analysis/geometry/80cffa22a4d4e0930d01d075d6b4235516fbd95252da86be6d0b650ce2ef1966/receipt.json"
+    },
+    {
+      "site": "Site04_P1",
+      "profile": "short_h2",
+      "max_horizon_difference_deg": 0.0,
+      "identical_coverage": true,
+      "native_receipt": "data/cache/point-analysis/geometry/80cffa22a4d4e0930d01d075d6b4235516fbd95252da86be6d0b650ce2ef1966/receipt.json"
+    }
+  ],
+  "fresh_result_timings": [
+    {
+      "site": "Site01_P1",
+      "duration_hours": 72,
+      "seconds": 2.1444818179998038,
+      "decision": "PASS",
+      "illumination": {
+        "model": "solar_disc",
+        "method_version": "solar-disc-mean-1.0",
+        "metric": "time_mean_visible_solar_disc_fraction",
+        "mean_visible_fraction_bounds": [
+          1.0,
+          1.0
+        ],
+        "total_sun_hours_definition": "equivalent full-disc hours",
+        "darkness_definition": "no part of the solar disc visible",
+        "eclipse_model": "solid Earth disc; no atmospheric dimming"
+      },
+      "stages": [
+        "verify_dem",
+        "precomputed_horizon",
+        "verify_horizon_artifacts",
+        "horizons_5min",
+        "shared_ephemeris_5min_sun",
+        "shared_ephemeris_5min_earth",
+        "initial_metrics",
+        "hard_requirements",
+        "scientific_validation",
+        "metrics_and_validation",
+        "horizons_1min",
+        "shared_ephemeris_1min_sun",
+        "shared_ephemeris_1min_earth",
+        "soft_preferences",
+        "commit_artifacts",
+        "complete"
+      ],
+      "validation_passed": true
+    },
+    {
+      "site": "Site04_P1",
+      "duration_hours": 72,
+      "seconds": 1.8870384360006938,
+      "decision": "PASS",
+      "illumination": {
+        "model": "solar_disc",
+        "method_version": "solar-disc-mean-1.0",
+        "metric": "time_mean_visible_solar_disc_fraction",
+        "mean_visible_fraction_bounds": [
+          1.0,
+          1.0
+        ],
+        "total_sun_hours_definition": "equivalent full-disc hours",
+        "darkness_definition": "no part of the solar disc visible",
+        "eclipse_model": "solid Earth disc; no atmospheric dimming"
+      },
+      "stages": [
+        "verify_dem",
+        "precomputed_horizon",
+        "verify_horizon_artifacts",
+        "horizons_5min",
+        "shared_ephemeris_5min_sun",
+        "shared_ephemeris_5min_earth",
+        "initial_metrics",
+        "hard_requirements",
+        "scientific_validation",
+        "metrics_and_validation",
+        "horizons_1min",
+        "shared_ephemeris_1min_sun",
+        "shared_ephemeris_1min_earth",
+        "soft_preferences",
+        "commit_artifacts",
+        "complete"
+      ],
+      "validation_passed": true
+    },
+    {
+      "site": "haworth",
+      "duration_hours": 72,
+      "seconds": 0.9087841629998366,
+      "decision": "FAIL",
+      "illumination": {
+        "model": "solar_disc",
+        "mean_visible_fraction_bounds": [
+          0.7289700142806111,
+          0.7289700142806111
+        ]
+      },
+      "stages": [
+        "verify_dem",
+        "precomputed_horizon",
+        "verify_horizon_artifacts",
+        "horizons_5min",
+        "shared_ephemeris_5min_sun",
+        "shared_ephemeris_5min_earth",
+        "initial_metrics",
+        "hard_requirements",
+        "confirming_hard_failure_1min",
+        "shared_ephemeris_1min_sun",
+        "shared_ephemeris_1min_earth",
+        "commit_artifacts",
+        "complete"
+      ],
+      "validation_passed": false
+    }
+  ],
+  "live_llm_calls": 0,
+  "timing_scope": "Local machine. Fresh result AND geometry caches; packaged terrain and installed shared SPICE kernels/tables. No raw DEM scans.",
+  "direct_mesh_seconds": 6.902535021999938,
+  "mesh_http": {
+    "seconds": 0.03520640499937144,
+    "cache": "HIT",
+    "identical_to_raw_dem_display": true,
+    "gzip_bytes": 267717,
+    "conditional_status": 304
+  }
+}

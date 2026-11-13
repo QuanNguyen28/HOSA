@@ -11,7 +11,7 @@ from .store import Store, coordinate_key
 
 FINE_STEP = .03125
 SHORT_STEP = .0625
-HEIGHTS = (1., 2., 10., 20.)
+HEIGHTS = (1., 2., 10., 20., 30.)
 
 
 def encode_profile(profile):

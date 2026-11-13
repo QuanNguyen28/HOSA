@@ -1,0 +1,292 @@
+{
+  "passed": true,
+  "records": [
+    {
+      "site_ids": [
+        "connecting-ridge"
+      ],
+      "status": "extended",
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "elapsed_seconds": 64.0498086120001,
+      "enu_reference_verified": true
+    },
+    {
+      "site_ids": [
+        "shackleton-rim"
+      ],
+      "status": "extended",
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "elapsed_seconds": 82.85422680700003,
+      "enu_reference_verified": true
+    },
+    {
+      "site_ids": [
+        "peak-near-cabeus-b"
+      ],
+      "status": "extended",
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "elapsed_seconds": 69.47018956900001,
+      "enu_reference_verified": true
+    },
+    {
+      "site_ids": [
+        "haworth"
+      ],
+      "status": "extended",
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "elapsed_seconds": 54.48421026200003,
+      "enu_reference_verified": true
+    },
+    {
+      "site_ids": [
+        "malapert-massif"
+      ],
+      "status": "extended",
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "elapsed_seconds": 61.61593134500026,
+      "enu_reference_verified": true
+    },
+    {
+      "site_ids": [
+        "mons-mouton-plateau"
+      ],
+      "status": "extended",
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "elapsed_seconds": 84.46734194299961,
+      "enu_reference_verified": true
+    },
+    {
+      "site_ids": [
+        "mons-mouton"
+      ],
+      "status": "extended",
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "elapsed_seconds": 103.2000713880002,
+      "enu_reference_verified": true
+    },
+    {
+      "site_ids": [
+        "nobile-rim-1"
+      ],
+      "status": "extended",
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "elapsed_seconds": 109.52573281700006,
+      "enu_reference_verified": true
+    },
+    {
+      "site_ids": [
+        "nobile-rim-2"
+      ],
+      "status": "extended",
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "elapsed_seconds": 100.67597748299977,
+      "enu_reference_verified": true
+    },
+    {
+      "site_ids": [
+        "de-gerlache-rim-2"
+      ],
+      "status": "extended",
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "elapsed_seconds": 69.60895752099987,
+      "enu_reference_verified": true
+    },
+    {
+      "site_ids": [
+        "im1-odysseus"
+      ],
+      "status": "extended",
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "elapsed_seconds": 92.2731195639999,
+      "enu_reference_verified": true
+    },
+    {
+      "site_ids": [
+        "im2-athena"
+      ],
+      "status": "extended",
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "elapsed_seconds": 84.47050115499997,
+      "enu_reference_verified": true
+    },
+    {
+      "site_ids": [
+        "viper"
+      ],
+      "status": "extended",
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "elapsed_seconds": 82.79400408600031,
+      "enu_reference_verified": true
+    },
+    {
+      "site_ids": [
+        "shackleton-floor"
+      ],
+      "status": "extended",
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "elapsed_seconds": 93.41970881599991,
+      "enu_reference_verified": true
+    },
+    {
+      "site_ids": [
+        "peak-near-shackleton"
+      ],
+      "status": "extended",
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "elapsed_seconds": 109.95154096700026,
+      "enu_reference_verified": true
+    },
+    {
+      "site_ids": [
+        "leibnitz-beta-plateau"
+      ],
+      "status": "extended",
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "elapsed_seconds": 92.36733703400023,
+      "enu_reference_verified": true
+    },
+    {
+      "site_ids": [
+        "de-gerlache-kocher"
+      ],
+      "status": "extended",
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "elapsed_seconds": 126.44246703499994,
+      "enu_reference_verified": true
+    },
+    {
+      "site_ids": [
+        "shoemaker"
+      ],
+      "status": "extended",
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "elapsed_seconds": 114.42317538099996,
+      "enu_reference_verified": true
+    },
+    {
+      "site_ids": [
+        "amundsen-rim"
+      ],
+      "status": "extended",
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "elapsed_seconds": 93.72954565700002,
+      "enu_reference_verified": true
+    }
+  ],
+  "sites_total": 19,
+  "live_llm_calls": 0
+}

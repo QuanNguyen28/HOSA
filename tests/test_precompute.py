@@ -32,12 +32,12 @@ def package(tmp_path, monkeypatch):
 def sphere(package):
     site = {"site_id": "coordinate", "lon_e_deg": 17., "lat_deg": -88., "dem_z_m": 100., "dem_sha256": "fixture"}
     record = {"site": site, "observer_source": {"dataset_id": "synthetic-sphere", "resolution_m": 80},
-        "geometry_method": METHOD_VERSION, "heights_m": [1., 2.], "source_inventory": [],
+        "geometry_method": METHOD_VERSION, "heights_m": [1., 2., 30.], "source_inventory": [],
         "datasets": [], "seams": [{"passed": False}], "profiles": {}}
     for label, step, radius in (("fine", FINE_STEP, 400000), ("short", SHORT_STEP, 300000)):
         az = np.arange(0, 360, step)
         lon, lat = ray_positions(17., -88., az, 1000.)
-        for height in (1., 2.):
+        for height in (1., 2., 30.):
             profile = pd.DataFrame({"site_id": "coordinate", "height_m": height, "az_deg": az,
                 "az_step_deg": step, "horizon_deg": ray_elevation(100., 100., height, 1000.),
                 "blocker_distance_m": 1000., "blocker_z_m": 100., "blocker_lon_e_deg": lon.ravel() % 360,
@@ -63,6 +63,16 @@ def test_exact_coordinates_heights_and_source_changes(package, sphere, tmp_path,
     raw.with_name(raw.name+".receipt.json").write_text('{"sha256":"changed"}')
     monkeypatch.setattr(point, "terrain_sources", lambda: [{"dataset_id": "new", "path": raw}])
     assert prepared_terrain(request()) is None
+
+
+def test_viewer_30m_uses_its_own_horizon_not_a_lower_height(package, sphere):
+    terrain = prepared_terrain(request(panel_height_m=30., antenna_height_m=30.))
+    assert terrain is not None
+    fine, short, _ = terrain.profiles([2., 30.], .125)
+    for group in (fine, short):
+        assert group[30.].height_m.eq(30.).all()
+        assert (group[30.].horizon_deg < group[2.].horizon_deg).all()
+        assert not group[30.].coverage_complete.iloc[0]
 
 
 def test_prepared_geometry_without_raw_dem_preserves_unknowns_and_validation(package, sphere, tmp_path, monkeypatch):

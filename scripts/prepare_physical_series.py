@@ -42,7 +42,7 @@ if __name__ == "__main__":
     parser.add_argument("--root", type=Path, default=ROOT/"data/cache/point-analysis")
     parser.add_argument("--report", type=Path)
     args = parser.parse_args()
-    selected = [t for t in targets() if not args.sites or set(args.sites)&set(t["site_ids"])]
+    selected = [t for t in targets(include_legacy=bool(args.sites)) if not args.sites or set(args.sites)&set(t["site_ids"])]
     if not selected or (args.sites and set(args.sites)-{s for t in selected for s in t["site_ids"]}):
         parser.error("Unknown site ID")
     records = []
