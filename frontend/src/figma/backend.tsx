@@ -1,3 +1,4 @@
+import { useTranslation } from "../i18n/LanguageProvider";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../mvp/api";
 import {
@@ -87,11 +88,12 @@ export function NumberField({
   disabled?: boolean;
   onChange: (v: number) => void;
 }) {
+  const { t: tr } = useTranslation();
   return (
     <label className="block">
-      <span className="eyebrow">{label}</span>
+      <span className="eyebrow">{tr(label)}</span>
       <input
-        aria-label={label}
+        aria-label={tr(label)}
         className={`${inputClass} mt-1`}
         type="number"
         min={min}
@@ -115,6 +117,7 @@ export function MissionFields({
   onChange: (m: Mission) => void;
   disabled: boolean;
 }) {
+  const { t: tr } = useTranslation();
   const change = <K extends keyof Mission>(key: K, value: Mission[K]) => {
     const next = { ...m, [key]: value };
     if (next.timing === "end") next.hours = missionHours(next);
@@ -124,27 +127,27 @@ export function MissionFields({
   return (
     <fieldset disabled={disabled} className="space-y-3">
       <label className="block">
-        <span className="eyebrow">Define mission by</span>
+        <span className="eyebrow">{tr("Define mission by")}</span>
         <select
-          aria-label="Define mission by"
+          aria-label={tr("Define mission by")}
           className={`${inputClass} mt-1`}
           value={m.timing}
           onChange={(e) =>
             change("timing", e.target.value as Mission["timing"])
           }
         >
-          <option value="hours">Duration in hours</option>
-          <option value="end">Target end date (UTC)</option>
+          <option value="hours">{tr("Duration in hours")}</option>
+          <option value="end">{tr("Target end date (UTC)")}</option>
         </select>
       </label>
       <div
         className={`grid gap-3 ${m.timing === "end" ? "grid-cols-1" : "grid-cols-2"}`}
       >
         <label>
-          <span className="eyebrow">From · UTC</span>
+          <span className="eyebrow">{tr("From · UTC")}</span>
           <input
             className={`${inputClass} mt-1`}
-            aria-label="Mission start UTC"
+            aria-label={tr("Mission start UTC")}
             type="datetime-local"
             step={300}
             value={m.start}
@@ -160,10 +163,10 @@ export function MissionFields({
           />
         ) : (
           <label>
-            <span className="eyebrow">Target end · UTC</span>
+            <span className="eyebrow">{tr("Target end · UTC")}</span>
             <input
               className={`${inputClass} mt-1`}
-              aria-label="Mission end UTC"
+              aria-label={tr("Mission end UTC")}
               type="datetime-local"
               step={300}
               value={m.end}
@@ -174,12 +177,12 @@ export function MissionFields({
       </div>
       <p className="text-[11px] text-mute">
         {Number.isFinite(missionHours(m)) && missionHours(m) > 0
-          ? `${Number(missionHours(m).toFixed(4))} hours · ends ${missionEnd(m).replace("T", " ")} UTC`
-          : "Choose an end after the mission start."}
+          ? tr("{0} hours · ends {1} UTC", [Number(missionHours(m).toFixed(4)), missionEnd(m).replace("T", " ")])
+          : tr("Choose an end after the mission start.")}
       </p>
       <details>
         <summary className="eyebrow cursor-pointer py-1">
-          Mission requirements
+          {tr("Mission requirements")}
         </summary>
         <div className="mt-3 space-y-3">
           <NumberField
@@ -238,8 +241,7 @@ export function MissionFields({
             />
           </div>
           <p className="text-[11px] leading-relaxed text-mute">
-            A window is continuous geometric visibility. Setup and the first
-            contact must finish by the deadline.
+            {tr("A window is continuous geometric visibility. Setup and the first contact must finish by the deadline.")}
           </p>
           <NumberField
             label="Longest darkness preference · h"
@@ -254,8 +256,7 @@ export function MissionFields({
             onChange={(v) => change("blackout", v)}
           />
           <p className="text-[11px] text-mute">
-            Darkness and blackout preferences are secondary; they do not reject
-            a mission that meets primary requirements.
+            {tr("Darkness and blackout preferences are secondary; they do not reject a mission that meets primary requirements.")}
           </p>
           <label className="flex gap-2 text-xs text-soft">
             <input
@@ -265,12 +266,10 @@ export function MissionFields({
                 change("resolve_indeterminate", e.target.checked)
               }
             />
-            Complete inconclusive validation automatically
+            {tr("Complete inconclusive validation automatically")}
           </label>
           <p className="text-[11px] text-mute">
-            Check conservative mission bounds first; refine the horizon up to
-            twice only when needed. Requirements and validation tolerances stay
-            unchanged.
+            {tr("Check conservative mission bounds first; refine the horizon up to twice only when needed. Requirements and validation tolerances stay unchanged.")}
           </p>
           <label className="flex gap-2 text-xs text-soft">
             <input
@@ -278,7 +277,7 @@ export function MissionFields({
               checked={m.offline}
               onChange={(e) => change("offline", e.target.checked)}
             />
-            Use local astronomy data only
+            {tr("Use local astronomy data only")}
           </label>
         </div>
       </details>
@@ -294,11 +293,12 @@ export function RequestStatus({
   stage: string;
   error?: string;
 }) {
+  const { t: tr } = useTranslation();
   return (
     <>
       {busy && (
         <p role="status" className="text-xs text-sun animate-pulse">
-          {stage || "Calculating"}…
+          {tr(stage || "Calculating")}…
         </p>
       )}
       {error && (
@@ -306,7 +306,7 @@ export function RequestStatus({
           role="alert"
           className="break-words text-xs leading-relaxed text-rose"
         >
-          {error}
+          {tr(error)}
         </p>
       )}
     </>
@@ -325,6 +325,7 @@ export function MetricBar({
   color: string;
   icon?: React.ReactNode;
 }) {
+  const { t: tr } = useTranslation();
   const pct: Bounds | undefined = pair && [
     (pair[0] / hours) * 100,
     (pair[1] / hours) * 100,
@@ -334,11 +335,11 @@ export function MetricBar({
       <div className="flex items-center justify-between text-[13px]">
         <span className="flex items-center gap-2 text-soft">
           {icon}
-          {label}
+          {tr(label)}
         </span>
         <span className="font-display text-lg font-semibold tabular">
           {boundsText(pct)}
-          {pct ? "%" : ""}
+          {tr(pct ? "%" : "")}
         </span>
       </div>
       <div className="mt-1.5 h-[3px] bg-line">
@@ -351,7 +352,7 @@ export function MetricBar({
       </div>
       {pair && (
         <p className="mt-1 font-mono text-[10px] text-mute">
-          {boundsText(pair)} {label === "Mean visible Sun disc" ? "equivalent full-disc h" : "h"}
+          {boundsText(pair)} {tr(label === "Mean visible Sun disc" ? "equivalent full-disc h" : "h")}
         </p>
       )}
     </div>
@@ -364,6 +365,7 @@ export function CurrentStatus({
   result?: PointResult;
   time: number;
 }) {
+  const { t: tr } = useTranslation();
   const row = result && (result.instant ?? intervalAt(result.timeline, time));
   return (
     <div className="flex gap-2">
@@ -377,17 +379,17 @@ export function CurrentStatus({
             {body === "sun" ? <SunIcon size={20} /> : <EarthIcon size={20} />}
             <div>
               <p className="font-display text-sm font-semibold">
-                {body === "sun" ? "Sun" : "Earth"}{" "}
-                {state === "V"
+                {tr(body === "sun" ? "Sun" : "Earth")}{" "}
+                {tr(state === "V"
                   ? "visible"
                   : state === "B"
                     ? "blocked"
-                    : "unknown"}
+                    : "unknown")}
               </p>
               <p className="font-mono text-[10px]">
                 {body === "sun" && row?.sun_visible_fraction != null
-                  ? `${(row.sun_visible_fraction * 100).toFixed(1)}% of disc visible`
-                  : row ? "Backend interval" : "No interval evidence"}
+                  ? tr("{0}% of disc visible", [(row.sun_visible_fraction * 100).toFixed(1)])
+                  : tr(row ? "Backend interval" : "No interval evidence")}
               </p>
             </div>
           </div>
@@ -420,18 +422,19 @@ export function BackendTimeline({
   time: number;
   onTime: (v: number) => void;
 }) {
+  const { t: tr } = useTranslation();
   const bins = useMemo(() => timelineBins(result?.timeline ?? [], start, end), [result, start, end]);
   return (
-    <div className="space-y-1.5" aria-label="Backend visibility timeline">
+    <div className="space-y-1.5" aria-label={tr("Backend visibility timeline")}>
       {(["sun", "earth", "joint"] as const).map((body) => (
         <div key={body} className="flex items-center gap-3">
           <span className="w-10 font-mono text-[10px] uppercase text-mute">
-            {body}
+            {tr(body)}
           </span>
           <div
             className="relative flex h-3.5 flex-1 cursor-pointer overflow-hidden bg-panel-2"
             role="img"
-            aria-label={`${body}: visible, blocked or unknown across mission`}
+            aria-label={tr("{0}: visible, blocked or unknown across mission", [body])}
             onClick={(e) => {
               const box = e.currentTarget.getBoundingClientRect();
               onTime(
@@ -456,7 +459,7 @@ export function BackendTimeline({
               return <span
                 aria-hidden="true"
                 key={i}
-                title={`${fmtTime(Date.parse(r.start_utc))}: ${(lo * 100).toFixed(1)}${uncertain ? `–${(hi * 100).toFixed(1)}` : ""}% ${body === "sun" ? "mean Sun disc" : "visible time"} in display bin`}
+                title={tr("{0}: {1}{2}% {3} in display bin", [fmtTime(Date.parse(r.start_utc)), boundsText([lo * 100, hi * 100], 1), "", body === "sun" ? "mean Sun disc" : "visible time"])}
                 style={{
                   alignSelf: "flex-end",
                   height: uncertain ? "100%" : `${Math.max(0, lo) * 100}%`,
@@ -474,13 +477,12 @@ export function BackendTimeline({
         </div>
       ))}
       <p className="text-right font-mono text-[9px] text-mute">
-        HEIGHT = MEAN SUN DISC / EARTH & JOINT VISIBLE TIME · HATCHED = UNCERTAIN · DISPLAY BIN AVERAGES
-        {result?.timeline_transport?.exact_intervals_ready === false && " · Preview chart; exact instants available after Analyze"}
-        {result?.timeline_transport?.mode === "aggregated" && result.timeline_transport.exact_intervals_ready !== false && " · Current status uses exact native intervals"}
-        {!result && " · Run Analyze to load evidence"}
-        {result?.timeline_transport?.mode === "pending" && (result.evaluation_stages?.validation === "not_started"
+        {tr("HEIGHT = MEAN SUN DISC / EARTH & JOINT VISIBLE TIME · HATCHED = UNCERTAIN · DISPLAY BIN AVERAGES")}{tr(result?.timeline_transport?.exact_intervals_ready === false && " · Preview chart; exact instants available after Analyze")}
+        {tr(result?.timeline_transport?.mode === "aggregated" && result.timeline_transport.exact_intervals_ready !== false && " · Current status uses exact native intervals")}
+        {tr(!result && " · Run Analyze to load evidence")}
+        {tr(result?.timeline_transport?.mode === "pending" && (result.evaluation_stages?.validation === "not_started"
           ? " · Metrics ready · Analyze point to prepare timeline and evaluate"
-          : " · Metrics ready · timeline and evaluation are being prepared")}
+          : " · Metrics ready · timeline and evaluation are being prepared"))}
       </p>
     </div>
   );
@@ -494,31 +496,32 @@ export function ValidationInfo({
   pendingError?: string;
   onTime?: (value: number) => void;
 }) {
+  const { t: tr } = useTranslation();
   if ("hard_failure" in result && result.hard_failure) {
     const failure = result.hard_failure;
     return <div className="space-y-1 text-[11px] leading-relaxed text-rose" role="alert">
-      <p>Hard requirement failed: {failure.constraint.replaceAll("_", " ")}.</p>
+      <p>{tr("Hard requirement failed: ")}{tr(failure.constraint.replaceAll("_", " "))}.</p>
       {typeof failure.limit === "number" && failure.observed_bounds && <p>
-        Required {(failure.limit * 100).toFixed(2)}%; upper bound {(failure.observed_bounds[1] * 100).toFixed(2)}%.
-        {failure.shortfall_hours_bounds && ` At least ${boundsText(failure.shortfall_hours_bounds)} h short.`}
+        {tr("Required ")}{(failure.limit * 100).toFixed(2)}{tr("%; upper bound ")}{(failure.observed_bounds[1] * 100).toFixed(2)}%.
+        {tr(failure.shortfall_hours_bounds && tr(" At least {0} h short.", [boundsText(failure.shortfall_hours_bounds)]))}
       </p>}
-      <p>{failure.confirmed_sampling_minutes?.length
-        ? `Hard failure confirmed on ${failure.confirmed_sampling_minutes.join("/")}-minute grids. Full validation and soft preferences skipped.`
-        : "Validation and soft preferences skipped. Sampled model · PROVISIONAL."}</p>
-      <p>Window: {failure.window.start_utc.replace("T", " ")} → {failure.window.end_utc.replace("T", " ")}</p>
-      {failure.deadline_utc && <p>Contact must finish by {failure.deadline_utc.replace("T", " ")}.</p>}
-      <p className="text-mute">{failure.explanation}</p>
+      <p>{tr(failure.confirmed_sampling_minutes
+        ? tr("Hard failure confirmed on {0}-minute grids. Full validation and soft preferences skipped.", [failure.confirmed_sampling_minutes.join("/")])
+        : "Validation and soft preferences skipped.")} {tr(" Sampled model · PROVISIONAL.")}</p>
+      <p>{tr("Window: ")}{failure.window.start_utc.replace("T", " ")} → {failure.window.end_utc.replace("T", " ")}</p>
+      {failure.deadline_utc && <p>{tr("Contact must finish by ")}{failure.deadline_utc.replace("T", " ")}.</p>}
+      <p className="text-mute">{tr(failure.explanation)}</p>
       {failure.evidence_intervals.map((row) => <button key={row.start_utc} className="block text-left underline underline-offset-2"
         disabled={!onTime} onClick={() => onTime?.(Date.parse(row.at_utc ?? row.start_utc))}>
-        {row.target}: {row.start_utc.replace("T", " ")} → {row.end_utc.replace("T", " ")}
-        {row.at_utc && <span className="block">Worst sample: {row.at_utc.replace("T", " ")}</span>}
+        {tr(row.target)}: {row.start_utc.replace("T", " ")} → {row.end_utc.replace("T", " ")}
+        {row.at_utc && <span className="block">{tr("Worst sample: ")}{row.at_utc.replace("T", " ")}</span>}
       </button>)}
     </div>;
   }
   if ("evaluation_status" in result && result.evaluation_status === "pending") {
     return <div role="status" className="text-[11px] leading-relaxed text-amber">
-      <p>{pendingError ? "Evaluation stopped. Initial metrics remain available." : result.evaluation_stages?.validation === "not_started" ? "Prepared metrics ready. Analyze point to evaluate requirements and scientific validation." : "Evaluating requirements and scientific validation…"}</p>
-      <p>Initial Sun/Earth/Joint metrics are available. Values may change after refinement; no final decision yet.</p>
+      <p>{tr(pendingError ? "Evaluation stopped. Initial metrics remain available." : result.evaluation_stages?.validation === "not_started" ? "Prepared metrics ready. Analyze point to evaluate requirements and scientific validation." : "Evaluating requirements and scientific validation…")}</p>
+      <p>{tr("Initial Sun/Earth/Joint metrics are available. Values may change after refinement; no final decision yet.")}</p>
     </div>;
   }
   return (
@@ -530,60 +533,60 @@ export function ValidationInfo({
             : "text-amber"
         }
       >
-        {result.validation.passed
+        {tr(result.validation.passed
           ? "Numerical checks passed"
           : result.validation.mission_path?.passed
             ? "Mission requirement bounds passed; full-model checks need review"
-            : "Validation incomplete or failed"}{" "}
-        · PROVISIONAL
+            : "Validation incomplete or failed")}{" "}
+        {tr("· PROVISIONAL")}
       </p>
       {!result.validation.passed && !result.validation.mission_path?.passed && (
         <p>
-          {result.decision === "FAIL"
+          {tr(result.decision === "FAIL"
             ? "A hard requirement failed. FAIL is retained with these validation warnings."
-            : `Sampled decision ${result.nominal_sampled_decision ?? "undecided"}; PASS requires full or mission-path validation.`}
+            : tr("Sampled decision {0}; PASS requires full or mission-path validation.", [result.nominal_sampled_decision ?? "undecided"]))}
         </p>
       )}
       {result.validation.mission_path?.passed && (
         <p>
-          Verified for this sampled mission only. Full-circle accuracy and
-          physical DEM uncertainty are not certified.
+          {tr("Verified for this sampled mission only. Full-circle accuracy and physical DEM uncertainty are not certified.")}
         </p>
       )}
       {result.validation.mission_path?.metrics_hours && (
         <p>
-          Conservative bounds: sunlight{" "}
+          {tr("Conservative bounds: sunlight")}{" "}
           {boundsText(
             result.validation.mission_path.metrics_hours.total_sun_hours,
           )}{" "}
-          h; Earth LOS{" "}
+          {tr("h; Earth LOS")}{" "}
           {boundsText(
             result.validation.mission_path.metrics_hours.total_earth_los_hours,
           )}{" "}
-          h.
+          {tr("h.")}
         </p>
       )}
       {result.resolution?.enabled && (
         <p>
-          {result.resolution.status === "resolved"
-            ? `Revalidated: ${result.resolution.initial_decision} → ${result.decision}`
+          {tr(result.resolution.status === "resolved"
+            ? tr("Revalidated: {0} → {1}", [result.resolution.initial_decision, result.decision])
             : result.resolution.status === "not_needed"
               ? "No additional validation needed."
               : result.resolution.status === "hard_requirement_failed"
                 ? "Hard requirement failed; extra validation is not required to reject this request."
-                : "Additional validation could not resolve this request."}
-          {!!result.resolution.refinement_rounds &&
-            ` · ${result.resolution.refinement_rounds} refinement round(s)`}
-          {result.resolution.error_code && ` · ${result.resolution.error_code}`}
+                : "Additional validation could not resolve this request.")}
+          {tr(!!result.resolution.refinement_rounds &&
+            tr(" · {0} refinement round(s)", [result.resolution.refinement_rounds]))}
+          {tr(result.resolution.error_code && tr(" · {0}", [result.resolution.error_code]))}
         </p>
       )}
       {!!result.validation.reason_codes?.length && (
-        <p>{result.validation.reason_codes.join(", ")}</p>
+        <p>{result.validation.reason_codes.map((code) => tr(code)).join(", ")}</p>
       )}
     </div>
   );
 }
 export function PlanningSummary({ result }: { result: PlanningResult }) {
+  const { t: tr } = useTranslation();
   return (
     <section
       className="glass flex flex-wrap items-center justify-between gap-4 p-4"
@@ -591,17 +594,17 @@ export function PlanningSummary({ result }: { result: PlanningResult }) {
     >
       <div>
         <p className="font-display text-lg">
-          {result.status.replaceAll("_", " ")}
+          {tr(result.status.replaceAll("_", " "))}
         </p>
         <p className="mt-1 text-xs text-mute">
-          Evaluated {result.coverage.candidate_total} · PASS{" "}
-          {result.coverage.pass} · FAIL {result.coverage.fail} · INDETERMINATE{" "}
-          {result.coverage.indeterminate}
+          {tr("Evaluated ")}{tr(result.coverage.candidate_total)} {tr(" · PASS")}{" "}
+          {tr(result.coverage.pass)} {tr(" · FAIL ")}{tr(result.coverage.fail)} {tr(" · INDETERMINATE")}{" "}
+          {tr(result.coverage.indeterminate)}
         </p>
         <p className="mt-1 text-xs text-mute">
-          {result.apply_allowed
+          {tr(result.apply_allowed
             ? "A validated feasible candidate is available."
-            : "No validated feasible candidate is available."}
+            : "No validated feasible candidate is available.")}
         </p>
       </div>
       <div className="flex gap-3">
@@ -609,13 +612,13 @@ export function PlanningSummary({ result }: { result: PlanningResult }) {
           className={actionClass}
           href={`/api/planning/results/${result.result_id}?format=json`}
         >
-          Download JSON
+          {tr("Download JSON")}
         </a>
         <a
           className={actionClass}
           href={`/api/planning/results/${result.result_id}?format=csv`}
         >
-          Download CSV
+          {tr("Download CSV")}
         </a>
       </div>
     </section>
@@ -634,6 +637,7 @@ export function CandidateCard({
   onOpen: () => void;
   recommended: boolean;
 }) {
+  const { t: tr } = useTranslation();
   return (
     <article
       className={`glass space-y-4 p-5 ${recommended ? "border-mint/40" : ""}`}
@@ -669,19 +673,18 @@ export function CandidateCard({
             key={key}
             className="flex justify-between gap-2 border-t border-line pt-2"
           >
-            <dt className="text-mute">{label}</dt>
+            <dt className="text-mute">{tr(label)}</dt>
             <dd className="font-mono text-xs">
-              {boundsText(c.metrics[key])} h
-            </dd>
+              {boundsText(c.metrics[key])} {tr(" h")}</dd>
           </div>
         ))}
       </dl>
       <ValidationInfo result={c} />
       {recommended && (
         <p className="text-xs text-mint">
-          {c.decision === "PASS"
+          {tr(c.decision === "PASS"
             ? "Recommended among evaluated candidates"
-            : "Near miss — requirements not met"}
+            : "Near miss — requirements not met")}
         </p>
       )}
       <button
@@ -689,7 +692,7 @@ export function CandidateCard({
         disabled={!c.coordinate}
         onClick={onOpen}
       >
-        View on Moon →
+        {tr("View on Moon →")}
       </button>
     </article>
   );

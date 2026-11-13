@@ -1,3 +1,4 @@
+import { useTranslation } from "../i18n/LanguageProvider";
 import { Suspense, useEffect, useMemo, useRef } from "react";
 import { Canvas, type ThreeEvent, useFrame, useThree } from "@react-three/fiber";
 import {
@@ -290,6 +291,7 @@ function CelestialMarker({
   terrain: TerrainWindow;
   horizonProfile: Float32Array;
 }) {
+  const { t: tr } = useTranslation();
   const metadata = terrain.geometry!;
   const direction = skyDirectionToTerrainAxes(
     body.azimuthDeg,
@@ -351,10 +353,10 @@ function CelestialMarker({
         )}
         <Html center position={[0, 0.082, 0]} zIndexRange={[20, 10]}>
           <div className={`ground-sky-label ground-sky-label-${name.toLowerCase()}`}>
-            <strong>{name}</strong>
-            <span>{visible ? "visible" : "terrain hidden"}</span>
+            <strong>{tr(name)}</strong>
+            <span>{tr(visible ? "visible" : "terrain hidden")}</span>
             <small>
-              az {body.azimuthDeg.toFixed(1)}° · el {body.elevationDeg.toFixed(2)}° · {clearance >= 0 ? "+" : ""}{clearance.toFixed(2)}°
+              {tr("az ")}{body.azimuthDeg.toFixed(1)}{tr("° · el ")}{body.elevationDeg.toFixed(2)}° · {tr(clearance >= 0 ? "+" : "")}{clearance.toFixed(2)}°
             </small>
           </div>
         </Html>
@@ -1089,6 +1091,7 @@ function SiteMarker({
 }
 
 function SelectedMarker({ coordinate }: { coordinate: LunarCoordinate }) {
+  const { t: tr } = useTranslation();
   const position = useMemo(
     () => coordinateToVector(coordinate, MOON_SCENE_RADIUS * 1.003),
     [coordinate],
@@ -1107,7 +1110,7 @@ function SelectedMarker({ coordinate }: { coordinate: LunarCoordinate }) {
         </mesh>
       </Billboard>
       <Html center position={[0, 0.026, 0]}>
-        <div className="site-marker-label">Custom point</div>
+        <div className="site-marker-label">{tr("Custom point")}</div>
       </Html>
     </group>
   );

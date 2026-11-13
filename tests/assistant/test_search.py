@@ -4,7 +4,7 @@ import pytest
 
 from app.assistant.models import EvaluateRequest, ExplainPlan, ParseRequest
 from app.assistant.provider import AssistantError
-from app.assistant.explanations import valid_plan
+from app.assistant.explanations import valid_plan, render
 from conftest import FixtureLLM, default_patch
 
 
@@ -87,6 +87,20 @@ def test_explanation_reports_the_selected_sunlight_objective(service, request_pa
     result = asyncio.run(service.evaluate(confirm(parsed, request_payload)))
     assert any("có nắng" in line for line in result.explanation)
     assert any(key.endswith(".sun") for key in result.explanation_fact_ids)
+
+
+def test_explanation_collapses_equal_display_bounds_and_preserves_ranges(service, request_payload):
+    parsed = asyncio.run(service.parse(ParseRequest.model_validate(request_payload)))
+    result = asyncio.run(service.evaluate(confirm(parsed, request_payload)))
+    evidence = result.evidence.model_copy(deep=True)
+    candidate = evidence.candidates[0]
+    candidate.metrics["total_sun_hours"] = [36., 36.000001]
+    candidate.metrics["total_earth_los_hours"] = [12., 18.]
+    lines, _ = render(evidence)
+    text = " ".join(lines)
+    assert "có nắng 36.00 giờ" in text
+    assert "36.00–36.00" not in text
+    assert "có tầm nhìn Trái Đất 12.00–18.00 giờ" in text
 
 
 def test_parse_issues_include_proposed_fields_for_user_review(service, request_payload):

@@ -1,3 +1,4 @@
+import { useTranslation } from "../i18n/LanguageProvider";
 import { type ReactNode } from "react";
 import { SPEEDS, STEP, fmtLat, fmtLon } from "./model";
 
@@ -159,6 +160,7 @@ export function Ring({
   best?: boolean;
   suffix?: string;
 }) {
+  const { t: tr } = useTranslation();
   const r = size / 2 - 8,
     c = 2 * Math.PI * r,
     v = clamp(value, 0, 100);
@@ -166,7 +168,7 @@ export function Ring({
     <div
       className="flex flex-col items-center gap-2"
       role="img"
-      aria-label={`${label}: ${value.toFixed(0)}${suffix}`}
+      aria-label={tr("{0}: {1}{2}", [label, value.toFixed(0), suffix])}
     >
       <div className="relative" style={{ width: size, height: size }}>
         <svg width={size} height={size} className="-rotate-90">
@@ -196,18 +198,18 @@ export function Ring({
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="font-display text-2xl font-semibold tabular">
             {value.toFixed(0)}
-            <span className="text-sm text-mute">{suffix}</span>
+            <span className="text-sm text-mute">{tr(suffix)}</span>
           </span>
         </div>
         {best && (
           <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-white px-1.5 font-display text-[10px] font-bold tracking-widest text-ink">
-            TOP
+            {tr("TOP")}
           </span>
         )}
       </div>
       <span className="flex items-center gap-1.5 text-xs text-soft">
         {icon}
-        {label}
+        {tr(label)}
       </span>
     </div>
   );
@@ -224,10 +226,11 @@ export function Seg<T extends string | number>({
   onChange: (v: T) => void;
   label: string;
 }) {
+  const { t: tr } = useTranslation();
   return (
     <div
       role="radiogroup"
-      aria-label={label}
+      aria-label={tr(label)}
       className="inline-flex border border-line bg-ink/85"
     >
       {options.map((o) => (
@@ -239,7 +242,7 @@ export function Seg<T extends string | number>({
           onClick={() => onChange(o.v)}
           className={`px-4 py-2 font-display text-[12px] font-semibold tracking-[0.14em] whitespace-nowrap uppercase transition ${o.v === value ? "bg-white text-ink" : "text-soft hover:text-white"}`}
         >
-          {o.label}
+          {tr(o.label)}
         </button>
       ))}
     </div>
@@ -257,9 +260,10 @@ export function LiveBar({
   setSpeed,
   children,
 }: { s: Shared; children?: ReactNode } & Ctl) {
+  const { t: tr, locale } = useTranslation();
   const d = new Date(s.timeMs);
   const date = d
-    .toLocaleDateString("en-US", {
+    .toLocaleDateString(locale, {
       month: "short",
       day: "numeric",
       year: "numeric",
@@ -270,13 +274,13 @@ export function LiveBar({
   const idx = SPEEDS.indexOf(s.speed);
   return (
     <section
-      aria-label="Time"
+      aria-label={tr("Time")}
       className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/70 to-transparent px-4 pt-10 pb-4"
     >
       <div className="mx-auto flex max-w-3xl items-center justify-between gap-4">
         <span className="flex items-center gap-2 font-display text-lg font-bold tracking-[0.1em] text-mint">
           <i className="size-2.5 rounded-full bg-mint" />
-          SIM
+          {tr("SIM")}
         </span>
         <span className="font-display text-base font-semibold tracking-[0.08em] tabular">
           {date}
@@ -284,7 +288,7 @@ export function LiveBar({
         <button
           type="button"
           aria-pressed={s.playing}
-          aria-label={s.playing ? "Pause" : "Play"}
+          aria-label={tr(s.playing ? "Pause" : "Play")}
           onClick={() => {
             if (!s.playing && s.timeMs >= s.endMs) setTime(s.startMs);
             setPlaying(!s.playing);
@@ -296,17 +300,17 @@ export function LiveBar({
         <button
           type="button"
           onClick={() => setSpeed(SPEEDS[(idx + 1) % SPEEDS.length])}
-          aria-label="Change speed"
+          aria-label={tr("Change speed")}
           className="font-display text-base font-semibold tracking-[0.08em] text-mint"
         >
-          {s.speed >= 24 ? `${s.speed / 24} DAY/S` : `${s.speed} H/S`}
+          {tr(s.speed >= 24 ? tr("{0} DAY/S", [s.speed / 24]) : tr("{0} H/S", [s.speed]))}
         </button>
         <span className="font-display text-base font-semibold tracking-[0.08em] tabular">
           {time}
         </span>
       </div>
       <label className="sr-only" htmlFor="live-scrub">
-        Time within the selected range
+        {tr("Time within the selected range")}
       </label>
       <input
         id="live-scrub"

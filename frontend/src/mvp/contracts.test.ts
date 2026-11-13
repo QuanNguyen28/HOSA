@@ -117,6 +117,10 @@ describe("shared backend mission contracts", () => {
     expect(boundsText(undefined)).toBe("—");
     expect(boundsText([0, 72])).toBe("0–72");
     expect(boundsText([72, 72])).toBe("72");
+    expect(boundsText([71.999999, 72])).toBe("72");
+    expect(boundsText([53.63001, 53.63002])).toBe("53.63");
+    expect(boundsText([53.63, 53.65])).toBe("53.63–53.65");
+    expect(boundsText([50.01, 50.02], 1)).toBe("50");
   });
   it("uses half-open backend intervals", () => {
     const rows: Interval[] = [

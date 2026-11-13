@@ -5,6 +5,12 @@ REASON_SUFFIX = {"DARKNESS": "dark", "BLACKOUT": "blackout", "EARTH_LOS": "earth
 HARD_CONSTRAINT = {"EARTH_LOS": "min_earth_los_fraction", "SUNLIGHT": "min_sunlit_fraction"}
 
 
+def bounds_text(low, high):
+    """Collapse equal display values without altering the underlying evidence."""
+    lower, upper = f"{low:.2f}", f"{high:.2f}"
+    return lower if lower == upper else f"{lower}–{upper}"
+
+
 def explanation_options(candidate, facts):
     """Allowed reason/fact pairs for this exact candidate and computed status."""
     options = {}
@@ -54,12 +60,12 @@ def render(evidence, plan=None):
             fact_ids.append(f"{key}.availability")
             continue
         sun, earth = c.metrics["total_sun_hours"], c.metrics["total_earth_los_hours"]
-        sun_text = (f"chiếu sáng trung bình {sun[0]/evidence.request.duration_hours*100:.2f}–{sun[1]/evidence.request.duration_hours*100:.2f}% diện tích đĩa Mặt Trời "
+        sun_text = (f"chiếu sáng trung bình {bounds_text(sun[0]/evidence.request.duration_hours*100, sun[1]/evidence.request.duration_hours*100)}% diện tích đĩa Mặt Trời "
                     f"(tối thiểu {evidence.request.min_sunlit_fraction*100:g}%)")
         if evidence.request.illumination_model == "sun_center":
-            sun_text = (f"có nắng {sun[0]:.2f}–{sun[1]:.2f} giờ "
+            sun_text = (f"có nắng {bounds_text(*sun)} giờ "
                         f"(tối thiểu {evidence.request.min_sunlit_fraction*100:g}%)")
-        earth_text = (f"có tầm nhìn Trái Đất {earth[0]:.2f}–{earth[1]:.2f} giờ "
+        earth_text = (f"có tầm nhìn Trái Đất {bounds_text(*earth)} giờ "
                       f"(tối thiểu {evidence.request.min_earth_los_fraction*100:g}%)")
         ordered_metrics = (earth_text, sun_text) if focus.get(key) == "EARTH_LOS" else (sun_text, earth_text)
         decision = "chưa đủ căn cứ để kết luận (INDETERMINATE)" if c.decision == "INDETERMINATE" else c.decision
@@ -89,11 +95,11 @@ def render(evidence, plan=None):
             limit = getattr(evidence.request.constraints, name)
             state = c.soft_constraint_states[name]
             note = "vượt mong muốn" if state == "FAIL" else "chưa xác định" if state == "INDETERMINATE" else "đáp ứng mong muốn"
-            texts.append(f"{label}: yêu cầu mềm {title} {low:.2f}–{high:.2f} giờ, mong muốn ≤ {limit:g} giờ; {note}, không làm đổi kết luận yêu cầu cứng.")
+            texts.append(f"{label}: yêu cầu mềm {title} {bounds_text(low, high)} giờ, mong muốn ≤ {limit:g} giờ; {note}, không làm đổi kết luận yêu cầu cứng.")
             fact_ids.append(f"{key}.{suffix}")
         if evidence.request.rank_by == "longest_joint_hours":
             low, high = c.metrics["longest_joint_hours"]
-            texts.append(f"{label}: khoảng khả kiến đồng thời dài nhất {low:.2f}–{high:.2f} giờ.")
+            texts.append(f"{label}: khoảng khả kiến đồng thời dài nhất {bounds_text(low, high)} giờ.")
             fact_ids.append(f"{key}.joint")
         ranking = next((r for r in evidence.ranking if r.candidate_id == key), None)
         if ranking and ranking.rank_min != ranking.rank_max:

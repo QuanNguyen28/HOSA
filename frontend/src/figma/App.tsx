@@ -1,3 +1,5 @@
+import { useTranslation } from "../i18n/LanguageProvider";
+import { LanguageSwitcher } from "../i18n/LanguageSwitcher";
 import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import { SITES, HEIGHTS, HIDDEN_DEFAULT_SITE_IDS, HOUR, STEP, fmtTime, type Site } from "./model";
 import {
@@ -59,6 +61,7 @@ function initialView(): View {
   return TABS.some(([key]) => key === v) ? (v as View) : "explore";
 }
 export default function App() {
+  const { t: tr } = useTranslation();
   const [view, setView] = useState<View>(initialView);
   const [mission, setMission] = useState<Mission>(DEFAULT_MISSION);
   const [viewerHeight, setViewerHeight] = useState(DEFAULT_MISSION.panel);
@@ -223,42 +226,44 @@ export default function App() {
   return (
     <div className="min-h-svh bg-ink">
       <header className="sticky top-0 z-40 border-b border-line bg-ink">
-        <div className="flex h-14 items-center gap-4 px-4 lg:px-6">
+        <div className="flex h-14 items-center gap-1 px-2 sm:gap-4 sm:px-4 lg:px-6">
           <button
             type="button"
             onClick={() => go("explore")}
-            className="flex items-center gap-3"
-            aria-label="HOSA, explore"
+            className="flex shrink-0 items-center gap-3"
+            aria-label={tr("HOSA, explore")}
           >
             <Logo size={30} />
             <span className="font-display text-[15px] font-bold tracking-[0.12em] max-sm:hidden">
-              HOSA
+              {"HOSA"}
             </span>
           </button>
-          <p className="flex items-center gap-2 font-display text-[15px] font-semibold tracking-[0.06em] text-mute max-md:hidden">
+          <p className="flex items-center gap-2 font-display text-[15px] font-semibold tracking-[0.06em] text-mute max-xl:hidden">
             <span aria-hidden>›</span>
-            <span>South Pole</span>
+            <span>{tr("South Pole")}</span>
             <span aria-hidden>›</span>
             <span className="text-white">
-              {TABS.find(([v]) => v === view)![1]}
+              {tr(TABS.find(([v]) => v === view)![1])}
             </span>
           </p>
-          <nav aria-label="Views" className="ml-auto flex h-full items-stretch">
+          <nav aria-label={tr("Views")} className="ml-auto flex h-full items-stretch">
             {TABS.map(([v, l]) => (
               <button
                 key={v}
                 type="button"
                 aria-current={view === v ? "page" : undefined}
                 onClick={() => go(v)}
-                className={`relative px-2 font-display text-[11px] font-semibold tracking-[0.1em] uppercase transition sm:px-5 sm:text-[13px] ${view === v ? "text-white" : "text-mute hover:text-white"}`}
+                className={`relative px-1 font-display text-[9px] whitespace-nowrap min-[360px]:px-1.5 min-[360px]:text-[10px] font-semibold tracking-[0.04em] uppercase transition sm:px-5 sm:tracking-[0.1em] sm:text-[13px] ${view === v ? "text-white" : "text-mute hover:text-white"}`}
               >
-                {l}
+                <span className="sm:hidden">{tr(v === "dates" ? "Dates" : l)}</span>
+                <span className="max-sm:hidden">{tr(l)}</span>
                 {view === v && (
                   <span className="absolute inset-x-3 bottom-0 h-[3px] bg-white sm:inset-x-5" />
                 )}
               </button>
             ))}
           </nav>
+          <LanguageSwitcher />
         </div>
       </header>
       {view === "explore" && (
@@ -294,7 +299,7 @@ export default function App() {
         <main className="mx-auto max-w-[1400px] space-y-4 px-4 py-6 lg:px-8">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <h2 className="font-display text-3xl font-semibold">
-              Compare sites
+              {tr("Compare sites")}
             </h2>
             <button
               className={actionClass}
@@ -309,7 +314,7 @@ export default function App() {
                 )
               }
             >
-              Compare sites
+              {tr("Compare sites")}
             </button>
           </div>
           <section className="glass space-y-3 p-4">
@@ -319,12 +324,11 @@ export default function App() {
               disabled={busy}
             />
             <p className="text-xs text-mute">
-              Same mission, requirements and hardware for every candidate. Only
-              validated PASS candidates can be recommended.
+              {tr("Same mission, requirements and hardware for every candidate. Only validated PASS candidates can be recommended.")}
             </p>
             {issue && (
               <p role="alert" className="text-xs text-rose">
-                {issue}
+                {tr(issue)}
               </p>
             )}
           </section>
@@ -333,10 +337,10 @@ export default function App() {
               { length: Math.min(3, selected.length + 1) },
               (_, i) => (
                 <label key={i} className="glass p-5">
-                  <span className="eyebrow">Site {i + 1}</span>
+                  <span className="eyebrow">{tr("Site ")}{i + 1}</span>
                   <select
                     className={`${inputClass} mt-2`}
-                    aria-label={`Site ${i + 1}`}
+                    aria-label={tr("Site {0}", [i + 1])}
                     value={selected[i] ?? ""}
                     disabled={busy}
                     onChange={(e) => {
@@ -346,10 +350,10 @@ export default function App() {
                       setSelected([...new Set(n)]);
                     }}
                   >
-                    <option value="">— Add a site —</option>
+                    <option value="">{tr("— Add a site —")}</option>
                     {sites.map((t) => (
                       <option key={t.id} value={t.id}>
-                        {t.name}
+                        {t.id === "custom" ? tr("Custom coordinate") : t.name}
                       </option>
                     ))}
                   </select>
@@ -434,6 +438,7 @@ function Explore({
   onCoordinate: (lat: number, lon: number) => void;
   onAnalyze: () => void;
 }) {
+  const { t: tr } = useTranslation();
   const [mode, setMode] = useState<Mode>("pole");
   const [tab, setTab] = useState<"info" | "sites">("info");
   const prepared = usePreparedMetrics(issue ? undefined : missionRequest(mission, toTarget(site)));
@@ -464,14 +469,14 @@ function Explore({
               onClick={() => setTab(t)}
               className={`px-5 py-3 font-display text-[13px] font-semibold tracking-[0.12em] uppercase ${tab === t ? "bg-ink text-white shadow-[inset_0_2px_0_#fff]" : "text-mute hover:text-white"}`}
             >
-              {t === "info" ? "Site" : "All sites"}
+              {tr(t === "info" ? "Site" : "All sites")}
             </button>
           ))}
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto">
           {tab === "sites" ? (
             <div className="px-2 pb-4">
-              <p className="eyebrow px-3 py-3">Sites · {sites.length}</p>
+              <p className="eyebrow px-3 py-3">{tr("Sites · ")}{sites.length}</p>
               {sites.map((t) => (
                 <button
                   key={t.id}
@@ -484,31 +489,31 @@ function Explore({
                   className={`flex w-full items-center gap-3 px-3 py-2.5 text-left text-[13px] ${t.id === site.id ? "bg-white/[0.07] text-white" : "text-soft hover:bg-white/[0.04]"}`}
                 >
                   <i className="size-1.5 shrink-0 rounded-full bg-mute/60" />
-                  <span>{t.name}</span>
+                  <span>{t.id === "custom" ? tr("Custom coordinate") : t.name}</span>
                 </button>
               ))}
               <p className="px-3 pt-3 text-[10px] text-mute">
-                Location catalog only. Visibility is calculated on demand.
+                {tr("Location catalog only. Visibility is calculated on demand.")}
               </p>
             </div>
           ) : (
             <>
               <div className="border-b border-line p-5">
                 <h2 className="text-[26px] leading-none font-bold">
-                  {site.name}
+                  {site.id === "custom" ? tr("Custom coordinate") : site.name}
                 </h2>
                 <p className="mt-2 font-mono text-xs text-mute tabular">
                   {coords(site.lat, site.lon, 4)}
                 </p>
                 <details className="mt-3">
                   <summary className="cursor-pointer text-xs text-mute">
-                    Choose / enter coordinates
+                    {tr("Choose / enter coordinates")}
                   </summary>
                   <div className="mt-3 space-y-3">
                     <label>
-                      <span className="eyebrow">Location</span>
+                      <span className="eyebrow">{tr("Location")}</span>
                       <select
-                        aria-label="Location"
+                        aria-label={tr("Location")}
                         className={`${inputClass} mt-1`}
                         disabled={busy}
                         value={site.id}
@@ -520,7 +525,7 @@ function Explore({
                       >
                         {sites.map((t) => (
                           <option key={t.id} value={t.id}>
-                            {t.name}
+                            {t.id === "custom" ? tr("Custom coordinate") : t.name}
                           </option>
                         ))}
                       </select>
@@ -545,19 +550,19 @@ function Explore({
                 </details>
               </div>
               <div className="space-y-3 border-b border-line p-5">
-                <p className="eyebrow">Right now · backend intervals</p>
+                <p className="eyebrow">{tr("Right now · backend intervals")}</p>
                 <CurrentStatus result={viewResult} time={s.timeMs} />
               </div>
               {customCoordinate && (
                 <div className="space-y-1 border-b border-line p-5 text-xs text-soft">
-                  <p className="eyebrow">Point terrain</p>
-                  {terrainLoading ? <p>Checking DEM coverage…</p> : terrain ? (
+                  <p className="eyebrow">{tr("Point terrain")}</p>
+                  {terrainLoading ? <p>{tr("Checking DEM coverage…")}</p> : terrain ? (
                     <>
-                      <p>Elevation {terrain.elevation_m.toFixed(1)} m · {terrain.resolution_m} m DEM</p>
-                      {terrain.slope_deg != null && <p>Local slope {terrain.slope_deg.toFixed(2)}°</p>}
-                      {terrain.local_3x3_roughness_m != null && <p>Roughness {terrain.local_3x3_roughness_m.toFixed(2)} m</p>}
+                      <p>{tr("Elevation ")}{terrain.elevation_m.toFixed(1)} {tr(" m · ")}{terrain.resolution_m} {tr(" m DEM")}</p>
+                      {terrain.slope_deg != null && <p>{tr("Local slope ")}{terrain.slope_deg.toFixed(2)}°</p>}
+                      {terrain.local_3x3_roughness_m != null && <p>{tr("Roughness ")}{terrain.local_3x3_roughness_m.toFixed(2)} {tr(" m")}</p>}
                     </>
-                  ) : customTerrain ? <p>No validated DEM covers this point.</p> : <p>DEM coverage unavailable.</p>}
+                  ) : customTerrain ? <p>{tr("No validated DEM covers this point.")}</p> : <p>{tr("DEM coverage unavailable.")}</p>}
                 </div>
               )}
               <div className="space-y-5 border-b border-line p-5">
@@ -568,7 +573,7 @@ function Explore({
                 />
                 {issue && (
                   <p role="alert" className="text-xs text-rose">
-                    {issue}
+                    {tr(issue)}
                   </p>
                 )}
                 <button
@@ -576,7 +581,7 @@ function Explore({
                   disabled={point.busy || !!issue}
                   onClick={onAnalyze}
                 >
-                  {point.busy ? "Analyzing…" : "Analyze point"}
+                  {tr(point.busy ? "Analyzing…" : "Analyze point")}
                 </button>
                 <RequestStatus
                   busy={point.busy}
@@ -585,8 +590,7 @@ function Explore({
                 />
                 {!r && !point.busy && !point.error && (
                   <p className="text-xs text-mute">
-                    Run Analyze point to calculate. First-time terrain
-                    preparation can take longer; astronomy uses local SPICE data.
+                    {tr("Run Analyze point to calculate. First-time terrain preparation can take longer; astronomy uses local SPICE data.")}
                   </p>
                 )}
                 {r && (
@@ -599,7 +603,7 @@ function Explore({
                         downloadJson(r, `point-${r.result_id}.json`)
                       }
                     >
-                      {r.evaluation_status === "pending" ? "Download initial metrics" : r.timeline_transport?.mode === "aggregated" ? "Download summary JSON" : "Download JSON"}
+                      {tr(r.evaluation_status === "pending" ? "Download initial metrics" : r.timeline_transport?.mode === "aggregated" ? "Download summary JSON" : "Download JSON")}
                     </button>
                   </div>
                 )}
@@ -631,17 +635,17 @@ function Explore({
                     className="flex items-center justify-between text-[13px]"
                   >
                     <span className="text-soft">
-                      {i ? "Longest blackout" : "Longest dark"}
+                      {tr(i ? "Longest blackout" : "Longest dark")}
                     </span>
                     <span className="font-display text-lg font-semibold tabular">
                       {boundsText(r?.metrics_hours[key])}
-                      {r ? " h" : ""}
+                      {tr(r ? " h" : "")}
                     </span>
                   </div>
                 ))}
               </div>
               <div className="border-b border-line p-5">
-                <p className="eyebrow mb-3">Viewer height</p>
+                <p className="eyebrow mb-3">{tr("Viewer height")}</p>
                 <Seg
                   label="Observer height"
                   value={s.hIdx}
@@ -654,11 +658,11 @@ function Explore({
                   }))}
                 />
                 <p className="mt-2 text-[10px] text-mute">
-                  Lander uses 2 m. Viewer presets set panel and antenna together to 2, 10, 20 or 30 m.
+                  {tr("Lander uses 2 m. Viewer presets set panel and antenna together to 2, 10, 20 or 30 m.")}
                 </p>
               </div>
               <div className="space-y-3 p-5">
-                <p className="eyebrow">Earth contact windows</p>
+                <p className="eyebrow">{tr("Earth contact windows")}</p>
                 {r?.contact_analysis?.visible_windows.length ? (
                   r.contact_analysis.visible_windows.map((w, i) => (
                     <button
@@ -668,14 +672,14 @@ function Explore({
                     >
                       {fmtTime(Date.parse(w.start_utc))}
                       <span className="mt-1 block text-mute">
-                        {w.usable_duration_minutes.toFixed(1)} usable min ·{" "}
-                        {w.qualifies ? "Qualifies" : "Too short"}
+                        {w.usable_duration_minutes.toFixed(1)} {tr(" usable min ·")}{" "}
+                        {tr(w.qualifies ? "Qualifies" : "Too short")}
                       </span>
                     </button>
                   ))
                 ) : (
                   <p className="text-xs text-mute">
-                    {r?.hard_failure && !r.contact_analysis
+                    {tr(r?.hard_failure && !r.contact_analysis
                       ? "Contact requirements were not evaluated after the hard failure."
                       : r?.evaluation_stages?.validation === "not_started"
                       ? "Analyze point to evaluate contact requirements."
@@ -683,47 +687,45 @@ function Explore({
                       ? "Contact requirements are still being evaluated."
                       : r
                       ? "No confirmed visibility windows in this mission."
-                      : "Analyze to load confirmed windows."}
+                      : "Analyze to load confirmed windows.")}
                   </p>
                 )}
                 {r && (
                   <details>
                     <summary className="cursor-pointer text-xs text-mute">
-                      Requirements, sources & limitations
+                      {tr("Requirements, sources & limitations")}
                     </summary>
                     <div className="mt-3 space-y-2 text-[11px] leading-relaxed text-mute">
                       {Object.entries(r.constraint_checks).map(([k, v]) => (
                         <p key={k}>
-                          {k.replaceAll("_", " ")}: <DecisionBadge value={v} />
+                          {tr(k.replaceAll("_", " "))}: <DecisionBadge value={v} />
                         </p>
                       ))}
-                      <p>Secondary preferences</p>
+                      <p>{tr("Secondary preferences")}</p>
                       {Object.entries(r.soft_constraint_checks).map(
                         ([k, v]) => (
                           <p key={k}>
-                            {k.replaceAll("_", " ")}:{" "}
+                            {tr(k.replaceAll("_", " "))}:{" "}
                             <DecisionBadge value={v} />
                           </p>
                         ),
                       )}
                       <p>
-                        Method {r.method_version} ·{" "}
-                        {r.coordinate.observer_dataset_id} ·{" "}
-                        {r.coordinate.observer_resolution_m} m DEM
-                      </p>
+                        {tr("Method ")}{tr(r.method_version)} ·{" "}
+                        {tr(r.coordinate.observer_dataset_id)} ·{" "}
+                        {tr(r.coordinate.observer_resolution_m)} {tr(" m DEM")}</p>
                       {r.warnings.map((w) => (
-                        <p key={w}>{w}</p>
+                        <p key={w}>{tr(w)}</p>
                       ))}
                     </div>
                   </details>
                 )}
                 <p className="text-[10px] leading-relaxed text-mute">
-                  NASA LOLA + SPICE/JPL · mean solar-disc visibility / Earth-centre LOS ·
-                  PROVISIONAL. No RF link or landing-safety certification.
+                  {tr("NASA LOLA + SPICE/JPL · mean solar-disc visibility / Earth-centre LOS · PROVISIONAL. No RF link or landing-safety certification.")}
                 </p>
                 {catalogError && (
                   <p role="alert" className="text-xs text-rose">
-                    Catalog: {catalogError}
+                    {tr("Catalog: ")}{tr(catalogError)}
                   </p>
                 )}
               </div>
@@ -735,7 +737,7 @@ function Explore({
         <Suspense
           fallback={
             <div className="absolute inset-0 grid place-items-center font-mono text-[11px] tracking-widest text-mute">
-              LOADING MOON…
+              {tr("LOADING MOON…")}
             </div>
           }
         >
@@ -782,8 +784,7 @@ function Explore({
           />
         </div>
         <p className="pointer-events-none absolute top-16 right-4 max-w-[240px] text-right text-[10px] text-mute">
-          3D lighting is a visual preview. Metric evidence comes from backend
-          intervals.
+          {tr("3D lighting is a visual preview. Metric evidence comes from backend intervals.")}
         </p>
         <LiveBar s={s} {...ctl}>
           <BackendTimeline

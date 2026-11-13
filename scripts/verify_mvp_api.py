@@ -21,7 +21,21 @@ def verify(base_url, offline=False):
             query = json.loads((ROOT/f'docs/examples/point-analysis-outside-{name}-request.json').read_text())
             result = post('/lunar/point/analyze', {**query, 'offline': offline})
             assert result['decision'] == name.upper(), result['decision']
-            assert result['validation']['passed'] is True
+            if result['validation'].get('status') == 'skipped_hard_failure':
+                # Full spatial validation is intentionally skipped only after
+                # the same hard requirement fails both temporal grids.
+                failure = result['hard_failure']
+                confirmation = result['validation']['temporal_confirmation']
+                constraint = failure['constraint']
+                assert name == 'fail' and confirmation['confirmed'] is True
+                assert failure['sampling_minutes'] == 1
+                assert failure['confirmed_sampling_minutes'] == confirmation['sampling_minutes'] == [5, 1]
+                assert confirmation['constraint'] == constraint
+                assert confirmation['checks_5min'][constraint] == confirmation['checks_1min'][constraint] == 'FAIL'
+                assert result['constraint_checks'][constraint] == 'FAIL'
+                assert failure['evidence_intervals']
+            else:
+                assert result['validation']['passed'] is True
             direct[name] = result
         query = json.loads((ROOT/'docs/examples/planning-compare-coordinate-request.json').read_text())
         query['offline'] = offline

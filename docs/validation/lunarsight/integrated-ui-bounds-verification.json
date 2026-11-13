@@ -1,0 +1,91 @@
+{
+  "passed": true,
+  "scope": "Integrated English/Vietnamese UI and equal-bound formatting; tests include planning, search, exports and chat, not only point analysis.",
+  "backend_tests": {
+    "passed": 441,
+    "skipped": 1,
+    "command": "PYTHONPATH=.:backend backend/.venv/bin/pytest -q"
+  },
+  "frontend_tests": {
+    "passed": 62,
+    "files_passed": 10,
+    "command": "npm --prefix frontend test"
+  },
+  "frontend_production_build": {
+    "passed": true,
+    "includes_typescript_check": true
+  },
+  "real_api_smoke": {
+    "passed": true,
+    "point_decisions": {
+      "pass": "PASS",
+      "fail": "FAIL"
+    },
+    "compare": {
+      "candidate_total": 2,
+      "pass": 1,
+      "fail": 1,
+      "indeterminate": 0
+    },
+    "search": {
+      "candidate_total": 2,
+      "pass": 1,
+      "fail": 1,
+      "indeterminate": 0,
+      "returned": 1,
+      "not_returned": 1
+    },
+    "exports": [
+      "json",
+      "csv"
+    ]
+  },
+  "browser_checks": [
+    {
+      "feature": "Compare",
+      "targets": [
+        "haworth",
+        "shackleton-floor"
+      ],
+      "pass": 1,
+      "fail": 1,
+      "indeterminate": 0,
+      "equal_bounds_display_as_single_value": true
+    },
+    {
+      "feature": "language switch",
+      "languages": [
+        "vi",
+        "en"
+      ],
+      "existing_comparison_result_preserved": true
+    },
+    {
+      "feature": "CSV download",
+      "passed": true
+    },
+    {
+      "feature": "Best dates",
+      "evaluated": 2,
+      "pass": 1,
+      "fail": 1,
+      "returned": 1,
+      "returned_site": "haworth",
+      "results_localized": true
+    },
+    {
+      "feature": "Assistant",
+      "checked": [
+        "general/planning mode switch",
+        "translated controls",
+        "persisted conversation display"
+      ],
+      "live_model_request_sent": false
+    }
+  ],
+  "live_llm_calls": 0,
+  "limits": [
+    "LLM provider behavior was covered with fixtures; no live provider or key validity claim.",
+    "Browser checks used selected 72-hour local cases, not every site or mission duration."
+  ]
+}

@@ -1,3 +1,4 @@
+import { useTranslation } from "../i18n/LanguageProvider";
 import { useEffect, useMemo, useState } from "react";
 
 import { MoonScene, type GroundSky } from "../components/MoonScene";
@@ -71,6 +72,7 @@ export default function Stage3D({
   className = "",
   interactive = true,
 }: Props) {
+  const { t: tr } = useTranslation();
   const sites = useMemo(() => catalog.map(toRendererSite), [catalog]);
   const activeSite = useMemo(
     () => sites.find((site) => site.id === siteId) ?? sites[0],
@@ -238,76 +240,72 @@ export default function Stage3D({
 
       {!ready && (
         <div className="pointer-events-none absolute inset-0 grid place-items-center bg-black font-mono text-[11px] tracking-widest text-mute">
-          LOADING NASA LUNAR SURFACE…
+          {tr("LOADING NASA LUNAR SURFACE…")}
         </div>
       )}
 
       {mode === "surface" && (terrainLoading || midTerrainLoading || farTerrainLoading || contextTerrainLoading || regionalTerrainLoading || horizonTerrainLoading) && (
         <div className="pointer-events-none absolute top-16 left-1/2 -translate-x-1/2 border border-line bg-black/80 px-3 py-1.5 font-mono text-[10px] tracking-wider text-soft">
-          PREPARING LOLA TERRAIN…
+          {tr("PREPARING LOLA TERRAIN…")}
         </div>
       )}
 
       {mode === "pole" && (terrainPending || polarTerrainLoading) && (
         <div className="pointer-events-none absolute top-16 left-1/2 -translate-x-1/2 border border-line bg-black/80 px-3 py-1.5 font-mono text-[10px] tracking-wider text-soft">
-          STREAMING NASA SOUTH-POLE TERRAIN…
+          {tr("STREAMING NASA SOUTH-POLE TERRAIN…")}
         </div>
       )}
       {mode === "pole" && !terrainPending && !poleIsCurrent && !terrainWindow?.grid && (
         <div className="pointer-events-none absolute top-16 left-1/2 -translate-x-1/2 border border-line bg-black/80 px-3 py-1.5 font-mono text-[10px] tracking-wider text-soft">
-          TERRAIN UNAVAILABLE FOR THIS POINT
+          {tr("TERRAIN UNAVAILABLE FOR THIS POINT")}
         </div>
       )}
 
       {mode === "pole" && visibleTerrain?.grid && (
         <div className="pointer-events-none absolute top-16 left-4 border border-line bg-black/80 px-3 py-2 font-mono text-[10px] leading-relaxed tracking-wider text-soft">
-          <div className="text-mint">LOLA NESTED TERRAIN · TRUE RELIEF 1×</div>
-          <div className="text-mute">NASA LOLA · 5 / 80 / 240 m source DEM</div>
-          <div className="text-mute">6 circular LOD rings · south-pole flight view</div>
-          <div className="text-sun">FOCUS LOD · 1.5 / 6 / 24 / 48 / 120 / 300 km</div>
-          <div className="text-mute">SOURCE · {visibleTerrain.dataset_id ?? "regional terrain"}</div>
-          <div className="text-mute">MICRO-RELIEF · SHADING ONLY</div>
-          <div className="mt-1 text-mint">MOUSE · LEFT DRAG MOVE · RIGHT DRAG TILT · WHEEL ZOOM</div>
+          <div className="text-mint">{tr("LOLA NESTED TERRAIN · TRUE RELIEF 1×")}</div>
+          <div className="text-mute">{tr("NASA LOLA · 5 / 80 / 240 m source DEM")}</div>
+          <div className="text-mute">{tr("6 circular LOD rings · south-pole flight view")}</div>
+          <div className="text-sun">{tr("FOCUS LOD · 1.5 / 6 / 24 / 48 / 120 / 300 km")}</div>
+          <div className="text-mute">{tr("SOURCE · ")}{tr(visibleTerrain.dataset_id ?? "regional terrain")}</div>
+          <div className="text-mute">{tr("MICRO-RELIEF · SHADING ONLY")}</div>
+          <div className="mt-1 text-mint">{tr("MOUSE · LEFT DRAG MOVE · RIGHT DRAG TILT · WHEEL ZOOM")}</div>
         </div>
       )}
 
       {mode === "surface" && terrainWindow?.grid && (
         <div className="pointer-events-none absolute top-16 left-4 border border-line bg-black/80 px-3 py-2 font-mono text-[10px] leading-relaxed tracking-wider text-soft">
-          <div className="text-mint">LOLA TERRAIN · TRUE SCALE 1×</div>
+          <div className="text-mint">{tr("LOLA TERRAIN · TRUE SCALE 1×")}</div>
           <div className="text-mute">
-            {terrainWindow.dataset_id} · source{" "}
-            {terrainWindow.native_resolution_m} m
-          </div>
+            {terrainWindow.dataset_id} {tr(" · source")}{" "}
+            {terrainWindow.native_resolution_m} {tr(" m")}</div>
           <div className="text-mute">
-            mesh {terrainWindow.grid.spacing_m.toFixed(1)} m ·{" "}
-            {terrainWindow.grid.rows}² vertices
-          </div>
+            {tr("mesh ")}{terrainWindow.grid.spacing_m.toFixed(1)} {tr(" m ·")}{" "}
+            {tr(terrainWindow.grid.rows)}{tr("² vertices")}</div>
           <div className="text-mute">
-            {(terrainWindow.radius_km! * 2).toFixed(0)} km field · curvature
-            enabled
-          </div>
+            {(terrainWindow.radius_km! * 2).toFixed(0)} {tr(" km field · curvature enabled")}</div>
           <div className={groundSky.source !== "MODEL_PREVIEW" ? "text-mint" : "text-sun"}>
-            SKY · {groundSky.source === "SHARED_SPICE" ? "SPICE / JPL CHECKED" : groundSky.source === "JPL_HORIZONS" ? "JPL HORIZONS" : "MODEL PREVIEW"}
+            {tr("SKY · ")}{tr(groundSky.source === "SHARED_SPICE" ? "SPICE / JPL CHECKED" : groundSky.source === "JPL_HORIZONS" ? "JPL HORIZONS" : "MODEL PREVIEW")}
           </div>
         </div>
       )}
 
       {mode === "surface" && terrainWindow?.grid && (
         <div className="pointer-events-none absolute top-16 right-4 w-48 border border-line bg-black/80 px-3 py-2 font-mono text-[10px] leading-relaxed tracking-wider">
-          <div className="text-sun">☀ SUN · {groundSky.sun.state === "V" ? "VISIBLE" : groundSky.sun.state === "B" ? "HIDDEN" : "UNKNOWN"}</div>
-          <div className="text-mute">AZ {groundSky.sun.azimuthDeg.toFixed(1)}° · EL {groundSky.sun.elevationDeg.toFixed(2)}° · CLR {(groundSky.sun.clearanceDeg ?? 0).toFixed(2)}°</div>
-          <div className="mt-1 text-earth">⊕ EARTH · {groundSky.earth.state === "V" ? "VISIBLE" : groundSky.earth.state === "B" ? "HIDDEN" : "UNKNOWN"}</div>
-          <div className="text-mute">AZ {groundSky.earth.azimuthDeg.toFixed(1)}° · EL {groundSky.earth.elevationDeg.toFixed(2)}° · CLR {(groundSky.earth.clearanceDeg ?? 0).toFixed(2)}°</div>
-          <div className="mt-1 text-mute">DRAG 360° TO INSPECT THE SKY</div>
+          <div className="text-sun">{tr("☀ SUN · ")}{tr(groundSky.sun.state === "V" ? "VISIBLE" : groundSky.sun.state === "B" ? "HIDDEN" : "UNKNOWN")}</div>
+          <div className="text-mute">{tr("AZ ")}{groundSky.sun.azimuthDeg.toFixed(1)}{tr("° · EL ")}{groundSky.sun.elevationDeg.toFixed(2)}{tr("° · CLR ")}{(groundSky.sun.clearanceDeg ?? 0).toFixed(2)}°</div>
+          <div className="mt-1 text-earth">{tr("⊕ EARTH · ")}{tr(groundSky.earth.state === "V" ? "VISIBLE" : groundSky.earth.state === "B" ? "HIDDEN" : "UNKNOWN")}</div>
+          <div className="text-mute">{tr("AZ ")}{groundSky.earth.azimuthDeg.toFixed(1)}{tr("° · EL ")}{groundSky.earth.elevationDeg.toFixed(2)}{tr("° · CLR ")}{(groundSky.earth.clearanceDeg ?? 0).toFixed(2)}°</div>
+          <div className="mt-1 text-mute">{tr("DRAG 360° TO INSPECT THE SKY")}</div>
         </div>
       )}
 
       {hovered && mode !== "surface" && (
         <div className="pointer-events-none absolute right-4 bottom-4 border border-line bg-black/75 px-2.5 py-1.5 font-mono text-[10px] text-soft tabular">
           {Math.abs(hovered.latitude).toFixed(4)}°
-          {hovered.latitude < 0 ? "S" : "N"} ·{" "}
+          {tr(hovered.latitude < 0 ? "S" : "N")} ·{" "}
           {Math.abs(hovered.longitude).toFixed(4)}°
-          {hovered.longitude < 0 ? "W" : "E"}
+          {tr(hovered.longitude < 0 ? "W" : "E")}
         </div>
       )}
     </div>

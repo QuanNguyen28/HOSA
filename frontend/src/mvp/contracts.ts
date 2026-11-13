@@ -335,12 +335,11 @@ export function missionIssue(m: Mission): string | null {
 }
 export const timestamp = (v: string) =>
   new Date(v).toISOString().replace("T", " ").replace(".000Z", " UTC");
-export const boundsText = (pair?: Bounds) =>
-  !pair
-    ? "—"
-    : Math.abs(pair[0] - pair[1]) < 1e-8
-      ? `${Number(pair[0].toFixed(2))}`
-      : `${Number(pair[0].toFixed(2))}–${Number(pair[1].toFixed(2))}`;
+export function boundsText(pair?: Bounds, digits = 2): string {
+  if (!pair) return "—";
+  const [lower, upper] = pair.map((value) => `${Number(value.toFixed(digits))}`);
+  return lower === upper ? lower : `${lower}–${upper}`;
+}
 export function intervalAt(
   rows: Interval[],
   time: number,

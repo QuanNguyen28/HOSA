@@ -1,3 +1,4 @@
+import { useTranslation } from "../i18n/LanguageProvider";
 import { useMemo, useState } from "react";
 import { api, useOperation } from "../mvp/api";
 import {
@@ -35,6 +36,7 @@ export function Finder({
   onSelected: (v: string[]) => void;
   onOpen: (c: Candidate) => void;
 }) {
+  const { t: tr } = useTranslation();
   const [until, setUntil] = useState(() =>
     new Date(Date.parse(mission.start + "Z") + 15 * 60000)
       .toISOString()
@@ -79,7 +81,7 @@ export function Finder({
     <main className="mx-auto max-w-[1400px] space-y-5 px-4 py-6 lg:px-8">
       <div className="flex flex-wrap items-end justify-between gap-5">
         <h2 className="font-display text-3xl font-semibold">
-          Best dates to land
+          {tr("Best dates to land")}
         </h2>
         <button
           className={actionClass}
@@ -96,7 +98,7 @@ export function Finder({
             )
           }
         >
-          {search.busy ? "Searching…" : "Search dates"}
+          {tr(search.busy ? "Searching…" : "Search dates")}
         </button>
       </div>
       <section className="glass space-y-4 p-4">
@@ -107,9 +109,9 @@ export function Finder({
         />
         <div className="flex flex-wrap items-end gap-4">
           <label>
-            <span className="eyebrow">Search starts before · UTC</span>
+            <span className="eyebrow">{tr("Search starts before · UTC")}</span>
             <input
-              aria-label="Search ends before UTC"
+              aria-label={tr("Search ends before UTC")}
               className={`${inputClass} mt-1`}
               type="datetime-local"
               step={300}
@@ -119,9 +121,9 @@ export function Finder({
             />
           </label>
           <label>
-            <span className="eyebrow">Start step</span>
+            <span className="eyebrow">{tr("Start step")}</span>
             <select
-              aria-label="Search step"
+              aria-label={tr("Search step")}
               className={`${inputClass} mt-1`}
               disabled={search.busy}
               value={step}
@@ -129,21 +131,16 @@ export function Finder({
             >
               {[5, 15, 30, 60, 360, 1440].map((v) => (
                 <option key={v} value={v}>
-                  {v} minutes
-                </option>
+                  {tr(v)} {tr(" minutes")}</option>
               ))}
             </select>
           </label>
           <p className="text-xs text-mute">
-            {Number.isFinite(count) ? count : "—"} candidate evaluations ·
-            maximum 128
-          </p>
+            {tr(Number.isFinite(count) ? count : "—")} {tr(" candidate evaluations · maximum 128")}</p>
         </div>
         <p className="text-xs leading-relaxed text-mute">
-          The end is exclusive for start times. Each candidate lasts{" "}
-          {missionHours(mission)} hours. Only validated PASS missions can be
-          returned; returned missions at the same coordinate do not overlap.
-        </p>
+          {tr("The end is exclusive for start times. Each candidate lasts")}{" "}
+          {tr(missionHours(mission))} {tr(" hours. Only validated PASS missions can be returned; returned missions at the same coordinate do not overlap.")}</p>
         <div className="flex flex-wrap gap-x-5 gap-y-2">
           {sites.map((t) => (
             <label
@@ -152,7 +149,7 @@ export function Finder({
             >
               <input
                 type="checkbox"
-                aria-label={t.name}
+                aria-label={t.id === "custom" ? tr("Custom coordinate") : t.name}
                 checked={selected.includes(t.id)}
                 disabled={search.busy}
                 onChange={(e) =>
@@ -163,13 +160,13 @@ export function Finder({
                   )
                 }
               />
-              {t.name}
+              {t.id === "custom" ? tr("Custom coordinate") : t.name}
             </label>
           ))}
         </div>
         {issue && (
           <p role="alert" className="text-xs text-rose">
-            {issue}
+            {tr(issue)}
           </p>
         )}
       </section>
@@ -182,7 +179,7 @@ export function Finder({
         <>
           <PlanningSummary result={search.result} />
           <section
-            aria-label="Start date grid"
+            aria-label={tr("Start date grid")}
             className="glass overflow-x-auto p-4"
           >
             <div className="min-w-[620px]">
@@ -200,7 +197,7 @@ export function Finder({
               {targets.map((target) => (
                 <div key={target.id} className="mt-1 flex items-center gap-1">
                   <p className="w-44 shrink-0 truncate pr-3 text-xs text-soft">
-                    {target.name}
+                    {target.id === "custom" ? tr("Custom coordinate") : target.name}
                   </p>
                   {starts.map((t) => {
                     const candidate = search.result!.candidates.find(
@@ -221,7 +218,7 @@ export function Finder({
                         key={t}
                         type="button"
                         disabled={!candidate}
-                        aria-label={`${target.name}, ${fmtTime(t)}: ${candidate ? "PASS returned" : "Not returned; inspect aggregate coverage"}`}
+                        aria-label={tr("{0}, {1}: {2}", [target.name, fmtTime(t), candidate ? "PASS returned" : "Not returned; inspect aggregate coverage"])}
                         onClick={() => candidate && onOpen(candidate)}
                         className={`h-6 flex-1 ${candidate ? "bg-mint/70 hover:outline-1 hover:outline-white" : "bg-mute/20"}`}
                       />
@@ -232,13 +229,12 @@ export function Finder({
             </div>
             <p className="mt-3 flex flex-wrap items-center gap-2 font-mono text-[10px] text-mute">
               <i className="size-2.5 bg-mint/70" />
-              validated PASS returned
-              <i className="ml-3 size-2.5 bg-mute/20" />
-              not returned (not an individual FAIL classification)
+              {tr("validated PASS returned")}<i className="ml-3 size-2.5 bg-mute/20" />
+              {tr("not returned (not an individual FAIL classification)")}
             </p>
           </section>
           <section
-            aria-label="Best sites"
+            aria-label={tr("Best sites")}
             className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
           >
             {search.result.candidates.map((c) => (
@@ -256,8 +252,7 @@ export function Finder({
           </section>
           {!search.result.candidates.length && (
             <p className="text-sm text-mute">
-              No validated feasible candidate returned. Review coverage and
-              available evidence.
+              {tr("No validated feasible candidate returned. Review coverage and available evidence.")}
             </p>
           )}
         </>
