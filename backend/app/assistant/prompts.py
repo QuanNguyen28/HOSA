@@ -5,8 +5,9 @@ from .explanations import explanation_options
 from .sites import available_sites, coordinate_sites_for_prompt, named_sites
 from .language import request_language
 from .start_time import start_context
+from .interpretation import ANSWER_POLICY, METRIC_MEANINGS, explanation_view, engine_evidence
 
-PROMPT_VERSION = "assistant-3.5-natural-dates"
+PROMPT_VERSION = "assistant-3.6-grounded-narrative"
 
 
 def parse_messages(request: ParseRequest, capabilities: dict) -> list[dict]:
@@ -114,7 +115,8 @@ def parse_messages(request: ParseRequest, capabilities: dict) -> list[dict]:
     ]
 
 
-def explain_messages(evidence: EvidenceBundle, *, repair: bool = False) -> list[dict]:
+def explain_messages(evidence: EvidenceBundle, *, repair: bool = False, natural: bool = False,
+                     question: str = "", language: str = "vi") -> list[dict]:
     rows = []
     for candidate in evidence.candidates:
         options = explanation_options(candidate, evidence.facts)
@@ -132,6 +134,36 @@ def explain_messages(evidence: EvidenceBundle, *, repair: bool = False) -> list[
         })
     payload = {"run_id": evidence.run_id, "spec_hash": evidence.spec_hash,
                "status": evidence.status, "candidate_count": len(rows), "candidates": rows}
+    narrative_policy = ""
+    if natural:
+        summary = {"result_id": evidence.run_id, "status": evidence.status,
+                   "request": evidence.request.model_dump(),
+                   "candidates": [candidate.model_dump() for candidate in evidence.candidates]}
+        focused_evidence = explanation_view(engine_evidence(summary), question)
+        qualitative = focused_evidence.get("detail_mode") == "qualitative"
+        payload.update(user_question=question, response_language=language,
+            mission=evidence.request.model_dump(), metric_meanings=METRIC_MEANINGS,
+            recommended_candidate_id=evidence.recommended_candidate_id, apply_allowed=evidence.apply_allowed,
+            explanation_evidence=focused_evidence)
+        for row, candidate in zip(rows, evidence.candidates):
+            row["nominal_sampled_decision"] = candidate.nominal_sampled_decision
+            if qualitative:
+                row["allowed_reasons"] = [{"reason_code": item["reason_code"], "fact_ids": item["fact_ids"]}
+                                          for item in row["allowed_reasons"]]
+            else:
+                row.update(validation=candidate.validation, contact_analysis=candidate.contact_analysis,
+                           resolution=candidate.resolution)
+        narrative_policy = (
+            " Return NaturalExplainPlan with a nonempty answer written in response_language. "
+            "Copy each candidate's final decision into its block.decision, even if its nominal result differs. "
+            "The answer is your own explanation of the supplied engine evidence, not a template or list of fields. "
+            "Address user_question, connect the decisive requirement or validation cause to its operational meaning, "
+            "and compare only the actual evaluated candidates and dates. Use few numbers; the interface shows engine metrics. "
+            "For qualitative evidence explain states and causes without inventing quantities. Do not convert percentages to hours "
+            "or repeat the metric table. Passing an illumination threshold does not mean full or continuous illumination. "
+            "The engine alone owns decisions/ranking. Hard failure is different from a soft preference. "
+            "Do not invent terrain causes or physical performance, upgrade an indeterminate result, or claim a global optimum. "
+            "No automatic application; honor apply_allowed and the actual recommended candidate status. " + ANSWER_POLICY)
     return [
         {"role": "system", "content": (
             "Return ExplainPlan JSON only. The engine already evaluated the candidates. "
@@ -143,6 +175,7 @@ def explain_messages(evidence: EvidenceBundle, *, repair: bool = False) -> list[
             "from one of that row's allowed_reasons. Prefer a hard constraint with an "
             "INDETERMINATE state when explaining uncertainty. Do not invent or copy facts across rows. "
             "Do not recalculate metrics or change engine decisions."
+            + narrative_policy
             + (" The previous plan failed validation. Rebuild every block from the candidate rows." if repair else "")
         )},
         {"role": "user", "content": json.dumps(payload, ensure_ascii=False)},

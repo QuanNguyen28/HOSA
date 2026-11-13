@@ -57,6 +57,21 @@ def check_case(case: dict, run: dict, source_reader) -> list[str]:
         if source is None or source.get("source_hash")!=citation.get("source_hash") or source.get("excerpt")!=citation.get("excerpt"):
             failures.append("citation_invalid:"+str(citation.get("source_id","")))
     engine=result.get("result") or {}
+    for key, value in case.get("expected_query", {}).items():
+        if (result.get("query") or {}).get(key) != value:
+            failures.append("query_mismatch:"+key)
+    oracle = case.get("oracle_query")
+    if oracle and result.get("intent") in {"compare","search"} and engine:
+        from app.assistant.chat_service import _safe_result
+        from app.planning.service import PlanningService
+        from app.planning.models import CompareRequest, SearchRequest
+        planner = PlanningService()
+        direct = (planner.compare(CompareRequest.model_validate(oracle)) if result["intent"]=="compare"
+                  else planner.search(SearchRequest.model_validate(oracle)))
+        direct = _safe_result(direct)
+        for key in ("result_id","status","source_hash","recommended_candidate_id","apply_allowed","coverage","candidates"):
+            if engine.get(key) != direct.get(key):
+                failures.append("direct_engine_mismatch:"+key)
     if case.get("require_engine_evidence") or result.get("evidence_claims"):
         from app.assistant.chat_models import EvidenceClaim
         from app.assistant.interpretation import claim_issues
@@ -81,7 +96,7 @@ def execute_turn(client, session_id: str, case: dict, provider: str, model: str,
                  case_id: str, turn_number: int) -> dict:
     started=time.monotonic()
     response=client.post(f"/api/assistant/sessions/{session_id}/messages",
-        headers={"Idempotency-Key":str(uuid4())},json={"text":case["text"]})
+        headers={"Idempotency-Key":str(uuid4())},json={"text":case["text"], "knowledge_only":case.get("knowledge_only", False)})
     if response.status_code!=202:
         return {"turn":turn_number,"passed":False,"error_code":(response.json().get("detail") or {}).get("code","MESSAGE_REJECTED"),
                 "http_status":response.status_code}
@@ -114,7 +129,7 @@ def execute_turn(client, session_id: str, case: dict, provider: str, model: str,
 def main(argv=None) -> int:
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--live",action="store_true",help="Make real paid requests using local .env credentials")
-    parser.add_argument("--provider",choices=["nvidia","gemini"],required=True)
+    parser.add_argument("--provider",choices=["nvidia","gemini","openai"],required=True)
     parser.add_argument("--cases",type=Path,default=ROOT/"tests/fixtures/assistant/llm_smoke_cases.json")
     parser.add_argument("--limit",type=int,default=0,help="Limit cases; 0 runs every case in the file")
     parser.add_argument("--case-id",action="append",default=[],help="Run only this case ID; may be repeated")
@@ -138,7 +153,7 @@ def main(argv=None) -> int:
     from app.main import app
 
     settings=get_assistant_settings()
-    secret=(settings.nvidia_api_key if args.provider=="nvidia" else settings.gemini_api_key)
+    secret={"nvidia":settings.nvidia_api_key,"gemini":settings.gemini_api_key,"openai":settings.llm_proxy_api_key}[args.provider]
     if not secret or not secret.get_secret_value().strip():
         print("No API request made: selected provider credential is not configured.")
         return 2
@@ -215,6 +230,7 @@ def main(argv=None) -> int:
                        "provider_call_latency_ms_p95":percentile(latencies,.95),"token_usage":usage},
             "total":len(records),"passed":sum(bool(item.get("passed")) for item in records),
             "failed":sum(not bool(item.get("passed")) for item in records),"cases":records}
+    report["quality_note"] = "Automated routing, references and specified engine-oracle checks; naturalness and factual entailment require a separate human review."
     output=args.output or ROOT/"data/cache/assistant"/f"live-eval-{args.provider}.json"
     output.parent.mkdir(parents=True,exist_ok=True)
     output.write_text(json.dumps(report,ensure_ascii=False,indent=2,allow_nan=False)+"\n",encoding="utf-8")

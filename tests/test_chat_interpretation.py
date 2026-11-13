@@ -221,3 +221,29 @@ def test_explanation_focus_preserves_states_and_only_includes_numbers_when_reque
     assert explanation_view(evidence,"Có bao nhiêu giờ nhìn thấy Trái Đất? Chi tiết số liệu.")==evidence
     assert explanation_view(evidence,"Giải thích bằng chứng thay vì liệt kê số liệu")["detail_mode"]=="qualitative"
     assert explanation_view(evidence,"Không giới hạn độ dài, chỉ cần ít số liệu")["detail_mode"]=="qualitative"
+
+
+def test_answer_review_uses_original_sources_and_returns_validated_edit(monkeypatch):
+    draft=ChatTurn(intent="knowledge",answer="A generic draft.",source_ids=["doc"])
+    edit=ChatTurn(intent="knowledge",answer="A focused explanation grounded in the source.",source_ids=["doc"])
+    llm=ScriptedLLM([draft,edit])
+    instance=service(monkeypatch,llm)
+    instance.review_answers=True
+    result=asyncio.run(instance.respond("What is the point of HOSA?",[],{},knowledge_only=True))
+    assert result["answer"]==edit.answer and len(llm.messages)==2
+    assert "draft_to_review" in llm.messages[1][-1]["content"]
+    assert "retrieved_sources" in llm.messages[1][1]["content"]
+
+
+def test_answer_review_cannot_turn_knowledge_into_new_computation(monkeypatch):
+    draft=ChatTurn(intent="knowledge",answer="Original answer.",source_ids=["doc"])
+    bad=ChatTurn(intent="point",answer="Do a new mission.",query={"unverified":True})
+    llm=ScriptedLLM([draft,bad,draft])
+    instance=service(monkeypatch,llm)
+    instance.review_answers=True
+    async def unexpected(*args):
+        pytest.fail("The editor cannot initiate an engine call")
+    monkeypatch.setattr(instance,"_execute",unexpected)
+    result=asyncio.run(instance.respond("What is HOSA?",[],{},knowledge_only=True))
+    assert result["intent"]=="knowledge" and result["query"] is None
+    assert "review_changed_routing" in llm.messages[-1][-1]["content"]

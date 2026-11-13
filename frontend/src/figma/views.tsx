@@ -1,4 +1,4 @@
-import { useTranslation } from "../i18n/LanguageProvider";
+import { useTranslation } from "../i18n/language";
 import { useMemo, useState } from "react";
 import { api, useOperation } from "../mvp/api";
 import {

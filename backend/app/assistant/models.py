@@ -147,6 +147,15 @@ class ExplainPlan(Contract):
     blocks: list[ExplanationBlock] = Field(max_length=5)
 
 
+class NaturalExplanationBlock(ExplanationBlock):
+    decision: Decision
+
+
+class NaturalExplainPlan(ExplainPlan):
+    answer: str = Field(min_length=1)
+    blocks: list[NaturalExplanationBlock] = Field(max_length=5)
+
+
 class EvidenceBundle(Contract):
     schema_version: Literal["2.0"] = "2.0"
     run_id: str

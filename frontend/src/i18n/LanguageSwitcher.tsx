@@ -1,4 +1,4 @@
-import { useTranslation, type Language } from "./LanguageProvider";
+import { useTranslation, type Language } from "./language";
 
 function Flag({ language }: { language: Language }) {
   return language === "vi" ? (

@@ -10,6 +10,11 @@ class EvidenceClaim(Contract):
     state: Literal["PASS", "FAIL", "INDETERMINATE"] | None = None
 
 
+class RetrievalPlan(Contract):
+    # Search terms only: the model cannot supply URLs, file paths or executable tools.
+    queries: list[str] = Field(min_length=1, max_length=3)
+
+
 class ChatTurn(Contract):
     intent: Literal["knowledge", "explain", "clarify", "point", "compare", "search"]
     answer: str = ""

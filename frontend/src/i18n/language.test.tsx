@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import { LanguageProvider, LANGUAGE_STORAGE_KEY, readLanguage, translate } from "./LanguageProvider";
+import { LanguageProvider } from "./LanguageProvider";
+import { LANGUAGE_STORAGE_KEY, readLanguage, translate } from "./language";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { MissionFields, ValidationInfo } from "../figma/backend";
 import { ChatThread, type Assistant } from "../figma/Chat";

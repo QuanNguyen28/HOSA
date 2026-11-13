@@ -1,4 +1,4 @@
-"""Probe configured NIM/Gemini model availability and one real structured stream."""
+"""Probe configured provider availability and real structured completions without logging keys."""
 from __future__ import annotations
 
 import argparse
@@ -37,6 +37,8 @@ async def probe(provider: str, infer: bool = True) -> dict:
     from app.assistant.provider import AssistantError, NativeLLM
 
     settings = get_assistant_settings()
+    if provider == "openai":
+        return await proxy_probe(settings, infer)
     model = settings.nvidia_model if provider == "nvidia" else settings.gemini_model
     secret = settings.nvidia_api_key if provider == "nvidia" else settings.gemini_api_key
     profile = {"provider": provider, "model_requested": model, "checked_utc": utc_now(),
@@ -104,9 +106,54 @@ async def probe(provider: str, infer: bool = True) -> dict:
         return profile
 
 
+async def proxy_probe(settings, infer: bool) -> dict:
+    from app.assistant.chat_models import ChatTurn
+    from app.assistant.provider import AssistantError, NativeLLM
+    secret = settings.llm_proxy_api_key
+    profile = {"provider":"openai", "model_requested":settings.llm_proxy_model,
+               "endpoint":settings.llm_proxy_base_url, "checked_utc":utc_now(),
+               "inference_attempted":False, "inference_passed":False,
+               "structured_mode":settings.llm_proxy_response_format,
+               "streaming":settings.assistant_streaming,
+               "output_limit_verified":False}
+    if not secret or not secret.get_secret_value().strip():
+        return {**profile,"failure_code":"CREDENTIAL_MISSING"}
+    adapter = NativeLLM("openai",settings)
+    # Apply the adapter's URL/configuration checks before sending the credential anywhere.
+    try:
+        adapter._request(ChatTurn, [])
+    except AssistantError as error:
+        return {**profile,"failure_code":error.code}
+    async with httpx.AsyncClient(timeout=httpx.Timeout(None,connect=settings.assistant_connect_timeout_seconds)) as client:
+        try:
+            response = await client.get(settings.llm_proxy_base_url.rstrip("/")+"/models",
+                headers={"Authorization":"Bearer "+secret.get_secret_value().strip()})
+            profile["catalog_http_status"] = response.status_code
+            ids = [item.get("id") for item in response.json().get("data",[])] if response.is_success else []
+            profile["model_available"] = settings.llm_proxy_model in ids
+            if not infer:
+                return profile
+            profile["inference_attempted"] = True
+            adapter = NativeLLM("openai",settings,client=client)
+            checks = []
+            for language, phrase in [("Vietnamese","kiểm tra thật"),("English","live check")]:
+                result = await adapter.complete(ChatTurn,[
+                    {"role":"system","content":f"Reply in {language}. This is only a provider contract check."},
+                    {"role":"user","content":f"Return intent=knowledge, query=null, no source_ids, and include '{phrase}' in a natural sentence."}])
+                checks.append({"passed":result.output.intent=="knowledge" and phrase in result.output.answer.casefold(),
+                    "language":language,"model_reported":result.model,"finish_reason":result.finish_reason,
+                    "usage":result.usage,"request_id":result.request_id,"latency_ms":result.latency_ms})
+            profile.update(checks=checks, inference_passed=all(c["passed"] for c in checks))
+        except AssistantError as error:
+            profile.update(failure_code=error.code,upstream_status=getattr(error,"upstream_status",None))
+        except (httpx.HTTPError, ValueError):
+            profile["failure_code"] = "PROXY_PREFLIGHT_UNAVAILABLE"
+    return profile
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--provider", choices=("nvidia", "gemini"), required=True)
+    parser.add_argument("--provider", choices=("nvidia", "gemini", "openai"), required=True)
     parser.add_argument("--catalog-only", action="store_true", help="Inspect model availability without generation")
     args = parser.parse_args(argv)
     import asyncio

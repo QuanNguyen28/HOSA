@@ -60,4 +60,6 @@ def request_payload():
 @pytest.fixture
 def service(tmp_path, monkeypatch):
     monkeypatch.setattr(planning, "_result_dir", lambda: tmp_path / "results")
-    return AssistantService(AssistantSettings(assistant_enabled=True, _env_file=None), FixtureLLM(), DraftStore(), PlanningAdapter())
+    # Legacy render/compatibility cases; natural generation has its own contract regressions.
+    return AssistantService(AssistantSettings(assistant_enabled=True, assistant_natural_explanations=False,
+        assistant_answer_review=False, _env_file=None), FixtureLLM(), DraftStore(), PlanningAdapter())

@@ -1,4 +1,4 @@
-import { useTranslation } from "../i18n/LanguageProvider";
+import { useTranslation } from "../i18n/language";
 export function DecisionBadge({ value }: { value: string | null | undefined }) {
   const { t: tr } = useTranslation();
   return (

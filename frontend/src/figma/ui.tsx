@@ -1,4 +1,4 @@
-import { useTranslation } from "../i18n/LanguageProvider";
+import { useTranslation } from "../i18n/language";
 import { type ReactNode } from "react";
 import { SPEEDS, STEP, fmtLat, fmtLon } from "./model";
 

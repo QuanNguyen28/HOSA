@@ -7,7 +7,12 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class AssistantSettings(BaseSettings):
     assistant_enabled: bool = False
-    assistant_provider: str = Field(default="nvidia", pattern="^(nvidia|gemini|openrouter)$")
+    assistant_provider: str = Field(default="nvidia", pattern="^(nvidia|gemini|openrouter|openai)$")
+    llm_proxy_api_key: SecretStr | None = None
+    llm_proxy_base_url: str = ""
+    llm_proxy_model: str = ""
+    llm_proxy_response_format: str = Field(default="json_schema", pattern="^(json_schema|json_object)$")
+    llm_proxy_max_output_tokens: int | None = Field(default=None, ge=128)
     nvidia_api_key: SecretStr | None = None
     nvidia_model: str = "deepseek-ai/deepseek-v4.1-flash"
     nvidia_base_url: str = "https://integrate.api.nvidia.com/v1"
@@ -16,6 +21,8 @@ class AssistantSettings(BaseSettings):
     gemini_model: str = "gemini-3.1-flash-lite"
     gemini_max_output_tokens: int = Field(default=65536, ge=1024, le=65536)
     assistant_streaming: bool = True
+    assistant_natural_explanations: bool = True
+    assistant_answer_review: bool = True
     assistant_failover_enabled: bool = True
     assistant_connect_timeout_seconds: float = Field(default=15, gt=0, le=60)
     assistant_retry_base_seconds: float = Field(default=60, ge=1, le=3600)
