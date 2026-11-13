@@ -7,7 +7,7 @@ TEMPLATES = {
     "time": "Bạn muốn hạ cánh lúc mấy giờ?",
     "timezone": "Thời gian bạn vừa nêu theo múi giờ nào? Ví dụ UTC hoặc +07:00.",
     "search_range": "Bạn cho phép chọn ngày bắt đầu trong khoảng nào? Ví dụ: từ 17/11/2026 00:00 UTC đến trước 24/11/2026 00:00 UTC.",
-    "site_scope": "Bạn muốn phân tích hoặc so sánh điểm nào? Hãy dùng tên hoặc mã trong danh mục Compare.",
+    "site_scope": "Bạn muốn phân tích hoặc so sánh điểm nào? Hãy chọn trong 27 điểm của danh sách Khám phá, ví dụ Connecting Ridge hoặc Shackleton Rim.",
     "mission_duration": "Bạn muốn nhiệm vụ kéo dài bao nhiêu giờ, hoặc kết thúc vào ngày/giờ UTC nào? Thời lượng cần nằm trên lưới 5 phút.",
     "constraints": "Bạn cần tối thiểu bao nhiêu % thời gian có nắng và có Earth LOS? Có muốn đặt thêm mong muốn mềm về khoảng tối hoặc mất LOS liên tục không?",
     "request": "Bạn hãy nêu lại phần cần thay đổi cụ thể hơn.",
@@ -16,6 +16,7 @@ ISSUE_FIELDS = {
     "MISSING_BASELINE": ["request"], "INVALID_BASELINE_TIME": ["arrival_utc"],
     "TOO_MANY_SITES": ["site_scope"], "MISSING_REGION": ["site_scope"], "UNSUPPORTED_SITE_SCOPE": ["site_scope"],
     "UNSUPPORTED_SITE_COORDINATES": ["site_scope"], "AMBIGUOUS_SITE_SELECTION": ["site_scope"],
+    "SITE_NOT_IN_CATALOG": ["site_scope"],
     "AMBIGUOUS_ARRIVAL": ["arrival_utc"], "UNRESOLVED_ARRIVAL": ["arrival_utc"],
     "INVALID_COORDINATE_ARRIVAL": ["arrival_utc"],
     "INCOMPLETE_SEARCH_RANGE": ["search_range"], "UNRESOLVED_SEARCH_RANGE": ["search_range"],
@@ -39,7 +40,7 @@ EN_TEMPLATES = {
     'time': 'What time should the mission start?',
     'timezone': 'Which time zone should I use, for example UTC or +07:00?',
     'search_range': 'What range may I search for start dates? Provide both endpoints with time zones; the upper endpoint is exclusive.',
-    'site_scope': 'Which site or sites should I analyze or compare? Please use names from the Compare catalog.',
+    'site_scope': 'Which site or sites should I analyze or compare? Please choose from the 27 sites listed in Explore, for example Connecting Ridge or Shackleton Rim.',
     'mission_duration': 'How long should the mission last, or at what UTC date and time should it end?',
     'constraints': 'What minimum illumination and Earth LOS fractions are required? Do you also have darkness or blackout preferences?',
     'request': 'Please clarify the part of the mission you want to change.',
@@ -50,7 +51,9 @@ EN_ISSUES = {
     'TOO_MANY_SITES': 'Chat compares up to two sites per request. Which two catalog sites should I use?',
     'INVALID_COORDINATE_ARRIVAL': 'Please supply a start date and time with a time zone on the exact 5-minute grid.',
     'MISSING_BASELINE': 'Please provide the original mission start, duration, site and hardware before changing its schedule.',
-    'UNSUPPORTED_SITE_COORDINATES': 'These coordinates are outside the supported chat coordinate scope. Please select a supported catalog site.',
+    'UNSUPPORTED_SITE_COORDINATES': 'Those coordinates do not match one of the 27 sites listed in Explore. Which listed site should I use?',
+    'SITE_NOT_IN_CATALOG': ('Chat only analyses the 27 sites listed in Explore, Compare and Best dates; the site you named is not one of them. '
+                            'Which listed site should I use, for example Connecting Ridge, Shackleton Rim or Malapert Massif?'),
     'AMBIGUOUS_SITE_SELECTION': ('I am not sure which catalog site that name refers to. '
                                  'Please write the exact name, for example Connecting Ridge, Shackleton Rim or IM-1.'),
     'SEARCH_TOO_LARGE': ('That search is too long for one request: I can try at most 128 start times '
@@ -60,7 +63,42 @@ EN_ISSUES = {
 }
 
 
+SUPPORTED_VI = ("chiều cao tấm pin và ăng-ten, ngưỡng nắng và Earth LOS tối thiểu, khoảng tối hoặc mất Earth LOS liên tục tối đa, "
+                "yêu cầu liên lạc (số phút liên lạc liên tục, thời gian thiết lập, số cửa sổ, hạn liên lạc đầu tiên), "
+                "ngày giờ, thời lượng, khoảng tìm và cách xếp hạng")
+SUPPORTED_EN = ("panel and antenna heights, minimum sunlight and Earth LOS, maximum continuous darkness or Earth blackout, contact requirements "
+                "(continuous contact minutes, setup time, number of windows, first-contact deadline), dates, duration, "
+                "search range and ranking")
+
+
+def _unsupported_question(patch, language):
+    """Name what could not be applied instead of a generic 'please rephrase'."""
+    items = [item for item in (patch.unsupported_requirements if patch else []) if item.strip()]
+    hardware = bool(patch and patch.hardware_change)
+    if language == 'en':
+        parts = []
+        if items:
+            parts.append('I cannot apply: ' + '; '.join(f'"{item}"' for item in items[:3]) + '.')
+        if hardware:
+            parts.append('Chat can change panel and antenna heights (up to 30 m); other equipment changes are not supported yet.')
+        parts.append(f'Chat supports {SUPPORTED_EN}. Should I continue without that part, or would you like to rephrase it?')
+        return ' '.join(parts)
+    parts = []
+    if items:
+        parts.append('Mình chưa áp dụng được: ' + '; '.join(f'«{item}»' for item in items[:3]) + '.')
+    if hardware:
+        parts.append('Chat đổi được chiều cao tấm pin và ăng-ten (tối đa 30 m); các thay đổi thiết bị khác chưa hỗ trợ.')
+    parts.append(f'Chat hỗ trợ {SUPPORTED_VI}. Bạn muốn bỏ phần đó để tính tiếp, hay diễn đạt lại?')
+    return ' '.join(parts)
+
+
 def questions_for(issue: str, patch=None, *, baseline_duration_hours=None, language='vi', start=None):
+    if issue == "UNSUPPORTED_REQUIREMENT":
+        return [ClarificationQuestion(field="request", question=_unsupported_question(patch, language))]
+    if issue == "MISSING_CONTACT_MINUTES":
+        return [ClarificationQuestion(field="constraints", question=(
+            'How many minutes of continuous Earth contact does each contact need?' if language == 'en'
+            else 'Mỗi lần liên lạc cần liên tục tối thiểu bao nhiêu phút?'))]
     fields = ISSUE_FIELDS.get(issue, [])
     if issue == "UNRESOLVED_FIELDS" and patch:
         fields = [ALIASES.get(field, field) for field in patch.unresolved_fields] or [q.field for q in patch.clarification_questions]
@@ -108,6 +146,9 @@ def questions_for(issue: str, patch=None, *, baseline_duration_hours=None, langu
         elif issue == "MISSING_BASELINE":
             text = "Bạn cần cung cấp kế hoạch gốc gồm ngày giờ, thời lượng, điểm và cấu hình phần cứng trước khi thay lịch."
         elif issue == "UNSUPPORTED_SITE_COORDINATES":
-            text = "Tọa độ chưa có phân tích Sun/Earth. Hiện chỉ nhận hai điểm P1 trong catalog (sai số nhập tối đa 1 m); chọn Site01_P1 hoặc Site04_P1."
+            text = "Tọa độ này không trùng với điểm nào trong 27 điểm của danh sách Khám phá. Bạn muốn dùng điểm nào trong danh sách?"
+        elif issue == "SITE_NOT_IN_CATALOG":
+            text = ("Chat chỉ phân tích 27 điểm trong danh sách Khám phá, So sánh và Thời điểm tốt nhất; điểm bạn nêu không nằm trong danh sách này. "
+                    "Bạn muốn dùng điểm nào, ví dụ Connecting Ridge, Shackleton Rim hoặc Malapert Massif?")
         result.append(ClarificationQuestion(field=field, question=text))
     return result

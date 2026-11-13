@@ -2,7 +2,7 @@ import json
 
 from .models import EvidenceBundle, ParseRequest
 from .explanations import explanation_options
-from .sites import available_sites, coordinate_sites_for_prompt, named_sites, site_display_name
+from .sites import coordinate_sites_for_prompt, named_sites, site_display_name, site_info
 from .language import request_language
 from .start_time import start_context
 from .interpretation import ANSWER_POLICY, METRIC_MEANINGS, explanation_view, engine_evidence
@@ -16,7 +16,7 @@ def parse_messages(request: ParseRequest, capabilities: dict) -> list[dict]:
             "You parse Vietnamese/English lunar planning requests into RequestPatch JSON only. "
             f"The conversation language hint is {request_language(request)}. Set response_language to en or vi based on the latest "
             "USER wording, including clarification answers. Numeric-only/date-only answers preserve the conversation language. "
-            "Recognize English beyond a list of command words, including 'explore IM-1'. Write questions in that language. "
+            "Recognize English beyond a list of command words, including 'explore Connecting Ridge'. Write questions in that language. "
             "Accept natural dates, not only ISO: 'November 24, 2026 at 9 AM UTC', '24 November 2026 09:00 UTC', "
             "'24/11/2026 lúc 9 giờ UTC' and '11/24/2026 09:00 UTC' all normalize to 2026-11-24T09:00:00Z. "
             "noon/midday/giữa trưa => 12:00, midnight/nửa đêm => 00:00, '1 giờ chiều' => 13:00, '8 giờ tối' => 20:00. "
@@ -39,9 +39,9 @@ def parse_messages(request: ParseRequest, capabilities: dict) -> list[dict]:
             "or mission_end_utc for an explicit timezone-aware mission END date (distinct from landing/arrival). "
             "An instruction to analyze OR COMPARE sites FROM timestamp A TO timestamp B describes one mission lasting from A to B, "
             "unless the user explicitly asks to find/choose a START date inside that range. "
-            "For 'phân tích điểm IM-1 từ A đến B', set arrival_utc=A, mission_end_utc=B, duration_hours=null, "
+            "For 'phân tích Connecting Ridge từ A đến B', set arrival_utc=A, mission_end_utc=B, duration_hours=null, "
             "search_from_utc=null and search_until_utc=null. Even a year-long mission is supported. "
-            "For 'so sánh IM-1 với IM-2 từ A đến B', select BOTH site IDs and set arrival_utc=A, mission_end_utc=B, "
+            "For 'so sánh Connecting Ridge với Shackleton Rim từ A đến B', select BOTH site IDs and set arrival_utc=A, mission_end_utc=B, "
             "duration_hours=null and both search fields null. Evaluate both sites over the SAME COMPLETE interval A to B. "
             "Do not keep the baseline 72-hour duration, evaluate just the first day, or turn this into a best-dates search. "
             "'ngày bắt đầu và ngày kết thúc cùng một nhiệm vụ' explicitly confirms this interpretation. "
@@ -58,17 +58,20 @@ def parse_messages(request: ParseRequest, capabilities: dict) -> list[dict]:
             "set hardware_change=false and still select the explicitly named site. "
             "For sites explicitly named now, set site_ids by copying explicit_named_site_ids exactly; that backend lookup is "
             "authoritative for names, codes and aliases (for example site01/Site01/R01 => connecting-ridge, "
-            "site04 => shackleton-rim; only the literal IDs Site01_P1/Site04_P1 select the archived P1 observers). "
+            "site04/điểm 04 => shackleton-rim). "
             "'2 điểm 04 và 01' means both. Otherwise leave site_ids null and inherit selected_site_ids "
             "with site_scope unspecified; use keep_current only when explicitly requested. "
-            "All coordinate_sites are supported by name, ID or listed alias. Use the exact site_id, do not substitute a snapshot point. "
-            "For example Connecting Ridge and Site01_P1 are distinct points. Mons Mouton and Mons Mouton Plateau are distinct. "
+            "Chat supports ONLY the 27 coordinate_sites (the sites listed in the app tabs), by name, ID or listed alias. Use the exact site_id. "
+            "If the user names any other point (for example IM-1, VIPER, Mons Mouton or Site01_P1), copy that name into site_ids; "
+            "the backend explains that it is not one of the 27 sites. Never substitute a nearby listed site yourself. "
+            "Connecting Ridge and Connecting Ridge Extension, Shackleton Rim and Shackleton Rim B, Malapert Massif and Malapert Crater 1 "
+            "are distinct sites. "
             "For a comparison of known sites, keep both IDs and ask only for missing inputs. "
             "This chat compares up to two points per request; if the user names more, still list every named site in "
             "site_ids and leave clarification to the backend. "
             "For explicit latitude/east longitude, set site_coordinates with lat_deg and lon_e_deg; "
             "never guess coordinate order or choose a nearest site yourself. Backend only identifies "
-            "processed P1 coordinates within 1 metre; arbitrary-coordinate science is unsupported. "
+            "one of the 27 sites from coordinates within 1 metre; arbitrary-coordinate science is unsupported. "
             "If a requested schedule change lacks the number of days or an exact target date, mark arrival_utc "
             "in unresolved_fields and supply a short clarification_questions entry in the user's language. "
             "When request.require_explicit_start is true, require an explicit start date/time, relative shift, "
@@ -84,7 +87,10 @@ def parse_messages(request: ParseRequest, capabilities: dict) -> list[dict]:
             "arrival_shift_days is an integer relative to baseline, or arrival_utc is an explicit "
             "timezone-aware timestamp; never silently resolve conflicting alternatives. "
             "720 minutes of darkness = 12 hours. 75% sunlight = 0.75. "
-            "Hard requirements are min_sunlit_fraction and min_earth_los_fraction, fractions in [0,1]. "
+            "min_earth_los_fraction may be null in the baseline (the app tabs require contact windows instead); set it only "
+            "when the user asks for an Earth LOS/visibility fraction. "
+            "Hard requirements are min_sunlit_fraction and min_earth_los_fraction, fractions in [0,1], plus the optional "
+            "contact requirements above. "
             "Sunlight means the time-mean visible area fraction of the solar disk including Earth occultation, "
             "not the fraction of time the Sun centre or any part is visible. Half the disk for the whole mission means 0.5. "
             "Preserve baseline.illumination_model: an explicit legacy sun_center baseline instead means centre-visible time. "
@@ -94,7 +100,10 @@ def parse_messages(request: ParseRequest, capabilities: dict) -> list[dict]:
             "Missing year/time/timezone must be unresolved_fields. A clear self-correction uses "
             "the final value; genuinely ambiguous alternatives require clarification. "
             "site_scope selected means the explicitly selected site list, keep_current forbids moving. "
-            "Set hardware_change true if equipment or height changes. Negative limits are invalid; "
+            "Equipment heights are supported: 'tấm pin cao 1 m', 'panel at 10 m' => panel_height_m; 'ăng-ten 2 m', "
+            "'antenna mast 20 m' => antenna_height_m; 'chân đế 5 m' / 'everything at 5 m' sets both. Leave them null when "
+            "not stated (the working baseline keeps the mission settings from the app tabs). Set hardware_change true only "
+            "for an equipment change other than these heights. Negative limits are invalid; "
             "do not change the sign. Unsupported requirements must be listed, never ignored. "
             "Every source_quote must be an exact nonempty substring of current or historical USER text/answers, never an assistant question or summary. "
             "search_from_utc/search_until_utc are nullable explicit start-date search boundaries: "
@@ -108,6 +117,18 @@ def parse_messages(request: ParseRequest, capabilities: dict) -> list[dict]:
             "For example, a request allowing starts from 2026-11-17T00:00:00Z until 2026-11-24T00:00:00Z "
             "sets search_from_utc/search_until_utc to those values, site_scope selected, hardware_change false, "
             "and both arrival fields null. Copy source_quotes verbatim from request.text, never translate them. "
+            "Earth-contact requirements are SUPPORTED hard requirements, never unsupported_requirements: "
+            "'thời lượng liên lạc 70 phút', 'liên lạc liên tục ít nhất 70 phút', 'a 70-minute contact window' => "
+            "min_contact_minutes=70; setup/warm-up time before contact => contact_setup_minutes; a number of separate contact "
+            "windows/passes => required_contact_windows; 'first contact within 6 hours of landing' => "
+            "first_contact_deadline_minutes=360. Leave them null when not stated; the backend keeps earlier values. "
+            "When the user asks to find the best/optimal start time but gives only ONE start instant and no range "
+            "('tìm thời điểm tốt nhất ... tại 26/11/2026 00:00 UTC'), set search_requested=true, arrival_utc to that instant "
+            "and both search fields null; the backend searches forward from it within its evaluation budget. "
+            "Do not ask for a range in that case. "
+            "If a clarification answer tells you to drop, ignore or skip a part that could not be applied "
+            "('bỏ phần đó', 'bỏ qua', 'ignore it', 'continue without it'), omit it from unsupported_requirements "
+            "and keep every other value from the request. "
             "search_step_minutes is null unless the user states a search step ('bước một giờ' => 60, 'every 30 minutes' => 30); "
             "the backend otherwise picks the finest step that fits its evaluation budget. "
             "rank_by may select total_earth_los_hours (default), total_sun_hours, longest_dark_hours, longest_blackout_hours or longest_joint_hours. "
@@ -116,7 +137,7 @@ def parse_messages(request: ParseRequest, capabilities: dict) -> list[dict]:
         {"role": "user", "content": json.dumps({"request": request.model_dump(),
             "explicit_named_site_ids": next((ids for turn in reversed(request.clarifications)
                 if (ids := named_sites(turn.answer))), named_sites(request.text)),
-            "start_time_context": start_context(request), "available_sites": available_sites(),
+            "start_time_context": start_context(request),
             "coordinate_sites": coordinate_sites_for_prompt(), "capabilities": {
             key: capabilities[key] for key in ("scenario", "supported_constraints", "supported_soft_constraints", "warnings", "supported_operations", "ranking_metrics")}}, ensure_ascii=False)},
     ]
@@ -130,6 +151,7 @@ def explain_messages(evidence: EvidenceBundle, *, repair: bool = False, natural:
         rows.append({
             "candidate_id": candidate.candidate_id, "site_id": candidate.site_id,
             "site_name": site_display_name(candidate.site_id),
+            "site": {k: v for k, v in site_info(candidate.site_id).items() if k in ("label", "kind", "same_coordinates_as")},
             "start_utc": candidate.start_utc, "decision": candidate.decision,
             "issue": candidate.issue, "constraint_states": candidate.constraint_states,
             "soft_constraint_states": candidate.soft_constraint_states,
@@ -191,11 +213,23 @@ def explain_messages(evidence: EvidenceBundle, *, repair: bool = False, natural:
             "and step, how many met the hard requirements, and that the listed windows are the best non-overlapping ones. "
             "If none passed, say plainly that no start in that range met the requirements and that the top-ranked window "
             "is only the closest miss, never a recommended or proposed plan. "
-            "For a comparison, state which site fares better or that neither meets the requirements, and why, in one or two "
-            "sentences before details. For a failed hard requirement, quote achieved_percent against required_percent "
+            "For a comparison, state in one or two sentences before details whether any site meets the requirements, and "
+            "which site fares better and by how much on the decisive requirement. When none passes, still name the closer "
+            "miss (the engine's recommended_candidate_id) and its margin over the other; never say neither is better when "
+            "their decisive metrics differ.For a failed hard requirement, quote achieved_percent against required_percent "
             "when supplied. Never write code identifiers such as min_earth_los_fraction, total_sun_hours, candidate_id, "
             "NO_FEASIBLE_IN_EVALUATED_SET, or raw ISO timestamps; write dates in natural language. "
             "Refer to each site by its site_name, never by a site_id slug such as connecting-ridge. "
+            "A site.kind of p1_observer is an archived observer point inside that region, not the region centre; say so "
+            "if both appear or the user may confuse them. If site.same_coordinates_as lists another evaluated site, say they "
+            "are the same point, so identical results are expected. "
+            "State once the evaluated panel and antenna heights from mission.hardware (sun_panel, earth_antenna, metres), "
+            "because polar sunlight and Earth visibility depend strongly on height above the terrain. "
+            "The engine stops at the first failed hard requirement: when mission.contact_requirements is set but a "
+            "candidate's constraint_states has no contact.* entry, say the contact requirement was not evaluated because "
+            "an earlier requirement already failed; never claim it was evaluated, met or missed. "
+            "If a failing sunlight or Earth LOS threshold is not stated in user_question (an inherited default), say it is "
+            "the default requirement and that the user can change it. "
             "Write requirement fractions as percentages (0.8 => 80%) and whole hours without a trailing .0. " + ANSWER_POLICY)
     return [
         {"role": "system", "content": (

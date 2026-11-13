@@ -156,7 +156,8 @@ export default function App() {
     margin: 0,
     hIdx: HEIGHTS.indexOf(viewerHeight),
   };
-  const assistant = useAssistant();
+  // Chat evaluates with the same heights and requirements as the tabs.
+  const assistant = useAssistant(mission);
   const go = (v: View) => {
     setView(v);
     setPlaying(false);

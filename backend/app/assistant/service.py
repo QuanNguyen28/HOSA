@@ -14,6 +14,7 @@ from .store import Draft, DraftStore
 from .language import request_language
 from .start_time import reconcile_start, start_context
 from .answer_review import review_messages
+from .sites import site_info
 
 
 class AssistantService:
@@ -44,7 +45,8 @@ class AssistantService:
             user_text=request.text),
             self.settings.assistant_max_drafts)
         return ParseResponse(status="READY", issues=[], patch=patch, draft_id=identifier, spec_hash=spec_hash,
-            baseline_hash=spec.baseline_hash, spec=spec, llm_calls=1)
+            baseline_hash=spec.baseline_hash, spec=spec, llm_calls=1,
+            site_labels={site_id: site_info(site_id)["label"] for site_id in spec.site_ids})
 
     async def evaluate(self, request: EvaluateRequest) -> EvaluateResponse:
         if not request.confirmed:

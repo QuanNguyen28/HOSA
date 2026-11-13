@@ -37,27 +37,28 @@ def console(service, payload, answers):
 
 
 def test_commands_update_baseline_and_do_not_call_llm(service, request_payload):
-    output = console(service, request_payload, ['/sites Site04_P1', '/baseline', '/sites all', '/baseline', '/quit'])
+    output = console(service, request_payload, ['/sites Shackleton Rim', '/baseline',
+                                                 '/sites Connecting Ridge, Shackleton Rim', '/baseline', '/quit'])
     states = [json.loads(s) for s in output if s.startswith('{')]
-    assert states[0]['current_site_id'] == 'Site04_P1'
-    assert states[0]['selected_site_ids'] == ['Site04_P1']
-    assert states[1]['selected_site_ids'] == ['Site01_P1', 'Site04_P1']
+    assert states[0]['current_site_id'] == 'shackleton-rim'
+    assert states[0]['selected_site_ids'] == ['shackleton-rim']
+    assert states[1]['selected_site_ids'] == ['connecting-ridge', 'shackleton-rim']
     assert not service.llm.calls
 
 
 def test_evaluated_turn_becomes_next_turn_context(service, request_payload):
-    service.llm = TurnLLM([patch('chọn Site04_P1', site_ids=['Site04_P1'],
+    service.llm = TurnLLM([patch('chọn Shackleton Rim', site_ids=['shackleton-rim'],
         arrival_utc='2026-11-17T00:00:00Z', max_earth_blackout_hours=5),
         patch('giảm tối', max_darkness_hours=8)])
     original = deepcopy(request_payload)
-    console(service, request_payload, ['chọn Site04_P1', 'y', 'giảm tối', 'y', '/quit'])
+    console(service, request_payload, ['chọn Shackleton Rim', 'y', 'giảm tối', 'y', '/quit'])
     first, second = service.llm.requests
     assert not first['conversation_history']
-    assert second['baseline']['current_site_id'] == 'Site04_P1'
+    assert second['baseline']['current_site_id'] == 'shackleton-rim'
     assert second['baseline']['arrival_utc'] == '2026-11-17T00:00:00Z'
     assert second['baseline']['constraints']['max_earth_blackout_hours'] == 5
-    assert second['selected_site_ids'] == ['Site04_P1']
-    assert second['conversation_history'][0]['text'] == 'chọn Site04_P1'
+    assert second['selected_site_ids'] == ['shackleton-rim']
+    assert second['conversation_history'][0]['text'] == 'chọn Shackleton Rim'
     assert second['conversation_history'][0]['outcome'] == 'evaluated'
     assert request_payload == original
 
@@ -72,17 +73,17 @@ def test_cancelled_turn_does_not_apply_plan(service, request_payload):
 
 def test_site_command_during_confirmation_invalidates_draft(service, request_payload):
     service.llm = TurnLLM([patch('giữ nguyên'), patch('giữ nguyên')])
-    console(service, request_payload, ['giữ nguyên', '/sites Site04_P1', 'giữ nguyên', 'n', '/quit'])
+    console(service, request_payload, ['giữ nguyên', '/sites Shackleton Rim', 'giữ nguyên', 'n', '/quit'])
     assert 'ExplainPlan' not in service.llm.calls
-    assert service.llm.requests[1]['baseline']['current_site_id'] == 'Site04_P1'
+    assert service.llm.requests[1]['baseline']['current_site_id'] == 'shackleton-rim'
 
 
 def test_new_keeps_context_reset_clears_it(request_payload):
     state = ChatSession(request_payload)
-    state.command('/sites Site04_P1', lambda _: None)
+    state.command('/sites Shackleton Rim', lambda _: None)
     state.text = 'đang hỏi'
     state.command('/new', lambda _: None)
-    assert state.text is None and state.baseline.current_site_id == 'Site04_P1'
+    assert state.text is None and state.baseline.current_site_id == 'shackleton-rim'
     assert len(state.history) == 1
     state.command('/reset', lambda _: None)
     assert state.baseline.current_site_id == 'Site01_P1' and state.history == []
@@ -97,8 +98,8 @@ def test_unspecified_scope_uses_selection(service, request_payload):
 
 def custom_duration_context(payload, hours=8784):
     payload['baseline'].update(arrival_utc='2027-11-17T00:00:00Z', duration_hours=hours,
-                               current_site_id='im1-odysseus')
-    payload['selected_site_ids'] = ['im1-odysseus']
+                               current_site_id='haworth')
+    payload['selected_site_ids'] = ['haworth']
     return payload
 
 
@@ -106,7 +107,7 @@ def custom_duration_context(payload, hours=8784):
 @pytest.mark.parametrize('copied_duration', [False, True])
 def test_new_date_does_not_silently_reuse_custom_duration(service, request_payload, hours, copied_duration):
     request_payload = custom_duration_context(request_payload, hours)
-    text = 'Phân tích IM-1 vào 2028-11-17T00:00:00Z'
+    text = 'Phân tích Haworth vào 2028-11-17T00:00:00Z'
     request_payload['text'] = text
     service.llm = FixtureLLM(patch(text, arrival_utc='2028-11-17T00:00:00Z',
         duration_hours=hours if copied_duration else None))
@@ -118,8 +119,8 @@ def test_new_date_does_not_silently_reuse_custom_duration(service, request_paylo
 
 
 @pytest.mark.parametrize('text,duration', [
-    ('Phân tích IM-1 vào 2028-11-17T00:00:00Z, giữ nguyên thời lượng', None),
-    ('Phân tích IM-1 vào 2028-11-17T00:00:00Z trong 24 giờ', 24),
+    ('Phân tích Haworth vào 2028-11-17T00:00:00Z, giữ nguyên thời lượng', None),
+    ('Phân tích Haworth vào 2028-11-17T00:00:00Z trong 24 giờ', 24),
 ])
 def test_explicit_duration_choice_with_new_date_is_respected(service, request_payload, text, duration):
     request_payload = custom_duration_context(request_payload)
@@ -141,7 +142,7 @@ def test_relative_start_shift_is_not_mistaken_for_mission_duration(service, requ
 
 def test_duration_clarification_resolves_without_reusing_a_year(service, request_payload):
     request_payload = custom_duration_context(request_payload)
-    text = 'Phân tích IM-1 vào 2028-11-17T00:00:00Z'
+    text = 'Phân tích Haworth vào 2028-11-17T00:00:00Z'
     request_payload.update(text=text, clarifications=[{'question':'Bạn muốn nhiệm vụ kéo dài bao nhiêu giờ?', 'answer':'24'}])
     service.llm = FixtureLLM(patch(text, arrival_utc='2028-11-17T00:00:00Z', duration_hours=24))
     result = asyncio.run(service.parse(ParseRequest.model_validate(request_payload)))
@@ -151,7 +152,7 @@ def test_duration_clarification_resolves_without_reusing_a_year(service, request
 
 def test_missing_duration_fields_ask_about_duration_not_generic_request(service, request_payload):
     request_payload = custom_duration_context(request_payload)
-    text = 'Phân tích IM-1 vào 2028-11-17T00:00:00Z'
+    text = 'Phân tích Haworth vào 2028-11-17T00:00:00Z'
     request_payload['text'] = text
     service.llm = FixtureLLM(patch(text, arrival_utc='2028-11-17T00:00:00Z',
         unresolved_fields=['duration_hours', 'mission_end_utc']))
@@ -166,12 +167,13 @@ def test_explicit_keep_current_overrides_region(service, request_payload):
     assert result.spec.site_ids == ['Site01_P1']
 
 
-@pytest.mark.parametrize('longitude', [203.733786, -156.266214])
-def test_coordinate_command_identifies_site04(longitude, request_payload):
+@pytest.mark.parametrize('longitude', [188.13, -171.87])
+def test_coordinate_command_identifies_shackleton_rim(longitude, request_payload):
+    # Coordinates identify one of the 27 tab sites (Shackleton Rim region centre), never a P1 observer.
     state = ChatSession(request_payload)
-    state.command(f'/sites coords -89.779800 {longitude}', lambda _: None)
-    assert state.baseline.current_site_id == 'Site04_P1'
-    assert state.selected == ['Site04_P1']
+    state.command(f'/sites coords -89.7668 {longitude}', lambda _: None)
+    assert state.baseline.current_site_id == 'shackleton-rim'
+    assert state.selected == ['shackleton-rim']
 
 
 def test_coordinate_command_rejects_unknown_and_nonfinite(request_payload):
@@ -182,10 +184,14 @@ def test_coordinate_command_rejects_unknown_and_nonfinite(request_payload):
 
 
 def test_natural_language_coordinate_selection_and_rejection(service, request_payload):
-    coords = available_sites()[1]
-    service.llm = FixtureLLM(patch('ba ngày', site_coordinates={k: coords[k] for k in ('lat_deg', 'lon_e_deg')}))
+    service.llm = FixtureLLM(patch('ba ngày', site_coordinates={'lat_deg': -89.7668, 'lon_e_deg': -171.87}))
     result = asyncio.run(service.parse(ParseRequest.model_validate(request_payload)))
-    assert result.spec.site_ids == ['Site04_P1']
+    assert result.spec.site_ids == ['shackleton-rim']
+    # The archived Site04_P1 observer is not one of the 27 sites, so its coordinates are not identified.
+    coords = available_sites()[1]
+    service.llm.patch = patch('ba ngày', site_coordinates={k: coords[k] for k in ('lat_deg', 'lon_e_deg')})
+    result = asyncio.run(service.parse(ParseRequest.model_validate(request_payload)))
+    assert result.issues == ['UNSUPPORTED_SITE_COORDINATES']
     service.llm.patch = patch('ba ngày', site_coordinates={'lat_deg': -89, 'lon_e_deg': 10})
     result = asyncio.run(service.parse(ParseRequest.model_validate(request_payload)))
     assert result.issues == ['UNSUPPORTED_SITE_COORDINATES'] and result.draft_id is None

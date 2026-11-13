@@ -13,6 +13,13 @@ def build_evidence(result, spec, run_id, spec_hash):
         if candidate.issue:
             facts[f"{key}.availability"] = {"site_id": candidate.site_id, "candidate_id": key, "status": candidate.issue}
             continue
+        contact_states = {name: state for name, state in candidate.constraint_states.items() if name.startswith("contact.")}
+        if contact_states or candidate.contact_analysis:
+            analysis = candidate.contact_analysis or {}
+            facts[f"{key}.contact"] = {"site_id": candidate.site_id, "candidate_id": key, "requirement_type": "hard",
+                "requirements": spec.contact_requirements.model_dump() if spec.contact_requirements else None,
+                "states": contact_states, "metrics": analysis.get("metrics"), "scope": analysis.get("scope"),
+                "source": candidate.provenance}
         facts[f"{key}.validation"] = {"site_id": candidate.site_id, "candidate_id": key,
             "nominal_sampled_decision": candidate.nominal_sampled_decision,
             "validation": candidate.validation, "resolution": candidate.resolution}
@@ -26,10 +33,11 @@ def build_evidence(result, spec, run_id, spec_hash):
             if worst:
                 worst = {**worst, "event_id": digest({"candidate": key, "source": spec.source_hash, "event": worst})[:20]}
             limit = spec.constraints.max_darkness_hours if suffix == "dark" else spec.constraints.max_earth_blackout_hours if suffix == "blackout" else (
-                spec.min_sunlit_fraction*spec.duration_hours if suffix == "sun" else spec.min_earth_los_fraction*spec.duration_hours if suffix == "earth" else None)
+                spec.min_sunlit_fraction*spec.duration_hours if suffix == "sun" else (spec.min_earth_los_fraction*spec.duration_hours
+                if spec.min_earth_los_fraction is not None else None) if suffix == "earth" else None)
             facts[f"{key}.{suffix}"] = {"site_id": candidate.site_id, "candidate_id": key, "metric": metric,
                 "bounds": candidate.metrics[metric], "limit_hours": limit, "unit": "hours",
-                "requirement_type": "hard" if suffix in ("sun", "earth") else "soft",
+                "requirement_type": "hard" if suffix == "sun" or (suffix == "earth" and spec.min_earth_los_fraction is not None) else "soft" if suffix in ("dark", "blackout") else "context",
                 "worst_interval": worst, "context": candidate.metric_context.get(metric), "source": candidate.provenance}
     chosen = next((c for c in result.candidates if c.candidate_id == result.recommended_candidate_id), None)
     rankings = [r.model_copy(update={"candidate_id": identities[r.candidate_id],

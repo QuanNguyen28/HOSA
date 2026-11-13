@@ -1,8 +1,16 @@
 """Validate references and render factual prose; LLMs do not own numbers or decisions."""
 
 REASON_SUFFIX = {"DARKNESS": "dark", "BLACKOUT": "blackout", "EARTH_LOS": "earth",
-                 "SUNLIGHT": "sun", "DATA_MISSING": "availability"}
+                 "SUNLIGHT": "sun", "CONTACT": "contact", "DATA_MISSING": "availability"}
 HARD_CONSTRAINT = {"EARTH_LOS": "min_earth_los_fraction", "SUNLIGHT": "min_sunlit_fraction"}
+
+
+def _hard_state(candidate, reason):
+    """State of the hard requirement behind a reason; contact.* states collapse to the worst one."""
+    if reason == "CONTACT":
+        states = [s for n, s in candidate.constraint_states.items() if n.startswith("contact.")]
+        return "FAIL" if "FAIL" in states else "INDETERMINATE" if "INDETERMINATE" in states else "PASS" if states else None
+    return candidate.constraint_states.get(HARD_CONSTRAINT.get(reason))
 
 
 def bounds_text(low, high):
@@ -17,7 +25,7 @@ def explanation_options(candidate, facts):
     for reason, suffix in REASON_SUFFIX.items():
         if candidate.issue and reason != "DATA_MISSING":
             continue
-        if candidate.decision == "FAIL" and candidate.constraint_states.get(HARD_CONSTRAINT.get(reason)) != "FAIL":
+        if candidate.decision == "FAIL" and _hard_state(candidate, reason) != "FAIL":
             continue
         fact_id = f"{candidate.candidate_id}.{suffix}"
         if fact_id in facts and facts[fact_id]["candidate_id"] == candidate.candidate_id:
@@ -77,15 +85,22 @@ def render(evidence, plan=None, *, language='vi'):
                         f"(minimum {evidence.request.min_sunlit_fraction*100:g}%)")
             if evidence.request.illumination_model == 'sun_center':
                 sun_text = f"Sun-centre visibility {bounds_text(*sun)} hours (minimum {evidence.request.min_sunlit_fraction*100:g}%)"
-        earth_text = (f"có tầm nhìn Trái Đất {bounds_text(*earth)} giờ "
-                      f"(tối thiểu {evidence.request.min_earth_los_fraction*100:g}%)")
+        earth_min = evidence.request.min_earth_los_fraction
+        earth_text = (f"có tầm nhìn Trái Đất {bounds_text(*earth)} giờ"
+                      + (f" (tối thiểu {earth_min*100:g}%)" if earth_min is not None else ""))
         if language == 'en':
-            earth_text = f"Earth LOS {bounds_text(*earth)} hours (minimum {evidence.request.min_earth_los_fraction*100:g}%)"
+            earth_text = f"Earth LOS {bounds_text(*earth)} hours" + (f" (minimum {earth_min*100:g}%)" if earth_min is not None else "")
         ordered_metrics = (earth_text, sun_text) if focus.get(key) == "EARTH_LOS" else (sun_text, earth_text)
         decision = tr("chưa đủ căn cứ để kết luận (INDETERMINATE)", "insufficient evidence for a conclusion (INDETERMINATE)") if c.decision == "INDETERMINATE" else c.decision
         texts.append(tr(f"{label}: {decision} theo yêu cầu cứng; {'; '.join(ordered_metrics)}.",
                         f"{label}: {decision} against the hard requirements; {'; '.join(ordered_metrics)}."))
         fact_ids.extend((f"{key}.sun", f"{key}.earth"))
+        contact_state = _hard_state(c, "CONTACT")
+        if contact_state and evidence.request.contact_requirements:
+            minutes = evidence.request.contact_requirements.min_contact_minutes
+            texts.append(tr(f"{label}: yêu cầu liên lạc liên tục tối thiểu {minutes:g} phút: {contact_state}.",
+                            f"{label}: continuous contact requirement of at least {minutes:g} minutes: {contact_state}."))
+            fact_ids.append(f"{key}.contact")
         if not c.validation.get("passed"):
             if c.validation.get("mission_path", {}).get("passed"):
                 texts.append(tr(f"{label}: kiểm chứng đường đi của nhiệm vụ đạt; kiểm chứng horizon toàn vòng vẫn chưa đạt. Ngưỡng còn PROVISIONAL.",

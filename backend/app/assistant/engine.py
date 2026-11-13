@@ -30,6 +30,7 @@ class PlanningAdapter:
                  "arrival_utc": spec.arrival_utc, "constraints": spec.constraints,
                  "hardware": spec.hardware, "current_site_id": spec.current_site_id,
                  "min_sunlit_fraction": spec.min_sunlit_fraction, "min_earth_los_fraction": spec.min_earth_los_fraction, "rank_by": spec.rank_by,
+                 "contact_requirements": spec.contact_requirements,
                  "expected_source_hash": spec.source_hash if spec.data_source == "snapshot" else None}
         if spec.search_from_utc:
             step = {"start_step_minutes": spec.search_step_minutes} if spec.search_step_minutes else {}

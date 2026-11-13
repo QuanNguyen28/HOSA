@@ -16,7 +16,7 @@ from app.main import app
 from app.services.lunarsight import planning
 from app.mission.snapshot import SnapshotProvider
 from app.mission.evaluation import evaluate
-from app.mission.targets import compare_sites, coordinates_for_site
+from app.mission.targets import compare_sites, coordinates_for_site, default_sites
 from conftest import FixtureLLM, default_patch
 
 
@@ -45,7 +45,7 @@ def test_two_calls_gated_engine_and_idempotent_replay(service, request_payload):
 def test_chat_handoff_asks_only_for_missing_start_then_keeps_sites(service, request_payload):
     request_payload.update(text="so sánh 2 điểm 04 và 01", require_explicit_start=True)
     service.llm = FixtureLLM(default_patch(
-        arrival_shift_days=None, site_ids=["Site04_P1", "Site01_P1"],
+        arrival_shift_days=None, site_ids=["shackleton-rim", "connecting-ridge"],
         source_quotes=["04 và 01"],
     ))
     missing = run(service.parse(ParseRequest.model_validate(request_payload)))
@@ -56,19 +56,19 @@ def test_chat_handoff_asks_only_for_missing_start_then_keeps_sites(service, requ
     date = "2026-11-17T00:00:00Z"
     request_payload["clarifications"] = [{"question": missing.questions[0].question, "answer": date}]
     service.llm = FixtureLLM(default_patch(
-        arrival_shift_days=None, arrival_utc=date, site_ids=["Site04_P1", "Site01_P1"],
+        arrival_shift_days=None, arrival_utc=date, site_ids=["shackleton-rim", "connecting-ridge"],
         source_quotes=["04 và 01", date],
     ))
     ready = run(service.parse(ParseRequest.model_validate(request_payload)))
     assert ready.status == "READY" and ready.spec.arrival_utc == date
-    assert set(ready.spec.site_ids) == {"Site04_P1", "Site01_P1"}
+    assert set(ready.spec.site_ids) == {"shackleton-rim", "connecting-ridge"}
     assert service.llm.calls == ["RequestPatch"]  # Review only; no evaluation.
 
 
-def test_clps_chat_handoff_keeps_both_names_and_uses_coordinate_planner(service, request_payload, monkeypatch):
-    request_payload.update(text="so sánh IM1 IM2", require_explicit_start=True)
+def test_two_site_handoff_keeps_both_names_and_uses_coordinate_planner(service, request_payload, monkeypatch):
+    request_payload.update(text="so sánh Haworth và Malapert Massif", require_explicit_start=True)
     service.llm = FixtureLLM(default_patch(
-        arrival_shift_days=None, site_ids=["IM1", "IM2"], source_quotes=["IM1 IM2"],
+        arrival_shift_days=None, site_ids=["Haworth", "Malapert Massif"], source_quotes=["Haworth và Malapert Massif"],
     ))
     missing = run(service.parse(ParseRequest.model_validate(request_payload)))
     assert missing.status == "NEEDS_INPUT"
@@ -78,12 +78,12 @@ def test_clps_chat_handoff_keeps_both_names_and_uses_coordinate_planner(service,
     date = "2026-11-17T00:05:00Z"
     request_payload["clarifications"] = [{"question": missing.questions[0].question, "answer": date}]
     service.llm = FixtureLLM(default_patch(
-        arrival_shift_days=None, arrival_utc=date, site_ids=["Athena"],
-        source_quotes=["IM1 IM2", date],
+        arrival_shift_days=None, arrival_utc=date, site_ids=["Malapert Massif"],
+        source_quotes=["Haworth và Malapert Massif", date],
     ))
     ready = run(service.parse(ParseRequest.model_validate(request_payload)))
     assert ready.status == "READY" and ready.spec.arrival_utc == date
-    assert ready.spec.site_ids == ["im1-odysseus", "im2-athena"]
+    assert ready.spec.site_ids == ["haworth", "malapert-massif"]
     assert ready.spec.data_source == "coordinate" and ready.spec.start_index is None
     assert service.llm.calls == ["RequestPatch"]
 
@@ -100,8 +100,8 @@ def test_clps_chat_handoff_keeps_both_names_and_uses_coordinate_planner(service,
         service.engine.evaluate(ready.spec, "test-run", ready.spec_hash)
 
 
-@pytest.mark.parametrize("site_id,site", compare_sites().items())
-def test_each_compare_site_is_supported_in_chat(service, request_payload, site_id, site):
+@pytest.mark.parametrize("site_id,site", default_sites().items())
+def test_each_tab_site_is_supported_in_chat(service, request_payload, site_id, site):
     date = "2026-11-17T00:05:00Z"
     request_payload.update(text=f"Phân tích {site['name']} lúc {date}", require_explicit_start=True)
     service.llm = FixtureLLM(default_patch(
@@ -114,11 +114,12 @@ def test_each_compare_site_is_supported_in_chat(service, request_payload, site_i
     assert coordinates_for_site(site_id) == {"latitude_deg": site["lat"], "longitude_e_deg": site["lon"] % 360}
 
 
-def test_chat_keeps_distinct_names_and_mixed_snapshot_target(service, request_payload):
+def test_chat_keeps_distinct_names_of_similar_tab_sites(service, request_payload):
     date = "2026-11-17T00:05:00Z"
     for text, expected in [
-        ("Mons Mouton và Mons Mouton Plateau", ["mons-mouton", "mons-mouton-plateau"]),
-        ("Site01_P1 và Connecting Ridge", ["Site01_P1", "connecting-ridge"]),
+        ("Connecting Ridge và Connecting Ridge Extension", ["connecting-ridge", "connecting-ridge-extension"]),
+        ("Shackleton Rim và Shackleton Rim B", ["shackleton-rim", "shackleton-rim-b"]),
+        ("Malapert Massif và Malapert Crater 1", ["malapert-massif", "malapert-crater-1"]),
     ]:
         request_payload.update(text=f"So sánh {text} lúc {date}", require_explicit_start=True)
         service.llm = FixtureLLM(default_patch(
@@ -127,6 +128,19 @@ def test_chat_keeps_distinct_names_and_mixed_snapshot_target(service, request_pa
         ready = run(service.parse(ParseRequest.model_validate(request_payload)))
         assert ready.status == "READY"
         assert ready.spec.site_ids == expected and ready.spec.data_source == "coordinate"
+
+
+@pytest.mark.parametrize("site_id,site", [(k, v) for k, v in compare_sites().items() if k not in default_sites()]
+                         + [("Site01_P1", {"name": "Site01_P1"})])
+def test_points_outside_the_27_tab_sites_are_declined(service, request_payload, site_id, site):
+    date = "2026-11-17T00:05:00Z"
+    request_payload["baseline"]["illumination_model"] = "solar_disc"
+    request_payload.update(text=f"Phân tích {site['name']} lúc {date}", require_explicit_start=True)
+    service.llm = FixtureLLM(default_patch(arrival_shift_days=None, arrival_utc=date, site_ids=[site["name"]],
+        source_quotes=[date]))
+    result = run(service.parse(ParseRequest.model_validate(request_payload)))
+    assert result.status != "READY" and result.issues == ["SITE_NOT_IN_CATALOG"]
+    assert "27" in result.questions[0].question
 
 
 def test_second_call_timeout_preserves_engine_result(service, request_payload):
@@ -419,7 +433,7 @@ def test_revalidation_is_sealed_in_draft_and_missing_network_stays_unknown(servi
     assert any(key.endswith('.validation') for key in result.explanation_fact_ids)
 
 
-@pytest.mark.parametrize('site_id', ['Site04_P1', 'haworth'])
+@pytest.mark.parametrize('site_id', ['shackleton-rim', 'haworth'])
 def test_merged_chat_preserves_long_end_date_and_validation_across_turns(service, request_payload, site_id):
     start, end = '2026-11-17T00:00:00Z', '2026-11-27T00:00:00Z'
     request_payload.update(text=f'Phân tích {site_id} từ {start} đến {end}',
@@ -447,8 +461,8 @@ def test_merged_chat_preserves_long_end_date_and_validation_across_turns(service
 ])
 def test_compare_two_sites_for_entire_explicit_interval(service, request_payload, monkeypatch, end, hours):
     start = '2027-11-17T00:00:00Z'
-    sites = ['im1-odysseus', 'im2-athena']
-    request_payload.update(text=f'So sánh IM-1 với IM-2 từ {start} đến {end}', selected_site_ids=sites)
+    sites = ['haworth', 'malapert-massif']
+    request_payload.update(text=f'So sánh Haworth với Malapert Massif từ {start} đến {end}', selected_site_ids=sites)
     service.llm = FixtureLLM(default_patch(arrival_shift_days=None, arrival_utc=start,
         mission_end_utc=end, site_scope='selected', site_ids=sites, source_quotes=[start, end]))
     parsed = run(service.parse(ParseRequest.model_validate(request_payload)))

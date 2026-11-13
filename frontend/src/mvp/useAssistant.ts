@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "./api";
 import { useGroundedChat, type ChatMessage } from "./useGroundedChat";
+import type { Mission } from "./contracts";
 
 type Baseline = {
   illumination_model: "solar_disc" | "sun_center";
@@ -10,8 +11,14 @@ type Baseline = {
   hardware: { sun_panel: number; earth_antenna: number };
   constraints: { max_darkness_hours: number; max_earth_blackout_hours: number };
   min_sunlit_fraction: number;
-  min_earth_los_fraction: number;
+  min_earth_los_fraction: number | null;
   current_site_id: string;
+  contact_requirements?: {
+    min_contact_minutes: number;
+    setup_minutes: number;
+    required_windows: number | null;
+    first_contact_deadline_minutes: number | null;
+  } | null;
 };
 type Turn = {
   text: string;
@@ -51,6 +58,7 @@ type ParseRequest = {
 };
 type Draft = {
   status: string;
+  site_labels?: Record<string, string>;
   issues: string[];
   questions: { question: string }[];
   draft_id: string;
@@ -62,9 +70,11 @@ type Draft = {
     rank_by: string;
     search_from_utc: string | null;
     search_until_utc: string | null;
+    search_step_minutes?: number | null;
   };
 };
 type Evaluation = {
+  site_labels?: Record<string, string>;
   explanation: string[];
   explanation_mode: string;
   evidence: {
@@ -87,7 +97,46 @@ type Evaluation = {
 };
 type Message = ChatMessage;
 
-export function useAssistant() {
+/** Working baseline for a new planning conversation. With the tabs' shared
+ * mission settings, chat uses the same heights, sunlight threshold, contact
+ * requirements and soft limits as Explore/Compare/Best dates (no Earth LOS
+ * fraction unless the user asks for one), so the same question gives the same
+ * engine result in chat and in the tabs. */
+/** No site is preselected: the user names one of the 27 tab sites. */
+const DEFAULT_CHAT_SITE = "connecting-ridge";
+
+function createBaseline(c: Capabilities, mission?: Mission): Baseline {
+  const base: Baseline = {
+    illumination_model: "solar_disc",
+    scenario_id: c.scenario.scenario_id,
+    arrival_utc: c.scenario.A_utc,
+    duration_hours: c.scenario.D_hours,
+    hardware: c.scenario.device_heights_m,
+    constraints: c.scenario.example_constraints,
+    ...c.scenario.example_requirements,
+    current_site_id: c.scenario.site_ids[0],
+  };
+  if (!mission) return base;
+  return {
+    ...base,
+    // First of the 27 tab sites; chat never defaults to the archived P1 observers.
+    current_site_id: DEFAULT_CHAT_SITE,
+    hardware: { sun_panel: mission.panel, earth_antenna: mission.antenna },
+    constraints: { max_darkness_hours: mission.darkness, max_earth_blackout_hours: mission.blackout },
+    min_sunlit_fraction: mission.sun / 100,
+    min_earth_los_fraction: null,
+    contact_requirements: mission.contact > 0
+      ? {
+          min_contact_minutes: mission.contact,
+          setup_minutes: mission.setup,
+          required_windows: mission.windows || null,
+          first_contact_deadline_minutes: mission.deadline || null,
+        }
+      : null,
+  };
+}
+
+export function useAssistant(mission?: Mission) {
   const [caps, setCaps] = useState<Capabilities | null>(null);
   const [mode, setMode] = useState<"general" | "planning">("general");
   const general = useGroundedChat(caps?.assistant_enabled === true);
@@ -108,26 +157,20 @@ export function useAssistant() {
     search_until_utc: null,
   });
   const [busy, setBusy] = useState(false);
+  // Name + coordinates for site IDs seen in this conversation (two sites can share a region name).
+  const [siteLabels, setSiteLabels] = useState<Record<string, string>>({});
   const [resolveIndeterminate, setResolveIndeterminate] = useState(true);
   const [outcome, setOutcome] = useState<Evaluation | null>(null);
   const active = useRef<AbortController | null>(null);
-  const createBaseline = (c: Capabilities): Baseline => ({
-    illumination_model: "solar_disc",
-    scenario_id: c.scenario.scenario_id,
-    arrival_utc: c.scenario.A_utc,
-    duration_hours: c.scenario.D_hours,
-    hardware: c.scenario.device_heights_m,
-    constraints: c.scenario.example_constraints,
-    ...c.scenario.example_requirements,
-    current_site_id: c.scenario.site_ids[0],
-  });
+  const missionRef = useRef(mission);
+  missionRef.current = mission;
   useEffect(() => {
     const controller = new AbortController();
     api<Capabilities>("/assistant/capabilities", controller.signal)
       .then((c) => {
         setCaps(c);
-        setBaseline(createBaseline(c));
-        setSelectedSites(c.scenario.site_ids);
+        setBaseline(createBaseline(c, missionRef.current));
+        setSelectedSites([]);
       })
       .catch((e) => {
         if (!controller.signal.aborted)
@@ -138,6 +181,12 @@ export function useAssistant() {
       active.current?.abort();
     };
   }, []);
+  // Before the first evaluated turn, follow edits to the tabs' mission settings.
+  // Later turns keep the conversation's own working baseline.
+  useEffect(() => {
+    if (caps && history.length === 0 && !pending && !review)
+      setBaseline(createBaseline(caps, mission));
+  }, [caps, mission, history.length, pending, review]);
   const add = (who: Message["who"], value: string) =>
     setMessages((old) => [...old, { who, text: value }]);
   const sendPlanning = async (input: string, fromGeneral = false) => {
@@ -184,7 +233,9 @@ export function useAssistant() {
       } else {
         const questions = draft.questions.map((q) => q.question).join("\n");
         add("assistant", questions || draft.issues.join(", "));
-        setPending(draft.status === "NEEDS_INPUT" ? request : null);
+        // Keep the request for unsupported parts too, so "drop that part"
+        // continues this request instead of starting an empty one.
+        setPending(request);
       }
     } catch (e) {
       if (!controller.signal.aborted)
@@ -228,7 +279,8 @@ export function useAssistant() {
         },
       );
       if (controller.signal.aborted) return;
-      setOutcome(response);
+      setOutcome({ ...response, site_labels: draft.site_labels });
+      setSiteLabels((old) => ({ ...old, ...draft.site_labels }));
       add("assistant", response.explanation.join("\n"));
       setHistory(
         (old) =>
@@ -254,6 +306,7 @@ export function useAssistant() {
         min_sunlit_fraction: spec.min_sunlit_fraction,
         min_earth_los_fraction: spec.min_earth_los_fraction,
         current_site_id: spec.site_ids.length === 1 ? spec.site_ids[0] : spec.current_site_id,
+        contact_requirements: spec.contact_requirements ?? null,
       });
       setContext({
         rank_by: spec.rank_by,
@@ -284,8 +337,8 @@ export function useAssistant() {
       search_until_utc: null,
     });
     if (caps) {
-      setBaseline(createBaseline(caps));
-      setSelectedSites(caps.scenario.site_ids);
+      setBaseline(createBaseline(caps, missionRef.current));
+      setSelectedSites([]);
     }
   };
   const cancel = () => {
@@ -305,6 +358,8 @@ export function useAssistant() {
   };
   return {
     hasPending: pending !== null,
+    siteLabels,
+    hasHistory: history.length > 0,
     resolveIndeterminate,
     setResolveIndeterminate,
     caps,

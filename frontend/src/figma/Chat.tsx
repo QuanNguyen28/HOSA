@@ -25,6 +25,9 @@ const REQUEST_LABELS: Record<string, string> = {
   current_site_id: "Current site", data_source: "Data source", site_ids: "Selected sites",
   rank_by: "Rank by", search_from_utc: "Search from · UTC", search_until_utc: "Search until · UTC",
   search_step_minutes: "Search step · min",
+  contact_requirements: "Contact requirements", min_contact_minutes: "Minimum continuous contact · min",
+  setup_minutes: "Contact setup · min", required_windows: "Required contact windows",
+  first_contact_deadline_minutes: "First contact deadline · min",
 };
 
 export function RequestDetails({ value }: { value: Record<string, unknown> }) {
@@ -78,11 +81,11 @@ export function ChatThread({
         <p className="text-xs leading-relaxed text-mute">
           {tr(general
             ? "Ask what HOSA can do, how to interpret results, or where its data comes from."
-            : "Choose any site from Compare, up to two per request. The default mission is 72 hours with a 1 m panel and 2 m antenna. Longer missions or an explicit UTC end date are supported without a duration cap. Review before evaluation.")}
+            : "Choose any site from Compare, up to two per request. Chat uses the current mission settings from Explore, Compare and Best dates: equipment heights, sunlight threshold and contact requirements; you can change them in your question. Longer missions or an explicit UTC end date are supported. Review before evaluation.")}
         </p>
-        {!general && baseline && (
+        {!general && baseline && a.hasHistory && (
           <p className="break-words font-mono text-[10px] text-mute">
-            {tr("Conversation context: ")}{baseline.current_site_id} ·{" "}
+            {tr("Conversation context: ")}{a.siteLabels[baseline.current_site_id] ?? baseline.current_site_id} ·{" "}
             {baseline.arrival_utc}
           </p>
         )}
@@ -167,15 +170,34 @@ export function ChatThread({
               {tr("Review interpreted request")}
             </h3>
             <p className="break-words text-sm text-soft">
-              {tr(review.draft.spec.site_ids.join(", "))} ·{" "}
+              {review.draft.spec.site_ids.map((id) => review.draft.site_labels?.[id] ?? id).join(" · ")} ·{" "}
               {review.draft.spec.arrival_utc}
               {" → "}{review.draft.spec.end_utc}
               {" · "}{review.draft.spec.duration_hours} {tr("h")}
             </p>
             <p className="text-xs text-mute">
-              {tr("Minimum mean visible Sun disc ")}{tr(review.draft.spec.min_sunlit_fraction * 100)}{tr("% · minimum Earth LOS ")}{tr(review.draft.spec.min_earth_los_fraction * 100)}
-              %
+              {tr("Minimum mean visible Sun disc ")}{tr(review.draft.spec.min_sunlit_fraction * 100)}
+              {review.draft.spec.min_earth_los_fraction != null
+                ? <>{tr("% · minimum Earth LOS ")}{tr(review.draft.spec.min_earth_los_fraction * 100)}%</>
+                : "%"}
             </p>
+            <p className="text-xs text-mute">
+              {tr("Panel height")} {review.draft.spec.hardware.sun_panel} m · {tr("antenna height")} {review.draft.spec.hardware.earth_antenna} m
+            </p>
+            {review.draft.spec.search_from_utc && review.draft.spec.search_until_utc && (
+              <p className="text-xs text-mute">
+                {tr("Best start search ")}{review.draft.spec.search_from_utc}{tr(" → before ")}{review.draft.spec.search_until_utc}
+                {review.draft.spec.search_step_minutes ? <>{tr(" · step ")}{review.draft.spec.search_step_minutes}{tr(" min")}</> : null}
+              </p>
+            )}
+            {review.draft.spec.contact_requirements && (
+              <p className="text-xs text-mute">
+                {tr("Continuous Earth contact ≥ ")}{review.draft.spec.contact_requirements.min_contact_minutes}{tr(" min")}
+                {review.draft.spec.contact_requirements.setup_minutes ? <>{tr(" · setup ")}{review.draft.spec.contact_requirements.setup_minutes}{tr(" min")}</> : null}
+                {review.draft.spec.contact_requirements.required_windows ? <>{tr(" · windows ")}{review.draft.spec.contact_requirements.required_windows}</> : null}
+                {review.draft.spec.contact_requirements.first_contact_deadline_minutes != null ? <>{tr(" · first contact within ")}{review.draft.spec.contact_requirements.first_contact_deadline_minutes}{tr(" min")}</> : null}
+              </p>
+            )}
             <details>
               <summary className="cursor-pointer text-xs text-mute">
                 {tr("Full request")}
@@ -222,7 +244,7 @@ export function ChatThread({
             </strong>
             {outcome.evidence.candidates.map((c) => (
               <p key={c.site_id}>
-                {c.site_id} <DecisionBadge value={c.decision} />
+                {outcome.site_labels?.[c.site_id] ?? c.site_id} <DecisionBadge value={c.decision} />
               </p>
             ))}
             <p>

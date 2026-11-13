@@ -17,7 +17,7 @@ from pydantic import ValidationError
 from app.assistant.config import AssistantSettings, get_assistant_settings
 from app.assistant.models import (Baseline, ClarificationTurn, ConversationTurn,
     EvaluateRequest, ParseRequest, PlanningContext, SiteCoordinates)
-from app.assistant.sites import available_sites, resolve_coordinates
+from app.assistant.sites import canonical_site_id, chat_site_ids, named_sites, resolve_coordinates, site_info
 from app.assistant.provider import AssistantError, OpenRouterLLM
 from app.assistant.service import AssistantService
 from app.assistant.store import DraftStore
@@ -87,7 +87,8 @@ class ChatSession:
             say(json.dumps({**self.baseline.model_dump(), "selected_site_ids": self.selected,
                             "planning_context": self.planning.model_dump()}, ensure_ascii=False, indent=2))
         elif text == "/sites":
-            say(json.dumps({"selected_site_ids": self.selected, "available_sites": available_sites()},
+            say(json.dumps({"selected_site_ids": self.selected,
+                            "available_sites": sorted(site_info(site)["label"] for site in chat_site_ids())},
                            ensure_ascii=False, indent=2))
         elif text.startswith("/sites "):
             choice = text.partition(" ")[2].strip()
@@ -96,15 +97,15 @@ class ChatSession:
                     lat, lon = map(float, choice[len("coords "):].replace(",", " ").split())
                     sites = [resolve_coordinates(SiteCoordinates(lat_deg=lat, lon_e_deg=lon))]
                 else:
-                    sites = ["Site01_P1", "Site04_P1"] if choice == "all" else [
-                        {"site01": "Site01_P1", "site04": "Site04_P1"}.get(part.strip().lower(), part.strip())
-                        for part in choice.split(",")]
-                if not sites or len(set(sites)) != len(sites) or any(
-                        site not in {"Site01_P1", "Site04_P1"} for site in sites):
+                    # Same 27 sites as the Explore/Compare/Best dates tabs, by name, ID or code.
+                    sites = named_sites(choice) or [canonical_site_id(part.strip()) for part in choice.split(",")]
+                if not sites or len(sites) > 2 or len(set(sites)) != len(sites) or any(
+                        site not in chat_site_ids() for site in sites):
                     raise ValueError("Unsupported sites")
             except (ValueError, AssistantError):
-                say("Chọn /sites Site04_P1, /sites all hoặc /sites coords <lat_deg> <lon_e_deg>. "
-                    "Tọa độ chỉ nhận diện P1 đã xử lý trong sai số 1 m; không phân tích điểm tùy ý.")
+                say("Chọn tối đa hai điểm trong 27 điểm của danh sách Khám phá, ví dụ /sites Shackleton Rim "
+                    "hoặc /sites Connecting Ridge, Shackleton Rim; hoặc /sites coords <lat_deg> <lon_e_deg> "
+                    "(chỉ nhận đúng tọa độ của một trong 27 điểm, sai số 1 m).")
                 return True
             self.selected = sites
             if len(sites) == 1:
@@ -120,7 +121,7 @@ def run_console(service, initial_context, ask=input, say=print, demo=False, max_
     say("HOSA | " + ("DEMO GIẢ LẬP LLM — không gọi OpenRouter." if demo else "OpenRouter thật — đọc model/key từ .env."))
     say(f"Kế hoạch làm việc: {session.baseline.arrival_utc}; {session.baseline.duration_hours:g} giờ; {session.baseline.current_site_id}.")
     say("Dữ liệu demo: 14/11–trước 28/11/2026 UTC, lưới 15 phút; nhiệm vụ 72 giờ.")
-    say("Lệnh: /quit, /new, /reset, /baseline, /sites, /sites all, /sites Site04_P1, /sites coords <lat> <lon_e>.")
+    say("Lệnh: /quit, /new, /reset, /baseline, /sites, /sites Shackleton Rim, /sites coords <lat> <lon_e>.")
     say("Kế hoạch đã xác nhận đánh giá sẽ được nhớ cho lượt sau; /reset khôi phục phiên ban đầu.")
     if demo:
         say("Nhấn Enter để dùng câu mẫu: " + DEMO_PROMPT)

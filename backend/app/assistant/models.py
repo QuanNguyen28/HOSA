@@ -1,7 +1,8 @@
 from typing import Annotated, Literal
 from pydantic import Field, field_validator
 
-from app.planning.models import Candidate, Contract, Constraints, Decision, Fraction, Hardware, Hours, RankMetric, RankRange, Status, utc
+from app.planning.models import (Candidate, ContactRequirements, Contract, Constraints, Decision, Fraction, Hardware,
+                                 Hours, RankMetric, RankRange, Status, utc)
 
 
 class Baseline(Contract):
@@ -12,8 +13,9 @@ class Baseline(Contract):
     hardware: Hardware
     constraints: Constraints
     min_sunlit_fraction: Fraction
-    min_earth_los_fraction: Fraction
+    min_earth_los_fraction: Fraction | None = None  # tabs use contact requirements instead
     current_site_id: str
+    contact_requirements: ContactRequirements | None = None
 
     @field_validator("arrival_utc")
     @classmethod
@@ -29,7 +31,7 @@ class ClarificationTurn(Contract):
 
 class ClarificationQuestion(Contract):
     field: Literal["arrival_utc", "year", "time", "timezone", "search_range", "site_scope", "mission_duration", "constraints", "request"]
-    question: str = Field(min_length=1, max_length=300)
+    question: str = Field(min_length=1, max_length=600)
 
 
 class SiteCoordinates(Contract):
@@ -75,6 +77,9 @@ class RequestPatch(Contract):
     duration_hours: Annotated[float, Field(strict=True, gt=0)] | None
     mission_end_utc: str | None = None
     hardware_change: bool = Field(strict=True)
+    # Equipment heights in metres, as in the Explore/Compare mission settings.
+    panel_height_m: Annotated[float, Field(gt=0, le=30)] | None = None
+    antenna_height_m: Annotated[float, Field(gt=0, le=30)] | None = None
     site_scope: Literal["selected", "keep_current", "unspecified"]
     # Up to six so a request naming too many sites still parses; normalization
     # then asks the user to choose two instead of the model failing validation.
@@ -84,6 +89,13 @@ class RequestPatch(Contract):
     max_earth_blackout_hours: Hours | None
     min_sunlit_fraction: Annotated[float, Field(strict=True, ge=0, le=1)] | None
     min_earth_los_fraction: Fraction | None = None
+    # Hard Earth-contact requirements (engine contact_requirements).
+    min_contact_minutes: Annotated[float, Field(gt=0)] | None = None
+    contact_setup_minutes: Annotated[float, Field(ge=0)] | None = None
+    required_contact_windows: Annotated[int, Field(strict=True, ge=1)] | None = None
+    first_contact_deadline_minutes: Annotated[float, Field(ge=0)] | None = None
+    # Best start-time search requested with only a starting instant.
+    search_requested: bool = False
     search_from_utc: str | None = None
     search_until_utc: str | None = None
     search_step_minutes: Annotated[int, Field(strict=True, ge=5, le=1440)] | None = None
@@ -108,7 +120,8 @@ class RequestSpec(Contract):
     hardware: Hardware
     constraints: Constraints
     min_sunlit_fraction: Fraction
-    min_earth_los_fraction: Fraction
+    min_earth_los_fraction: Fraction | None = None
+    contact_requirements: ContactRequirements | None = None
     current_site_id: str
     baseline_hash: str
     source_hash: str
@@ -127,6 +140,8 @@ class ParseResponse(Contract):
     spec_hash: str | None = None
     baseline_hash: str | None = None
     spec: RequestSpec | None = None
+    # Unambiguous name + coordinates for each selected site, for the Review card.
+    site_labels: dict[str, str] = Field(default_factory=dict)
     llm_calls: int
 
 
@@ -140,7 +155,7 @@ class EvaluateRequest(Contract):
 class ExplanationBlock(Contract):
     site_id: str
     candidate_id: str | None = None
-    reason_code: Literal["DARKNESS", "BLACKOUT", "EARTH_LOS", "SUNLIGHT", "DATA_MISSING"]
+    reason_code: Literal["DARKNESS", "BLACKOUT", "EARTH_LOS", "SUNLIGHT", "CONTACT", "DATA_MISSING"]
     fact_ids: list[str] = Field(min_length=1, max_length=4)
 
 
