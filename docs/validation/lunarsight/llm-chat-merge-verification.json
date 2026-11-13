@@ -1,0 +1,49 @@
+{
+  "branch": "feat/merge-fe-be",
+  "source_branch": "codex/llm-chat-fixes-20261113",
+  "source_commit": "84f24b3b3d044ead1aee97cb685c524573cf3848",
+  "pre_merge_commit": "8c8cb0c",
+  "backend_tests": {
+    "passed": 503,
+    "skipped": 1
+  },
+  "frontend_tests": {
+    "passed": 76,
+    "files": 12
+  },
+  "production_build": "passed",
+  "api_smoke": {
+    "passed": true,
+    "point_decisions": {
+      "pass": "PASS",
+      "fail": "FAIL"
+    },
+    "compare": {
+      "candidate_total": 2,
+      "pass": 1,
+      "fail": 1,
+      "indeterminate": 0
+    },
+    "search": {
+      "candidate_total": 2,
+      "pass": 1,
+      "fail": 1,
+      "indeterminate": 0,
+      "returned": 1,
+      "not_returned": 1
+    },
+    "exports": [
+      "json",
+      "csv"
+    ]
+  },
+  "live_llm_calls": 0,
+  "integration_decisions": [
+    "Preserve current computing, long missions, timeline and simulation improvements.",
+    "Merge bilingual responses, natural start dates and explicit mission windows.",
+    "Resolve explanation conflict by retaining bilingual prose and collapsing equal display bounds in both languages.",
+    "Use lossless native artifacts for planning verification, not rounded display JSON.",
+    "Preserve unresolved explicit end dates; regression reproduced before fix and passed in English and Vietnamese."
+  ],
+  "scope": "Automated fixture-based LLM tests and real deterministic computing HTTP checks; no provider live evaluation."
+}

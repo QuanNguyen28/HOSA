@@ -95,6 +95,71 @@ def test_unspecified_scope_uses_selection(service, request_payload):
     assert result.status == 'READY' and result.spec.site_ids == ['Site04_P1']
 
 
+def custom_duration_context(payload, hours=8784):
+    payload['baseline'].update(arrival_utc='2027-11-17T00:00:00Z', duration_hours=hours,
+                               current_site_id='im1-odysseus')
+    payload['selected_site_ids'] = ['im1-odysseus']
+    return payload
+
+
+@pytest.mark.parametrize('hours', [240, 8784])
+@pytest.mark.parametrize('copied_duration', [False, True])
+def test_new_date_does_not_silently_reuse_custom_duration(service, request_payload, hours, copied_duration):
+    request_payload = custom_duration_context(request_payload, hours)
+    text = 'Phân tích IM-1 vào 2028-11-17T00:00:00Z'
+    request_payload['text'] = text
+    service.llm = FixtureLLM(patch(text, arrival_utc='2028-11-17T00:00:00Z',
+        duration_hours=hours if copied_duration else None))
+    result = asyncio.run(service.parse(ParseRequest.model_validate(request_payload)))
+    assert result.status == 'NEEDS_INPUT' and result.draft_id is None
+    assert result.issues == ['DURATION_CONFIRMATION_REQUIRED']
+    assert result.questions[0].field == 'mission_duration'
+    assert str(hours) in result.questions[0].question
+
+
+@pytest.mark.parametrize('text,duration', [
+    ('Phân tích IM-1 vào 2028-11-17T00:00:00Z, giữ nguyên thời lượng', None),
+    ('Phân tích IM-1 vào 2028-11-17T00:00:00Z trong 24 giờ', 24),
+])
+def test_explicit_duration_choice_with_new_date_is_respected(service, request_payload, text, duration):
+    request_payload = custom_duration_context(request_payload)
+    request_payload['text'] = text
+    service.llm = FixtureLLM(patch(text, arrival_utc='2028-11-17T00:00:00Z', duration_hours=duration))
+    result = asyncio.run(service.parse(ParseRequest.model_validate(request_payload)))
+    assert result.status == 'READY'
+    assert result.spec.duration_hours == (8784 if duration is None else duration)
+
+
+def test_relative_start_shift_is_not_mistaken_for_mission_duration(service, request_payload):
+    request_payload = custom_duration_context(request_payload)
+    text = 'Lùi ngày bắt đầu 1 ngày, giữ phần cứng'
+    request_payload['text'] = text
+    service.llm = FixtureLLM(patch(text, arrival_shift_days=1))
+    result = asyncio.run(service.parse(ParseRequest.model_validate(request_payload)))
+    assert result.status == 'NEEDS_INPUT' and result.issues == ['DURATION_CONFIRMATION_REQUIRED']
+
+
+def test_duration_clarification_resolves_without_reusing_a_year(service, request_payload):
+    request_payload = custom_duration_context(request_payload)
+    text = 'Phân tích IM-1 vào 2028-11-17T00:00:00Z'
+    request_payload.update(text=text, clarifications=[{'question':'Bạn muốn nhiệm vụ kéo dài bao nhiêu giờ?', 'answer':'24'}])
+    service.llm = FixtureLLM(patch(text, arrival_utc='2028-11-17T00:00:00Z', duration_hours=24))
+    result = asyncio.run(service.parse(ParseRequest.model_validate(request_payload)))
+    assert result.status == 'READY' and result.spec.duration_hours == 24
+    assert result.spec.end_utc == '2028-11-18T00:00:00Z'
+
+
+def test_missing_duration_fields_ask_about_duration_not_generic_request(service, request_payload):
+    request_payload = custom_duration_context(request_payload)
+    text = 'Phân tích IM-1 vào 2028-11-17T00:00:00Z'
+    request_payload['text'] = text
+    service.llm = FixtureLLM(patch(text, arrival_utc='2028-11-17T00:00:00Z',
+        unresolved_fields=['duration_hours', 'mission_end_utc']))
+    result = asyncio.run(service.parse(ParseRequest.model_validate(request_payload)))
+    assert result.status == 'NEEDS_INPUT'
+    assert [q.field for q in result.questions] == ['mission_duration']
+
+
 def test_explicit_keep_current_overrides_region(service, request_payload):
     service.llm = FixtureLLM(patch('ba ngày', site_scope='keep_current'))
     result = asyncio.run(service.parse(ParseRequest.model_validate(request_payload)))

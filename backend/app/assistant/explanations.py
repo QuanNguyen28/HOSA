@@ -47,7 +47,9 @@ def valid_plan(plan, evidence):
     return True
 
 
-def render(evidence, plan=None):
+def render(evidence, plan=None, *, language='vi'):
+    def tr(vi, en):
+        return en if language == 'en' else vi
     ordering = [identity(b) for b in plan.blocks] if plan else [c.candidate_id for c in evidence.candidates]
     by_id = {c.candidate_id: c for c in evidence.candidates}
     focus = {identity(b): b.reason_code for b in plan.blocks} if plan else {}
@@ -56,7 +58,8 @@ def render(evidence, plan=None):
         c = by_id[key]
         label = f"{c.site_id} ({c.start_utc})" if evidence.request.search_from_utc else c.site_id
         if c.issue:
-            texts.append(f"{label}: chưa đủ dữ liệu; không dùng để xếp hạng.")
+            texts.append(tr(f"{label}: chưa đủ dữ liệu; không dùng để xếp hạng.",
+                            f"{label}: insufficient data; excluded from ranking."))
             fact_ids.append(f"{key}.availability")
             continue
         sun, earth = c.metrics["total_sun_hours"], c.metrics["total_earth_los_hours"]
@@ -65,26 +68,39 @@ def render(evidence, plan=None):
         if evidence.request.illumination_model == "sun_center":
             sun_text = (f"có nắng {bounds_text(*sun)} giờ "
                         f"(tối thiểu {evidence.request.min_sunlit_fraction*100:g}%)")
+        if language == 'en':
+            sun_text = (f"mean visible solar-disc area {bounds_text(sun[0]/evidence.request.duration_hours*100, sun[1]/evidence.request.duration_hours*100)}% "
+                        f"(minimum {evidence.request.min_sunlit_fraction*100:g}%)")
+            if evidence.request.illumination_model == 'sun_center':
+                sun_text = f"Sun-centre visibility {bounds_text(*sun)} hours (minimum {evidence.request.min_sunlit_fraction*100:g}%)"
         earth_text = (f"có tầm nhìn Trái Đất {bounds_text(*earth)} giờ "
                       f"(tối thiểu {evidence.request.min_earth_los_fraction*100:g}%)")
+        if language == 'en':
+            earth_text = f"Earth LOS {bounds_text(*earth)} hours (minimum {evidence.request.min_earth_los_fraction*100:g}%)"
         ordered_metrics = (earth_text, sun_text) if focus.get(key) == "EARTH_LOS" else (sun_text, earth_text)
-        decision = "chưa đủ căn cứ để kết luận (INDETERMINATE)" if c.decision == "INDETERMINATE" else c.decision
-        texts.append(f"{label}: {decision} theo yêu cầu cứng; {'; '.join(ordered_metrics)}.")
+        decision = tr("chưa đủ căn cứ để kết luận (INDETERMINATE)", "insufficient evidence for a conclusion (INDETERMINATE)") if c.decision == "INDETERMINATE" else c.decision
+        texts.append(tr(f"{label}: {decision} theo yêu cầu cứng; {'; '.join(ordered_metrics)}.",
+                        f"{label}: {decision} against the hard requirements; {'; '.join(ordered_metrics)}."))
         fact_ids.extend((f"{key}.sun", f"{key}.earth"))
         if not c.validation.get("passed"):
             if c.validation.get("mission_path", {}).get("passed"):
-                texts.append(f"{label}: kiểm chứng đường đi của nhiệm vụ đạt; kiểm chứng horizon toàn vòng vẫn chưa đạt. Ngưỡng còn PROVISIONAL.")
+                texts.append(tr(f"{label}: kiểm chứng đường đi của nhiệm vụ đạt; kiểm chứng horizon toàn vòng vẫn chưa đạt. Ngưỡng còn PROVISIONAL.",
+                                f"{label}: mission-path validation passed; full-circle horizon validation has not passed. Tolerances remain PROVISIONAL."))
             elif c.decision == "FAIL":
-                texts.append(f"{label}: không đạt yêu cầu cứng; vẫn trả FAIL dù kiểm chứng dữ liệu/số học chưa đạt: " + ", ".join(c.validation.get("reason_codes", [])) + ".")
+                reasons = ', '.join(c.validation.get('reason_codes', []))
+                texts.append(tr(f"{label}: không đạt yêu cầu cứng; vẫn trả FAIL dù kiểm chứng dữ liệu/số học chưa đạt: {reasons}.",
+                                f"{label}: a hard requirement fails; FAIL is retained even though numerical/data validation has not passed" + (f": {reasons}." if reasons else ".")))
             fact_ids.append(f"{key}.validation")
         if c.resolution.get("enabled"):
             status = c.resolution.get("status")
             if status == "resolved":
-                texts.append(f"{label}: đã hoàn tất kiểm chứng bổ sung; {c.resolution.get('initial_decision')} → {c.decision}; giữ nguyên yêu cầu và ngưỡng kiểm chứng.")
+                texts.append(tr(f"{label}: đã hoàn tất kiểm chứng bổ sung; {c.resolution.get('initial_decision')} → {c.decision}; giữ nguyên yêu cầu và ngưỡng kiểm chứng.",
+                                f"{label}: additional validation completed; {c.resolution.get('initial_decision')} → {c.decision}; requirements and validation tolerances were preserved."))
             elif c.decision == "INDETERMINATE":
                 reasons = ", ".join(c.validation.get("reason_codes", []))
                 error = c.resolution.get("error_code")
-                texts.append(f"{label}: kết quả theo mẫu là {c.nominal_sampled_decision}; kiểm chứng bổ sung chưa hoàn tất: {reasons}" + (f"; {error}." if error else "."))
+                texts.append(tr(f"{label}: kết quả theo mẫu là {c.nominal_sampled_decision}; kiểm chứng bổ sung chưa hoàn tất: {reasons}",
+                                f"{label}: nominal sampled result is {c.nominal_sampled_decision}; additional validation is incomplete: {reasons}") + (f"; {error}." if error else "."))
             fact_ids.append(f"{key}.validation")
 
         for name, metric, suffix, title in (("max_darkness_hours", "longest_dark_hours", "dark", "tối liên tục"),
@@ -95,22 +111,31 @@ def render(evidence, plan=None):
             limit = getattr(evidence.request.constraints, name)
             state = c.soft_constraint_states[name]
             note = "vượt mong muốn" if state == "FAIL" else "chưa xác định" if state == "INDETERMINATE" else "đáp ứng mong muốn"
-            texts.append(f"{label}: yêu cầu mềm {title} {bounds_text(low, high)} giờ, mong muốn ≤ {limit:g} giờ; {note}, không làm đổi kết luận yêu cầu cứng.")
+            english_title = 'continuous darkness' if suffix == 'dark' else 'continuous Earth LOS blackout'
+            english_note = 'preference exceeded' if state == 'FAIL' else 'uncertain' if state == 'INDETERMINATE' else 'preference met'
+            texts.append(tr(f"{label}: yêu cầu mềm {title} {bounds_text(low, high)} giờ, mong muốn ≤ {limit:g} giờ; {note}, không làm đổi kết luận yêu cầu cứng.",
+                            f"{label}: soft preference for {english_title}: {bounds_text(low, high)} hours, preferred maximum {limit:g} hours; {english_note}. This does not change the hard decision."))
             fact_ids.append(f"{key}.{suffix}")
         if evidence.request.rank_by == "longest_joint_hours":
             low, high = c.metrics["longest_joint_hours"]
-            texts.append(f"{label}: khoảng khả kiến đồng thời dài nhất {bounds_text(low, high)} giờ.")
+            texts.append(tr(f"{label}: khoảng khả kiến đồng thời dài nhất {bounds_text(low, high)} giờ.",
+                            f"{label}: longest joint visibility interval {bounds_text(low, high)} hours."))
             fact_ids.append(f"{key}.joint")
         ranking = next((r for r in evidence.ranking if r.candidate_id == key), None)
         if ranking and ranking.rank_min != ranking.rank_max:
-            texts.append(f"{label}: khoảng hạng {ranking.rank_min}–{ranking.rank_max}; các cận chỉ số xếp hạng chồng lấn.")
+            texts.append(tr(f"{label}: khoảng hạng {ranking.rank_min}–{ranking.rank_max}; các cận chỉ số xếp hạng chồng lấn.",
+                            f"{label}: rank range {ranking.rank_min}–{ranking.rank_max}; ranking metric bounds overlap."))
         if any(context.get("touches_window_edge") for context in c.metric_context.values()):
-            texts.append(f"{label}: sự kiện chạm biên nhiệm vụ; thời lượng ngoài cửa sổ chưa được đo.")
+            texts.append(tr(f"{label}: sự kiện chạm biên nhiệm vụ; thời lượng ngoài cửa sổ chưa được đo.",
+                            f"{label}: an event touches the mission boundary; its duration outside the window is not measured."))
     if not evidence.apply_allowed:
-        texts.append("Chưa có phương án đạt trong tập đã đánh giá; không tự nới ngưỡng hoặc cho phép áp dụng.")
+        texts.append(tr("Chưa có phương án đạt trong tập đã đánh giá; không tự nới ngưỡng hoặc cho phép áp dụng.",
+                        "No feasible candidate was established in the evaluated set; requirements are not relaxed and application is not allowed."))
     if evidence.recommended_candidate_id:
         selected = by_id[evidence.recommended_candidate_id]
-        texts.append(f"Phương án đề xuất: {selected.site_id}, bắt đầu {selected.start_utc}; trạng thái {selected.decision}.")
+        texts.append(tr(f"Phương án đề xuất: {selected.site_id}, bắt đầu {selected.start_utc}; trạng thái {selected.decision}.",
+                        f"{'Recommended candidate' if selected.decision == 'PASS' else 'Near-miss candidate, not applicable'}: {selected.site_id}, starting {selected.start_utc}; status {selected.decision}."))
     if evidence.coverage["indeterminate"]:
-        texts.append(f"Có {evidence.coverage['indeterminate']} phương án chưa đủ căn cứ kết luận; không suy rộng ra cả vùng.")
+        texts.append(tr(f"Có {evidence.coverage['indeterminate']} phương án chưa đủ căn cứ kết luận; không suy rộng ra cả vùng.",
+                        f"{evidence.coverage['indeterminate']} candidates remain indeterminate; this does not establish conditions throughout the region."))
     return texts, fact_ids

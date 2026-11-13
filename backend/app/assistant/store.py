@@ -21,6 +21,7 @@ class Draft:
     started: bool = False
     result: EvaluateResponse | None = None
     failure: tuple[str, int] | None = None
+    language: str = 'vi'
 
 
 class DraftStore:

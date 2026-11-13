@@ -2,7 +2,7 @@
 from .models import ClarificationQuestion
 
 TEMPLATES = {
-    "arrival_utc": "Bạn muốn hạ cánh lúc nào? Cho biết đầy đủ năm, giờ và múi giờ; ví dụ 2026-11-17T00:00:00Z, hoặc nêu rõ lùi bao nhiêu ngày.",
+    "arrival_utc": "Bạn muốn bắt đầu nhiệm vụ lúc nào? Bạn có thể viết tự nhiên, ví dụ ngày 24 tháng 11 năm 2026 lúc 9 giờ UTC, hoặc nêu rõ lùi bao nhiêu ngày.",
     "year": "Ngày hạ cánh thuộc năm nào?",
     "time": "Bạn muốn hạ cánh lúc mấy giờ?",
     "timezone": "Thời gian bạn vừa nêu theo múi giờ nào? Ví dụ UTC hoặc +07:00.",
@@ -21,16 +21,39 @@ ISSUE_FIELDS = {
     "INCOMPLETE_SEARCH_RANGE": ["search_range"], "UNRESOLVED_SEARCH_RANGE": ["search_range"],
     "INVALID_SEARCH_RANGE": ["search_range"], "OUTSIDE_TIME_COVERAGE": ["arrival_utc"],
     "OFF_START_GRID": ["arrival_utc"], "UNSUPPORTED_DURATION": ["mission_duration"],
+    "DURATION_CONFIRMATION_REQUIRED": ["mission_duration"],
     "UNSUPPORTED_BASELINE_CONFIG": ["mission_duration"], "UNSUPPORTED_REQUIREMENT": ["request"],
 }
 ALIASES = {"arrival": "arrival_utc", "date": "arrival_utc", "arrival_change": "arrival_utc",
            "region": "site_scope", "selected_region": "site_scope", "duration": "mission_duration",
+           "duration_hours": "mission_duration", "mission_end_utc": "mission_duration", "end_utc": "mission_duration",
            "mission_duration_s": "mission_duration", "max_darkness_hours": "constraints",
            "max_earth_blackout_hours": "constraints", "search_until_utc": "search_range",
            "search_from_utc": "search_range", "min_sunlit_fraction": "constraints", "min_earth_los_fraction": "constraints"}
 
 
-def questions_for(issue: str, patch=None):
+EN_TEMPLATES = {
+    'arrival_utc': 'When should the mission start? You can write a date, time and time zone naturally, for example 24 November 2026 at 9 AM UTC.',
+    'year': 'Which year is the arrival date in?',
+    'time': 'What time should the mission start?',
+    'timezone': 'Which time zone should I use, for example UTC or +07:00?',
+    'search_range': 'What range may I search for start dates? Provide both endpoints with time zones; the upper endpoint is exclusive.',
+    'site_scope': 'Which site or sites should I analyze or compare? Please use names from the Compare catalog.',
+    'mission_duration': 'How long should the mission last, or at what UTC date and time should it end?',
+    'constraints': 'What minimum illumination and Earth LOS fractions are required? Do you also have darkness or blackout preferences?',
+    'request': 'Please clarify the part of the mission you want to change.',
+}
+EN_ISSUES = {
+    'OUTSIDE_TIME_COVERAGE': 'The snapshot accepts start dates from 2026-11-14 until before 2026-11-28 UTC. Which start would you like?',
+    'OFF_START_GRID': 'Please choose a start on the 15-minute grid: minute 00, 15, 30 or 45. I will not round it automatically.',
+    'TOO_MANY_SITES': 'Chat compares up to two sites per request. Which two catalog sites should I use?',
+    'INVALID_COORDINATE_ARRIVAL': 'Please supply a start date and time with a time zone on the exact 5-minute grid.',
+    'MISSING_BASELINE': 'Please provide the original mission start, duration, site and hardware before changing its schedule.',
+    'UNSUPPORTED_SITE_COORDINATES': 'These coordinates are outside the supported chat coordinate scope. Please select a supported catalog site.',
+}
+
+
+def questions_for(issue: str, patch=None, *, baseline_duration_hours=None, language='vi', start=None):
     fields = ISSUE_FIELDS.get(issue, [])
     if issue == "UNRESOLVED_FIELDS" and patch:
         fields = [ALIASES.get(field, field) for field in patch.unresolved_fields] or [q.field for q in patch.clarification_questions]
@@ -40,8 +63,25 @@ def questions_for(issue: str, patch=None):
     proposals = {q.field: q.question for q in patch.clarification_questions} if patch else {}
     result = []
     for field in fields[:3]:
-        text = proposals.get(field) or TEMPLATES[field]
-        if issue == "OUTSIDE_TIME_COVERAGE":
+        if field == 'arrival_utc' and start and start['ambiguous_date']:
+            text = ('Which day and month do you mean? For example, write 24 November 2026.' if language == 'en'
+                    else 'Bạn muốn nói ngày nào, tháng nào? Ví dụ: ngày 24 tháng 11 năm 2026.')
+            result.append(ClarificationQuestion(field=field, question=text))
+            continue
+        if language == 'en':
+            text = EN_ISSUES.get(issue, EN_TEMPLATES[field])
+            if issue == 'DURATION_CONFIRMATION_REQUIRED':
+                prior = f'{baseline_duration_hours:g} hours' if baseline_duration_hours is not None else 'a custom duration'
+                text = (f'The previous mission used {prior}. For the new start, should I keep that duration, '
+                        'use a different duration, or end at a specific date and time?')
+            result.append(ClarificationQuestion(field=field, question=text))
+            continue
+        text = TEMPLATES[field] if field == 'mission_duration' or start else proposals.get(field) or TEMPLATES[field]
+        if issue == 'DURATION_CONFIRMATION_REQUIRED':
+            prior = f'{baseline_duration_hours:g} giờ' if baseline_duration_hours is not None else 'thời lượng riêng'
+            text = (f'Lượt trước dùng {prior}. Với ngày bắt đầu mới, '
+                    'bạn muốn giữ thời lượng đó, chọn thời lượng khác, hay kết thúc vào ngày/giờ nào?')
+        elif issue == "OUTSIDE_TIME_COVERAGE":
             text = "Dữ liệu demo chỉ nhận ngày bắt đầu từ 14/11 đến trước 28/11/2026 UTC. Bạn muốn chọn mốc nào?"
         elif issue == "OFF_START_GRID":
             text = "Mốc bắt đầu cần đúng lưới 15 phút. Bạn chọn thời điểm nào có phút 00, 15, 30 hoặc 45? Hệ thống không tự làm tròn."

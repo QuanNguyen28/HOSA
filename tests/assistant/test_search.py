@@ -101,6 +101,10 @@ def test_explanation_collapses_equal_display_bounds_and_preserves_ranges(service
     assert "có nắng 36.00 giờ" in text
     assert "36.00–36.00" not in text
     assert "có tầm nhìn Trái Đất 12.00–18.00 giờ" in text
+    english = " ".join(render(evidence, language='en')[0])
+    assert "Sun-centre visibility 36.00 hours" in english
+    assert "36.00–36.00" not in english
+    assert "Earth LOS 12.00–18.00 hours" in english
 
 
 def test_parse_issues_include_proposed_fields_for_user_review(service, request_payload):

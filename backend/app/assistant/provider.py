@@ -435,7 +435,16 @@ class ResilientLLM:
         if primary is None:
             if not self.settings.openrouter_api_key or not self.settings.openrouter_model:
                 raise AssistantError("OPENROUTER_NOT_CONFIGURED", 503)
-            return await OpenRouterLLM(self.settings).complete(contract, messages)
+            if self.on_attempt:
+                self.on_attempt("openrouter", contract.__name__, 1)
+            result = await OpenRouterLLM(self.settings).complete(contract, messages)
+            self.last_provider = "openrouter"
+            self.events.append({"provider":"openrouter", "model":result.model,
+                                "stage":contract.__name__, "attempt":1, "outcome":"success",
+                                "latency_ms":result.latency_ms, "usage":result.usage,
+                                "request_id":result.request_id, "finish_reason":result.finish_reason,
+                                "timestamp_utc":datetime.now(timezone.utc).isoformat()})
+            return result
         secondary = self.secondary if primary is self.primary and self.settings.assistant_failover_enabled else None
         probe = False
         if primary is self.primary:
@@ -572,4 +581,6 @@ class OpenRouterLLM:
         usage = {key: value for key, value in usage.items() if key in
                  {"prompt_tokens", "completion_tokens", "total_tokens", "cost"}
                  and isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)} if isinstance(usage, dict) else {}
-        return Completion(output, s.openrouter_model, (perf_counter() - started) * 1000, usage)
+        return Completion(output, body.get("model") or s.openrouter_model,
+                          (perf_counter() - started) * 1000, usage,
+                          body.get("id"), choice.get("finish_reason"))

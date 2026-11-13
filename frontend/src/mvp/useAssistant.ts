@@ -56,6 +56,7 @@ type Draft = {
   draft_id: string;
   spec_hash: string;
   spec: Baseline & {
+    end_utc: string;
     data_source?: "snapshot" | "coordinate";
     site_ids: string[];
     rank_by: string;
