@@ -1,0 +1,8 @@
+{
+  "site_id": "haworth",
+  "illumination_model": "solar_disc",
+  "start_utc": "2000-01-01T00:00:00Z",
+  "end_utc": "2101-01-01T00:00:00Z",
+  "panel_height_m": 20,
+  "antenna_height_m": 20
+}

@@ -1,0 +1,11 @@
+{
+  "site_id": "haworth",
+  "illumination_model": "solar_disc",
+  "start_utc": "2026-11-24T00:00:00Z",
+  "duration_hours": 72,
+  "panel_height_m": 20,
+  "antenna_height_m": 20,
+  "min_sunlit_fraction": 0.8,
+  "evaluation_policy": "hard_first",
+  "resolve_indeterminate": true
+}
