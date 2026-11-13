@@ -10,6 +10,9 @@ import {
   type PlanningResult,
 } from "../mvp/contracts";
 import { type Site, fmtTime } from "./model";
+
+/** Same per-search cap as PlanningService.search. */
+const MAX_EVALUATIONS = 128;
 import {
   CandidateCard,
   MissionFields,
@@ -37,11 +40,6 @@ export function Finder({
   onOpen: (c: Candidate) => void;
 }) {
   const { t: tr } = useTranslation();
-  const [until, setUntil] = useState(() =>
-    new Date(Date.parse(mission.start + "Z") + 15 * 60000)
-      .toISOString()
-      .slice(0, 16),
-  );
   const [step, setStep] = useState(15);
   const targets = useMemo(
     () =>
@@ -51,31 +49,30 @@ export function Finder({
         .map(toTarget),
     [selected, sites],
   );
-  const search = useOperation<PlanningResult>(
-    JSON.stringify([mission, targets, until, step]),
-  );
-  const slots =
-      (Date.parse(until + "Z") - Date.parse(mission.start + "Z")) /
-      (step * 60000),
+  // No separate end field: the search covers as many start times as the
+  // 128-evaluation budget allows for the chosen sites and step.
+  const slots = targets.length
+      ? Math.min(MAX_EVALUATIONS, Math.floor(MAX_EVALUATIONS / targets.length))
+      : 0,
     count = slots * targets.length;
+  const startMs = Date.parse(mission.start + "Z");
+  const untilMs = startMs + slots * step * 60000;
+  const search = useOperation<PlanningResult>(
+    JSON.stringify([mission, targets, step]),
+  );
   const issue =
     missionIssue(mission) ??
     (!targets.length
       ? "Choose at least one site."
-      : !Number.isInteger(slots) || slots <= 0
-        ? "Choose an exclusive end after the start, aligned with the search step."
-        : count > 128
-          ? "Narrow the range or reduce targets: at most 128 evaluations per search."
-          : null);
+      : slots < 1
+        ? "Narrow the range or reduce targets: at most 128 evaluations per search."
+        : null);
   const starts = useMemo(
     () =>
-      Number.isInteger(slots) && slots > 0 && slots <= 128
-        ? Array.from(
-            { length: slots },
-            (_, i) => Date.parse(mission.start + "Z") + i * step * 60000,
-          )
+      slots > 0 && Number.isFinite(startMs)
+        ? Array.from({ length: slots }, (_, i) => startMs + i * step * 60000)
         : [],
-    [mission.start, slots, step],
+    [startMs, slots, step],
   );
   return (
     <main className="mx-auto max-w-[1400px] space-y-5 px-4 py-6 lg:px-8">
@@ -90,7 +87,7 @@ export function Finder({
             void search.run((signal) =>
               api<PlanningResult>("/planning/windows/search", signal, {
                 ...planningRequest(mission, targets),
-                until_utc: new Date(until + "Z").toISOString(),
+                until_utc: new Date(untilMs).toISOString(),
                 start_step_minutes: step,
                 max_results: 10,
                 non_overlapping: true,
@@ -109,18 +106,6 @@ export function Finder({
         />
         <div className="flex flex-wrap items-end gap-4">
           <label>
-            <span className="eyebrow">{tr("Search starts before · UTC")}</span>
-            <input
-              aria-label={tr("Search ends before UTC")}
-              className={`${inputClass} mt-1`}
-              type="datetime-local"
-              step={300}
-              value={until}
-              disabled={search.busy}
-              onChange={(e) => setUntil(e.target.value)}
-            />
-          </label>
-          <label>
             <span className="eyebrow">{tr("Start step")}</span>
             <select
               aria-label={tr("Search step")}
@@ -136,10 +121,15 @@ export function Finder({
             </select>
           </label>
           <p className="text-xs text-mute">
-            {tr(Number.isFinite(count) ? count : "—")} {tr(" candidate evaluations · maximum 128")}</p>
+            {tr(count)} {tr(" candidate evaluations · maximum 128")}
+            {slots > 0 && Number.isFinite(untilMs) && <>
+              {" · "}{tr("tries start times until before")}{" "}
+              {new Date(untilMs).toISOString().slice(0, 16).replace("T", " ") + " UTC"}
+            </>}
+          </p>
         </div>
         <p className="text-xs leading-relaxed text-mute">
-          {tr("The end is exclusive for start times. Each candidate lasts")}{" "}
+          {tr("Each candidate lasts")}{" "}
           {tr(missionHours(mission))} {tr(" hours. Only validated PASS missions can be returned; returned missions at the same coordinate do not overlap.")}</p>
         <div className="flex flex-wrap gap-x-5 gap-y-2">
           {sites.map((t) => (
@@ -182,15 +172,16 @@ export function Finder({
             aria-label={tr("Start date grid")}
             className="glass overflow-x-auto p-4"
           >
-            <div className="min-w-[620px]">
+            <div style={{ minWidth: Math.max(620, 176 + starts.length * 8) }}>
               <div className="mb-3 flex">
                 <div className="w-44 shrink-0" />
-                {starts.map((t) => (
+                {starts.map((t, i) => (
                   <p
                     key={t}
-                    className="flex-1 px-1 text-center font-mono text-[10px] text-mute"
+                    className="min-w-0 flex-1 overflow-visible whitespace-nowrap font-mono text-[10px] text-mute"
                   >
-                    {fmtTime(t)}
+                    {/* About a dozen evenly spaced labels keep up to 128 slots legible. */}
+                    {i % Math.max(1, Math.ceil(starts.length / 12)) === 0 ? fmtTime(t) : ""}
                   </p>
                 ))}
               </div>

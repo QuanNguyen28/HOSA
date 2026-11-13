@@ -185,6 +185,8 @@
   "Search step": "Bước tìm kiếm",
   "minutes": "phút",
   "candidate evaluations · maximum 128": "lượt đánh giá phương án · tối đa 128",
+  "tries start times until before": "thử các giờ bắt đầu đến trước",
+  "Each candidate lasts": "Mỗi phương án kéo dài",
   "The end is exclusive for start times. Each candidate lasts": "Không bao gồm mốc cuối khi xét thời điểm bắt đầu. Mỗi phương án kéo dài",
   "hours. Only validated PASS missions can be returned; returned missions at the same coordinate do not overlap.": "giờ. Chỉ trả về nhiệm vụ ĐẠT (PASS) đã kiểm chứng; các nhiệm vụ tại cùng tọa độ không trùng thời gian.",
   "Start date grid": "Lưới thời điểm bắt đầu",
