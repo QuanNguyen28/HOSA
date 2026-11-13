@@ -460,7 +460,7 @@ export function BackendTimeline({
     <div className="space-y-1.5" aria-label={tr("Backend visibility timeline")}>
       {(["sun", "earth", "joint"] as const).map((body) => (
         <div key={body} className="flex items-center gap-3">
-          <span className="w-10 font-mono text-[10px] uppercase text-mute" title={body === "joint" ? tr("Joint = any visible Sun disc AND Earth line of sight") : undefined}>
+          <span className="w-10 font-mono text-[10px] uppercase text-mute">
             {tr(body)}
           </span>
           <div
@@ -492,16 +492,6 @@ export function BackendTimeline({
           </div>
         </div>
       ))}
-      <p className="text-right font-mono text-[9px] text-mute">
-        {tr("HEIGHT = MEAN SUN DISC / EARTH & JOINT VISIBLE TIME · HATCHED = UNCERTAIN · DISPLAY BIN AVERAGES")}
-        <span className="block">{tr("Joint = any visible Sun disc AND Earth line of sight")}</span>
-        {tr(result?.timeline_transport?.exact_intervals_ready === false && " · Preview chart; current status uses a separate nominal sample")}
-        {tr(result?.timeline_transport?.mode === "aggregated" && result.timeline_transport.exact_intervals_ready !== false && " · Current status uses exact native intervals")}
-        {tr(!result && " · Run Analyze to load evidence")}
-        {tr(result?.timeline_transport?.mode === "pending" && (result.evaluation_stages?.validation === "not_started"
-          ? " · Metrics ready · Analyze point to prepare timeline and evaluate"
-          : " · Metrics ready · timeline and evaluation are being prepared"))}
-      </p>
     </div>
   );
 }
@@ -537,9 +527,9 @@ export function ValidationInfo({
     </div>;
   }
   if ("evaluation_status" in result && result.evaluation_status === "pending") {
+    if (!pendingError && result.evaluation_stages?.validation === "not_started") return null;
     return <div role="status" className="text-[11px] leading-relaxed text-amber">
-      <p>{tr(pendingError ? "Evaluation stopped. Initial metrics remain available." : result.evaluation_stages?.validation === "not_started" ? "Prepared metrics ready. Analyze point to evaluate requirements and scientific validation." : "Evaluating requirements and scientific validation…")}</p>
-      <p>{tr("Initial Sun/Earth/Joint metrics are available. Values may change after refinement; no final decision yet.")}</p>
+      <p>{tr(pendingError ? "Evaluation stopped. Initial metrics remain available." : "Evaluating requirements and scientific validation…")}</p>
     </div>;
   }
   return (

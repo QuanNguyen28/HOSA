@@ -262,7 +262,6 @@ export default function Stage3D({
             <button type="button" aria-pressed={imagery} onClick={()=>setImagery(true)} className={`border px-2 py-1.5 ${imagery?'border-mint text-mint':'border-line text-mute'}`}>{tr('NASA imagery')}</button>
             <button type="button" aria-pressed={!imagery} onClick={()=>setImagery(false)} className={`border px-2 py-1.5 ${!imagery?'border-sun text-sun':'border-line text-mute'}`}>{tr('Relief model')}</button>
           </div>
-          <p className="mt-2 leading-relaxed text-mute">{tr(imagery ? 'NASA imagery shaded by the selected mission time' : 'Lighting follows the selected mission time')}</p>
           {imagery && <p className={`mt-1 ${imageryStatus==='ready'?'text-mint':'text-sun'}`} role="status">{tr(imageryStatus==='ready'?'NASA Moon Trek · imagery loaded':imageryStatus==='loading'?'Loading NASA image tiles…':imageryStatus==='partial'?'Some image tiles unavailable · lower detail retained':'NASA imagery unavailable · local preview')}</p>}
         </div>
         {mode === "surface" && terrainWindow?.grid && (
@@ -274,7 +273,6 @@ export default function Stage3D({
             <div className="mt-1 text-mute">{tr("DRAG 360° TO INSPECT THE SKY")}</div>
           </div>
         )}
-        <p className="text-right text-[10px] leading-snug text-mute">{tr("3D lighting is a visual preview. Metric evidence comes from backend intervals.")}</p>
       </div>
 
       {imagery && <a className="absolute bottom-4 left-4 z-10 border border-line bg-black/80 px-2 py-1 text-[10px] text-mute hover:text-soft" href="https://trek.nasa.gov/tiles/apidoc/trekAPI.html?body=moon" target="_blank" rel="noreferrer">{tr('Imagery: NASA/JPL Moon Trek · LRO/LROC')}</a>}
