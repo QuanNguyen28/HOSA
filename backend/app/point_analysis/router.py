@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, Query
+from fastapi import APIRouter, Depends, HTTPException, Response, Query, Request
 from typing import Literal
 from fastapi.responses import StreamingResponse
 
@@ -8,6 +8,44 @@ from .service import PointAnalysisJobs, get_point_jobs, get_point_pipeline, calc
 from .pipeline import PointAnalysisPipeline
 
 router = APIRouter(prefix="/lunar/point", tags=["coordinate analysis"])
+
+
+@router.post("/horizon-profile/preload", summary="Prepare missing terrain horizons in background without Analyze")
+def preload_horizon_profile(request: PointAnalysisRequest, response: Response,
+                            pipeline: PointAnalysisPipeline = Depends(get_point_pipeline)):
+    from .horizon_preload import get_horizon_preloads
+    try:
+        state = get_horizon_preloads().ensure(request, pipeline)
+        if state["status"] == "preparing":
+            response.status_code = 202
+            response.headers["Retry-After"] = "1"
+        return state
+    except DomainError as error:
+        raise HTTPException(status_code=error.status_code, detail={"code": error.code}) from error
+
+
+@router.post("/horizon-profile", summary="Cached 360-degree terrain horizon at the requested hardware heights")
+def horizon_profile(request: PointAnalysisRequest, pipeline: PointAnalysisPipeline = Depends(get_point_pipeline)):
+    from .horizon_view import profile_view
+    try:
+        return profile_view(request, pipeline)
+    except DomainError as error:
+        raise HTTPException(status_code=error.status_code, detail={"code": error.code}) from error
+
+
+@router.post("/sky-track", summary="Bounded sampled Sun/Earth positions across the whole mission")
+def mission_sky_track(request: PointAnalysisRequest, http_request: Request, chunk_index: int = Query(default=0, ge=0),
+                      pipeline: PointAnalysisPipeline = Depends(get_point_pipeline)):
+    from .horizon_view import sky_track
+    try:
+        import gzip
+        from app.precompute.store import json_bytes
+        from app.precompute.display import http_response
+        import hashlib
+        payload = gzip.compress(json_bytes(sky_track(request, pipeline, chunk_index)), mtime=0)
+        return http_response(http_request, (payload, hashlib.sha256(payload).hexdigest(), False))
+    except DomainError as error:
+        raise HTTPException(status_code=error.status_code, detail={"code": error.code}) from error
 
 
 @router.get("/sky-vectors", summary="Checked hourly Moon-frame vectors for smooth 3D playback")

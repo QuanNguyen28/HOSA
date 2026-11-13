@@ -18,19 +18,9 @@ sys.path.insert(0, str(ROOT))
 from backend.app.services.lunarsight.acquire import download, utc_now  # noqa: E402
 
 
-SITE_NAMES = {
-    "Site06": "Nobile Rim 1",
-    "Site07": "Peak Near Shackleton",
-    "Site11": "de Gerlache Rim",
-    "Site20": "Leibnitz Beta Plateau",
-    "Site20v2": "Leibnitz Beta Plateau (extended)",
-    "Site23": "Malapert Massif",
-    "Site42": "de Gerlache-Kocher Massif",
-    "Haworth": "Haworth Crater",
-    "Shoemaker": "Shoemaker Crater",
-    "DM1": "Amundsen Rim",
-    "DM2": "Nobile Rim 2",
-}
+from scripts.build_nasa_default_catalog import nasa_sites  # noqa: E402
+
+SITE_NAMES = {site["source_code"]: site["name"] for site in nasa_sites()}
 ROI_SITES = {"Site01", "Site04", "Site06", "Site07", "Site11"}
 DEFAULT_SITES = tuple(SITE_NAMES)
 BASE_URL = "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp"
@@ -83,9 +73,12 @@ def assets(site: str) -> list[dict[str, object]]:
     return result
 
 
-def acquire(item: dict[str, object], offline: bool) -> dict[str, object]:
+def acquire(item: dict[str, object], offline: bool, range_workers=1) -> dict[str, object]:
     site_dir = ROOT / "data/raw" / str(item["site"])
-    receipt = download(site_dir, item, offline=offline)
+    flat = ROOT / "data/raw/nasa"
+    if not (site_dir / str(item["filename"])).is_file() and (flat / str(item["filename"])).is_file():
+        site_dir = flat
+    receipt = download(site_dir, item, offline=offline, range_workers=range_workers)
     tracked_dir = ROOT / "manifests/lunarsight/nasa"
     tracked_dir.mkdir(parents=True, exist_ok=True)
     adjacent = site_dir / f"{item['filename']}.receipt.json"
@@ -110,6 +103,8 @@ def update_dataset_registry(
         crs = horizontal_unit = extent = nodata = ""
         if role in {"dem", "error", "count"}:
             path = ROOT / "data/raw" / site / str(record["filename"])
+            if not path.is_file():
+                path = ROOT / "data/raw/nasa" / str(record["filename"])
             with rasterio.open(path) as dataset:
                 crs = dataset.crs.to_wkt() if dataset.crs else ""
                 horizontal_unit = "m"
@@ -166,7 +161,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--sites", nargs="+", default=list(DEFAULT_SITES))
     parser.add_argument("--workers", type=int, default=3)
+    parser.add_argument("--range-workers", type=int, default=1, choices=range(1, 17),
+                        help="Parallel validated byte ranges per raster (bounded memory)")
     parser.add_argument("--offline", action="store_true")
+    parser.add_argument("--roles", nargs="+", choices=("dem", "error", "count", "roi"),
+                        help="Restrict acquisition, e.g. dem error count when no ROI is needed")
     args = parser.parse_args()
 
     unknown = set(args.sites) - set(SITE_NAMES)
@@ -175,11 +174,12 @@ def main() -> int:
     if not 1 <= args.workers <= 6:
         parser.error("--workers must be between 1 and 6")
 
-    requested = [item for site in args.sites for item in assets(site)]
+    requested = [item for site in args.sites for item in assets(site)
+                 if not args.roles or item["role"] in args.roles]
     records: list[dict[str, object]] = []
     failures: list[dict[str, str]] = []
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
-        futures = {pool.submit(acquire, item, args.offline): item for item in requested}
+        futures = {pool.submit(acquire, item, args.offline, args.range_workers): item for item in requested}
         for future in as_completed(futures):
             item = futures[future]
             try:
@@ -217,6 +217,18 @@ def main() -> int:
         "total_verified_bytes": sum(int(record["bytes"]) for record in records),
     }
     report_path = ROOT / "manifests/lunarsight/pgda78_selected_sites.json"
+    # A selected/resumed acquisition must not erase provenance of earlier sites.
+    if report_path.is_file():
+        previous = json.loads(report_path.read_text())
+        requested_ids = {item["id"] for item in requested}
+        report["records"] = sorted([*records, *(record for record in previous.get("records", [])
+            if record["id"] not in requested_ids)], key=lambda record: str(record["id"]))
+        report["failures"] = [*failures, *(failure for failure in previous.get("failures", [])
+            if failure["id"] not in requested_ids)]
+        site_rows = {site["site"]: site for site in previous.get("sites", [])}
+        site_rows.update({site["site"]: site for site in report["sites"]})
+        report["sites"] = list(site_rows.values())
+        report["total_verified_bytes"] = sum(int(record["bytes"]) for record in report["records"])
     temporary = report_path.with_suffix(".json.tmp")
     temporary.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     temporary.replace(report_path)

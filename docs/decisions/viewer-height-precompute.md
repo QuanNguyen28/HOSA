@@ -1,12 +1,12 @@
 # Prepared metrics for viewer heights
 
-The default catalog contains 19 coordinates. The archived `Site01_P1`, `Site04_P1`, `example-a` and `example-b` targets remain explicitly addressable by the API, but are excluded from the default selectors. Similar place names do not imply equal coordinates; the viewer must not substitute a P1 analysis for a different named catalog point.
+The default catalog contains 27 published NASA rows at 26 distinct coordinates; see [NASA catalog](nasa-default-catalog.md). The archived `Site01_P1`, `Site04_P1`, `example-a` and `example-b` targets remain explicitly addressable by the API, but are excluded from the default selectors. Similar place names do not imply equal coordinates; the viewer must not substitute a P1 analysis for a different named catalog point.
 
 Viewer presets set **both** panel and Earth antenna height: Lander = 2 m, then 10 m, 20 m and 30 m. The coordinate MissionRequest contract accepts positive heights through 30 m. Arbitrary intermediate heights and unequal panel/antenna pairs still need their own geometry/metrics and are not covered by these four prepared presets.
 
 Each default coordinate has independent horizon profiles at 1/2/10/20/30 m. The additional 30 m profiles use the existing DEM source inventory, observer elevation and spherical ENU method, at 400 km / 0.03125° and 300 km / 0.0625°. Their blocker angles are independently verified before atomic publication. Existing profile blobs and display meshes are preserved. Missing terrain remains unknown; the new heights do not relax validation gates.
 
-Each of the 76 default coordinate/preset configurations has nominal five-minute metrics and up to 800 chart bins for `[2000-01-01, 2101-01-01)` UTC. Source identity includes the actual height and profile hashes. No 20 m metric is copied to another preset. Requirement decisions and validation are still assessed for the specific mission request; the prepared metric endpoint starts no evaluation job and supplies no PASS/FAIL.
+Each of the 104 default coordinate/preset configurations has nominal five-minute metrics and up to 800 chart bins for `[2000-01-01, 2101-01-01)` UTC. Source identity includes the actual height and profile hashes. No 20 m metric is copied to another preset. Requirement decisions and validation are still assessed for the specific mission request; the prepared metric endpoint starts no evaluation job and supplies no PASS/FAIL.
 
 Reproduce on a machine with verified shared ephemeris installed:
 
@@ -27,7 +27,7 @@ OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONPATH=backend \
 
 Metrics caches under `data/cache/point-analysis/prepared-metrics/` are runtime artifacts excluded from Git. Deploy compatible caches on persistent storage or run the preparation command before routing traffic. Rebuilding the frontend alone does not create them.
 
-Verify the running API with all 76 full-band configurations and three native windows per configuration:
+Verify the running API with all 104 full-band configurations and three native windows per configuration:
 
 ```bash
 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 PYTHONPATH=backend \
@@ -38,7 +38,9 @@ OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 PYTHONPATH=backend \
 
 Checks cover exact coverage boundaries, UTC leap days, chart-integrated hours, native Sun/Earth/Joint metrics, distinct height identities, monotonic terrain visibility with increasing height and absence of new analysis jobs. Local HTTP timings are measured separately from preparation time.
 
-## Recorded verification
+## Historical verification before the NASA catalog migration
+
+The 76-configuration evidence below belongs to the previous mixed catalog. Current NASA evidence is recorded in `nasa27-catalog-verification.json`, `nasa27-metrics-build.json` and `nasa27-metrics-http.json` under `docs/validation/lunarsight/`.
 
 The prepared default cache contains 76 distinct source identities and 807,448,320 native five-minute intervals across all configurations. Compact aggregate and yearly indexes occupy about 1.76 GiB, excluding kernels, receipts and archived target caches. [Build report](../validation/lunarsight/viewer-metrics-build.json).
 

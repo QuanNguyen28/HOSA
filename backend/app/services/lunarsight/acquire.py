@@ -84,7 +84,60 @@ def ranged_download(session,url,partial,limit):
     return dict(final_url=url,bytes=total,sha256=sha.hexdigest(),accessed_utc=utc_now(),status="VERIFIED_BYTES",
                 transfer="ordered validated HTTP byte ranges",http_headers=dict(headers,**{"Content-Length":str(total)}))
 
-def download(nasa_dir,item,offline=False):
+def parallel_ranged_download(url, partial, limit, workers):
+    """Bounded parallel reads of one immutable NASA asset, verified before use.
+
+    Each response must describe its exact byte range and the same source
+    identity. The joined file is hashed in file order, never completion order.
+    """
+    from concurrent.futures import ThreadPoolExecutor
+    import requests
+    if not 1 <= workers <= 16:
+        raise ValueError("Range workers must be between 1 and 16")
+    def get(first, last, expected=None):
+        for attempt in range(3):
+            try:
+                response = requests.get(url, timeout=(15, 90), headers={
+                    "Accept-Encoding": "identity", "Range": f"bytes={first}-{last}"})
+                response.raise_for_status()
+                match = re.fullmatch(r"bytes (\d+)-(\d+)/(\d+)", response.headers.get("Content-Range", ""))
+                if response.status_code != 206 or response.url != url or not match:
+                    raise ValueError("Expected an original-host HTTP 206 byte range")
+                start, stop, total = map(int, match.groups())
+                identity = (response.headers.get("ETag"), response.headers.get("Last-Modified"), total)
+                if (not 0 < total <= limit or start != first or stop != min(last, total-1)
+                        or len(response.content) != stop-start+1 or not any(identity[:2])
+                        or expected is not None and identity != expected):
+                    raise ValueError("Truncated, mismatched or changed NASA byte range")
+                return response, identity
+            except (requests.ConnectionError, requests.Timeout, requests.exceptions.ChunkedEncodingError):
+                if attempt == 2:
+                    raise
+                time.sleep(attempt+1)
+    probe, identity = get(0, 0)
+    total = identity[2]
+    with partial.open("wb") as stream:
+        stream.truncate(total)
+    chunk_size = 2*1024*1024
+    ranges = [(first, min(first+chunk_size-1, total-1)) for first in range(0, total, chunk_size)]
+    def write_range(bounds):
+        first, last = bounds
+        response, _ = get(first, last, identity)
+        # Independent handles write disjoint validated intervals. At most
+        # workers * chunk_size bytes of response data are held in memory.
+        with partial.open("r+b") as stream:
+            stream.seek(first)
+            stream.write(response.content)
+        return len(response.content)
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        if sum(pool.map(write_range, ranges)) != total:
+            raise ValueError("Incomplete NASA byte ranges")
+    headers = {k: probe.headers.get(k) for k in ("ETag", "Last-Modified", "Content-Type", "Accept-Ranges")}
+    return dict(final_url=url, bytes=total, sha256=hashfile(partial), accessed_utc=utc_now(),
+        status="VERIFIED_BYTES", transfer="validated parallel HTTP byte ranges",
+        http_headers=dict(headers, **{"Content-Length": str(total)}))
+
+def download(nasa_dir,item,offline=False,range_workers=1):
     import requests
     from requests.adapters import HTTPAdapter
     from urllib3.util.retry import Retry
@@ -104,6 +157,12 @@ def download(nasa_dir,item,offline=False):
         raise OSError("Insufficient disk for bounded download")
     partial=path.with_suffix(path.suffix+".part")
     try:
+        if range_workers > 1 and item["role"] in {"dem", "error", "count"}:
+            rec = dict(item, **parallel_ranged_download(item["url"], partial, limit, range_workers))
+            validate_payload(partial, item["role"])
+            partial.replace(path)
+            dump(receipt, rec)
+            return rec
         with requests.Session() as s:
             s.mount("https://",HTTPAdapter(max_retries=Retry(total=2,backoff_factor=.6,status_forcelist=(429,500,502,503,504),respect_retry_after_header=False)))
             if item["id"] in {"dem80","dem240"}:

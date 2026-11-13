@@ -16,6 +16,7 @@ import { Finder } from "./views";
 import ChatDock, { ChatPage, useAssistant } from "./Chat";
 import type { Mode } from "./Stage3D";
 import { usePointTerrain } from "../hooks/usePointTerrain";
+import { useHorizonProfile } from "../hooks/useHorizonView";
 import { analyzePoint, api, downloadJson, useOperation, usePointInstant, usePreparedMetrics } from "../mvp/api";
 import {
   DEFAULT_MISSION,
@@ -49,6 +50,7 @@ import {
 } from "./backend";
 
 const Stage3D = lazy(() => import("./Stage3D"));
+const HorizonView = lazy(() => import("./HorizonView"));
 type View = "explore" | "compare" | "dates" | "chat";
 const TABS: [View, string][] = [
   ["explore", "Explore"],
@@ -442,14 +444,16 @@ function Explore({
   onAnalyze: () => void;
 }) {
   const { t: tr } = useTranslation();
-  const [mode, setMode] = useState<Mode>("pole");
+  const [mode, setMode] = useState<Mode | "horizon">("pole");
   const [tab, setTab] = useState<"info" | "sites">("info");
-  const prepared = usePreparedMetrics(issue ? undefined : missionRequest(mission, toTarget(site)));
+  const prepared = usePreparedMetrics(issue ? undefined : missionRequest(mission, toTarget(site)), site.group === "nasa");
   const r = point.result ?? prepared,
     end = s.endMs;
   const busy = operationsBusy && !r;
   const instant = usePointInstant(r, s.timeMs);
   const viewResult = useMemo(() => r ? { ...r, instant } : undefined, [r, instant]);
+  const horizonRequest = useMemo(() => issue ? undefined : missionRequest(mission, toTarget(site)), [issue, mission, site]);
+  useHorizonProfile(horizonRequest);
   const customCoordinate = useMemo(
     () => site.id === "custom" && Number.isFinite(site.lat) && Number.isFinite(site.lon)
       ? { latitude: site.lat, longitude: site.lon }
@@ -479,7 +483,7 @@ function Explore({
         <div className="min-h-0 flex-1 overflow-y-auto">
           {tab === "sites" ? (
             <div className="px-2 pb-4">
-              <p className="eyebrow px-3 py-3">{tr("Sites · ")}{sites.length}</p>
+              <p className="eyebrow px-3 py-3">{tr("Sites · ")}{sites.filter((site) => site.id !== "custom").length}</p>
               {sites.map((t) => (
                 <button
                   key={t.id}
@@ -736,11 +740,11 @@ function Explore({
           )}
         </div>
       </aside>
-      <div className="relative min-h-[560px] flex-1">
+      <div className={`relative flex-1 ${mode === "horizon" ? "flex min-h-[740px] flex-col" : "min-h-[560px]"}`}>
         <Suspense
           fallback={
             <div className="absolute inset-0 grid place-items-center font-mono text-[11px] tracking-widest text-mute">
-              {tr("LOADING MOON…")}
+              {tr(mode === "horizon" ? "LOADING HORIZON…" : mode === "orbit" ? "LOADING MOON…" : "PREPARING LOLA TERRAIN…")}
             </div>
           }
         >
@@ -751,7 +755,7 @@ function Explore({
             site.lon >= -180 &&
             site.lon <= 360 &&
             Number.isFinite(s.timeMs) && (
-              <Stage3D
+              mode === "horizon" ? <HorizonView request={horizonRequest} site={site} timeMs={s.timeMs} result={viewResult} /> : <Stage3D
                 className="absolute inset-0"
                 mode={mode}
                 sites={sites}
@@ -783,13 +787,14 @@ function Explore({
               { v: "orbit", label: "Moon" },
               { v: "pole", label: "Pole" },
               { v: "surface", label: "Ground" },
+              { v: "horizon", label: "Horizon" },
             ]}
           />
         </div>
-        <p className="pointer-events-none absolute top-16 right-4 max-w-[240px] text-right text-[10px] text-mute">
+        {mode !== "horizon" && <p className="pointer-events-none absolute top-16 right-4 max-w-[240px] text-right text-[10px] text-mute">
           {tr("3D lighting is a visual preview. Metric evidence comes from backend intervals.")}
-        </p>
-        <LiveBar s={s} {...ctl}>
+        </p>}
+        <LiveBar s={s} {...ctl} overlay={mode !== "horizon"}>
           <BackendTimeline
             result={r}
             start={s.startMs}

@@ -10,12 +10,14 @@
   "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Shoemaker/Shoemaker_final_adj_5mpp_toterr.tif",
   "bytes": 64025605,
   "sha256": "6e9aae69ff0f1bd6fa65c4ecd0e270c02aa6318da834c53c3e2edd81ce0c5d0e",
-  "accessed_utc": "2026-11-12T02:54:35.433832+00:00",
+  "accessed_utc": "2026-11-13T09:53:32.288668+00:00",
   "status": "VERIFIED_BYTES",
+  "transfer": "validated parallel HTTP byte ranges",
   "http_headers": {
-    "Content-Length": "64025605",
     "ETag": "W/\"3d0f405-175c6f490b0\"",
     "Last-Modified": "Sat, 14 Nov 2020 13:31:58 GMT",
-    "Content-Type": "image/tiff"
+    "Content-Type": "image/tiff",
+    "Accept-Ranges": "bytes",
+    "Content-Length": "64025605"
   }
 }

@@ -1,0 +1,23 @@
+{
+  "id": "SL3_dem",
+  "filename": "SL3_final_adj_5mpp_surf.tif",
+  "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/SL3/SL3_final_adj_5mpp_surf.tif",
+  "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+  "role": "dem",
+  "unit": "m",
+  "site": "SL3",
+  "frame": "MOON_ME/DE421",
+  "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/SL3/SL3_final_adj_5mpp_surf.tif",
+  "bytes": 64025611,
+  "sha256": "a18c153dab5c9e7e0b4d8a5f1547bd7ef5e31fba7dd1c3252d84060aebf0283b",
+  "accessed_utc": "2026-11-13T09:43:52.121747+00:00",
+  "status": "VERIFIED_BYTES",
+  "transfer": "validated parallel HTTP byte ranges",
+  "http_headers": {
+    "ETag": "W/\"3d0f40b-17835d14f08\"",
+    "Last-Modified": "Mon, 15 Mar 2021 12:16:53 GMT",
+    "Content-Type": "image/tiff",
+    "Accept-Ranges": "bytes",
+    "Content-Length": "64025611"
+  }
+}

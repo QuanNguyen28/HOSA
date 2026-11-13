@@ -1,6 +1,6 @@
 import { useTranslation } from "../i18n/LanguageProvider";
 import { Suspense, useEffect, useLayoutEffect, useMemo, useRef } from "react";
-import { Canvas, type ThreeEvent, useFrame, useThree } from "@react-three/fiber";
+import { Canvas, type ThreeEvent, useThree } from "@react-three/fiber";
 import {
   Billboard,
   Html,
@@ -62,6 +62,8 @@ import type { TerrainWindow } from "../hooks/useTerrainWindow";
 import { getLunarSurfaceTextures } from "../lib/lunarSurfaceTextures";
 import { terrainShadowFragment } from "../lib/terrainShadowShader";
 import { TERRAIN_SHADOW_SIZE, terrainShadowHalfSize, terrainShadowVerticalHalfSize, updateTerrainShadow } from "../lib/terrainLighting";
+import { sceneContent, terrainCameraPose } from "../lib/terrainCamera";
+import type { TerrainGeometryMetadata } from "../lib/terrainGeometry";
 
 type MoonSceneProps = {
   time: Date;
@@ -108,69 +110,32 @@ const INITIAL_CAMERA = {
 
 function SceneRig({
   preset,
-  surfaceTargetY = 0,
-  surfaceViewDirection,
+  geometry,
+  selectionKey,
 }: {
   preset: CameraPreset;
-  surfaceTargetY?: number;
-  surfaceViewDirection?: [number, number, number];
+  geometry?: TerrainGeometryMetadata | null;
+  selectionKey: string;
 }) {
   const { camera } = useThree();
-  const desired = useRef(new Vector3(0, 0.3, 6.4));
-  const target = useRef(new Vector3(0, 0, 0));
-  const transitioning = useRef(false);
-  // Choose an initial sky-facing view on entry. Moving sunlight must not keep
-  // rotating the camera or undo the user's inspection of terrain shadows.
-  const entry = useRef({ preset, direction: surfaceViewDirection });
-  if (entry.current.preset !== preset) entry.current = { preset, direction: surfaceViewDirection };
-  const viewX = preset === "surface" ? entry.current.direction?.[0] ?? -0.55 : -0.55;
-  const viewZ = preset === "surface" ? entry.current.direction?.[2] ?? -0.84 : -0.84;
-
-  useEffect(() => {
-    const viewLength = Math.hypot(viewX, viewZ) || 1;
-    desired.current =
-      preset === "south-pole"
-        ? new Vector3(-105, 128, 178)
-        : preset === "surface"
-          ? new Vector3(
-              -(viewX / viewLength) * 0.38,
-              surfaceTargetY + 0.052,
-              -(viewZ / viewLength) * 0.38,
-            )
-          : new Vector3(0, 0.35, 6.4);
-    target.current = preset === "surface"
-      ? new Vector3(0, surfaceTargetY + 0.018, 0)
-      : preset === "south-pole"
-        ? new Vector3(...POLE_TARGET)
-        : new Vector3(0, 0, 0);
+  const columnAzimuth = geometry?.column_azimuth_deg;
+  const rowAzimuth = geometry?.row_azimuth_deg;
+  useLayoutEffect(() => {
+    const pose = terrainCameraPose(preset, columnAzimuth === undefined || rowAzimuth === undefined
+      ? null : { column_azimuth_deg: columnAzimuth, row_azimuth_deg: rowAzimuth } as TerrainGeometryMetadata);
+    // Trackball can roll camera.up while viewing the globe. Local controls
+    // need the terrain zenith, not the last global orbital orientation.
+    camera.up.set(...pose.up);
+    camera.position.set(...pose.position);
+    camera.lookAt(new Vector3(...pose.target));
     if ("fov" in camera && typeof camera.fov === "number") {
-      camera.fov = preset === "surface" ? 68 : preset === "south-pole" ? 44 : 36;
+      camera.fov = pose.fov;
       camera.updateProjectionMatrix();
     }
-    // The map controls own the camera after entering Pole. Keep their pose
-    // through terrain swaps and time changes.
-    transitioning.current = preset !== "south-pole";
-    if (preset === "south-pole") {
-      camera.position.copy(desired.current);
-      camera.lookAt(target.current);
-    }
-  }, [
-    camera,
-    preset,
-    surfaceTargetY,
-    viewX,
-    viewZ,
-  ]);
-
-  useFrame((_, delta) => {
-    if (!transitioning.current) return;
-    camera.position.lerp(desired.current, 1 - Math.exp(-delta * 3.2));
-    camera.lookAt(target.current);
-    if (camera.position.distanceTo(desired.current) < 0.008) {
-      camera.position.copy(desired.current);
-      transitioning.current = false;
-    }
-  });
+    camera.updateMatrixWorld();
+    // Only entry, observer changes and a new terrain frame reset the pose.
+    // Playback, moving Sun/Earth and viewer heights preserve user navigation.
+  }, [camera, preset, selectionKey, columnAzimuth, rowAzimuth]);
 
   return null;
 }
@@ -1268,25 +1233,11 @@ export function MoonScene(props: MoonSceneProps) {
   const localTerrain =
     (props.cameraPreset === "surface" || props.cameraPreset === "south-pole") &&
     props.selected !== null &&
-    props.terrainWindow?.coverage_status === "COVERED";
-  const surfaceViewDirection = useMemo<[number, number, number] | undefined>(() => {
-    if (props.cameraPreset !== "surface" || !props.groundSky || !props.terrainWindow?.geometry) return undefined;
-    const sun = skyDirectionToTerrainAxes(
-      props.groundSky.sun.azimuthDeg,
-      props.groundSky.sun.elevationDeg,
-      props.terrainWindow.geometry,
-    );
-    const earth = skyDirectionToTerrainAxes(
-      props.groundSky.earth.azimuthDeg,
-      props.groundSky.earth.elevationDeg,
-      props.terrainWindow.geometry,
-    );
-    const x = sun.x + earth.x;
-    const z = sun.z + earth.z;
-    return Math.hypot(x, z) > 0.15
-      ? [x, sun.y + earth.y, z]
-      : [sun.x, sun.y, sun.z];
-  }, [props.cameraPreset, props.groundSky, props.terrainWindow?.geometry]);
+    props.terrainWindow?.coverage_status === "COVERED" &&
+    !!props.terrainWindow.grid && !!props.terrainWindow.geometry;
+  const selectionKey = `${props.selected?.latitude}:${props.selected?.longitude}`;
+  const controlsKey = `${props.cameraPreset}:${selectionKey}`;
+  const content = sceneContent(props.cameraPreset, localTerrain);
   return (
     <Canvas
       shadows
@@ -1315,7 +1266,7 @@ export function MoonScene(props: MoonSceneProps) {
         speed={0.08}
       />}
       <Suspense fallback={null}>
-        {localTerrain && props.terrainWindow && props.selected ? (
+        {content === "terrain" && props.terrainWindow && props.selected ? (
           <DynamicTerrain
             terrain={props.terrainWindow}
             terrainLods={props.terrainLods}
@@ -1330,17 +1281,19 @@ export function MoonScene(props: MoonSceneProps) {
             onHover={props.onHover}
             onReady={props.onReady}
           />
-        ) : props.cameraPreset !== "south-pole" ? (
+        ) : content === "moon" ? (
           <Moon {...props} />
         ) : null}
       </Suspense>
       <SceneRig
         preset={props.cameraPreset}
-        surfaceTargetY={0}
-        surfaceViewDirection={surfaceViewDirection}
+        geometry={props.terrainWindow?.geometry}
+        selectionKey={selectionKey}
       />
-      {localTerrain && props.cameraPreset === "surface" ? (
+      {props.cameraPreset === "surface" ? (
         <OrbitControls
+          key={controlsKey}
+          enabled={localTerrain}
           makeDefault
           target={[
             0,
@@ -1360,6 +1313,7 @@ export function MoonScene(props: MoonSceneProps) {
         />
       ) : props.cameraPreset === "south-pole" ? (
         <MapControls
+          key={controlsKey}
           makeDefault
           target={POLE_TARGET}
           enableDamping
@@ -1378,6 +1332,7 @@ export function MoonScene(props: MoonSceneProps) {
         />
       ) : (
         <TrackballControls
+          key={controlsKey}
           makeDefault
           minDistance={2.22}
           maxDistance={13}

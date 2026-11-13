@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify portable real-data artifacts and fresh-result timings, without LLM calls."""
+"""Historical 23-observer package audit. For NASA defaults use verify_nasa_catalog_cache.py."""
 import argparse
 import json
 from pathlib import Path

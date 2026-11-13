@@ -2,11 +2,11 @@
 
 HOSA phân tích chiếu sáng Mặt Trời và đường nhìn hình học tới Trái Đất tại cực nam Mặt Trăng, dựa trên địa hình NASA LOLA và ephemeris SPICE/JPL. Web gồm **Explore, Compare, Best dates và Assistant**; backend tính metrics, kiểm tra yêu cầu và trả PASS / FAIL / INDETERMINATE.
 
-README này hướng dẫn **một máy mới** chạy nhánh **`feat/merge-fe-be`** từ đầu. Đi theo bước **1–7** để chạy web với đầy đủ cache của 19 điểm mặc định. DEM cho tọa độ mới và LLM là các bước tùy chọn ở phía sau.
+README này hướng dẫn **một máy mới** chạy nhánh **`feat/merge-fe-be`** từ đầu. Đi theo bước **1–7** để chạy web với đầy đủ cache của 27 mục NASA mặc định (26 tọa độ riêng biệt). DEM cho tọa độ mới và LLM là các bước tùy chọn ở phía sau.
 
 Nếu đã có cache từ máy đang chạy, làm bước 1–3, chuyển cache theo [bước 11](#11-chuyển-cache-sang-máy-khác), rồi tiếp tục bước 5–7 để tiết kiệm thời gian chuẩn bị.
 
-**Clone Git chưa mang theo cache metrics.** Gói horizon/mesh có trong Git; kernel và cache 2000–2100 phải được tạo hoặc chuyển từ máy đã chuẩn bị. Riêng các chỉ mục của 76 cấu hình chiếm khoảng **1,76 GiB**, chưa gồm dependency, kernel, bảng vector và DEM.
+**Clone Git chưa mang theo cache metrics.** Gói horizon/mesh có trong Git; kernel và cache 2000–2100 phải được tạo hoặc chuyển từ máy đã chuẩn bị. Riêng các chỉ mục của 104 cấu hình chiếm khoảng **1,76 GiB**, chưa gồm dependency, kernel, bảng vector và DEM.
 
 ## 1. Cài công cụ trên máy mới
 
@@ -97,7 +97,7 @@ Trong lần chạy đầu, giữ `ASSISTANT_ENABLED=false` trong `.env`. Explore
 | DEM NASA gốc và receipt                                            | `data/raw/nasa/`                                                                             | Không                       | Chỉ cần tải ở bước 8 khi tính ngoài gói địa hình  |
 | Bằng chứng validation, chuỗi native, kết quả và lịch sử chat | `data/cache/`                                                                                | Không                       | Backend tạo khi sử dụng; có thể giữ trên ổ persistent |
 
-**Không cần tải lại DEM hoặc chạy `make precompute-catalog` để dùng 19 điểm mặc định ở các mức viewer đã có.** Gói trong Git đã chứa horizon cần thiết, gồm cả 30 m.
+**Không cần tải lại DEM hoặc chạy `make precompute-catalog` để dùng 27 mục NASA mặc định (26 tọa độ riêng biệt) ở các mức viewer đã có.** Gói trong Git đã chứa horizon cần thiết, gồm cả 30 m.
 
 ### 4.2. Cài kernel chính thức
 
@@ -108,7 +108,7 @@ make ephemeris-prepare
 
 Lệnh tải các kernel NAIF/JPL, lưu receipt và kiểm tra checksum. Mạng cần ở lần tải này. Sau đó mô hình `solar_disc` tính từ kernel cục bộ; bảng vector được tạo khi cần. Nếu đã có file kernel nhưng thiếu/sai receipt, cần khắc phục đúng artifact, không bỏ qua bước kiểm tra.
 
-### 4.3. Tạo đầy đủ cache cho 19 điểm × 4 độ cao
+### 4.3. Tạo đầy đủ cache cho 27 mục NASA / 26 tọa độ × 4 độ cao
 
 ```bash
 cd ~/HOSA
@@ -118,7 +118,7 @@ OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONPATH=backend \
   --report /tmp/hosa-viewer-metrics-build.json
 ```
 
-Lệnh chuẩn bị **76 cấu hình**, từ `2000-01-01T00:00:00Z` đến **trước** `2101-01-01T00:00:00Z`, tức bao gồm toàn bộ năm 2100. Mỗi cấu hình đặt **panel và antenna cùng độ cao**:
+Lệnh chuẩn bị **104 cấu hình cho 26 tọa độ**, từ `2000-01-01T00:00:00Z` đến **trước** `2101-01-01T00:00:00Z`, tức bao gồm toàn bộ năm 2100. Mỗi cấu hình đặt **panel và antenna cùng độ cao**:
 
 | Viewer | Panel | Antenna |
 | ------ | ----: | ------: |
@@ -136,16 +136,38 @@ backend/.venv/bin/python - <<'PY'
 import json
 from pathlib import Path
 r = json.loads(Path('/tmp/hosa-viewer-metrics-build.json').read_text())
-assert r['passed'] and len(r['records']) == r['configurations_total'] == 76
+assert r['passed'] and len(r['records']) == r['configurations_total'] == 104
 print('READY:', r['sites_total'], 'sites,', len(r['records']), 'configurations')
 PY
 ```
 
-Có thể dùng `make metrics-century-prepare` thay cho block build trên. Target này dùng 3 worker; nếu chọn cách này, thay đường dẫn báo cáo trong block kiểm tra bằng `docs/validation/lunarsight/viewer-metrics-build.json`.
+Có thể dùng `make metrics-century-prepare` thay cho block build trên. Target này dùng 3 worker; nếu chọn cách này, thay đường dẫn báo cáo trong block kiểm tra bằng `docs/validation/lunarsight/nasa27-metrics-build.json`.
 
-**Muốn thử sớm một điểm:** thêm `--sites haworth` vào block build và giữ bốn độ cao. Khi đó chỉ Haworth có cache cả thế kỷ; report có 4 cấu hình, không dùng assertion 76 ở trên. Chạy lại lệnh không có `--sites` khi muốn hoàn tất 19 điểm.
+**Muốn thử sớm một điểm:** thêm `--sites haworth` vào block build và giữ bốn độ cao. Khi đó chỉ Haworth có cache cả thế kỷ; report có 4 cấu hình, không dùng assertion 104 ở trên. Chạy lại lệnh không có `--sites` khi muốn hoàn tất 27 mục NASA.
 
 Cache này chứa metrics và chart tổng hợp, **không chứa kết luận nhiệm vụ được duyệt sẵn**. Analyze vẫn kiểm tra requirements và validation theo từng request. Site01_P1, Site04_P1, Example A và Example B đã bỏ khỏi danh sách mặc định; các ID cũ vẫn được API nhận, nhưng lệnh build mặc định không chuẩn bị cache cho chúng.
+
+### 4.4. Danh mục NASA và cách dựng lại địa hình
+
+Danh sách mặc định dùng **27 mục trong NASA Lunar Surface Data Book, ACD-50044 Revision A, bảng A2-2, trang 57–58**. UI hiển thị tên địa danh đầy đủ; mã Site/LM/NP chỉ được giữ làm metadata và alias. [Bảng tọa độ](manifests/nasa-south-pole-sites.csv) và [receipt nguồn PDF](manifests/nasa-south-pole-sites.receipt.json) được theo dõi trong Git.
+
+Đây là tâm vùng do NASA công bố, giữ nguyên tọa độ và độ chính xác được xuất bản. Chúng không phải điểm cao nhất trong vùng hoặc điểm đáp đã được phê duyệt. `Leibnitz Beta Plateau` và `Leibnitz Beta Plateau (extended boundaries)` cùng tọa độ, nên 27 mục dùng chung 26 bộ địa hình và **104 cấu hình metrics**. Tọa độ khác với catalog cũ sẽ tạo identity/cache mới; không dùng lại số liệu của điểm cũ có cùng tên.
+
+Máy mới dùng gói terrain đã chuẩn bị trong Git. Chỉ khi cần tái tạo từ DEM gốc:
+
+```bash
+backend/.venv/bin/python scripts/build_nasa_default_catalog.py
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 PYTHONPATH=backend \
+  backend/.venv/bin/python scripts/acquire_pgda78_sites.py \
+  --roles dem error count --workers 4 --range-workers 8
+make precompute-catalog
+make precompute-verify
+make metrics-century-prepare
+```
+
+Cần mạng và dung lượng trống cho DEM/lớp chất lượng. Tải bằng byte range vẫn kiểm tra HTTP 206, phạm vi byte, identity nguồn, dung lượng và SHA-256 của file ghép. Có thể giảm `--workers` và `--range-workers` khi mạng/máy yếu. Không cần ROI để dùng tọa độ đã xuất bản; ROI Site06 vẫn là hạn chế nguồn riêng.
+
+Pole và Ground dùng trục đứng địa phương của địa hình, khởi tạo nhìn về Bắc địa phương. Chuyển từ Moon không mang theo độ nghiêng camera; chạy simulation hoặc đổi viewer height giữ hướng người dùng đã xoay.
 
 ## 5. Chạy backend và frontend
 
@@ -239,7 +261,7 @@ PY
 
 Kết quả mong đợi: `metrics_index_hit=true`, `decision=null`, `evaluation_status="pending"` và tối đa 800 cột Sun/Earth/Joint trong `timeline`. `pending` ở endpoint này nghĩa là **chưa đánh giá nhiệm vụ**; metrics/chart đã có. Endpoint không tự tạo job validation.
 
-Đổi cả hai chiều cao sang 2, 10 hoặc 30 để thử các preset khác. Đổi `site_id` sang một trong 19 điểm đang hiện trên web, hoặc gửi cặp `latitude_deg` / `longitude_e_deg` thay cho `site_id`. Đường đọc nhanh chỉ có khi tọa độ, hardware, mô hình và khoảng ngày khớp cache đã chuẩn bị.
+Đổi cả hai chiều cao sang 2, 10 hoặc 30 để thử các preset khác. Đổi `site_id` sang một trong 27 mục NASA đang hiện trên web, hoặc gửi cặp `latitude_deg` / `longitude_e_deg` thay cho `site_id`. Đường đọc nhanh chỉ có khi tọa độ, hardware, mô hình và khoảng ngày khớp cache đã chuẩn bị.
 
 Để lấy trạng thái tại một thời điểm mà không chạy Analyze:
 
@@ -293,7 +315,7 @@ Preview/result/interval có thể trả 409 khi phần tương ứng chưa sẵn
 
 ## 7. Kiểm tra trên web
 
-1. Vào **Explore → All sites**, chọn **Haworth**. Danh sách có 19 điểm mặc định và tùy chọn nhập tọa độ riêng.
+1. Vào **Explore → All sites**, chọn **Haworth**. Danh sách có 27 mục NASA mặc định (26 tọa độ riêng biệt) và tùy chọn nhập tọa độ riêng.
 2. Giữ start `2026-11-24 00:00 UTC`, mission 72 giờ. Thử **Lander / 10 m / 20 m / 30 m**: cả panel và antenna phải đổi theo bảng ở bước 4.
 3. Sau khi đọc cache, metrics và ba chart Sun/Earth/Joint hiện với trạng thái **METRICS READY**, chưa cần bấm Analyze.
 4. Để thử dài hạn, chọn **Define mission by → Target end date (UTC)**, start `2000-01-01 00:00`, end `2101-01-01 00:00`. Metrics/chart vẫn dùng chỉ mục đã chuẩn bị.
@@ -308,6 +330,22 @@ Simulation dùng **Play → Pause → Continue / Replay**; khi tới phút cuố
 Hướng sáng 3D dùng bảng vector SPICE theo tháng qua `/api/lunar/point/sky-vectors?at_utc=...`, nội suy vector theo thời gian rồi chuyển sang cùng hệ tọa độ địa hình. Bảng tháng được dùng chung khi đổi điểm, lưu tạm trên trình duyệt và tải trước tháng tiếp theo. Không cần build thêm cache hay gọi LLM. Trong Ground, nhãn **SPICE · VISUAL PREVIEW** phân biệt hướng hình học với kết luận V/B/? từ backend. Shadow map phủ toàn bộ các lớp địa hình hiển thị, bao gồm lớp xa, để mép vùng shadow không tạo dải tối quay quanh điểm chọn; camera mặt đất không tự quay theo Sun trong lúc chạy. Tăng sáng và tương phản chỉ áp dụng cho renderer. Đây vẫn là preview trên mesh và shadow map, không phải mô phỏng bức xạ/penumbra hay chứng nhận độ chính xác của mọi pixel bóng đổ.
 
 Kiểm thử simulation, phép đổi hệ tọa độ và lỗi projection khi tải LOD: [simulation-render-verification.json](docs/validation/lunarsight/simulation-render-verification.json).
+
+### Horizon: đường chân trời 360° và quỹ đạo toàn nhiệm vụ
+
+Trong **Explore**, chọn **Horizon** cạnh Moon / Pole / Ground. Biểu đồ dùng chung tọa độ, độ cao panel/antenna, khoảng nhiệm vụ và thanh Play/Pause/Replay. Trục ngang là phương vị tính từ Bắc theo chiều kim đồng hồ; trục dọc là góc cao. Phần xám là đường chân trời địa hình, không phải độ cao mặt đất theo khoảng cách. Rê chuột để đọc góc chân trời và khoảng cách vật chắn; vùng thiếu dữ liệu được gạch chéo. Dùng **+/−**, **Full 360°**, **Follow Sun/Earth**, hoặc bấm dải tổng quan dưới biểu đồ để đổi vùng nhìn. Khi panel và antenna khác độ cao, có thể chọn đường chân trời tương ứng.
+
+Sun/Earth được vẽ trên **toàn bộ khoảng nhiệm vụ**, kể cả nhiều năm. Quỹ đạo tải dần theo từng phần 120 ngày, không cắt ngắn nhiệm vụ. Nhiệm vụ tối đa 7 ngày có mẫu vẽ 5 phút; nhiệm vụ dài hơn có mẫu vẽ 1 giờ từ bảng SPICE cục bộ đã kiểm tra. Nét đứt chỉ hướng tâm thiên thể nằm dưới đường chân trời; trạng thái visible/hidden/unknown ở thời điểm hiện tại lấy từ khoảng backend, còn Sun dùng diện tích đĩa theo mô hình hiện hành. Quỹ đạo hiển thị không được dùng lại để tính metrics hoặc requirements. Vị trí hiện tại được cập nhật riêng, nên Play/Follow không dựng lại toàn bộ quỹ đạo mỗi khung hình.
+
+Các điểm/độ cao đã có trong gói đọc horizon từ cache. Khi chọn tọa độ mới trong Explore, web tự yêu cầu chuẩn bị horizon ở nền (có debounce và gộp request trùng), kể cả trước khi mở tab Horizon; **không cần bấm Analyze point**. Lần đầu tại tọa độ/độ cao chưa cache cần quét DEM, hiển thị đang chuẩn bị rồi tự cập nhật. Công việc này chỉ dựng horizon, không tính requirements/validation hoặc kết luận PASS/FAIL. Các phần quỹ đạo được cache ở `data/cache/point-analysis/sky-tracks/`, có identity/checksum; thiếu kernel hoặc ngoài khoảng phủ sẽ báo lỗi dữ liệu. Mở lần đầu một khoảng dài cần tải thêm các phần chưa cache, nhưng vẫn có thể xem đường chân trời và chạy con trỏ trong khi chờ.
+
+Hai API POST mới nhận cùng schema request của `/api/lunar/point/analyze`:
+
+- `/api/lunar/point/horizon-profile`: đọc horizon đã có theo tọa độ/độ cao.
+- `/api/lunar/point/horizon-profile/preload`: cùng schema request; trả `202 preparing` khi đang dựng ở nền, `200 ready` kèm profile khi xong. Gọi lại cùng tọa độ/độ cao để lấy tiến độ; đổi thời gian/requirements không tạo thêm công việc geometry. Không gọi LLM hay đánh giá nhiệm vụ.
+- `/api/lunar/point/sky-track?chunk_index=0`: trả một phần quỹ đạo cùng `chunk_count`; gọi các chỉ số tiếp theo để lấy đủ khoảng nhiệm vụ. `bodies.sun` và `bodies.earth` gồm các hàng `[azimuth_deg, elevation_deg, angular_radius_deg]`. Mẫu bắt đầu tại `start_utc`, bước `sampling_seconds`; hàng cuối nằm chính xác tại `end_utc`, kể cả khi phần cuối ngắn hơn một bước. Biên cuối chỉ phục vụ vẽ quỹ đạo, không thay đổi quy ước mission window nửa mở của engine.
+
+Bằng chứng kiểm thử: [horizon-view-verification.json](docs/validation/lunarsight/horizon-view-verification.json).
 
 ## 8. Tùy chọn: phân tích tọa độ hoặc độ cao ngoài gói
 
@@ -326,6 +364,7 @@ Sau khi đổi nguồn hoặc thuật toán horizon, rebuild địa hình rồi 
 
 ```bash
 make precompute-catalog
+make precompute-verify
 make metrics-century-prepare
 ```
 
@@ -377,7 +416,7 @@ make verify
 
 Lệnh chạy backend tests, frontend tests, TypeScript và production build. Không cần API key LLM cho bộ kiểm thử thông thường.
 
-Sau khi đã chuẩn bị **đủ 76 cấu hình** và backend đang chạy, kiểm tra HTTP trên dữ liệu thật:
+Sau khi đã chuẩn bị **đủ 104 cấu hình** và backend đang chạy, kiểm tra HTTP trên dữ liệu thật:
 
 ```bash
 OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 PYTHONPATH=backend \
@@ -386,7 +425,7 @@ OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 PYTHONPATH=backend \
   --output /tmp/hosa-viewer-metrics-http.json
 ```
 
-Script kiểm tra 76 cấu hình toàn khoảng, 228 cửa sổ đối chiếu native, tích phân chart, identity từng độ cao, năm nhuận và biên coverage. Không tạo job phân tích hay gọi LLM. Bằng chứng đã lưu: [build cache](docs/validation/lunarsight/viewer-metrics-build.json), [HTTP/native](docs/validation/lunarsight/viewer-metrics-http.json), [horizon và mesh](docs/validation/lunarsight/viewer-catalog-verification.json).
+Script kiểm tra 104 cấu hình toàn khoảng, 312 cửa sổ đối chiếu native, tích phân chart, identity từng độ cao, năm nhuận và biên coverage. Không tạo job phân tích hay gọi LLM. Bằng chứng đã lưu: [build cache](docs/validation/lunarsight/nasa27-metrics-build.json), [HTTP/native](docs/validation/lunarsight/nasa27-metrics-http.json), [horizon và mesh](docs/validation/lunarsight/nasa27-catalog-verification.json).
 
 ## 11. Chuyển cache sang máy khác
 

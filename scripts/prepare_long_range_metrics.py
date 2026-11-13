@@ -6,7 +6,7 @@ import hashlib
 import json
 from pathlib import Path
 import sys
-from time import perf_counter
+from time import perf_counter, sleep
 
 import pandas as pd
 from filelock import FileLock
@@ -23,11 +23,18 @@ from app.services.lunarsight.visibility import visibility
 from precompute_catalog import targets
 
 
-def prepare(target, start, end, panel, antenna, root):
+def prepare(target, start, end, panel, antenna, root, wait_prepared_seconds=0):
     started = perf_counter()
     request = MissionRequest(latitude_deg=target["latitude_deg"], longitude_e_deg=target["longitude_e_deg"],
         start_utc=start, end_utc=end, panel_height_m=panel, antenna_height_m=antenna).resolved()
     pipeline, store = PointAnalysisPipeline(root), PreparedMetrics(root)
+    if wait_prepared_seconds:
+        from app.precompute.geometry import prepared_terrain
+        deadline = perf_counter() + wait_prepared_seconds
+        while prepared_terrain(request) is None:
+            if perf_counter() >= deadline:
+                raise TimeoutError(f"Prepared terrain not available: {target['site_ids']}")
+            sleep(1)
     boundaries = sorted({pd.Timestamp(start), pd.Timestamp(end), *pd.date_range(start, end, freq="YS")})
     completed, chunks = [], []
     with pipeline.terrain(request) as terrain:
@@ -90,6 +97,8 @@ if __name__ == "__main__":
     parser.add_argument("--panel", type=float, default=20.)
     parser.add_argument("--antenna", type=float, default=20.)
     parser.add_argument("--workers", type=int, choices=(1, 2, 3), default=2)
+    parser.add_argument("--wait-prepared-seconds", type=int, default=0,
+                        help="Wait for a concurrent terrain build instead of doing a duplicate raw DEM scan")
     parser.add_argument("--root", type=Path, default=ROOT/"data/cache/point-analysis")
     parser.add_argument("--report", type=Path, required=True)
     args = parser.parse_args()
@@ -100,8 +109,8 @@ if __name__ == "__main__":
     with ProcessPoolExecutor(max_workers=args.workers) as pool:
         hardware = [(h, h) for h in args.viewer_heights] if args.viewer_heights else [(args.panel, args.antenna)]
         total = len(selected)*len(hardware)
-        pending = [pool.submit(prepare, target, args.start, args.end, panel, antenna, args.root)
-                   for panel, antenna in hardware for target in selected]
+        pending = [pool.submit(prepare, target, args.start, args.end, panel, antenna, args.root, args.wait_prepared_seconds)
+                   for target in selected for panel, antenna in hardware]
         for future in as_completed(pending):
             row = future.result()
             records.append(row)

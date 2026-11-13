@@ -1,0 +1,249 @@
+{
+  "passed": true,
+  "requested_sites": 26,
+  "records": [
+    {
+      "site_ids": [
+        "shackleton-rim"
+      ],
+      "status": "prepared",
+      "seconds": 130.18096245700144,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "connecting-ridge"
+      ],
+      "status": "prepared",
+      "seconds": 130.69844702699993,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "nobile-rim-1"
+      ],
+      "status": "prepared",
+      "seconds": 139.0418565910004,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "peak-near-shackleton"
+      ],
+      "status": "prepared",
+      "seconds": 145.37825466799768,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "de-gerlache-rim-1"
+      ],
+      "status": "prepared",
+      "seconds": 170.97417646599934,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "leibnitz-beta-plateau",
+        "leibnitz-beta-plateau-extended"
+      ],
+      "status": "prepared",
+      "seconds": 167.34285002400065,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "malapert-massif"
+      ],
+      "status": "prepared",
+      "seconds": 227.6140054259995,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "de-gerlache-kocher"
+      ],
+      "status": "prepared",
+      "seconds": 231.8225274719989,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "haworth"
+      ],
+      "status": "prepared",
+      "seconds": 186.02337557400097,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "shoemaker"
+      ],
+      "status": "prepared",
+      "seconds": 184.2308178860003,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "amundsen-rim"
+      ],
+      "status": "prepared",
+      "seconds": 149.8267121280005,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "nobile-rim-2"
+      ],
+      "status": "prepared",
+      "seconds": 146.46399686800214,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "connecting-ridge-extension"
+      ],
+      "status": "prepared",
+      "seconds": 189.99363867400098,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "de-gerlache-rim-2"
+      ],
+      "status": "prepared",
+      "seconds": 194.17459903000054,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "cabeus-exterior-wall-1"
+      ],
+      "status": "prepared",
+      "seconds": 170.74341845399977,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "amundsen-1"
+      ],
+      "status": "prepared",
+      "seconds": 169.11867684500248,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "malapert-crater-1"
+      ],
+      "status": "prepared",
+      "seconds": 187.44705633600097,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "idelson-l-crater-1"
+      ],
+      "status": "prepared",
+      "seconds": 188.72948215900033,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "shackleton-rim-b"
+      ],
+      "status": "prepared",
+      "seconds": 206.49703973899886,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "shoemaker-rim-a"
+      ],
+      "status": "prepared",
+      "seconds": 206.06495180099955,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "shoemaker-rim-b"
+      ],
+      "status": "prepared",
+      "seconds": 175.608829058001,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "shoemaker-rim-c"
+      ],
+      "status": "prepared",
+      "seconds": 179.63530137899943,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "shoemaker-rim-d"
+      ],
+      "status": "prepared",
+      "seconds": 163.14896145900275,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "shoemaker-rim-e"
+      ],
+      "status": "prepared",
+      "seconds": 160.3357194329983,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "shoemaker-rim-f"
+      ],
+      "status": "prepared",
+      "seconds": 168.3688981819978,
+      "meshes": 11,
+      "coverage_complete": true
+    },
+    {
+      "site_ids": [
+        "faustini-rim-a"
+      ],
+      "status": "prepared",
+      "seconds": 180.92403550600284,
+      "meshes": 11,
+      "coverage_complete": true
+    }
+  ],
+  "errors": [],
+  "package": {
+    "schema_version": "site-precompute-1.0",
+    "manifest_hash": "83de9d05e8f3de2c500a0ecf17b1b89cd801fadffa74535d09881474a3b5dee1",
+    "sites": 49,
+    "meshes": 541
+  },
+  "live_llm_calls": 0
+}

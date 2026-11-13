@@ -1,0 +1,23 @@
+{
+  "id": "LM6_dem",
+  "filename": "LM6_final_adj_5mpp_surf.tif",
+  "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/LM6/LM6_final_adj_5mpp_surf.tif",
+  "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+  "role": "dem",
+  "unit": "m",
+  "site": "LM6",
+  "frame": "MOON_ME/DE421",
+  "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/LM6/LM6_final_adj_5mpp_surf.tif",
+  "bytes": 64033677,
+  "sha256": "452d0137122a787edff4e0ae7baeaac2b795d14cb48b3b8c0308be1aa6c44778",
+  "accessed_utc": "2026-11-13T09:46:39.542174+00:00",
+  "status": "VERIFIED_BYTES",
+  "transfer": "validated parallel HTTP byte ranges",
+  "http_headers": {
+    "ETag": "W/\"3d1138d-179272dd268\"",
+    "Last-Modified": "Sat, 01 May 2021 09:06:25 GMT",
+    "Content-Type": "image/tiff",
+    "Accept-Ranges": "bytes",
+    "Content-Length": "64033677"
+  }
+}

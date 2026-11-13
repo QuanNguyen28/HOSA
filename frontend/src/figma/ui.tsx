@@ -259,7 +259,8 @@ export function LiveBar({
   setPlaying,
   setSpeed,
   children,
-}: { s: Shared; children?: ReactNode } & Ctl) {
+  overlay = true,
+}: { s: Shared; children?: ReactNode; overlay?: boolean } & Ctl) {
   const { t: tr, locale } = useTranslation();
   const d = new Date(s.timeMs);
   const date = d
@@ -279,7 +280,7 @@ export function LiveBar({
   return (
     <section
       aria-label={tr("Time")}
-      className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/70 to-transparent px-4 pt-10 pb-4"
+      className={`${overlay ? "absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/70 to-transparent pt-10" : "relative shrink-0 border-t border-line bg-black pt-4"} px-4 pb-4`}
     >
       <div className="mx-auto flex max-w-3xl items-center justify-between gap-4">
         <span className="flex items-center gap-2 font-display text-lg font-bold tracking-[0.1em] text-mint">

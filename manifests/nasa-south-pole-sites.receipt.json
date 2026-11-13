@@ -1,0 +1,15 @@
+{
+  "document": "NASA ACD-50044 Lunar Surface Data Book Revision A",
+  "source_url": "https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf",
+  "source_sha256": "2095bb6b89a19cbf12d5d2d8c720e413df2bfc88dabab6a2500225c6517455b2",
+  "source_bytes": 2993207,
+  "table": "A2-2",
+  "pages": [
+    57,
+    58
+  ],
+  "records": 27,
+  "unique_coordinates": 26,
+  "extraction": "Published centre coordinates transcribed from text and checked against both rendered PDF pages. Negative longitude denotes west. No coordinate optimization or DEM snapping.",
+  "csv_sha256": "d185b9ffa5a99c511c7aa8485d26c7983dfc8a52de1787d6a8f1e88d4df4e45d"
+}

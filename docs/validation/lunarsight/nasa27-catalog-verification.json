@@ -1,0 +1,2542 @@
+{
+  "passed": true,
+  "default_entries": 27,
+  "coordinates": 26,
+  "viewer_heights_m": [
+    2,
+    10,
+    20,
+    30
+  ],
+  "metric_configurations_expected": 104,
+  "verified_profiles": 260,
+  "verified_meshes": 286,
+  "sites": [
+    {
+      "site_ids": [
+        "connecting-ridge"
+      ],
+      "names": [
+        "Connecting Ridge"
+      ],
+      "coordinate": {
+        "site_id": "coordinate",
+        "lon_e_deg": 222.51,
+        "lat_deg": -89.4632,
+        "dem_z_m": 1944.632568359375,
+        "dem_sha256": "3ba7b97cb00a2bcf21189c3aeb535f65afc21207154ab9f0d43c5bdc1f7e747e"
+      },
+      "observer_source": {
+        "dataset_id": "Site01_dem",
+        "resolution_m": 5
+      },
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "verified_profiles": 10,
+      "verified_meshes": 11,
+      "reference_checks": {
+        "fine": {
+          "1.0": {
+            "checks": 678,
+            "max_delta_el_deg": 5.846318984481513e-10,
+            "max_delta_az_deg": 1.0392113836132921e-09,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 678,
+            "max_delta_el_deg": 3.2681411743507027e-10,
+            "max_delta_az_deg": 5.637161848426331e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.398621218839935e-10,
+            "max_delta_az_deg": 1.82978965312941e-10,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 678,
+            "max_delta_el_deg": 3.176259255610603e-11,
+            "max_delta_az_deg": 3.467448550509289e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.7517320927140645e-11,
+            "max_delta_az_deg": 1.787725523172412e-11,
+            "passed": true
+          }
+        },
+        "short": {
+          "1.0": {
+            "checks": 339,
+            "max_delta_el_deg": 4.962066313396463e-10,
+            "max_delta_az_deg": 1.0392113836132921e-09,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 339,
+            "max_delta_el_deg": 2.9711533233722776e-10,
+            "max_delta_az_deg": 4.877449555351632e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.241999836310015e-10,
+            "max_delta_az_deg": 1.82978965312941e-10,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 339,
+            "max_delta_el_deg": 3.176259255610603e-11,
+            "max_delta_az_deg": 2.4499513529008254e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.7517320927140645e-11,
+            "max_delta_az_deg": 1.787725523172412e-11,
+            "passed": true
+          }
+        }
+      },
+      "height_monotonicity_passed": true,
+      "coverage_complete": true,
+      "referenced_bytes": 6585279
+    },
+    {
+      "site_ids": [
+        "shackleton-rim"
+      ],
+      "names": [
+        "Shackleton Rim"
+      ],
+      "coordinate": {
+        "site_id": "coordinate",
+        "lon_e_deg": 188.13,
+        "lat_deg": -89.7668,
+        "dem_z_m": 771.043212890625,
+        "dem_sha256": "38ff70dbdf2f066c2cfa94a646c3a59d653ce7f6b4528b15fc1b43ee397ce758"
+      },
+      "observer_source": {
+        "dataset_id": "Site04_dem",
+        "resolution_m": 5
+      },
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "verified_profiles": 10,
+      "verified_meshes": 11,
+      "reference_checks": {
+        "fine": {
+          "1.0": {
+            "checks": 678,
+            "max_delta_el_deg": 7.812932523165728e-10,
+            "max_delta_az_deg": 3.8488678910653107e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 678,
+            "max_delta_el_deg": 2.7913316102967656e-10,
+            "max_delta_az_deg": 2.8188651413074695e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 678,
+            "max_delta_el_deg": 3.637978807091713e-11,
+            "max_delta_az_deg": 7.628386811120436e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 678,
+            "max_delta_el_deg": 3.7264413776938454e-11,
+            "max_delta_az_deg": 4.331468517193571e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 678,
+            "max_delta_el_deg": 2.9324098704819335e-11,
+            "max_delta_az_deg": 4.3286263462505303e-11,
+            "passed": true
+          }
+        },
+        "short": {
+          "1.0": {
+            "checks": 339,
+            "max_delta_el_deg": 7.812932523165728e-10,
+            "max_delta_az_deg": 3.8488678910653107e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 339,
+            "max_delta_el_deg": 2.7913316102967656e-10,
+            "max_delta_az_deg": 2.7631585908238776e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 339,
+            "max_delta_el_deg": 3.2155611506823334e-11,
+            "max_delta_az_deg": 4.274625098332763e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 339,
+            "max_delta_el_deg": 2.4339641413462232e-11,
+            "max_delta_az_deg": 4.271782927389722e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 339,
+            "max_delta_el_deg": 2.9324098704819335e-11,
+            "max_delta_az_deg": 3.373656909388956e-11,
+            "passed": true
+          }
+        }
+      },
+      "height_monotonicity_passed": true,
+      "coverage_complete": true,
+      "referenced_bytes": 6739273
+    },
+    {
+      "site_ids": [
+        "nobile-rim-1"
+      ],
+      "names": [
+        "Nobile Rim 1"
+      ],
+      "coordinate": {
+        "site_id": "coordinate",
+        "lon_e_deg": 37.36667,
+        "lat_deg": -85.4381,
+        "dem_z_m": 5946.12841796875,
+        "dem_sha256": "cca17e8067601dd659b583f889204db6bce685bc30c60a9e62427a8bce36b03d"
+      },
+      "observer_source": {
+        "dataset_id": "Site06_dem",
+        "resolution_m": 5
+      },
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "verified_profiles": 10,
+      "verified_meshes": 11,
+      "reference_checks": {
+        "fine": {
+          "1.0": {
+            "checks": 678,
+            "max_delta_el_deg": 5.528743685090376e-09,
+            "max_delta_az_deg": 1.0162580110772979e-08,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 678,
+            "max_delta_el_deg": 3.6765435140750924e-10,
+            "max_delta_az_deg": 6.853611012047622e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 678,
+            "max_delta_el_deg": 7.911005184269015e-11,
+            "max_delta_az_deg": 1.3534418030758388e-10,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 678,
+            "max_delta_el_deg": 4.441957912604266e-11,
+            "max_delta_az_deg": 8.327560863108374e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 678,
+            "max_delta_el_deg": 3.821298832917819e-11,
+            "max_delta_az_deg": 7.599965101690032e-11,
+            "passed": true
+          }
+        },
+        "short": {
+          "1.0": {
+            "checks": 339,
+            "max_delta_el_deg": 5.528743685090376e-09,
+            "max_delta_az_deg": 1.0162580110772979e-08,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 339,
+            "max_delta_el_deg": 3.6765435140750924e-10,
+            "max_delta_az_deg": 6.853611012047622e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 339,
+            "max_delta_el_deg": 5.702638361526624e-11,
+            "max_delta_az_deg": 1.3534418030758388e-10,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 339,
+            "max_delta_el_deg": 4.441957912604266e-11,
+            "max_delta_az_deg": 4.7066350816749036e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 339,
+            "max_delta_el_deg": 3.821298832917819e-11,
+            "max_delta_az_deg": 7.599965101690032e-11,
+            "passed": true
+          }
+        }
+      },
+      "height_monotonicity_passed": true,
+      "coverage_complete": true,
+      "referenced_bytes": 6413957
+    },
+    {
+      "site_ids": [
+        "peak-near-shackleton"
+      ],
+      "names": [
+        "Peak Near Shackleton"
+      ],
+      "coordinate": {
+        "site_id": "coordinate",
+        "lon_e_deg": 123.6901,
+        "lat_deg": -88.811,
+        "dem_z_m": 1645.548828125,
+        "dem_sha256": "38aaee10bb4da4d63e7427aa1ca25c79bdbc649d212079a04990e135462091f8"
+      },
+      "observer_source": {
+        "dataset_id": "Site07_dem",
+        "resolution_m": 5
+      },
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "verified_profiles": 10,
+      "verified_meshes": 11,
+      "reference_checks": {
+        "fine": {
+          "1.0": {
+            "checks": 678,
+            "max_delta_el_deg": 2.8837976451256964e-10,
+            "max_delta_az_deg": 3.716138508025324e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.892518364243756e-10,
+            "max_delta_az_deg": 3.5419134292169474e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 678,
+            "max_delta_el_deg": 6.018607834334944e-11,
+            "max_delta_az_deg": 7.980816008057445e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 678,
+            "max_delta_el_deg": 2.6765256677663274e-12,
+            "max_delta_az_deg": 4.746425474877469e-12,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.7550405573274475e-12,
+            "max_delta_az_deg": 4.774847184307873e-12,
+            "passed": true
+          }
+        },
+        "short": {
+          "1.0": {
+            "checks": 339,
+            "max_delta_el_deg": 2.8837976451256964e-10,
+            "max_delta_az_deg": 3.716138508025324e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.6390200308080694e-10,
+            "max_delta_az_deg": 3.5419134292169474e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 339,
+            "max_delta_el_deg": 5.689315685231122e-11,
+            "max_delta_az_deg": 7.980816008057445e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 339,
+            "max_delta_el_deg": 2.6765256677663274e-12,
+            "max_delta_az_deg": 2.0463630789890885e-12,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.7550405573274475e-12,
+            "max_delta_az_deg": 1.6484591469634324e-12,
+            "passed": true
+          }
+        }
+      },
+      "height_monotonicity_passed": true,
+      "coverage_complete": true,
+      "referenced_bytes": 6740128
+    },
+    {
+      "site_ids": [
+        "de-gerlache-rim-1"
+      ],
+      "names": [
+        "de Gerlache Rim 1"
+      ],
+      "coordinate": {
+        "site_id": "coordinate",
+        "lon_e_deg": 292.0679,
+        "lat_deg": -88.6834,
+        "dem_z_m": 1793.7939453125,
+        "dem_sha256": "58f3372c35bbd6baf38ffd5633c1c96b59bd89dbd252150581d12893a43136e5"
+      },
+      "observer_source": {
+        "dataset_id": "Site11_dem",
+        "resolution_m": 5
+      },
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "verified_profiles": 10,
+      "verified_meshes": 11,
+      "reference_checks": {
+        "fine": {
+          "1.0": {
+            "checks": 678,
+            "max_delta_el_deg": 4.3907499858164556e-10,
+            "max_delta_az_deg": 5.756533028034028e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 678,
+            "max_delta_el_deg": 2.1105628356110628e-10,
+            "max_delta_az_deg": 4.984599399904255e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 678,
+            "max_delta_el_deg": 4.886135940296299e-11,
+            "max_delta_az_deg": 1.0561507224338129e-10,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 678,
+            "max_delta_el_deg": 4.5499159995188165e-11,
+            "max_delta_az_deg": 7.247535904753022e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 678,
+            "max_delta_el_deg": 4.189115720976133e-11,
+            "max_delta_az_deg": 6.070877134334296e-11,
+            "passed": true
+          }
+        },
+        "short": {
+          "1.0": {
+            "checks": 339,
+            "max_delta_el_deg": 3.5897995687150797e-10,
+            "max_delta_az_deg": 5.756533028034028e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.9400125950141955e-10,
+            "max_delta_az_deg": 4.984599399904255e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 339,
+            "max_delta_el_deg": 4.6676218445895756e-11,
+            "max_delta_az_deg": 8.117240213323385e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 339,
+            "max_delta_el_deg": 4.5499159995188165e-11,
+            "max_delta_az_deg": 7.247535904753022e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 339,
+            "max_delta_el_deg": 4.189115720976133e-11,
+            "max_delta_az_deg": 3.922195901395753e-11,
+            "passed": true
+          }
+        }
+      },
+      "height_monotonicity_passed": true,
+      "coverage_complete": true,
+      "referenced_bytes": 6720179
+    },
+    {
+      "site_ids": [
+        "leibnitz-beta-plateau",
+        "leibnitz-beta-plateau-extended"
+      ],
+      "names": [
+        "Leibnitz Beta Plateau",
+        "Leibnitz Beta Plateau (extended boundaries)"
+      ],
+      "coordinate": {
+        "site_id": "coordinate",
+        "lon_e_deg": 31.74276,
+        "lat_deg": -85.4266,
+        "dem_z_m": 6398.1748046875,
+        "dem_sha256": "0e96c40987c0814eadd4f94f85dacbb33bcab5388dd0b1dc99dc59bf987f072f"
+      },
+      "observer_source": {
+        "dataset_id": "Site20v2_dem",
+        "resolution_m": 5
+      },
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "verified_profiles": 10,
+      "verified_meshes": 11,
+      "reference_checks": {
+        "fine": {
+          "1.0": {
+            "checks": 678,
+            "max_delta_el_deg": 2.5283686255761495e-10,
+            "max_delta_az_deg": 2.0580159798555542e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 678,
+            "max_delta_el_deg": 8.01172461706301e-11,
+            "max_delta_az_deg": 1.6325429896824062e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 678,
+            "max_delta_el_deg": 6.105538297163093e-11,
+            "max_delta_az_deg": 1.6473222785862163e-10,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 678,
+            "max_delta_el_deg": 3.1924907162306226e-11,
+            "max_delta_az_deg": 1.2209966371301562e-10,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 678,
+            "max_delta_el_deg": 3.5031311185207414e-11,
+            "max_delta_az_deg": 7.361222742474638e-11,
+            "passed": true
+          }
+        },
+        "short": {
+          "1.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.0655920590352252e-10,
+            "max_delta_az_deg": 1.5057821656228043e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 339,
+            "max_delta_el_deg": 8.01172461706301e-11,
+            "max_delta_az_deg": 1.5160139810177498e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 339,
+            "max_delta_el_deg": 6.105538297163093e-11,
+            "max_delta_az_deg": 1.6473222785862163e-10,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 339,
+            "max_delta_el_deg": 3.1521008025947594e-11,
+            "max_delta_az_deg": 1.2209966371301562e-10,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 339,
+            "max_delta_el_deg": 3.2875480115990285e-11,
+            "max_delta_az_deg": 5.971401151327882e-11,
+            "passed": true
+          }
+        }
+      },
+      "height_monotonicity_passed": true,
+      "coverage_complete": true,
+      "referenced_bytes": 6183223
+    },
+    {
+      "site_ids": [
+        "malapert-massif"
+      ],
+      "names": [
+        "Malapert Massif"
+      ],
+      "coordinate": {
+        "site_id": "coordinate",
+        "lon_e_deg": 359.76422,
+        "lat_deg": -85.9948,
+        "dem_z_m": 4783.62939453125,
+        "dem_sha256": "12d280a59cd7580415f6bada638d0abe025ce6727541fddf68d5dc371a6c94cf"
+      },
+      "observer_source": {
+        "dataset_id": "Site23_dem",
+        "resolution_m": 5
+      },
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "verified_profiles": 10,
+      "verified_meshes": 11,
+      "reference_checks": {
+        "fine": {
+          "1.0": {
+            "checks": 678,
+            "max_delta_el_deg": 4.2805137212553745e-10,
+            "max_delta_az_deg": 9.815721568884328e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 678,
+            "max_delta_el_deg": 2.158558887188633e-10,
+            "max_delta_az_deg": 5.361471266951412e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 678,
+            "max_delta_el_deg": 5.608224995512501e-11,
+            "max_delta_az_deg": 1.7223555914824829e-10,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 678,
+            "max_delta_el_deg": 2.7145397041294927e-11,
+            "max_delta_az_deg": 6.17035311734071e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 678,
+            "max_delta_el_deg": 3.0324631694611526e-11,
+            "max_delta_az_deg": 5.692868398909923e-11,
+            "passed": true
+          }
+        },
+        "short": {
+          "1.0": {
+            "checks": 339,
+            "max_delta_el_deg": 4.2805137212553745e-10,
+            "max_delta_az_deg": 9.063683137355838e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 339,
+            "max_delta_el_deg": 2.158558887188633e-10,
+            "max_delta_az_deg": 3.850288976536831e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 339,
+            "max_delta_el_deg": 5.608224995512501e-11,
+            "max_delta_az_deg": 1.5717205315013416e-10,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 339,
+            "max_delta_el_deg": 2.6837643218868834e-11,
+            "max_delta_az_deg": 6.17035311734071e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 339,
+            "max_delta_el_deg": 3.0324631694611526e-11,
+            "max_delta_az_deg": 5.118749868415762e-11,
+            "passed": true
+          }
+        }
+      },
+      "height_monotonicity_passed": true,
+      "coverage_complete": true,
+      "referenced_bytes": 6286278
+    },
+    {
+      "site_ids": [
+        "de-gerlache-kocher"
+      ],
+      "names": [
+        "de Gerlache-Kocher Massif"
+      ],
+      "coordinate": {
+        "site_id": "coordinate",
+        "lon_e_deg": 243.678,
+        "lat_deg": -85.8296,
+        "dem_z_m": 2705.663330078125,
+        "dem_sha256": "5af35ddca6ee9d7b10348610cb6714fd6d04dcce08d4e8cb6fb1113f4c1839cf"
+      },
+      "observer_source": {
+        "dataset_id": "Site42_dem",
+        "resolution_m": 5
+      },
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "verified_profiles": 10,
+      "verified_meshes": 11,
+      "reference_checks": {
+        "fine": {
+          "1.0": {
+            "checks": 678,
+            "max_delta_el_deg": 7.256675260691736e-10,
+            "max_delta_az_deg": 1.8720243133429904e-09,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.1778000796880406e-10,
+            "max_delta_az_deg": 2.2612312022829428e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 678,
+            "max_delta_el_deg": 9.233325215518562e-11,
+            "max_delta_az_deg": 1.1971224012086168e-10,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 678,
+            "max_delta_el_deg": 3.5718095148240536e-12,
+            "max_delta_az_deg": 3.353761712787673e-12,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 678,
+            "max_delta_el_deg": 3.1747937612180976e-12,
+            "max_delta_az_deg": 4.661160346586257e-12,
+            "passed": true
+          }
+        },
+        "short": {
+          "1.0": {
+            "checks": 339,
+            "max_delta_el_deg": 6.946963004850204e-10,
+            "max_delta_az_deg": 1.8720243133429904e-09,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.1778000796880406e-10,
+            "max_delta_az_deg": 2.0605739337042905e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 339,
+            "max_delta_el_deg": 9.233325215518562e-11,
+            "max_delta_az_deg": 1.1971224012086168e-10,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 339,
+            "max_delta_el_deg": 3.5718095148240536e-12,
+            "max_delta_az_deg": 2.1032064978498966e-12,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 339,
+            "max_delta_el_deg": 3.1747937612180976e-12,
+            "max_delta_az_deg": 2.2737367544323206e-12,
+            "passed": true
+          }
+        }
+      },
+      "height_monotonicity_passed": true,
+      "coverage_complete": true,
+      "referenced_bytes": 6725220
+    },
+    {
+      "site_ids": [
+        "haworth"
+      ],
+      "names": [
+        "Haworth"
+      ],
+      "coordinate": {
+        "site_id": "coordinate",
+        "lon_e_deg": 337.223,
+        "lat_deg": -86.7639,
+        "dem_z_m": 1628.816162109375,
+        "dem_sha256": "387fd6e99bca266f4982f7256c4c185921105313882b4c2eee5b5ff1ef75016b"
+      },
+      "observer_source": {
+        "dataset_id": "Haworth_dem",
+        "resolution_m": 5
+      },
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "verified_profiles": 10,
+      "verified_meshes": 11,
+      "reference_checks": {
+        "fine": {
+          "1.0": {
+            "checks": 678,
+            "max_delta_el_deg": 4.003806175489899e-10,
+            "max_delta_az_deg": 2.966089596156962e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.59906310415181e-10,
+            "max_delta_az_deg": 2.1509549696929753e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 678,
+            "max_delta_el_deg": 4.6462944602865264e-11,
+            "max_delta_az_deg": 5.991296347929165e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 678,
+            "max_delta_el_deg": 2.990119263301949e-11,
+            "max_delta_az_deg": 5.331912689143792e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 678,
+            "max_delta_el_deg": 2.89969159794623e-11,
+            "max_delta_az_deg": 4.5076831156620756e-11,
+            "passed": true
+          }
+        },
+        "short": {
+          "1.0": {
+            "checks": 339,
+            "max_delta_el_deg": 3.3360336715304584e-10,
+            "max_delta_az_deg": 2.7404212232795544e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.59906310415181e-10,
+            "max_delta_az_deg": 2.1509549696929753e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 339,
+            "max_delta_el_deg": 4.6462944602865264e-11,
+            "max_delta_az_deg": 5.832134775118902e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 339,
+            "max_delta_el_deg": 2.990119263301949e-11,
+            "max_delta_az_deg": 5.331912689143792e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 339,
+            "max_delta_el_deg": 2.89969159794623e-11,
+            "max_delta_az_deg": 4.274625098332763e-11,
+            "passed": true
+          }
+        }
+      },
+      "height_monotonicity_passed": true,
+      "coverage_complete": true,
+      "referenced_bytes": 6384478
+    },
+    {
+      "site_ids": [
+        "shoemaker"
+      ],
+      "names": [
+        "Shoemaker"
+      ],
+      "coordinate": {
+        "site_id": "coordinate",
+        "lon_e_deg": 62.83502,
+        "lat_deg": -87.1835,
+        "dem_z_m": 547.7681274414062,
+        "dem_sha256": "75329262a6dbe37e4370adcf23ec3854396c9d3e911a682d76c170178a0b8290"
+      },
+      "observer_source": {
+        "dataset_id": "Shoemaker_dem",
+        "resolution_m": 5
+      },
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "verified_profiles": 10,
+      "verified_meshes": 11,
+      "reference_checks": {
+        "fine": {
+          "1.0": {
+            "checks": 678,
+            "max_delta_el_deg": 6.2050004023817e-10,
+            "max_delta_az_deg": 6.19991169514833e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.8652768218885285e-10,
+            "max_delta_az_deg": 6.349409886752255e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 678,
+            "max_delta_el_deg": 3.9793723871639486e-11,
+            "max_delta_az_deg": 6.266986929404084e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 678,
+            "max_delta_el_deg": 4.6040615764297854e-11,
+            "max_delta_az_deg": 4.311573320592288e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 678,
+            "max_delta_el_deg": 2.776778806889979e-11,
+            "max_delta_az_deg": 2.2964741219766438e-11,
+            "passed": true
+          }
+        },
+        "short": {
+          "1.0": {
+            "checks": 339,
+            "max_delta_el_deg": 3.5300740108823447e-10,
+            "max_delta_az_deg": 6.19991169514833e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.8652768218885285e-10,
+            "max_delta_az_deg": 6.349409886752255e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 339,
+            "max_delta_el_deg": 3.9793723871639486e-11,
+            "max_delta_az_deg": 6.266986929404084e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 339,
+            "max_delta_el_deg": 4.153551114161047e-11,
+            "max_delta_az_deg": 4.311573320592288e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.8881562979800037e-11,
+            "max_delta_az_deg": 2.2964741219766438e-11,
+            "passed": true
+          }
+        }
+      },
+      "height_monotonicity_passed": true,
+      "coverage_complete": true,
+      "referenced_bytes": 6346253
+    },
+    {
+      "site_ids": [
+        "amundsen-rim"
+      ],
+      "names": [
+        "Amundsen Rim"
+      ],
+      "coordinate": {
+        "site_id": "coordinate",
+        "lon_e_deg": 69.44396,
+        "lat_deg": -84.2287,
+        "dem_z_m": 399.65985107421875,
+        "dem_sha256": "ceb7e786d05ef6a604c80b78be885e641ad7bd2b5c3aac944201a4f2008d8ca4"
+      },
+      "observer_source": {
+        "dataset_id": "DM1_dem",
+        "resolution_m": 5
+      },
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "verified_profiles": 10,
+      "verified_meshes": 11,
+      "reference_checks": {
+        "fine": {
+          "1.0": {
+            "checks": 678,
+            "max_delta_el_deg": 5.199278785283923e-10,
+            "max_delta_az_deg": 6.166374078020453e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 678,
+            "max_delta_el_deg": 3.314315488722741e-10,
+            "max_delta_az_deg": 4.226876626489684e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 678,
+            "max_delta_el_deg": 4.853650814595767e-11,
+            "max_delta_az_deg": 5.837819117004983e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 678,
+            "max_delta_el_deg": 3.53008733355864e-11,
+            "max_delta_az_deg": 5.189804141991772e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.1725342918822435e-11,
+            "max_delta_az_deg": 2.944489096989855e-11,
+            "passed": true
+          }
+        },
+        "short": {
+          "1.0": {
+            "checks": 339,
+            "max_delta_el_deg": 4.9464055074111e-10,
+            "max_delta_az_deg": 5.618971954390872e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 339,
+            "max_delta_el_deg": 3.314315488722741e-10,
+            "max_delta_az_deg": 4.226876626489684e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 339,
+            "max_delta_el_deg": 4.668399000706813e-11,
+            "max_delta_az_deg": 5.837819117004983e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 339,
+            "max_delta_el_deg": 3.53008733355864e-11,
+            "max_delta_az_deg": 4.5560000216937624e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.1725342918822435e-11,
+            "max_delta_az_deg": 2.944489096989855e-11,
+            "passed": true
+          }
+        }
+      },
+      "height_monotonicity_passed": true,
+      "coverage_complete": true,
+      "referenced_bytes": 6098532
+    },
+    {
+      "site_ids": [
+        "nobile-rim-2"
+      ],
+      "names": [
+        "Nobile Rim 2"
+      ],
+      "coordinate": {
+        "site_id": "coordinate",
+        "lon_e_deg": 58.82206,
+        "lat_deg": -83.954,
+        "dem_z_m": 1009.5821533203125,
+        "dem_sha256": "d88677c21633683061117db0a577f0510e0948fe9db315d13be28782407ff604"
+      },
+      "observer_source": {
+        "dataset_id": "DM2_dem",
+        "resolution_m": 5
+      },
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "verified_profiles": 10,
+      "verified_meshes": 11,
+      "reference_checks": {
+        "fine": {
+          "1.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.0533085514907725e-10,
+            "max_delta_az_deg": 1.2096279533579946e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 678,
+            "max_delta_el_deg": 4.0805581136282854e-11,
+            "max_delta_az_deg": 6.332356861094013e-11,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 678,
+            "max_delta_el_deg": 4.0912384591251794e-11,
+            "max_delta_az_deg": 5.5933924159035087e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.0326406396643506e-11,
+            "max_delta_az_deg": 2.6147972675971687e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.4451995156150588e-11,
+            "max_delta_az_deg": 2.347633198951371e-11,
+            "passed": true
+          }
+        },
+        "short": {
+          "1.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.0533085514907725e-10,
+            "max_delta_az_deg": 1.2096279533579946e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 339,
+            "max_delta_el_deg": 4.0805581136282854e-11,
+            "max_delta_az_deg": 6.332356861094013e-11,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 339,
+            "max_delta_el_deg": 4.0912384591251794e-11,
+            "max_delta_az_deg": 5.5933924159035087e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 339,
+            "max_delta_el_deg": 9.908962539384447e-12,
+            "max_delta_az_deg": 2.290789780090563e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.390398907119561e-11,
+            "max_delta_az_deg": 2.347633198951371e-11,
+            "passed": true
+          }
+        }
+      },
+      "height_monotonicity_passed": true,
+      "coverage_complete": true,
+      "referenced_bytes": 6282338
+    },
+    {
+      "site_ids": [
+        "de-gerlache-rim-2"
+      ],
+      "names": [
+        "de Gerlache Rim 2"
+      ],
+      "coordinate": {
+        "site_id": "coordinate",
+        "lon_e_deg": 295.3716,
+        "lat_deg": -88.23,
+        "dem_z_m": -87.76504516601562,
+        "dem_sha256": "16737cb5fdaa47f243715e003450deadeabc6fb1b947a5ed245d5a3fd78a2208"
+      },
+      "observer_source": {
+        "dataset_id": "SL2_dem",
+        "resolution_m": 5
+      },
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "verified_profiles": 10,
+      "verified_meshes": 11,
+      "reference_checks": {
+        "fine": {
+          "1.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.4196732678328772e-10,
+            "max_delta_az_deg": 3.0044589038880076e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.0790746074462731e-10,
+            "max_delta_az_deg": 1.8053469830192626e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 678,
+            "max_delta_el_deg": 6.773248628633155e-11,
+            "max_delta_az_deg": 5.303490979713388e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.6130208280173974e-11,
+            "max_delta_az_deg": 2.347633198951371e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.5018652987919268e-11,
+            "max_delta_az_deg": 2.3419488570652902e-11,
+            "passed": true
+          }
+        },
+        "short": {
+          "1.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.240456626305786e-10,
+            "max_delta_az_deg": 1.8025048120762222e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.0572698272426351e-10,
+            "max_delta_az_deg": 1.8053469830192626e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 339,
+            "max_delta_el_deg": 6.773248628633155e-11,
+            "max_delta_az_deg": 4.7208459363901056e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.6130208280173974e-11,
+            "max_delta_az_deg": 2.347633198951371e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.5018652987919268e-11,
+            "max_delta_az_deg": 1.84456894203322e-11,
+            "passed": true
+          }
+        }
+      },
+      "height_monotonicity_passed": true,
+      "coverage_complete": true,
+      "referenced_bytes": 6872861
+    },
+    {
+      "site_ids": [
+        "connecting-ridge-extension"
+      ],
+      "names": [
+        "Connecting Ridge Extension"
+      ],
+      "coordinate": {
+        "site_id": "coordinate",
+        "lon_e_deg": 258.001,
+        "lat_deg": -89.0324,
+        "dem_z_m": 1180.16748046875,
+        "dem_sha256": "a18c153dab5c9e7e0b4d8a5f1547bd7ef5e31fba7dd1c3252d84060aebf0283b"
+      },
+      "observer_source": {
+        "dataset_id": "SL3_dem",
+        "resolution_m": 5
+      },
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "verified_profiles": 10,
+      "verified_meshes": 11,
+      "reference_checks": {
+        "fine": {
+          "1.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.2689860273695786e-10,
+            "max_delta_az_deg": 1.7766410564945545e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 678,
+            "max_delta_el_deg": 9.108225285103799e-11,
+            "max_delta_az_deg": 1.4722445484949276e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 678,
+            "max_delta_el_deg": 3.735467490884048e-11,
+            "max_delta_az_deg": 8.387246452912223e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 678,
+            "max_delta_el_deg": 3.1536551148292347e-11,
+            "max_delta_az_deg": 3.8966163629083894e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.8377875610209315e-11,
+            "max_delta_az_deg": 2.9672264645341784e-11,
+            "passed": true
+          }
+        },
+        "short": {
+          "1.0": {
+            "checks": 339,
+            "max_delta_el_deg": 6.325784340788232e-11,
+            "max_delta_az_deg": 1.7766410564945545e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 339,
+            "max_delta_el_deg": 9.108225285103799e-11,
+            "max_delta_az_deg": 1.4722445484949276e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 339,
+            "max_delta_el_deg": 3.2438052244287974e-11,
+            "max_delta_az_deg": 7.403855306620244e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 339,
+            "max_delta_el_deg": 3.1536551148292347e-11,
+            "max_delta_az_deg": 3.82840426027542e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.8377875610209315e-11,
+            "max_delta_az_deg": 2.7142732506035827e-11,
+            "passed": true
+          }
+        }
+      },
+      "height_monotonicity_passed": true,
+      "coverage_complete": true,
+      "referenced_bytes": 6674719
+    },
+    {
+      "site_ids": [
+        "cabeus-exterior-wall-1"
+      ],
+      "names": [
+        "Cabeus Exterior Wall 1"
+      ],
+      "coordinate": {
+        "site_id": "coordinate",
+        "lon_e_deg": 288.43489999999997,
+        "lat_deg": -86.9243,
+        "dem_z_m": -2228.95068359375,
+        "dem_sha256": "1d13a8befcaefbe168589d525aee05a14aff222068221d93406ce951600d2b32"
+      },
+      "observer_source": {
+        "dataset_id": "NPA_dem",
+        "resolution_m": 5
+      },
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "verified_profiles": 10,
+      "verified_meshes": 11,
+      "reference_checks": {
+        "fine": {
+          "1.0": {
+            "checks": 678,
+            "max_delta_el_deg": 8.65245652903468e-11,
+            "max_delta_az_deg": 9.379164112033322e-11,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 678,
+            "max_delta_el_deg": 8.577916155161347e-11,
+            "max_delta_az_deg": 9.14610609470401e-11,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 678,
+            "max_delta_el_deg": 2.3999469078717084e-11,
+            "max_delta_az_deg": 2.8137492336099967e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 678,
+            "max_delta_el_deg": 6.652678408158863e-12,
+            "max_delta_az_deg": 1.1368683772161603e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 678,
+            "max_delta_el_deg": 6.775024985472555e-12,
+            "max_delta_az_deg": 1.1198153515579179e-11,
+            "passed": true
+          }
+        },
+        "short": {
+          "1.0": {
+            "checks": 339,
+            "max_delta_el_deg": 8.65245652903468e-11,
+            "max_delta_az_deg": 9.379164112033322e-11,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 339,
+            "max_delta_el_deg": 8.577916155161347e-11,
+            "max_delta_az_deg": 9.14610609470401e-11,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.612743272261241e-11,
+            "max_delta_az_deg": 2.8137492336099967e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 339,
+            "max_delta_el_deg": 6.652678408158863e-12,
+            "max_delta_az_deg": 1.1368683772161603e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 339,
+            "max_delta_el_deg": 6.775024985472555e-12,
+            "max_delta_az_deg": 1.1198153515579179e-11,
+            "passed": true
+          }
+        }
+      },
+      "height_monotonicity_passed": true,
+      "coverage_complete": true,
+      "referenced_bytes": 6277997
+    },
+    {
+      "site_ids": [
+        "amundsen-1"
+      ],
+      "names": [
+        "Amundsen 1"
+      ],
+      "coordinate": {
+        "site_id": "coordinate",
+        "lon_e_deg": 89.53545,
+        "lat_deg": -83.9046,
+        "dem_z_m": -3631.6162109375,
+        "dem_sha256": "43e250222a3dd0aeee24b3a8a3fcb2303f5c51ad5655cc41590c95b929b342b8"
+      },
+      "observer_source": {
+        "dataset_id": "NPB_dem",
+        "resolution_m": 5
+      },
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "verified_profiles": 10,
+      "verified_meshes": 11,
+      "reference_checks": {
+        "fine": {
+          "1.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.0267342531733448e-12,
+            "max_delta_az_deg": 1.2221335055073723e-12,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 678,
+            "max_delta_el_deg": 7.496225862269057e-13,
+            "max_delta_az_deg": 1.1652900866465643e-12,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 678,
+            "max_delta_el_deg": 9.618972285352356e-13,
+            "max_delta_az_deg": 1.1937117960769683e-12,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 678,
+            "max_delta_el_deg": 6.221689829999377e-13,
+            "max_delta_az_deg": 1.1368683772161603e-12,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.0889067425523535e-12,
+            "max_delta_az_deg": 1.2221335055073723e-12,
+            "passed": true
+          }
+        },
+        "short": {
+          "1.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.0267342531733448e-12,
+            "max_delta_az_deg": 1.2221335055073723e-12,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 339,
+            "max_delta_el_deg": 7.496225862269057e-13,
+            "max_delta_az_deg": 1.1652900866465643e-12,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 339,
+            "max_delta_el_deg": 9.618972285352356e-13,
+            "max_delta_az_deg": 1.1937117960769683e-12,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 339,
+            "max_delta_el_deg": 6.221689829999377e-13,
+            "max_delta_az_deg": 1.1368683772161603e-12,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.0889067425523535e-12,
+            "max_delta_az_deg": 1.2221335055073723e-12,
+            "passed": true
+          }
+        }
+      },
+      "height_monotonicity_passed": true,
+      "coverage_complete": true,
+      "referenced_bytes": 6299313
+    },
+    {
+      "site_ids": [
+        "idelson-l-crater-1"
+      ],
+      "names": [
+        "Idel'son L Crater 1"
+      ],
+      "coordinate": {
+        "site_id": "coordinate",
+        "lon_e_deg": 126.9045,
+        "lat_deg": -84.5397,
+        "dem_z_m": -3097.798828125,
+        "dem_sha256": "af952c0d255d815c87e4f5521bff98ef22f3570853a1995008e70c7a3fec738a"
+      },
+      "observer_source": {
+        "dataset_id": "NPC_dem",
+        "resolution_m": 5
+      },
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "verified_profiles": 10,
+      "verified_meshes": 11,
+      "reference_checks": {
+        "fine": {
+          "1.0": {
+            "checks": 678,
+            "max_delta_el_deg": 3.716360552630249e-11,
+            "max_delta_az_deg": 8.71978045324795e-11,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 678,
+            "max_delta_el_deg": 3.362998768352554e-11,
+            "max_delta_az_deg": 8.571987564209849e-11,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.2144951710979512e-11,
+            "max_delta_az_deg": 3.3026026358129457e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 678,
+            "max_delta_el_deg": 8.871348100569776e-12,
+            "max_delta_az_deg": 1.9412027540965937e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 678,
+            "max_delta_el_deg": 7.956302283673722e-12,
+            "max_delta_az_deg": 1.5120349416974932e-11,
+            "passed": true
+          }
+        },
+        "short": {
+          "1.0": {
+            "checks": 339,
+            "max_delta_el_deg": 3.0593749755780664e-11,
+            "max_delta_az_deg": 8.478195923089515e-11,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 339,
+            "max_delta_el_deg": 3.362998768352554e-11,
+            "max_delta_az_deg": 8.330403034051415e-11,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.2144951710979512e-11,
+            "max_delta_az_deg": 3.3026026358129457e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 339,
+            "max_delta_el_deg": 8.022915665151231e-12,
+            "max_delta_az_deg": 1.9412027540965937e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 339,
+            "max_delta_el_deg": 7.956302283673722e-12,
+            "max_delta_az_deg": 1.5120349416974932e-11,
+            "passed": true
+          }
+        }
+      },
+      "height_monotonicity_passed": true,
+      "coverage_complete": true,
+      "referenced_bytes": 6279423
+    },
+    {
+      "site_ids": [
+        "malapert-crater-1"
+      ],
+      "names": [
+        "Malapert Crater 1"
+      ],
+      "coordinate": {
+        "site_id": "coordinate",
+        "lon_e_deg": 8.387032,
+        "lat_deg": -84.8034,
+        "dem_z_m": -2266.973876953125,
+        "dem_sha256": "c60be0a03f38dea0d250791373d8f13445c5bdbad7c49690e004f238ef309c78"
+      },
+      "observer_source": {
+        "dataset_id": "NPD_dem",
+        "resolution_m": 5
+      },
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "verified_profiles": 10,
+      "verified_meshes": 11,
+      "reference_checks": {
+        "fine": {
+          "1.0": {
+            "checks": 678,
+            "max_delta_el_deg": 4.938272013532696e-13,
+            "max_delta_az_deg": 1.1937117960769683e-12,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 678,
+            "max_delta_el_deg": 7.496225862269057e-13,
+            "max_delta_az_deg": 1.1652900866465643e-12,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 678,
+            "max_delta_el_deg": 7.052136652418994e-13,
+            "max_delta_az_deg": 1.1937117960769683e-12,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 678,
+            "max_delta_el_deg": 6.572520305780927e-13,
+            "max_delta_az_deg": 1.1368683772161603e-12,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 678,
+            "max_delta_el_deg": 6.021849685566849e-13,
+            "max_delta_az_deg": 1.1937117960769683e-12,
+            "passed": true
+          }
+        },
+        "short": {
+          "1.0": {
+            "checks": 339,
+            "max_delta_el_deg": 4.756195437494171e-13,
+            "max_delta_az_deg": 1.1937117960769683e-12,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 339,
+            "max_delta_el_deg": 6.52811138479592e-13,
+            "max_delta_az_deg": 1.1368683772161603e-12,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 339,
+            "max_delta_el_deg": 6.115108419635362e-13,
+            "max_delta_az_deg": 1.1368683772161603e-12,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 339,
+            "max_delta_el_deg": 5.520028878436278e-13,
+            "max_delta_az_deg": 1.1368683772161603e-12,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 339,
+            "max_delta_el_deg": 5.03597163969971e-13,
+            "max_delta_az_deg": 1.1368683772161603e-12,
+            "passed": true
+          }
+        }
+      },
+      "height_monotonicity_passed": true,
+      "coverage_complete": true,
+      "referenced_bytes": 6484320
+    },
+    {
+      "site_ids": [
+        "shackleton-rim-b"
+      ],
+      "names": [
+        "Shackleton Rim B"
+      ],
+      "coordinate": {
+        "site_id": "coordinate",
+        "lon_e_deg": 56.30993,
+        "lat_deg": -89.5244,
+        "dem_z_m": -27.784671783447266,
+        "dem_sha256": "acdb5999fbbf1d3720cee1a5e3955db9c4575a4f3665ad8443199c0f7a1d4c0c"
+      },
+      "observer_source": {
+        "dataset_id": "LM1_dem",
+        "resolution_m": 5
+      },
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "verified_profiles": 10,
+      "verified_meshes": 11,
+      "reference_checks": {
+        "fine": {
+          "1.0": {
+            "checks": 678,
+            "max_delta_el_deg": 2.860898185019778e-10,
+            "max_delta_az_deg": 9.194423000735696e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 678,
+            "max_delta_el_deg": 4.154143695700441e-11,
+            "max_delta_az_deg": 5.809397407574579e-11,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 678,
+            "max_delta_el_deg": 9.271472478644682e-12,
+            "max_delta_az_deg": 2.9331204132176936e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 678,
+            "max_delta_el_deg": 5.823341808763871e-12,
+            "max_delta_az_deg": 1.4949819160392508e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 678,
+            "max_delta_el_deg": 3.97326616052851e-12,
+            "max_delta_az_deg": 1.1141310096718371e-11,
+            "passed": true
+          }
+        },
+        "short": {
+          "1.0": {
+            "checks": 339,
+            "max_delta_el_deg": 2.860898185019778e-10,
+            "max_delta_az_deg": 9.194423000735696e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 339,
+            "max_delta_el_deg": 2.961184075722656e-11,
+            "max_delta_az_deg": 5.809397407574579e-11,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 339,
+            "max_delta_el_deg": 6.70991040507829e-12,
+            "max_delta_az_deg": 2.9331204132176936e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 339,
+            "max_delta_el_deg": 5.534017688546555e-12,
+            "max_delta_az_deg": 1.4949819160392508e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 339,
+            "max_delta_el_deg": 3.721467578543525e-12,
+            "max_delta_az_deg": 1.1141310096718371e-11,
+            "passed": true
+          }
+        }
+      },
+      "height_monotonicity_passed": true,
+      "coverage_complete": true,
+      "referenced_bytes": 7054469
+    },
+    {
+      "site_ids": [
+        "shoemaker-rim-a"
+      ],
+      "names": [
+        "Shoemaker Rim A"
+      ],
+      "coordinate": {
+        "site_id": "coordinate",
+        "lon_e_deg": 11.88866,
+        "lat_deg": -88.0792,
+        "dem_z_m": -619.6326904296875,
+        "dem_sha256": "2ae42c1da672a1273754bf04e4598695b75a7833a6948b7d2893e2dd58152716"
+      },
+      "observer_source": {
+        "dataset_id": "LM2_dem",
+        "resolution_m": 5
+      },
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "verified_profiles": 10,
+      "verified_meshes": 11,
+      "reference_checks": {
+        "fine": {
+          "1.0": {
+            "checks": 678,
+            "max_delta_el_deg": 3.8752223652238627e-10,
+            "max_delta_az_deg": 5.47743184142746e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 678,
+            "max_delta_el_deg": 3.3862812554019683e-10,
+            "max_delta_az_deg": 4.092726157978177e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 678,
+            "max_delta_el_deg": 4.7901238531267154e-11,
+            "max_delta_az_deg": 1.318767317570746e-10,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 678,
+            "max_delta_el_deg": 5.002243064211598e-11,
+            "max_delta_az_deg": 1.156195139628835e-10,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 678,
+            "max_delta_el_deg": 2.6439295197633328e-11,
+            "max_delta_az_deg": 4.905587047687732e-11,
+            "passed": true
+          }
+        },
+        "short": {
+          "1.0": {
+            "checks": 339,
+            "max_delta_el_deg": 3.8752223652238627e-10,
+            "max_delta_az_deg": 5.061906449554954e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 339,
+            "max_delta_el_deg": 3.3862812554019683e-10,
+            "max_delta_az_deg": 3.617515176301822e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 339,
+            "max_delta_el_deg": 4.7404302705444934e-11,
+            "max_delta_az_deg": 1.318767317570746e-10,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 339,
+            "max_delta_el_deg": 5.002243064211598e-11,
+            "max_delta_az_deg": 8.330403034051415e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 339,
+            "max_delta_el_deg": 2.6439295197633328e-11,
+            "max_delta_az_deg": 4.374101081339177e-11,
+            "passed": true
+          }
+        }
+      },
+      "height_monotonicity_passed": true,
+      "coverage_complete": true,
+      "referenced_bytes": 6677947
+    },
+    {
+      "site_ids": [
+        "shoemaker-rim-b"
+      ],
+      "names": [
+        "Shoemaker Rim B"
+      ],
+      "coordinate": {
+        "site_id": "coordinate",
+        "lon_e_deg": 16.58734,
+        "lat_deg": -88.3828,
+        "dem_z_m": -408.0255432128906,
+        "dem_sha256": "df159a1c7947394fd08217e9654651b020a3816fefbc143053c10d6ee386a548"
+      },
+      "observer_source": {
+        "dataset_id": "LM3_dem",
+        "resolution_m": 5
+      },
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "verified_profiles": 10,
+      "verified_meshes": 11,
+      "reference_checks": {
+        "fine": {
+          "1.0": {
+            "checks": 678,
+            "max_delta_el_deg": 2.098632378988441e-10,
+            "max_delta_az_deg": 1.8673063095775433e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.3777157192862433e-10,
+            "max_delta_az_deg": 1.8286527847521938e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 678,
+            "max_delta_el_deg": 5.846390038755089e-11,
+            "max_delta_az_deg": 1.2539658200694248e-10,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 678,
+            "max_delta_el_deg": 3.491518185683162e-11,
+            "max_delta_az_deg": 6.053824108676054e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 678,
+            "max_delta_el_deg": 2.249178621127612e-11,
+            "max_delta_az_deg": 6.31530383543577e-11,
+            "passed": true
+          }
+        },
+        "short": {
+          "1.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.8349499697478677e-10,
+            "max_delta_az_deg": 1.6922285794862546e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.297708607239656e-10,
+            "max_delta_az_deg": 1.241460267920047e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 339,
+            "max_delta_el_deg": 5.546096915054477e-11,
+            "max_delta_az_deg": 1.2539658200694248e-10,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 339,
+            "max_delta_el_deg": 3.491518185683162e-11,
+            "max_delta_az_deg": 6.053824108676054e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.9416024343854588e-11,
+            "max_delta_az_deg": 6.150457920739427e-11,
+            "passed": true
+          }
+        }
+      },
+      "height_monotonicity_passed": true,
+      "coverage_complete": true,
+      "referenced_bytes": 5935748
+    },
+    {
+      "site_ids": [
+        "shoemaker-rim-c"
+      ],
+      "names": [
+        "Shoemaker Rim C"
+      ],
+      "coordinate": {
+        "site_id": "coordinate",
+        "lon_e_deg": 37.23483,
+        "lat_deg": -88.9645,
+        "dem_z_m": -460.5127868652344,
+        "dem_sha256": "838eef455d71c86aa5fe1390df87772b82c9e6a812f68da027b554b521ce259d"
+      },
+      "observer_source": {
+        "dataset_id": "LM4_dem",
+        "resolution_m": 5
+      },
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "verified_profiles": 10,
+      "verified_meshes": 11,
+      "reference_checks": {
+        "fine": {
+          "1.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.7926371498333538e-10,
+            "max_delta_az_deg": 2.8558133635669947e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 678,
+            "max_delta_el_deg": 2.349063166207088e-10,
+            "max_delta_az_deg": 1.5876366887823679e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 678,
+            "max_delta_el_deg": 4.961997479568936e-11,
+            "max_delta_az_deg": 9.515588317299262e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 678,
+            "max_delta_el_deg": 2.645483831997808e-11,
+            "max_delta_az_deg": 3.672084858408198e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.3629097850298422e-11,
+            "max_delta_az_deg": 2.83648660115432e-11,
+            "passed": true
+          }
+        },
+        "short": {
+          "1.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.7926371498333538e-10,
+            "max_delta_az_deg": 1.7212187231052667e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.954076900290147e-10,
+            "max_delta_az_deg": 1.5876366887823679e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 339,
+            "max_delta_el_deg": 3.1648232645675733e-11,
+            "max_delta_az_deg": 9.515588317299262e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 339,
+            "max_delta_el_deg": 2.645483831997808e-11,
+            "max_delta_az_deg": 3.143441063002683e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.3626877404249171e-11,
+            "max_delta_az_deg": 2.0122570276726037e-11,
+            "passed": true
+          }
+        }
+      },
+      "height_monotonicity_passed": true,
+      "coverage_complete": true,
+      "referenced_bytes": 6665132
+    },
+    {
+      "site_ids": [
+        "shoemaker-rim-d"
+      ],
+      "names": [
+        "Shoemaker Rim D"
+      ],
+      "coordinate": {
+        "site_id": "coordinate",
+        "lon_e_deg": 74.62375,
+        "lat_deg": -88.632,
+        "dem_z_m": -446.9064025878906,
+        "dem_sha256": "611eb3b0d59570fbafd25ffae4bdbf40603e958a740654233834848d7fb14ad5"
+      },
+      "observer_source": {
+        "dataset_id": "LM5_dem",
+        "resolution_m": 5
+      },
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "verified_profiles": 10,
+      "verified_meshes": 11,
+      "reference_checks": {
+        "fine": {
+          "1.0": {
+            "checks": 678,
+            "max_delta_el_deg": 7.817690939049271e-11,
+            "max_delta_az_deg": 2.0827428670600057e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 678,
+            "max_delta_el_deg": 5.315325957155892e-11,
+            "max_delta_az_deg": 5.121592039358802e-11,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.8096413256785127e-11,
+            "max_delta_az_deg": 2.5863755581667647e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 678,
+            "max_delta_el_deg": 7.875144980573623e-12,
+            "max_delta_az_deg": 2.034994395216927e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 678,
+            "max_delta_el_deg": 5.3900217622526725e-12,
+            "max_delta_az_deg": 2.319211489520967e-11,
+            "passed": true
+          }
+        },
+        "short": {
+          "1.0": {
+            "checks": 339,
+            "max_delta_el_deg": 5.3169357805415984e-11,
+            "max_delta_az_deg": 2.0827428670600057e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 339,
+            "max_delta_el_deg": 5.315325957155892e-11,
+            "max_delta_az_deg": 5.113065526529681e-11,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.0524608962114712e-11,
+            "max_delta_az_deg": 2.5863755581667647e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 339,
+            "max_delta_el_deg": 6.590172851872467e-12,
+            "max_delta_az_deg": 2.034994395216927e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 339,
+            "max_delta_el_deg": 4.66526817177737e-12,
+            "max_delta_az_deg": 1.2050804798491299e-11,
+            "passed": true
+          }
+        }
+      },
+      "height_monotonicity_passed": true,
+      "coverage_complete": true,
+      "referenced_bytes": 6649715
+    },
+    {
+      "site_ids": [
+        "shoemaker-rim-e"
+      ],
+      "names": [
+        "Shoemaker Rim E"
+      ],
+      "coordinate": {
+        "site_id": "coordinate",
+        "lon_e_deg": 71.27421,
+        "lat_deg": -87.9458,
+        "dem_z_m": -857.2913818359375,
+        "dem_sha256": "452d0137122a787edff4e0ae7baeaac2b795d14cb48b3b8c0308be1aa6c44778"
+      },
+      "observer_source": {
+        "dataset_id": "LM6_dem",
+        "resolution_m": 5
+      },
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "verified_profiles": 10,
+      "verified_meshes": 11,
+      "reference_checks": {
+        "fine": {
+          "1.0": {
+            "checks": 678,
+            "max_delta_el_deg": 8.718092914250519e-11,
+            "max_delta_az_deg": 2.6409452402731404e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.6477308406592783e-10,
+            "max_delta_az_deg": 2.6349766812927555e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.4709566897863624e-11,
+            "max_delta_az_deg": 1.722355591482483e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.3772982754289842e-11,
+            "max_delta_az_deg": 1.574562702444382e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.6394656465745783e-11,
+            "max_delta_az_deg": 1.716671249596402e-11,
+            "passed": true
+          }
+        },
+        "short": {
+          "1.0": {
+            "checks": 339,
+            "max_delta_el_deg": 7.453593298123451e-11,
+            "max_delta_az_deg": 2.6409452402731404e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.6477308406592783e-10,
+            "max_delta_az_deg": 2.6349766812927555e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.4709566897863624e-11,
+            "max_delta_az_deg": 1.722355591482483e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.314182096479044e-11,
+            "max_delta_az_deg": 1.4921397450962104e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.6394656465745783e-11,
+            "max_delta_az_deg": 1.6768808563938364e-11,
+            "passed": true
+          }
+        }
+      },
+      "height_monotonicity_passed": true,
+      "coverage_complete": true,
+      "referenced_bytes": 6767922
+    },
+    {
+      "site_ids": [
+        "faustini-rim-a"
+      ],
+      "names": [
+        "Faustini Rim A"
+      ],
+      "coordinate": {
+        "site_id": "coordinate",
+        "lon_e_deg": 90.0,
+        "lat_deg": -87.8897,
+        "dem_z_m": 46.345115661621094,
+        "dem_sha256": "00930f9d110d5477b6d38349eb544ec35d0bb802035113a0894479c317d29023"
+      },
+      "observer_source": {
+        "dataset_id": "LM7_dem",
+        "resolution_m": 5
+      },
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "verified_profiles": 10,
+      "verified_meshes": 11,
+      "reference_checks": {
+        "fine": {
+          "1.0": {
+            "checks": 678,
+            "max_delta_el_deg": 2.13123052539288e-09,
+            "max_delta_az_deg": 1.6472654351673555e-09,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 678,
+            "max_delta_el_deg": 5.256595159153221e-11,
+            "max_delta_az_deg": 7.452172212651931e-11,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 678,
+            "max_delta_el_deg": 8.495781855799578e-11,
+            "max_delta_az_deg": 7.699441084696446e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 678,
+            "max_delta_el_deg": 2.8453864264754714e-11,
+            "max_delta_az_deg": 4.956746124662459e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 678,
+            "max_delta_el_deg": 9.478751117342199e-12,
+            "max_delta_az_deg": 1.8133050616597757e-11,
+            "passed": true
+          }
+        },
+        "short": {
+          "1.0": {
+            "checks": 339,
+            "max_delta_el_deg": 2.13123052539288e-09,
+            "max_delta_az_deg": 8.07119704404613e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 339,
+            "max_delta_el_deg": 5.015587944967592e-11,
+            "max_delta_az_deg": 6.482991921075154e-11,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 339,
+            "max_delta_el_deg": 7.916578503852634e-11,
+            "max_delta_az_deg": 7.699441084696446e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 339,
+            "max_delta_el_deg": 2.8453864264754714e-11,
+            "max_delta_az_deg": 4.158096089668106e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 339,
+            "max_delta_el_deg": 9.478751117342199e-12,
+            "max_delta_az_deg": 1.1681322575896047e-11,
+            "passed": true
+          }
+        }
+      },
+      "height_monotonicity_passed": true,
+      "coverage_complete": true,
+      "referenced_bytes": 6612510
+    },
+    {
+      "site_ids": [
+        "shoemaker-rim-f"
+      ],
+      "names": [
+        "Shoemaker Rim F"
+      ],
+      "coordinate": {
+        "site_id": "coordinate",
+        "lon_e_deg": 60.25512,
+        "lat_deg": -87.3417,
+        "dem_z_m": 476.5777893066406,
+        "dem_sha256": "75329262a6dbe37e4370adcf23ec3854396c9d3e911a682d76c170178a0b8290"
+      },
+      "observer_source": {
+        "dataset_id": "Shoemaker_dem",
+        "resolution_m": 5
+      },
+      "heights_m": [
+        1.0,
+        2.0,
+        10.0,
+        20.0,
+        30.0
+      ],
+      "verified_profiles": 10,
+      "verified_meshes": 11,
+      "reference_checks": {
+        "fine": {
+          "1.0": {
+            "checks": 678,
+            "max_delta_el_deg": 3.52212037313393e-10,
+            "max_delta_az_deg": 9.167706593871117e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 678,
+            "max_delta_el_deg": 2.1044499476374767e-10,
+            "max_delta_az_deg": 3.873878995364066e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.588773557159584e-11,
+            "max_delta_az_deg": 4.391154106997419e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 678,
+            "max_delta_el_deg": 2.2991830661567292e-11,
+            "max_delta_az_deg": 4.4565240386873484e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 678,
+            "max_delta_el_deg": 1.376276870246329e-11,
+            "max_delta_az_deg": 4.405364961712621e-11,
+            "passed": true
+          }
+        },
+        "short": {
+          "1.0": {
+            "checks": 339,
+            "max_delta_el_deg": 3.52212037313393e-10,
+            "max_delta_az_deg": 9.167706593871117e-10,
+            "passed": true
+          },
+          "2.0": {
+            "checks": 339,
+            "max_delta_el_deg": 2.1044499476374767e-10,
+            "max_delta_az_deg": 3.1297986424760893e-10,
+            "passed": true
+          },
+          "10.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.4659384817150567e-11,
+            "max_delta_az_deg": 3.385025593161117e-11,
+            "passed": true
+          },
+          "20.0": {
+            "checks": 339,
+            "max_delta_el_deg": 2.1022739105092114e-11,
+            "max_delta_az_deg": 3.916511559509672e-11,
+            "passed": true
+          },
+          "30.0": {
+            "checks": 339,
+            "max_delta_el_deg": 1.1717737891103752e-11,
+            "max_delta_az_deg": 2.998490344907623e-11,
+            "passed": true
+          }
+        }
+      },
+      "height_monotonicity_passed": true,
+      "coverage_complete": true,
+      "referenced_bytes": 6625393
+    }
+  ],
+  "live_llm_calls": 0,
+  "scope": "Published NASA centres, current verified source inventory, profile/blob integrity, independent Cartesian ENU blocker references, height monotonicity and display meshes. No mission PASS or continuous-time visibility certification."
+}

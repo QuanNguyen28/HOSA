@@ -17,7 +17,13 @@ def default_sites() -> dict:
 
 
 def coordinates_for_site(site_id):
-    site = compare_sites().get(site_id)
+    catalog = compare_sites()
+    site = catalog.get(site_id)
+    if site is None and isinstance(site_id, str):
+        label = site_id.strip().casefold()
+        site = next((candidate for candidate in catalog.values()
+                     if label in {value.casefold() for value in
+                         [candidate["name"], *candidate.get("aliases", [])]}), None)
     if site:
         return {"latitude_deg": site["lat"], "longitude_e_deg": site["lon"] % 360}
     for feature in site_catalog()["features"]:

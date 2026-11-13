@@ -1,0 +1,23 @@
+{
+  "id": "SL2_count",
+  "filename": "SL2_final_adj_5mpp_ldec.tif",
+  "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/SL2/SL2_final_adj_5mpp_ldec.tif",
+  "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+  "role": "count",
+  "unit": "LOLA spots",
+  "site": "SL2",
+  "frame": "MOON_ME/DE421",
+  "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/SL2/SL2_final_adj_5mpp_ldec.tif",
+  "bytes": 64025543,
+  "sha256": "ffea237023698c4970ac6a2d259ae31cd42967945ce52109c88d755c44bb42bb",
+  "accessed_utc": "2026-11-13T09:56:17.528012+00:00",
+  "status": "VERIFIED_BYTES",
+  "transfer": "validated parallel HTTP byte ranges",
+  "http_headers": {
+    "ETag": "W/\"3d0f3c7-17898359640\"",
+    "Last-Modified": "Sat, 03 Apr 2021 14:49:12 GMT",
+    "Content-Type": "image/tiff",
+    "Accept-Ranges": "bytes",
+    "Content-Length": "64025543"
+  }
+}

@@ -233,7 +233,7 @@ export default function Stage3D({
     >
       <div className="relative h-full w-full">
         <MoonScene
-          key={mode === "surface" ? "terrain" : "globe"}
+          key={mode === "orbit" ? "globe" : "terrain"}
           time={new Date(timeMs)}
           sunVector={continuousSky?.worldSun}
           cameraPreset={modeToPreset(mode)}
@@ -254,6 +254,12 @@ export default function Stage3D({
       {!ready && (
         <div className="pointer-events-none absolute inset-0 grid place-items-center bg-black font-mono text-[11px] tracking-widest text-mute">
           {tr("LOADING NASA LUNAR SURFACE…")}
+        </div>
+      )}
+
+      {mode === "surface" && !terrainWindow?.grid && (
+        <div role="status" className="pointer-events-none absolute inset-0 grid place-items-center bg-black/80 font-mono text-[11px] tracking-widest text-mute">
+          {tr(terrainLoading ? "PREPARING LOLA TERRAIN…" : "TERRAIN UNAVAILABLE FOR THIS POINT")}
         </div>
       )}
 

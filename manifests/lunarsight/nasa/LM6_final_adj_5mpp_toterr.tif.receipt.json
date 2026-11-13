@@ -1,0 +1,23 @@
+{
+  "id": "LM6_error",
+  "filename": "LM6_final_adj_5mpp_toterr.tif",
+  "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/LM6/LM6_final_adj_5mpp_toterr.tif",
+  "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+  "role": "error",
+  "unit": "m RMS",
+  "site": "LM6",
+  "frame": "MOON_ME/DE421",
+  "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/LM6/LM6_final_adj_5mpp_toterr.tif",
+  "bytes": 64033683,
+  "sha256": "31a2d5035143c2602d8f20950fdcf136b76054777c915e9aec0e3cc35a9f0e13",
+  "accessed_utc": "2026-11-13T10:02:33.324620+00:00",
+  "status": "VERIFIED_BYTES",
+  "transfer": "validated parallel HTTP byte ranges",
+  "http_headers": {
+    "ETag": "W/\"3d11393-179272f0318\"",
+    "Last-Modified": "Sat, 01 May 2021 09:07:43 GMT",
+    "Content-Type": "image/tiff",
+    "Accept-Ranges": "bytes",
+    "Content-Length": "64033683"
+  }
+}

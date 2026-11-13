@@ -1,27 +1,498 @@
 [
   {
     "id": "connecting-ridge",
-    "name": "Connecting ridge",
-    "group": "illumination",
-    "lat": -89.4398,
-    "lon": -137.17,
+    "name": "Connecting Ridge",
+    "group": "nasa",
     "kind": "exact",
-    "height_m": 1958.6,
-    "point": "The published highest-illumination point on the ridge joining Shackleton and de Gerlache",
-    "source": "Mazarico et al. 2011, Icarus",
-    "url": "https://doi.org/10.1016/j.icarus.2011.03.007"
+    "lat": -89.4632,
+    "lon": -137.49,
+    "point": "Centre of the original region polygon, published by NASA in Table A2-2; not an optimized landing point.",
+    "source": "NASA Lunar Surface Data Book, ACD-50044 Revision A, Table A2-2",
+    "url": "https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf#page=58",
+    "source_code": "Site01",
+    "source_page": 58,
+    "coordinate_basis": "published_polygon_center",
+    "location_group": "connecting-ridge",
+    "aliases": [
+      "Site01",
+      "R01"
+    ]
   },
   {
     "id": "shackleton-rim",
-    "name": "Shackleton rim",
-    "group": "illumination",
-    "lat": -89.6866,
-    "lon": -162.81,
+    "name": "Shackleton Rim",
+    "group": "nasa",
     "kind": "exact",
-    "height_m": 1729.6,
-    "point": "The published highest-illumination point on the rim of Shackleton crater",
-    "source": "Mazarico et al. 2011, Icarus",
-    "url": "https://doi.org/10.1016/j.icarus.2011.03.007"
+    "lat": -89.7668,
+    "lon": -171.87,
+    "point": "Centre of the original region polygon, published by NASA in Table A2-2; not an optimized landing point.",
+    "source": "NASA Lunar Surface Data Book, ACD-50044 Revision A, Table A2-2",
+    "url": "https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf#page=58",
+    "source_code": "Site04",
+    "source_page": 58,
+    "coordinate_basis": "published_polygon_center",
+    "location_group": "shackleton-rim",
+    "aliases": [
+      "Site04",
+      "R04"
+    ]
+  },
+  {
+    "id": "nobile-rim-1",
+    "name": "Nobile Rim 1",
+    "group": "nasa",
+    "kind": "exact",
+    "lat": -85.4381,
+    "lon": 37.36667,
+    "point": "Centre of the original region polygon, published by NASA in Table A2-2; not an optimized landing point.",
+    "source": "NASA Lunar Surface Data Book, ACD-50044 Revision A, Table A2-2",
+    "url": "https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf#page=58",
+    "source_code": "Site06",
+    "source_page": 58,
+    "coordinate_basis": "published_polygon_center",
+    "location_group": "nobile-rim-1",
+    "aliases": [
+      "Site06",
+      "R06"
+    ]
+  },
+  {
+    "id": "peak-near-shackleton",
+    "name": "Peak Near Shackleton",
+    "group": "nasa",
+    "kind": "exact",
+    "lat": -88.811,
+    "lon": 123.6901,
+    "point": "Centre of the original region polygon, published by NASA in Table A2-2; not an optimized landing point.",
+    "source": "NASA Lunar Surface Data Book, ACD-50044 Revision A, Table A2-2",
+    "url": "https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf#page=58",
+    "source_code": "Site07",
+    "source_page": 58,
+    "coordinate_basis": "published_polygon_center",
+    "location_group": "peak-near-shackleton",
+    "aliases": [
+      "Site07",
+      "R07"
+    ]
+  },
+  {
+    "id": "de-gerlache-rim-1",
+    "name": "de Gerlache Rim 1",
+    "group": "nasa",
+    "kind": "exact",
+    "lat": -88.6834,
+    "lon": -67.9321,
+    "point": "Centre of the original region polygon, published by NASA in Table A2-2; not an optimized landing point.",
+    "source": "NASA Lunar Surface Data Book, ACD-50044 Revision A, Table A2-2",
+    "url": "https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf#page=58",
+    "source_code": "Site11",
+    "source_page": 58,
+    "coordinate_basis": "published_polygon_center",
+    "location_group": "de-gerlache-rim-1",
+    "aliases": [
+      "Site11",
+      "R11"
+    ]
+  },
+  {
+    "id": "leibnitz-beta-plateau",
+    "name": "Leibnitz Beta Plateau",
+    "group": "nasa",
+    "kind": "exact",
+    "lat": -85.4266,
+    "lon": 31.74276,
+    "point": "Centre of the original region polygon, published by NASA in Table A2-2; not an optimized landing point.",
+    "source": "NASA Lunar Surface Data Book, ACD-50044 Revision A, Table A2-2",
+    "url": "https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf#page=58",
+    "source_code": "Site20",
+    "source_page": 58,
+    "coordinate_basis": "published_polygon_center",
+    "location_group": "leibnitz-beta-plateau",
+    "aliases": [
+      "Site20",
+      "R20"
+    ]
+  },
+  {
+    "id": "leibnitz-beta-plateau-extended",
+    "name": "Leibnitz Beta Plateau (extended boundaries)",
+    "group": "nasa",
+    "kind": "exact",
+    "lat": -85.4266,
+    "lon": 31.74276,
+    "point": "Centre of the original region polygon, published by NASA in Table A2-2; not an optimized landing point.",
+    "source": "NASA Lunar Surface Data Book, ACD-50044 Revision A, Table A2-2",
+    "url": "https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf#page=58",
+    "source_code": "Site20v2",
+    "source_page": 58,
+    "coordinate_basis": "published_polygon_center",
+    "location_group": "leibnitz-beta-plateau",
+    "aliases": [
+      "Site20v2",
+      "R20v2"
+    ]
+  },
+  {
+    "id": "malapert-massif",
+    "name": "Malapert Massif",
+    "group": "nasa",
+    "kind": "exact",
+    "lat": -85.9948,
+    "lon": -0.23578,
+    "point": "Centre of the original region polygon, published by NASA in Table A2-2; not an optimized landing point.",
+    "source": "NASA Lunar Surface Data Book, ACD-50044 Revision A, Table A2-2",
+    "url": "https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf#page=58",
+    "source_code": "Site23",
+    "source_page": 58,
+    "coordinate_basis": "published_polygon_center",
+    "location_group": "malapert-massif",
+    "aliases": [
+      "Site23",
+      "R23"
+    ]
+  },
+  {
+    "id": "de-gerlache-kocher",
+    "name": "de Gerlache-Kocher Massif",
+    "group": "nasa",
+    "kind": "exact",
+    "lat": -85.8296,
+    "lon": -116.322,
+    "point": "Centre of the original region polygon, published by NASA in Table A2-2; not an optimized landing point.",
+    "source": "NASA Lunar Surface Data Book, ACD-50044 Revision A, Table A2-2",
+    "url": "https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf#page=58",
+    "source_code": "Site42",
+    "source_page": 58,
+    "coordinate_basis": "published_polygon_center",
+    "location_group": "de-gerlache-kocher",
+    "aliases": [
+      "Site42",
+      "R42"
+    ]
+  },
+  {
+    "id": "haworth",
+    "name": "Haworth",
+    "group": "nasa",
+    "kind": "exact",
+    "lat": -86.7639,
+    "lon": -22.777,
+    "point": "Centre of the original region polygon, published by NASA in Table A2-2; not an optimized landing point.",
+    "source": "NASA Lunar Surface Data Book, ACD-50044 Revision A, Table A2-2",
+    "url": "https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf#page=57",
+    "source_code": "Haworth",
+    "source_page": 57,
+    "coordinate_basis": "published_polygon_center",
+    "location_group": "haworth",
+    "aliases": [
+      "Haworth"
+    ]
+  },
+  {
+    "id": "shoemaker",
+    "name": "Shoemaker",
+    "group": "nasa",
+    "kind": "exact",
+    "lat": -87.1835,
+    "lon": 62.83502,
+    "point": "Centre of the original region polygon, published by NASA in Table A2-2; not an optimized landing point.",
+    "source": "NASA Lunar Surface Data Book, ACD-50044 Revision A, Table A2-2",
+    "url": "https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf#page=58",
+    "source_code": "Shoemaker",
+    "source_page": 58,
+    "coordinate_basis": "published_polygon_center",
+    "location_group": "shoemaker",
+    "aliases": [
+      "Shoemaker"
+    ]
+  },
+  {
+    "id": "amundsen-rim",
+    "name": "Amundsen Rim",
+    "group": "nasa",
+    "kind": "exact",
+    "lat": -84.2287,
+    "lon": 69.44396,
+    "point": "Centre of the original region polygon, published by NASA in Table A2-2; not an optimized landing point.",
+    "source": "NASA Lunar Surface Data Book, ACD-50044 Revision A, Table A2-2",
+    "url": "https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf#page=57",
+    "source_code": "DM1",
+    "source_page": 57,
+    "coordinate_basis": "published_polygon_center",
+    "location_group": "amundsen-rim",
+    "aliases": [
+      "DM1"
+    ]
+  },
+  {
+    "id": "nobile-rim-2",
+    "name": "Nobile Rim 2",
+    "group": "nasa",
+    "kind": "exact",
+    "lat": -83.954,
+    "lon": 58.82206,
+    "point": "Centre of the original region polygon, published by NASA in Table A2-2; not an optimized landing point.",
+    "source": "NASA Lunar Surface Data Book, ACD-50044 Revision A, Table A2-2",
+    "url": "https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf#page=57",
+    "source_code": "DM2",
+    "source_page": 57,
+    "coordinate_basis": "published_polygon_center",
+    "location_group": "nobile-rim-2",
+    "aliases": [
+      "DM2"
+    ]
+  },
+  {
+    "id": "de-gerlache-rim-2",
+    "name": "de Gerlache Rim 2",
+    "group": "nasa",
+    "kind": "exact",
+    "lat": -88.23,
+    "lon": -64.6284,
+    "point": "Centre of the original region polygon, published by NASA in Table A2-2; not an optimized landing point.",
+    "source": "NASA Lunar Surface Data Book, ACD-50044 Revision A, Table A2-2",
+    "url": "https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf#page=58",
+    "source_code": "SL2",
+    "source_page": 58,
+    "coordinate_basis": "published_polygon_center",
+    "location_group": "de-gerlache-rim-2",
+    "aliases": [
+      "SL2"
+    ]
+  },
+  {
+    "id": "connecting-ridge-extension",
+    "name": "Connecting Ridge Extension",
+    "group": "nasa",
+    "kind": "exact",
+    "lat": -89.0324,
+    "lon": -101.999,
+    "point": "Centre of the original region polygon, published by NASA in Table A2-2; not an optimized landing point.",
+    "source": "NASA Lunar Surface Data Book, ACD-50044 Revision A, Table A2-2",
+    "url": "https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf#page=58",
+    "source_code": "SL3",
+    "source_page": 58,
+    "coordinate_basis": "published_polygon_center",
+    "location_group": "connecting-ridge-extension",
+    "aliases": [
+      "SL3"
+    ]
+  },
+  {
+    "id": "cabeus-exterior-wall-1",
+    "name": "Cabeus Exterior Wall 1",
+    "group": "nasa",
+    "kind": "exact",
+    "lat": -86.9243,
+    "lon": -71.5651,
+    "point": "Centre of the original region polygon, published by NASA in Table A2-2; not an optimized landing point.",
+    "source": "NASA Lunar Surface Data Book, ACD-50044 Revision A, Table A2-2",
+    "url": "https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf#page=58",
+    "source_code": "NPA",
+    "source_page": 58,
+    "coordinate_basis": "published_polygon_center",
+    "location_group": "cabeus-exterior-wall-1",
+    "aliases": [
+      "NPA"
+    ]
+  },
+  {
+    "id": "amundsen-1",
+    "name": "Amundsen 1",
+    "group": "nasa",
+    "kind": "exact",
+    "lat": -83.9046,
+    "lon": 89.53545,
+    "point": "Centre of the original region polygon, published by NASA in Table A2-2; not an optimized landing point.",
+    "source": "NASA Lunar Surface Data Book, ACD-50044 Revision A, Table A2-2",
+    "url": "https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf#page=58",
+    "source_code": "NPB",
+    "source_page": 58,
+    "coordinate_basis": "published_polygon_center",
+    "location_group": "amundsen-1",
+    "aliases": [
+      "NPB"
+    ]
+  },
+  {
+    "id": "idelson-l-crater-1",
+    "name": "Idel'son L Crater 1",
+    "group": "nasa",
+    "kind": "exact",
+    "lat": -84.5397,
+    "lon": 126.9045,
+    "point": "Centre of the original region polygon, published by NASA in Table A2-2; not an optimized landing point.",
+    "source": "NASA Lunar Surface Data Book, ACD-50044 Revision A, Table A2-2",
+    "url": "https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf#page=58",
+    "source_code": "NPC",
+    "source_page": 58,
+    "coordinate_basis": "published_polygon_center",
+    "location_group": "idelson-l-crater-1",
+    "aliases": [
+      "NPC"
+    ]
+  },
+  {
+    "id": "malapert-crater-1",
+    "name": "Malapert Crater 1",
+    "group": "nasa",
+    "kind": "exact",
+    "lat": -84.8034,
+    "lon": 8.387032,
+    "point": "Centre of the original region polygon, published by NASA in Table A2-2; not an optimized landing point.",
+    "source": "NASA Lunar Surface Data Book, ACD-50044 Revision A, Table A2-2",
+    "url": "https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf#page=58",
+    "source_code": "NPD",
+    "source_page": 58,
+    "coordinate_basis": "published_polygon_center",
+    "location_group": "malapert-crater-1",
+    "aliases": [
+      "NPD"
+    ]
+  },
+  {
+    "id": "shackleton-rim-b",
+    "name": "Shackleton Rim B",
+    "group": "nasa",
+    "kind": "exact",
+    "lat": -89.5244,
+    "lon": 56.30993,
+    "point": "Centre of the original region polygon, published by NASA in Table A2-2; not an optimized landing point.",
+    "source": "NASA Lunar Surface Data Book, ACD-50044 Revision A, Table A2-2",
+    "url": "https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf#page=57",
+    "source_code": "LM1",
+    "source_page": 57,
+    "coordinate_basis": "published_polygon_center",
+    "location_group": "shackleton-rim-b",
+    "aliases": [
+      "LM1"
+    ]
+  },
+  {
+    "id": "shoemaker-rim-a",
+    "name": "Shoemaker Rim A",
+    "group": "nasa",
+    "kind": "exact",
+    "lat": -88.0792,
+    "lon": 11.88866,
+    "point": "Centre of the original region polygon, published by NASA in Table A2-2; not an optimized landing point.",
+    "source": "NASA Lunar Surface Data Book, ACD-50044 Revision A, Table A2-2",
+    "url": "https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf#page=57",
+    "source_code": "LM2",
+    "source_page": 57,
+    "coordinate_basis": "published_polygon_center",
+    "location_group": "shoemaker-rim-a",
+    "aliases": [
+      "LM2"
+    ]
+  },
+  {
+    "id": "shoemaker-rim-b",
+    "name": "Shoemaker Rim B",
+    "group": "nasa",
+    "kind": "exact",
+    "lat": -88.3828,
+    "lon": 16.58734,
+    "point": "Centre of the original region polygon, published by NASA in Table A2-2; not an optimized landing point.",
+    "source": "NASA Lunar Surface Data Book, ACD-50044 Revision A, Table A2-2",
+    "url": "https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf#page=57",
+    "source_code": "LM3",
+    "source_page": 57,
+    "coordinate_basis": "published_polygon_center",
+    "location_group": "shoemaker-rim-b",
+    "aliases": [
+      "LM3"
+    ]
+  },
+  {
+    "id": "shoemaker-rim-c",
+    "name": "Shoemaker Rim C",
+    "group": "nasa",
+    "kind": "exact",
+    "lat": -88.9645,
+    "lon": 37.23483,
+    "point": "Centre of the original region polygon, published by NASA in Table A2-2; not an optimized landing point.",
+    "source": "NASA Lunar Surface Data Book, ACD-50044 Revision A, Table A2-2",
+    "url": "https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf#page=57",
+    "source_code": "LM4",
+    "source_page": 57,
+    "coordinate_basis": "published_polygon_center",
+    "location_group": "shoemaker-rim-c",
+    "aliases": [
+      "LM4"
+    ]
+  },
+  {
+    "id": "shoemaker-rim-d",
+    "name": "Shoemaker Rim D",
+    "group": "nasa",
+    "kind": "exact",
+    "lat": -88.632,
+    "lon": 74.62375,
+    "point": "Centre of the original region polygon, published by NASA in Table A2-2; not an optimized landing point.",
+    "source": "NASA Lunar Surface Data Book, ACD-50044 Revision A, Table A2-2",
+    "url": "https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf#page=57",
+    "source_code": "LM5",
+    "source_page": 57,
+    "coordinate_basis": "published_polygon_center",
+    "location_group": "shoemaker-rim-d",
+    "aliases": [
+      "LM5"
+    ]
+  },
+  {
+    "id": "shoemaker-rim-e",
+    "name": "Shoemaker Rim E",
+    "group": "nasa",
+    "kind": "exact",
+    "lat": -87.9458,
+    "lon": 71.27421,
+    "point": "Centre of the original region polygon, published by NASA in Table A2-2; not an optimized landing point.",
+    "source": "NASA Lunar Surface Data Book, ACD-50044 Revision A, Table A2-2",
+    "url": "https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf#page=57",
+    "source_code": "LM6",
+    "source_page": 57,
+    "coordinate_basis": "published_polygon_center",
+    "location_group": "shoemaker-rim-e",
+    "aliases": [
+      "LM6"
+    ]
+  },
+  {
+    "id": "faustini-rim-a",
+    "name": "Faustini Rim A",
+    "group": "nasa",
+    "kind": "exact",
+    "lat": -87.8897,
+    "lon": 90.0,
+    "point": "Centre of the original region polygon, published by NASA in Table A2-2; not an optimized landing point.",
+    "source": "NASA Lunar Surface Data Book, ACD-50044 Revision A, Table A2-2",
+    "url": "https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf#page=57",
+    "source_code": "LM7",
+    "source_page": 57,
+    "coordinate_basis": "published_polygon_center",
+    "location_group": "faustini-rim-a",
+    "aliases": [
+      "LM7"
+    ]
+  },
+  {
+    "id": "shoemaker-rim-f",
+    "name": "Shoemaker Rim F",
+    "group": "nasa",
+    "kind": "exact",
+    "lat": -87.3417,
+    "lon": 60.25512,
+    "point": "Centre of the original region polygon, published by NASA in Table A2-2; not an optimized landing point.",
+    "source": "NASA Lunar Surface Data Book, ACD-50044 Revision A, Table A2-2",
+    "url": "https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf#page=58",
+    "source_code": "LM8",
+    "source_page": 58,
+    "coordinate_basis": "published_polygon_center",
+    "location_group": "shoemaker-rim-f",
+    "aliases": [
+      "LM8"
+    ]
   },
   {
     "id": "peak-near-cabeus-b",
@@ -34,32 +505,8 @@
     "point": "Highest LOLA point inside the region footprint (2022 list, served by NASA Moon Trek). lat/lon below is the footprint centroid",
     "source": "NASA Moon Trek, A3_Named_regions_SP",
     "url": "https://trek.nasa.gov/moon/trekarcgis2/rest/services/A3_Named_regions_SP/MapServer/0",
-    "notes": "Region added in 2024."
-  },
-  {
-    "id": "haworth",
-    "name": "Haworth",
-    "group": "artemis",
-    "lat": -86.36428,
-    "lon": -23.20814,
-    "kind": "approx",
-    "height_m": 2842.2,
-    "point": "Highest LOLA point inside the region footprint (2022 list, served by NASA Moon Trek). lat/lon below is the footprint centroid",
-    "source": "NASA Moon Trek, A3_Named_regions_SP",
-    "url": "https://trek.nasa.gov/moon/trekarcgis2/rest/services/A3_Named_regions_SP/MapServer/0"
-  },
-  {
-    "id": "malapert-massif",
-    "name": "Malapert Massif",
-    "group": "artemis",
-    "lat": -85.98794,
-    "lon": 2.06238,
-    "kind": "approx",
-    "height_m": 5173.3,
-    "point": "Highest LOLA point inside the region footprint (2022 list, served by NASA Moon Trek). lat/lon below is the footprint centroid",
-    "source": "NASA Moon Trek, A3_Named_regions_SP",
-    "url": "https://trek.nasa.gov/moon/trekarcgis2/rest/services/A3_Named_regions_SP/MapServer/0",
-    "notes": "Intuitive Machines IM-5 plans to land at Mons Malapert (no coordinates published)."
+    "notes": "Region added in 2024.",
+    "default_visible": false
   },
   {
     "id": "mons-mouton-plateau",
@@ -71,7 +518,8 @@
     "height_m": 5605.6,
     "point": "Highest LOLA point inside the region footprint (2022 list, served by NASA Moon Trek). lat/lon below is the footprint centroid",
     "source": "NASA Moon Trek, A3_Named_regions_SP",
-    "url": "https://trek.nasa.gov/moon/trekarcgis2/rest/services/A3_Named_regions_SP/MapServer/0"
+    "url": "https://trek.nasa.gov/moon/trekarcgis2/rest/services/A3_Named_regions_SP/MapServer/0",
+    "default_visible": false
   },
   {
     "id": "mons-mouton",
@@ -83,43 +531,8 @@
     "height_m": 6463.6,
     "point": "Highest LOLA point inside the region footprint (2022 list, served by NASA Moon Trek). lat/lon below is the footprint centroid",
     "source": "NASA Moon Trek, A3_Named_regions_SP",
-    "url": "https://trek.nasa.gov/moon/trekarcgis2/rest/services/A3_Named_regions_SP/MapServer/0"
-  },
-  {
-    "id": "nobile-rim-1",
-    "name": "Nobile Rim 1",
-    "group": "artemis",
-    "lat": -85.23291,
-    "lon": 36.59181,
-    "kind": "approx",
-    "height_m": 6800,
-    "point": "Highest LOLA point inside the region footprint (2022 list, served by NASA Moon Trek). lat/lon below is the footprint centroid",
-    "source": "NASA Moon Trek, A3_Named_regions_SP",
-    "url": "https://trek.nasa.gov/moon/trekarcgis2/rest/services/A3_Named_regions_SP/MapServer/0"
-  },
-  {
-    "id": "nobile-rim-2",
-    "name": "Nobile Rim 2",
-    "group": "artemis",
-    "lat": -84.07924,
-    "lon": 54.89488,
-    "kind": "approx",
-    "height_m": 1817.4,
-    "point": "Highest LOLA point inside the region footprint (2022 list, served by NASA Moon Trek). lat/lon below is the footprint centroid",
-    "source": "NASA Moon Trek, A3_Named_regions_SP",
-    "url": "https://trek.nasa.gov/moon/trekarcgis2/rest/services/A3_Named_regions_SP/MapServer/0"
-  },
-  {
-    "id": "de-gerlache-rim-2",
-    "name": "de Gerlache Rim 2",
-    "group": "artemis",
-    "lat": -88.58734,
-    "lon": -67.89559,
-    "kind": "approx",
-    "height_m": 1764.9,
-    "point": "Highest LOLA point inside the region footprint (2022 list, served by NASA Moon Trek). lat/lon below is the footprint centroid",
-    "source": "NASA Moon Trek, A3_Named_regions_SP",
-    "url": "https://trek.nasa.gov/moon/trekarcgis2/rest/services/A3_Named_regions_SP/MapServer/0"
+    "url": "https://trek.nasa.gov/moon/trekarcgis2/rest/services/A3_Named_regions_SP/MapServer/0",
+    "default_visible": false
   },
   {
     "id": "im1-odysseus",
@@ -136,7 +549,8 @@
       "IM1",
       "IM-1",
       "Odysseus"
-    ]
+    ],
+    "default_visible": false
   },
   {
     "id": "im2-athena",
@@ -153,7 +567,8 @@
       "IM2",
       "IM-2",
       "Athena"
-    ]
+    ],
+    "default_visible": false
   },
   {
     "id": "viper",
@@ -168,7 +583,8 @@
     "url": "https://www.nasa.gov/",
     "aliases": [
       "VIPER"
-    ]
+    ],
+    "default_visible": false
   },
   {
     "id": "shackleton-floor",
@@ -183,76 +599,8 @@
     "url": "https://trek.nasa.gov/",
     "aliases": [
       "Shackleton floor"
-    ]
-  },
-  {
-    "id": "peak-near-shackleton",
-    "name": "Peak near Shackleton",
-    "lat": -88.81101,
-    "lon": 123.69007,
-    "height_m": 1645.5,
-    "group": "illumination",
-    "kind": "exact",
-    "point": "Centre pixel of the verified 5 m/pixel LOLA terrain footprint used by HOSA",
-    "source": "NASA GSFC PGDA Product 78",
-    "url": "https://pgda.gsfc.nasa.gov/products/78"
-  },
-  {
-    "id": "leibnitz-beta-plateau",
-    "name": "Leibnitz Beta Plateau",
-    "lat": -85.42658,
-    "lon": 31.74276,
-    "height_m": 6398.9,
-    "group": "illumination",
-    "kind": "exact",
-    "point": "Centre pixel of the verified 5 m/pixel LOLA terrain footprint used by HOSA",
-    "source": "NASA GSFC PGDA Product 78",
-    "url": "https://pgda.gsfc.nasa.gov/products/78",
-    "aliases": [
-      "Leibnitz Beta"
-    ]
-  },
-  {
-    "id": "de-gerlache-kocher",
-    "name": "de Gerlache–Kocher Massif",
-    "lat": -85.82955,
-    "lon": -116.32202,
-    "height_m": 2705.9,
-    "group": "illumination",
-    "kind": "exact",
-    "point": "Centre pixel of the verified 5 m/pixel LOLA terrain footprint used by HOSA",
-    "source": "NASA GSFC PGDA Product 78",
-    "url": "https://pgda.gsfc.nasa.gov/products/78",
-    "aliases": [
-      "de Gerlache Kocher"
-    ]
-  },
-  {
-    "id": "shoemaker",
-    "name": "Shoemaker crater",
-    "lat": -87.18351,
-    "lon": 62.83501,
-    "height_m": 548.1,
-    "group": "illumination",
-    "kind": "exact",
-    "point": "Centre pixel of the verified 5 m/pixel LOLA terrain footprint used by HOSA",
-    "source": "NASA GSFC PGDA Product 78",
-    "url": "https://pgda.gsfc.nasa.gov/products/78",
-    "aliases": [
-      "Shoemaker"
-    ]
-  },
-  {
-    "id": "amundsen-rim",
-    "name": "Amundsen rim",
-    "lat": -84.22874,
-    "lon": 69.44395,
-    "height_m": 399.3,
-    "group": "illumination",
-    "kind": "exact",
-    "point": "Centre pixel of the verified 5 m/pixel LOLA terrain footprint used by HOSA",
-    "source": "NASA GSFC PGDA Product 78",
-    "url": "https://pgda.gsfc.nasa.gov/products/78"
+    ],
+    "default_visible": false
   },
   {
     "id": "example-a",

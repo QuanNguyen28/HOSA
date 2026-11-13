@@ -10,12 +10,14 @@
   "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Haworth/Haworth_final_adj_5mpp_toterr.tif",
   "bytes": 142123773,
   "sha256": "f4231e1605d27b90c21fe5183db4e37de7532fed6b8fcfda860ec2eca8c61963",
-  "accessed_utc": "2026-11-12T02:51:46.377560+00:00",
+  "accessed_utc": "2026-11-13T09:53:33.503102+00:00",
   "status": "VERIFIED_BYTES",
+  "transfer": "validated parallel HTTP byte ranges",
   "http_headers": {
-    "Content-Length": "142123773",
     "ETag": "W/\"878a2fd-175fcd7d2a0\"",
     "Last-Modified": "Wed, 25 Nov 2020 00:40:04 GMT",
-    "Content-Type": "image/tiff"
+    "Content-Type": "image/tiff",
+    "Accept-Ranges": "bytes",
+    "Content-Length": "142123773"
   }
 }

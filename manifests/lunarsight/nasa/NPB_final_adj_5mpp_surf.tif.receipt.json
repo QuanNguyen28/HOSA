@@ -1,0 +1,23 @@
+{
+  "id": "NPB_dem",
+  "filename": "NPB_final_adj_5mpp_surf.tif",
+  "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/NPB/NPB_final_adj_5mpp_surf.tif",
+  "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+  "role": "dem",
+  "unit": "m",
+  "site": "NPB",
+  "frame": "MOON_ME/DE421",
+  "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/NPB/NPB_final_adj_5mpp_surf.tif",
+  "bytes": 64033687,
+  "sha256": "43e250222a3dd0aeee24b3a8a3fcb2303f5c51ad5655cc41590c95b929b342b8",
+  "accessed_utc": "2026-11-13T09:44:31.861366+00:00",
+  "status": "VERIFIED_BYTES",
+  "transfer": "validated parallel HTTP byte ranges",
+  "http_headers": {
+    "ETag": "W/\"3d11397-1799736b318\"",
+    "Last-Modified": "Sun, 23 May 2021 03:13:35 GMT",
+    "Content-Type": "image/tiff",
+    "Accept-Ranges": "bytes",
+    "Content-Length": "64033687"
+  }
+}

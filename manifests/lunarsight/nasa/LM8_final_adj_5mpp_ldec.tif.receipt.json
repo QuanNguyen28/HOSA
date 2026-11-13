@@ -1,0 +1,23 @@
+{
+  "id": "LM8_count",
+  "filename": "LM8_final_adj_5mpp_ldec.tif",
+  "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/LM8/LM8_final_adj_5mpp_ldec.tif",
+  "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+  "role": "count",
+  "unit": "LOLA spots",
+  "site": "LM8",
+  "frame": "MOON_ME/DE421",
+  "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/LM8/LM8_final_adj_5mpp_ldec.tif",
+  "bytes": 64033613,
+  "sha256": "88c45e774e2c622952838b263b4e0c35c24d1b19550ea29026529adc929a0fa4",
+  "accessed_utc": "2026-11-13T10:03:46.528947+00:00",
+  "status": "VERIFIED_BYTES",
+  "transfer": "validated parallel HTTP byte ranges",
+  "http_headers": {
+    "ETag": "W/\"3d1134d-17927704df0\"",
+    "Last-Modified": "Sat, 01 May 2021 10:19:02 GMT",
+    "Content-Type": "image/tiff",
+    "Accept-Ranges": "bytes",
+    "Content-Length": "64033613"
+  }
+}

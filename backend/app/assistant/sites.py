@@ -39,7 +39,9 @@ def _site_aliases() -> dict[str, str]:
         if number:
             suffix = number[1]
             for alias in (f"Site{suffix}", f"Site {suffix}", f"điểm {suffix}"):
-                aliases[_site_label(alias)] = site_id
+                # Published region aliases take precedence over archived P1
+                # observers. Explicit Site04_P1 still identifies that old point.
+                aliases.setdefault(_site_label(alias), site_id)
     return aliases
 
 

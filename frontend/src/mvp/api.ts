@@ -202,22 +202,38 @@ export function usePointInstant(result: PointResult | undefined, time: number) {
 }
 
 const preparedMetricCache = new Map<string, PointResult>();
-export function usePreparedMetrics(request: MissionRequest | undefined) {
+export function usePreparedMetrics(request: MissionRequest | undefined, watchPrepared = false) {
   const key = request ? JSON.stringify(request) : "";
   const [stored, setStored] = useState<{ key: string; result: PointResult }>();
   useEffect(() => {
     if (!key || preparedMetricCache.has(key)) return;
     const controller = new AbortController();
-    void api<PointResult>("/lunar/point/metrics", controller.signal, JSON.parse(key))
-      .then((result) => {
-        if (controller.signal.aborted) return;
-        preparedMetricCache.set(key, result);
-        if (preparedMetricCache.size > 100) preparedMetricCache.delete(preparedMetricCache.keys().next().value!);
-        setStored({ key, result });
-      })
-      .catch(() => { /* Missing prepared coverage falls back to explicit Analyze. */ });
+    const load = async () => {
+      const body = JSON.parse(key) as MissionRequest;
+      const withinPreparedBand = Date.parse(body.start_utc) >= Date.UTC(2000, 0, 1)
+        && Date.parse(body.end_utc) <= Date.UTC(2101, 0, 1)
+        && Date.parse(body.start_utc) % 86_400_000 === 0
+        && Date.parse(body.end_utc) % 86_400_000 === 0;
+      while (!controller.signal.aborted) {
+        try {
+          const result = await api<PointResult>("/lunar/point/metrics", controller.signal, body);
+          if (controller.signal.aborted) return;
+          preparedMetricCache.set(key, result);
+          if (preparedMetricCache.size > 100) preparedMetricCache.delete(preparedMetricCache.keys().next().value!);
+          setStored({ key, result });
+          return;
+        } catch (error) {
+          // Named catalog products may be published while this page is open.
+          // Arbitrary coordinates/out-of-band requests still use Analyze.
+          if (!watchPrepared || !withinPreparedBand || !(error instanceof Error)
+              || error.message !== "METRICS_NOT_PREPARED") return;
+          await wait(5000, controller.signal);
+        }
+      }
+    };
+    void load().catch(() => { /* Aborted on observer or view changes. */ });
     return () => controller.abort();
-  }, [key]);
+  }, [key, watchPrepared]);
   return preparedMetricCache.get(key) ?? (stored?.key === key ? stored.result : undefined);
 }
 export function downloadJson(value: unknown, filename: string) {

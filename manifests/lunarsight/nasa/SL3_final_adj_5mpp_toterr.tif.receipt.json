@@ -1,0 +1,23 @@
+{
+  "id": "SL3_error",
+  "filename": "SL3_final_adj_5mpp_toterr.tif",
+  "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/SL3/SL3_final_adj_5mpp_toterr.tif",
+  "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+  "role": "error",
+  "unit": "m RMS",
+  "site": "SL3",
+  "frame": "MOON_ME/DE421",
+  "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/SL3/SL3_final_adj_5mpp_toterr.tif",
+  "bytes": 64025613,
+  "sha256": "a337224e5c130fad7eb22928e8f09f6c52b5bcb4253c49211fc55e8af86cdc13",
+  "accessed_utc": "2026-11-13T09:56:18.073461+00:00",
+  "status": "VERIFIED_BYTES",
+  "transfer": "validated parallel HTTP byte ranges",
+  "http_headers": {
+    "ETag": "W/\"3d0f40d-17835d19d28\"",
+    "Last-Modified": "Mon, 15 Mar 2021 12:17:13 GMT",
+    "Content-Type": "image/tiff",
+    "Accept-Ranges": "bytes",
+    "Content-Length": "64025613"
+  }
+}

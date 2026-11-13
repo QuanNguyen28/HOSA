@@ -1,0 +1,29 @@
+{
+  "passed": true,
+  "coordinate": {
+    "site_id": "coordinate",
+    "lon_e_deg": 123.45678,
+    "lat_deg": -88.90123,
+    "dem_z_m": 1309.3106689453125,
+    "dem_sha256": "38aaee10bb4da4d63e7427aa1ca25c79bdbc649d212079a04990e135462091f8"
+  },
+  "viewer_height_m": 10,
+  "status_counts": {
+    "202": 46,
+    "200": 1
+  },
+  "stages": [
+    "queued",
+    "verify_dem",
+    "seam_validation",
+    "terrain_horizon",
+    "radius_sensitivity"
+  ],
+  "cold_seconds": 55.54336791300011,
+  "warm_different_mission_seconds": 3.1649395269996603,
+  "azimuth_samples": 2880,
+  "source_sha256": "efb64bccc31ced0089d0cb9ffc68a3bc8270d4ae5a99517eb4f176bfd07279ff",
+  "no_analysis_jobs_created": true,
+  "live_llm_calls": 0,
+  "scope": "Real arbitrary coordinate terrain preload; persistent geometry reused across different mission times; no mission decision or full time validation."
+}

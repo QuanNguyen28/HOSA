@@ -3,7 +3,7 @@ import compareSites from "../../../manifests/compare-sites.json";
 export type Site = {
   id: string;
   name: string;
-  group: "illumination" | "artemis" | "clps" | "contrast";
+  group: "nasa" | "illumination" | "artemis" | "clps" | "contrast";
   lat: number;
   lon: number;
   kind: "exact" | "approx";
@@ -15,12 +15,14 @@ export type Site = {
 };
 
 export const GROUPS: Record<Site["group"], string> = {
+  nasa: "NASA south-pole regions",
   illumination: "High-illumination points",
   artemis: "Artemis candidate regions",
   clps: "CLPS landing sites",
   contrast: "Permanent shadow",
 };
 export const GROUP_ORDER: Site["group"][] = [
+  "nasa",
   "illumination",
   "artemis",
   "clps",

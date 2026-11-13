@@ -1,0 +1,23 @@
+{
+  "id": "LM4_error",
+  "filename": "LM4_final_adj_5mpp_toterr.tif",
+  "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/LM4/LM4_final_adj_5mpp_toterr.tif",
+  "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+  "role": "error",
+  "unit": "m RMS",
+  "site": "LM4",
+  "frame": "MOON_ME/DE421",
+  "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/LM4/LM4_final_adj_5mpp_toterr.tif",
+  "bytes": 64033681,
+  "sha256": "0b68eb676cf202e4ad7f0ed8d0b498a92b1ba80ce8032fbf9e1c5772c5a75a7b",
+  "accessed_utc": "2026-11-13T10:01:16.556002+00:00",
+  "status": "VERIFIED_BYTES",
+  "transfer": "validated parallel HTTP byte ranges",
+  "http_headers": {
+    "ETag": "W/\"3d11391-178e3f16780\"",
+    "Last-Modified": "Sun, 18 Apr 2021 07:45:52 GMT",
+    "Content-Type": "image/tiff",
+    "Accept-Ranges": "bytes",
+    "Content-Length": "64033681"
+  }
+}

@@ -1,0 +1,494 @@
+{
+  "passed": true,
+  "start_utc": "2000-01-01T00:00:00Z",
+  "end_utc": "2101-01-01T00:00:00Z",
+  "sites": [
+    {
+      "site_ids": [
+        "connecting-ridge"
+      ],
+      "viewer_height_m": 2.0,
+      "full_band": {
+        "http_seconds": 1.2527450499983388,
+        "response_bytes": 417741,
+        "display_intervals": 800,
+        "source_intervals": 10624320,
+        "chart_integral_abs_delta_hours": {
+          "sun": 1.4551915228366852e-09,
+          "earth": 5.238689482212067e-10,
+          "joint": 1.1641532182693481e-10
+        }
+      },
+      "source_identity_sha256": "ed7288a76f26f1a37a4f08fbe75823da38136e57b50b175b4a73207f1c1b16b4",
+      "metrics_hours": {
+        "total_sun_hours": [
+          393223.63069233595,
+          393223.63069233595
+        ],
+        "total_earth_los_hours": [
+          363925.0833333333,
+          363925.0833333333
+        ],
+        "longest_dark_hours": [
+          502.583333333333,
+          502.583333333333
+        ],
+        "longest_blackout_hours": [
+          410.5,
+          410.5
+        ],
+        "longest_joint_hours": [
+          247.583333333333,
+          247.583333333333
+        ]
+      },
+      "joint_hours": [
+        184684.0,
+        184684.0
+      ],
+      "native_windows": [
+        {
+          "start_utc": "2000-01-01T00:00:00Z",
+          "end_utc": "2000-01-04T00:00:00Z",
+          "http_seconds": 0.134788961000595,
+          "response_bytes": 34151,
+          "display_intervals": 72,
+          "source_intervals": 864,
+          "chart_integral_abs_delta_hours": {
+            "sun": 0.0,
+            "earth": 0.0,
+            "joint": 0.0
+          },
+          "native_metric_abs_delta_hours": {
+            "total_sun_hours": 0.0,
+            "total_earth_los_hours": 0.0,
+            "longest_dark_hours": 0.0,
+            "longest_blackout_hours": 0.0,
+            "longest_joint_hours": 0.0
+          }
+        },
+        {
+          "start_utc": "2000-12-31T00:00:00Z",
+          "end_utc": "2001-01-03T00:00:00Z",
+          "http_seconds": 0.14755736000006436,
+          "response_bytes": 34151,
+          "display_intervals": 72,
+          "source_intervals": 864,
+          "chart_integral_abs_delta_hours": {
+            "sun": 0.0,
+            "earth": 0.0,
+            "joint": 0.0
+          },
+          "native_metric_abs_delta_hours": {
+            "total_sun_hours": 0.0,
+            "total_earth_los_hours": 0.0,
+            "longest_dark_hours": 0.0,
+            "longest_blackout_hours": 0.0,
+            "longest_joint_hours": 0.0
+          }
+        },
+        {
+          "start_utc": "2100-12-29T00:00:00Z",
+          "end_utc": "2101-01-01T00:00:00Z",
+          "http_seconds": 0.21786137600065558,
+          "response_bytes": 34151,
+          "display_intervals": 72,
+          "source_intervals": 864,
+          "chart_integral_abs_delta_hours": {
+            "sun": 0.0,
+            "earth": 0.0,
+            "joint": 0.0
+          },
+          "native_metric_abs_delta_hours": {
+            "total_sun_hours": 0.0,
+            "total_earth_los_hours": 0.0,
+            "longest_dark_hours": 0.0,
+            "longest_blackout_hours": 0.0,
+            "longest_joint_hours": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "site_ids": [
+        "connecting-ridge"
+      ],
+      "viewer_height_m": 10.0,
+      "full_band": {
+        "http_seconds": 1.2635569230005785,
+        "response_bytes": 403575,
+        "display_intervals": 800,
+        "source_intervals": 10624320,
+        "chart_integral_abs_delta_hours": {
+          "sun": 3.14321368932724e-09,
+          "earth": 4.0745362639427185e-10,
+          "joint": 7.566995918750763e-10
+        }
+      },
+      "source_identity_sha256": "dd4da9f698b46588440cf8e0e2628938f07541948db876adba02240e40c17738",
+      "metrics_hours": {
+        "total_sun_hours": [
+          739554.0727683015,
+          739554.0727683015
+        ],
+        "total_earth_los_hours": [
+          472759.99999999994,
+          472759.99999999994
+        ],
+        "longest_dark_hours": [
+          128.5,
+          128.5
+        ],
+        "longest_blackout_hours": [
+          327.583333333333,
+          327.583333333333
+        ],
+        "longest_joint_hours": [
+          379.25,
+          379.25
+        ]
+      },
+      "joint_hours": [
+        425288.49999999994,
+        425288.49999999994
+      ],
+      "native_windows": [
+        {
+          "start_utc": "2000-01-01T00:00:00Z",
+          "end_utc": "2000-01-04T00:00:00Z",
+          "http_seconds": 0.11065107899776194,
+          "response_bytes": 35360,
+          "display_intervals": 72,
+          "source_intervals": 864,
+          "chart_integral_abs_delta_hours": {
+            "sun": 2.511324481702104e-13,
+            "earth": 0.0,
+            "joint": 3.339550858072471e-13
+          },
+          "native_metric_abs_delta_hours": {
+            "total_sun_hours": 0.0,
+            "total_earth_los_hours": 0.0,
+            "longest_dark_hours": 1.0018652574217413e-12,
+            "longest_blackout_hours": 0.0,
+            "longest_joint_hours": 0.0
+          }
+        },
+        {
+          "start_utc": "2000-12-31T00:00:00Z",
+          "end_utc": "2001-01-03T00:00:00Z",
+          "http_seconds": 0.10519933799878345,
+          "response_bytes": 34155,
+          "display_intervals": 72,
+          "source_intervals": 864,
+          "chart_integral_abs_delta_hours": {
+            "sun": 0.0,
+            "earth": 0.0,
+            "joint": 0.0
+          },
+          "native_metric_abs_delta_hours": {
+            "total_sun_hours": 0.0,
+            "total_earth_los_hours": 0.0,
+            "longest_dark_hours": 0.0,
+            "longest_blackout_hours": 0.0,
+            "longest_joint_hours": 0.0
+          }
+        },
+        {
+          "start_utc": "2100-12-29T00:00:00Z",
+          "end_utc": "2101-01-01T00:00:00Z",
+          "http_seconds": 0.06455091799944057,
+          "response_bytes": 34155,
+          "display_intervals": 72,
+          "source_intervals": 864,
+          "chart_integral_abs_delta_hours": {
+            "sun": 0.0,
+            "earth": 0.0,
+            "joint": 0.0
+          },
+          "native_metric_abs_delta_hours": {
+            "total_sun_hours": 0.0,
+            "total_earth_los_hours": 0.0,
+            "longest_dark_hours": 0.0,
+            "longest_blackout_hours": 0.0,
+            "longest_joint_hours": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "site_ids": [
+        "connecting-ridge"
+      ],
+      "viewer_height_m": 20.0,
+      "full_band": {
+        "http_seconds": 0.5965970700017351,
+        "response_bytes": 402621,
+        "display_intervals": 800,
+        "source_intervals": 10624320,
+        "chart_integral_abs_delta_hours": {
+          "sun": 6.51925802230835e-09,
+          "earth": 5.238689482212067e-10,
+          "joint": 0.0
+        }
+      },
+      "source_identity_sha256": "0343550bb57027bf0cc5611e8cbb009c83e57342ad6dd68c035609bbdebe0118",
+      "metrics_hours": {
+        "total_sun_hours": [
+          804380.7870480402,
+          804380.7870480402
+        ],
+        "total_earth_los_hours": [
+          473841.0833333333,
+          473841.0833333333
+        ],
+        "longest_dark_hours": [
+          70.25,
+          70.25
+        ],
+        "longest_blackout_hours": [
+          326.0,
+          326.0
+        ],
+        "longest_joint_hours": [
+          381.5,
+          381.5
+        ]
+      },
+      "joint_hours": [
+        460419.1666666666,
+        460419.1666666666
+      ],
+      "native_windows": [
+        {
+          "start_utc": "2000-01-01T00:00:00Z",
+          "end_utc": "2000-01-04T00:00:00Z",
+          "http_seconds": 0.0740715049978462,
+          "response_bytes": 34159,
+          "display_intervals": 72,
+          "source_intervals": 864,
+          "chart_integral_abs_delta_hours": {
+            "sun": 0.0,
+            "earth": 0.0,
+            "joint": 0.0
+          },
+          "native_metric_abs_delta_hours": {
+            "total_sun_hours": 0.0,
+            "total_earth_los_hours": 0.0,
+            "longest_dark_hours": 0.0,
+            "longest_blackout_hours": 0.0,
+            "longest_joint_hours": 0.0
+          }
+        },
+        {
+          "start_utc": "2000-12-31T00:00:00Z",
+          "end_utc": "2001-01-03T00:00:00Z",
+          "http_seconds": 0.046192669000447495,
+          "response_bytes": 34155,
+          "display_intervals": 72,
+          "source_intervals": 864,
+          "chart_integral_abs_delta_hours": {
+            "sun": 0.0,
+            "earth": 0.0,
+            "joint": 0.0
+          },
+          "native_metric_abs_delta_hours": {
+            "total_sun_hours": 0.0,
+            "total_earth_los_hours": 0.0,
+            "longest_dark_hours": 0.0,
+            "longest_blackout_hours": 0.0,
+            "longest_joint_hours": 0.0
+          }
+        },
+        {
+          "start_utc": "2100-12-29T00:00:00Z",
+          "end_utc": "2101-01-01T00:00:00Z",
+          "http_seconds": 0.056504825999581954,
+          "response_bytes": 34155,
+          "display_intervals": 72,
+          "source_intervals": 864,
+          "chart_integral_abs_delta_hours": {
+            "sun": 0.0,
+            "earth": 0.0,
+            "joint": 0.0
+          },
+          "native_metric_abs_delta_hours": {
+            "total_sun_hours": 0.0,
+            "total_earth_los_hours": 0.0,
+            "longest_dark_hours": 0.0,
+            "longest_blackout_hours": 0.0,
+            "longest_joint_hours": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "site_ids": [
+        "connecting-ridge"
+      ],
+      "viewer_height_m": 30.0,
+      "full_band": {
+        "http_seconds": 0.6733220889982476,
+        "response_bytes": 402451,
+        "display_intervals": 800,
+        "source_intervals": 10624320,
+        "chart_integral_abs_delta_hours": {
+          "sun": 3.4924596548080444e-10,
+          "earth": 1.1641532182693481e-10,
+          "joint": 5.820766091346741e-10
+        }
+      },
+      "source_identity_sha256": "216338a231aaf397dfd896d20171876921ca246650dcfc7aa6db911bd9b92025",
+      "metrics_hours": {
+        "total_sun_hours": [
+          823259.2598419684,
+          823259.2598419684
+        ],
+        "total_earth_los_hours": [
+          474020.1666666666,
+          474020.1666666666
+        ],
+        "longest_dark_hours": [
+          68.25,
+          68.25
+        ],
+        "longest_blackout_hours": [
+          325.833333333333,
+          325.833333333333
+        ],
+        "longest_joint_hours": [
+          381.666666666667,
+          381.666666666667
+        ]
+      },
+      "joint_hours": [
+        469125.5,
+        469125.5
+      ],
+      "native_windows": [
+        {
+          "start_utc": "2000-01-01T00:00:00Z",
+          "end_utc": "2000-01-04T00:00:00Z",
+          "http_seconds": 0.06057476199930534,
+          "response_bytes": 34159,
+          "display_intervals": 72,
+          "source_intervals": 864,
+          "chart_integral_abs_delta_hours": {
+            "sun": 0.0,
+            "earth": 0.0,
+            "joint": 0.0
+          },
+          "native_metric_abs_delta_hours": {
+            "total_sun_hours": 0.0,
+            "total_earth_los_hours": 0.0,
+            "longest_dark_hours": 0.0,
+            "longest_blackout_hours": 0.0,
+            "longest_joint_hours": 0.0
+          }
+        },
+        {
+          "start_utc": "2000-12-31T00:00:00Z",
+          "end_utc": "2001-01-03T00:00:00Z",
+          "http_seconds": 0.045525879999331664,
+          "response_bytes": 34155,
+          "display_intervals": 72,
+          "source_intervals": 864,
+          "chart_integral_abs_delta_hours": {
+            "sun": 0.0,
+            "earth": 0.0,
+            "joint": 0.0
+          },
+          "native_metric_abs_delta_hours": {
+            "total_sun_hours": 0.0,
+            "total_earth_los_hours": 0.0,
+            "longest_dark_hours": 0.0,
+            "longest_blackout_hours": 0.0,
+            "longest_joint_hours": 0.0
+          }
+        },
+        {
+          "start_utc": "2100-12-29T00:00:00Z",
+          "end_utc": "2101-01-01T00:00:00Z",
+          "http_seconds": 0.09026279099998646,
+          "response_bytes": 34155,
+          "display_intervals": 72,
+          "source_intervals": 864,
+          "chart_integral_abs_delta_hours": {
+            "sun": 0.0,
+            "earth": 0.0,
+            "joint": 0.0
+          },
+          "native_metric_abs_delta_hours": {
+            "total_sun_hours": 0.0,
+            "total_earth_los_hours": 0.0,
+            "longest_dark_hours": 0.0,
+            "longest_blackout_hours": 0.0,
+            "longest_joint_hours": 0.0
+          }
+        }
+      ]
+    }
+  ],
+  "boundary_cases": [
+    {
+      "start_utc": "2000-02-28T00:00:00Z",
+      "end_utc": "2000-03-01T00:00:00Z",
+      "http_seconds": 0.03959296199900564,
+      "response_bytes": 24439,
+      "display_intervals": 48,
+      "source_intervals": 576,
+      "chart_integral_abs_delta_hours": {
+        "sun": 0.0,
+        "earth": 0.0,
+        "joint": 0.0
+      }
+    },
+    {
+      "start_utc": "2100-02-28T00:00:00Z",
+      "end_utc": "2100-03-01T00:00:00Z",
+      "http_seconds": 0.04079993800041848,
+      "response_bytes": 14715,
+      "display_intervals": 24,
+      "source_intervals": 288,
+      "chart_integral_abs_delta_hours": {
+        "sun": 0.0,
+        "earth": 0.0,
+        "joint": 0.0
+      }
+    },
+    {
+      "start_utc": "2000-01-01T00:00:00Z",
+      "end_utc": "2050-01-01T00:00:00Z",
+      "http_seconds": 0.07137787500323611,
+      "response_bytes": 399146,
+      "display_intervals": 800,
+      "source_intervals": 5259744,
+      "chart_integral_abs_delta_hours": {
+        "sun": 1.3387762010097504e-09,
+        "earth": 2.9103830456733704e-11,
+        "joint": 8.731149137020111e-11
+      }
+    },
+    {
+      "start_utc": "2050-01-01T00:00:00Z",
+      "end_utc": "2100-01-01T00:00:00Z",
+      "http_seconds": 0.07512245500038262,
+      "response_bytes": 399373,
+      "display_intervals": 800,
+      "source_intervals": 5259456,
+      "chart_integral_abs_delta_hours": {
+        "sun": 5.3551048040390015e-09,
+        "earth": 5.238689482212067e-10,
+        "joint": 5.820766091346741e-11
+      }
+    }
+  ],
+  "no_jobs_created": true,
+  "live_llm_calls": 0,
+  "viewer_heights_m": [
+    2.0,
+    10.0,
+    20.0,
+    30.0
+  ],
+  "scope": "Real catalog HTTP metrics and charts, full prepared band and native checks at boundaries/cross-year windows. Initial metrics only; no century-long validation or mission PASS is claimed. Timings are local."
+}

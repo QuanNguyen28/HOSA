@@ -1,6 +1,6 @@
 # Prepared catalog metrics, 2000–2100
 
-The prepared band is `[2000-01-01T00:00:00Z, 2101-01-01T00:00:00Z)`: it includes every calendar year from 2000 through 2100. It covers all 23 default catalog coordinates with panel and antenna heights of 20 m. This is prepared-data coverage, not an API mission-duration limit. Other coordinates, heights and unprepared endpoint times still use Analyze.
+The prepared band is `[2000-01-01T00:00:00Z, 2101-01-01T00:00:00Z)`: it includes every calendar year from 2000 through 2100. The current catalog has 27 named NASA entries at 26 distinct coordinates, prepared at equal panel/antenna heights of 2, 10, 20 and 30 m (104 physical configurations). See [NASA catalog](nasa-default-catalog.md). This is prepared-data coverage, not an API mission-duration limit. Other coordinates, heights and unprepared endpoint times still use Analyze.
 
 `POST /api/lunar/point/metrics` returns nominal metrics and all three Sun/Earth/Joint preview charts together. Requirements and validation remain `not_started`, and `decision` remains null. A century of displayed metrics does not approve a century-long mission.
 
@@ -33,7 +33,9 @@ OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 PYTHONPATH=backend \
 
 These checks verify nominal computation and selected numerical comparisons. They do not establish continuous-time visibility bounds or complete scientific validation for every instant of the century. Chart bins are duration-weighted summaries, not instantaneous observations; uncertainty bounds remain visible.
 
-## Recorded result
+## Historical result before the NASA catalog migration
+
+The following 23-coordinate report is historical. Current reports use the `nasa27-` prefix in `docs/validation/lunarsight/`.
 
 All 23 coordinates were prepared successfully: 101 yearly parts and 10,624,320 five-minute intervals per coordinate. Published combined indices total 293,577,534 bytes; the local directory, including yearly checkpoints, occupies about 585 MiB.
 

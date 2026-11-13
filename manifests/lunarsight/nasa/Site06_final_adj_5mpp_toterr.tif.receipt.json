@@ -10,12 +10,14 @@
   "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/Site06/Site06_final_adj_5mpp_toterr.tif",
   "bytes": 64025607,
   "sha256": "997c7d2d7ae6a74a1d5c38411cf30a414b1a83474b6b3c3a7b1cb32ef675661e",
-  "accessed_utc": "2026-11-12T02:26:35.845182+00:00",
+  "accessed_utc": "2026-11-13T09:48:33.117989+00:00",
   "status": "VERIFIED_BYTES",
+  "transfer": "validated parallel HTTP byte ranges",
   "http_headers": {
-    "Content-Length": "64025607",
     "ETag": "W/\"3d0f407-1779672add0\"",
     "Last-Modified": "Fri, 12 Feb 2021 13:33:54 GMT",
-    "Content-Type": "image/tiff"
+    "Content-Type": "image/tiff",
+    "Accept-Ranges": "bytes",
+    "Content-Length": "64025607"
   }
 }

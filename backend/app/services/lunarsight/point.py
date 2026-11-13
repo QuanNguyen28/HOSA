@@ -69,6 +69,13 @@ def terrain_sources() -> list[dict[str, Any]]:
         "Shoemaker",
         "DM1",
         "DM2",
+        "SL2",
+        "SL3",
+        "NPA",
+        "NPB",
+        "NPC",
+        "NPD",
+        *[f"LM{i}" for i in range(1, 9)],
     )
     sources = [
         {

@@ -46,18 +46,18 @@ def test_commands_update_baseline_and_do_not_call_llm(service, request_payload):
 
 
 def test_evaluated_turn_becomes_next_turn_context(service, request_payload):
-    service.llm = TurnLLM([patch('chọn Site04', site_ids=['Site04_P1'],
+    service.llm = TurnLLM([patch('chọn Site04_P1', site_ids=['Site04_P1'],
         arrival_utc='2026-11-17T00:00:00Z', max_earth_blackout_hours=5),
         patch('giảm tối', max_darkness_hours=8)])
     original = deepcopy(request_payload)
-    console(service, request_payload, ['chọn Site04', 'y', 'giảm tối', 'y', '/quit'])
+    console(service, request_payload, ['chọn Site04_P1', 'y', 'giảm tối', 'y', '/quit'])
     first, second = service.llm.requests
     assert not first['conversation_history']
     assert second['baseline']['current_site_id'] == 'Site04_P1'
     assert second['baseline']['arrival_utc'] == '2026-11-17T00:00:00Z'
     assert second['baseline']['constraints']['max_earth_blackout_hours'] == 5
     assert second['selected_site_ids'] == ['Site04_P1']
-    assert second['conversation_history'][0]['text'] == 'chọn Site04'
+    assert second['conversation_history'][0]['text'] == 'chọn Site04_P1'
     assert second['conversation_history'][0]['outcome'] == 'evaluated'
     assert request_payload == original
 

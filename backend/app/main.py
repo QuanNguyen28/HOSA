@@ -26,6 +26,10 @@ async def lifespan(application: FastAPI):
     finally:
         await application.state.llm_clients["nvidia"].aclose()
         await application.state.llm_clients["gemini"].aclose()
+        from app.point_analysis.horizon_preload import get_horizon_preloads
+        if get_horizon_preloads.cache_info().currsize:
+            get_horizon_preloads().close()
+            get_horizon_preloads.cache_clear()
 
 
 app = FastAPI(

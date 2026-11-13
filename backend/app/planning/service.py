@@ -51,7 +51,7 @@ class PlanningService:
             return {**caps, "source_hash": digest({"snapshot": caps["source_hash"], "coordinate": coordinate["source_hash"],
                 "resolution": RESOLUTION_VERSION}), "resolution_policy": RESOLUTION_VERSION}
         from app.point_analysis.sources import installed_sources
-        from app.mission.targets import compare_sites
+        from app.mission.targets import coordinates_for_site
         from app.point_analysis.geometry import METHOD_VERSION as GEOMETRY_VERSION
         from app.services.lunarsight.horizons import ADAPTER_VERSION
         from app.services.lunarsight.visibility import SENSITIVITY_VERSION
@@ -69,9 +69,8 @@ class PlanningService:
         from app.services.lunarsight.catalog import processed_root
         from app.services.lunarsight.acquire import hashfile
         catalog = processed_root()/"site_catalog.geojson"
-        sites = compare_sites()
-        named_targets = {t.site_id: {"latitude_deg": sites[t.site_id]["lat"], "longitude_e_deg": sites[t.site_id]["lon"]}
-                         for t in query.mission_targets() if t.site_id in sites}
+        named_targets = {t.site_id: coordinates_for_site(t.site_id)
+                         for t in query.mission_targets() if t.site_id}
         return {"scenario": {}, "warnings": ["PROVISIONAL: sampled solar-disc illumination and Earth-centre LOS; no RF, power or thermal model."],
             "dataset_version": "verified-dem-coordinate", "source_hash": digest({
             "datasets": sources, "evaluation": EVALUATION_VERSION, "validation": VALIDATION_VERSION,

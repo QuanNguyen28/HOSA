@@ -34,7 +34,11 @@ ephemeris-prepare:
 
 .PHONY: precompute-catalog
 precompute-catalog:
-	PYTHONPATH=backend backend/.venv/bin/python scripts/precompute_catalog.py --workers 2 --report docs/validation/lunarsight/catalog-precompute-build.json
+	OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 GDAL_CACHEMAX=96 PYTHONPATH=backend backend/.venv/bin/python scripts/precompute_catalog.py --workers 2 --report docs/validation/lunarsight/nasa27-catalog-build.json
+
+.PHONY: precompute-verify
+precompute-verify:
+	OPENBLAS_NUM_THREADS=1 PYTHONPATH=backend backend/.venv/bin/python scripts/verify_nasa_catalog_cache.py --output docs/validation/lunarsight/nasa27-catalog-verification.json
 
 .PHONY: physics-prepare
 physics-prepare:
@@ -46,7 +50,7 @@ metrics-prepare:
 
 .PHONY: metrics-century-prepare
 metrics-century-prepare:
-	OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONPATH=backend backend/.venv/bin/python scripts/prepare_long_range_metrics.py --viewer-heights 2 10 20 30 --workers 3 --report docs/validation/lunarsight/viewer-metrics-build.json
+	OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONPATH=backend backend/.venv/bin/python scripts/prepare_long_range_metrics.py --viewer-heights 20 2 10 30 --workers 3 --report docs/validation/lunarsight/nasa27-metrics-build.json
 
 .PHONY: viewer-horizons-prepare
 viewer-horizons-prepare:

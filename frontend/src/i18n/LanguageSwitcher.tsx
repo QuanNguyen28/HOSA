@@ -8,11 +8,21 @@ function Flag({ language }: { language: Language }) {
     </svg>
   ) : (
     <svg viewBox="0 0 30 20" className="h-4 w-6 sm:h-5 sm:w-[30px]" aria-hidden="true">
-      <path fill="#012169" d="M0 0h30v20H0z" />
-      <path stroke="#fff" strokeWidth="4" d="m0 0 30 20M30 0 0 20" />
-      <path stroke="#c8102e" strokeWidth="1.6" d="m0 0 30 20M30 0 0 20" />
-      <path stroke="#fff" strokeWidth="6" d="M15 0v20M0 10h30" />
-      <path stroke="#c8102e" strokeWidth="3.5" d="M15 0v20M0 10h30" />
+      <path fill="#fff" d="M0 0h30v20H0z" />
+      {Array.from({ length: 7 }, (_, stripe) => (
+        <rect key={stripe} y={stripe * 40 / 13} width="30" height={20 / 13} fill="#b22234" />
+      ))}
+      <rect width="12" height={140 / 13} fill="#3c3b6e" />
+      {Array.from({ length: 9 }, (_, row) =>
+        Array.from({ length: row % 2 === 0 ? 6 : 5 }, (_, column) => (
+          <path
+            key={`${row}-${column}`}
+            fill="#fff"
+            transform={`translate(${column * 2 + (row % 2 === 0 ? 1 : 2)} ${(row + 1) * 14 / 13}) scale(.45)`}
+            d="m0-1 .224.691h.727L.363.118l.225.691L0 .382l-.588.427.225-.691-.588-.427h.727z"
+          />
+        )),
+      )}
     </svg>
   );
 }

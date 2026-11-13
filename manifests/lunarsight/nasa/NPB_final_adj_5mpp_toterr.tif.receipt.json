@@ -1,0 +1,23 @@
+{
+  "id": "NPB_error",
+  "filename": "NPB_final_adj_5mpp_toterr.tif",
+  "url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/NPB/NPB_final_adj_5mpp_toterr.tif",
+  "source_page": "https://pgda.gsfc.nasa.gov/products/78",
+  "role": "error",
+  "unit": "m RMS",
+  "site": "NPB",
+  "frame": "MOON_ME/DE421",
+  "final_url": "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/NPB/NPB_final_adj_5mpp_toterr.tif",
+  "bytes": 64033691,
+  "sha256": "cf68da834935977c45f6af5d41157b6ecb8e9fae5f6385a262ecf20202ca3a00",
+  "accessed_utc": "2026-11-13T09:57:39.580005+00:00",
+  "status": "VERIFIED_BYTES",
+  "transfer": "validated parallel HTTP byte ranges",
+  "http_headers": {
+    "ETag": "W/\"3d1139b-1799737a930\"",
+    "Last-Modified": "Sun, 23 May 2021 03:14:38 GMT",
+    "Content-Type": "image/tiff",
+    "Accept-Ranges": "bytes",
+    "Content-Length": "64033691"
+  }
+}

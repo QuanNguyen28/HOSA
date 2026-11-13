@@ -1,0 +1,134 @@
+{
+  "profile_heights": [
+    {
+      "height_m": 2.0,
+      "milliseconds": 106.5,
+      "covered": true,
+      "source_sha256": "38642786a04be36509d47221749058421933f11bcc582f7567d6c328267c931f"
+    },
+    {
+      "height_m": 10.0,
+      "milliseconds": 175.4,
+      "covered": true,
+      "source_sha256": "142b2a3e3eab71779d32ff896f4fe32318f92fd4b859c69fc774a5119ed5020e"
+    },
+    {
+      "height_m": 20.0,
+      "milliseconds": 129.1,
+      "covered": true,
+      "source_sha256": "4750f8f852bb0f1606e8a53b14073b991c34e1833d04b6d5b5779089b3c694f1"
+    },
+    {
+      "height_m": 30.0,
+      "milliseconds": 130.5,
+      "covered": true,
+      "source_sha256": "3b8f944462a698066ddf46d66f7bbbc79f3bc768887f34cd6720c30af36433a8"
+    }
+  ],
+  "four_year_chunks": [
+    {
+      "index": 0,
+      "count": 2881,
+      "milliseconds": 158.4
+    },
+    {
+      "index": 1,
+      "count": 2881,
+      "milliseconds": 148.0
+    },
+    {
+      "index": 2,
+      "count": 2881,
+      "milliseconds": 148.4
+    },
+    {
+      "index": 3,
+      "count": 2881,
+      "milliseconds": 144.7
+    },
+    {
+      "index": 4,
+      "count": 2881,
+      "milliseconds": 143.9
+    },
+    {
+      "index": 5,
+      "count": 2881,
+      "milliseconds": 142.8
+    },
+    {
+      "index": 6,
+      "count": 2881,
+      "milliseconds": 146.1
+    },
+    {
+      "index": 7,
+      "count": 2881,
+      "milliseconds": 138.9
+    },
+    {
+      "index": 8,
+      "count": 2881,
+      "milliseconds": 137.5
+    },
+    {
+      "index": 9,
+      "count": 2881,
+      "milliseconds": 140.2
+    },
+    {
+      "index": 10,
+      "count": 2881,
+      "milliseconds": 141.4
+    },
+    {
+      "index": 11,
+      "count": 2881,
+      "milliseconds": 138.6
+    },
+    {
+      "index": 12,
+      "count": 505,
+      "milliseconds": 31.7
+    }
+  ],
+  "exact_spice_probe_max_error_deg": {
+    "sun": 0.0,
+    "earth": 0.0
+  },
+  "century": {
+    "start": "2000-01-01T00:00:00+00:00",
+    "end": "2101-01-01T00:00:00+00:00",
+    "chunks": 308,
+    "first_count": 2881,
+    "last_count": 1201,
+    "tested": "first and last chunks; all chunk continuity tested on four-year mission"
+  },
+  "tests": {
+    "backend_passed": 507,
+    "backend_skipped": 1,
+    "frontend_passed": 80,
+    "frontend_files": 13,
+    "production_build": "passed",
+    "live_llm_calls": 0
+  },
+  "browser": {
+    "sites": [
+      "connecting-ridge",
+      "Haworth"
+    ],
+    "mission_hours": 35064,
+    "whole_mission_loaded": "13/13 chunks",
+    "checked": [
+      "Follow Sun",
+      "Follow Earth",
+      "Zoom",
+      "Full 360",
+      "terrain tooltip",
+      "20m to lander 2m",
+      "English/Vietnamese",
+      "Play/Pause/Continue/Replay controls"
+    ],
+    "screenshot": "output/playwright/horizon-haworth-four-years.png"
+  }
+}

@@ -22,7 +22,7 @@ def test_viewer_contract_rejects_height_outside_supported_geometry(field):
 
 def test_archived_examples_are_removed_from_defaults_but_keep_api_compatibility():
     hidden = {"Site01_P1", "Site04_P1", "example-a", "example-b"}
-    assert len(default_sites()) == 19
+    assert len(default_sites()) == 27
     assert not hidden & default_sites().keys()
     assert {s["site_id"] for s in coordinate_sites_for_prompt()} == default_sites().keys()
     for site_id in hidden:
