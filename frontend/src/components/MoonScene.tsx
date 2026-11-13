@@ -17,6 +17,7 @@ import {
   Color,
   DataTexture,
   DirectionalLight,
+  DoubleSide,
   Float32BufferAttribute,
   LinearFilter,
   MathUtils,
@@ -59,7 +60,8 @@ import type {
 } from "../types";
 import type { TerrainWindow } from "../hooks/useTerrainWindow";
 import { getLunarSurfaceTextures } from "../lib/lunarSurfaceTextures";
-import { TERRAIN_SHADOW_SIZE, terrainShadowHalfSize, updateTerrainShadow } from "../lib/terrainLighting";
+import { terrainShadowFragment } from "../lib/terrainShadowShader";
+import { TERRAIN_SHADOW_SIZE, terrainShadowHalfSize, terrainShadowVerticalHalfSize, updateTerrainShadow } from "../lib/terrainLighting";
 
 type MoonSceneProps = {
   time: Date;
@@ -236,6 +238,9 @@ function LunarTerrainMaterial({
       color={color}
       roughness={0.98}
       metalness={0}
+      shadowSide={DoubleSide}
+      onBeforeCompile={(shader) => { shader.fragmentShader = terrainShadowFragment(shader.fragmentShader); }}
+      customProgramCacheKey={() => "terrain-receiver-plane-pcf-v1"}
     />
   );
 }
@@ -446,13 +451,15 @@ function DynamicTerrain({
       : new Float32Array(),
     [overview, terrainMesh, terrain.geometry, observerHeightM],
   );
-  const shadowHalfSize = terrainShadowHalfSize([
+  const shadowMeshes = [
     terrainMesh?.mesh, midTerrainMesh?.mesh, farTerrainMesh?.mesh, contextTerrainMesh?.mesh,
     regionalTerrainMesh?.mesh, horizonTerrainMesh?.mesh,
-  ]);
+  ];
+  const shadowHalfSize = terrainShadowHalfSize(shadowMeshes);
+  const shadowVerticalHalfSize = terrainShadowVerticalHalfSize(shadowMeshes, localSun[1]);
   useLayoutEffect(() => {
-    if (sunLight.current) updateTerrainShadow(sunLight.current, shadowHalfSize);
-  }, [shadowHalfSize]);
+    if (sunLight.current) updateTerrainShadow(sunLight.current, shadowHalfSize, shadowVerticalHalfSize);
+  }, [shadowHalfSize, shadowVerticalHalfSize]);
   if (!terrainMesh || !terrain.grid) return null;
   const observer: [number, number, number] = [
     0,
@@ -500,8 +507,8 @@ function DynamicTerrain({
         shadow-mapSize-height={TERRAIN_SHADOW_SIZE}
         shadow-camera-left={-shadowHalfSize}
         shadow-camera-right={shadowHalfSize}
-        shadow-camera-top={shadowHalfSize}
-        shadow-camera-bottom={-shadowHalfSize}
+        shadow-camera-top={shadowVerticalHalfSize}
+        shadow-camera-bottom={-shadowVerticalHalfSize}
         shadow-camera-near={1}
         shadow-camera-far={1_600}
         shadow-bias={-0.00008}

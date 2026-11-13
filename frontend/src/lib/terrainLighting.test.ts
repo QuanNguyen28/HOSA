@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { DirectionalLight, Vector3, WebGLRenderTarget } from "three";
-import { terrainShadowHalfSize, updateTerrainShadow, TERRAIN_SHADOW_SIZE } from "./terrainLighting";
+import { terrainShadowHalfSize, terrainShadowVerticalHalfSize, updateTerrainShadow, TERRAIN_SHADOW_SIZE } from "./terrainLighting";
 import type { TerrainMeshData } from "./terrainGeometry";
 
 describe("terrain shadow coverage", () => {
@@ -38,5 +38,20 @@ describe("terrain shadow coverage", () => {
         expect(Math.abs(point.dot(up))).toBeLessThan(size);
       }
     }
+  });
+  it("fits grazing light vertically without clipping curved terrain or wasting a square map", () => {
+    const mesh = { widthSceneUnits: 600, depthSceneUnits: 600, minYSceneUnits: -30, maxYSceneUnits: 12 } as TerrainMeshData;
+    for (const sunY of [-1, -.7, -.02, 0, .02, .7, 1]) {
+      const verticalSize = terrainShadowVerticalHalfSize([mesh], sunY);
+      for (let angle = 0; angle < Math.PI * 2; angle += .13) for (const y of [-30.012, 12]) {
+        const lightSpaceY = -300 * Math.cos(angle) * sunY + y * Math.sqrt(1 - sunY * sunY);
+        expect(Math.abs(lightSpaceY)).toBeLessThan(verticalSize);
+      }
+      const light = new DirectionalLight();
+      updateTerrainShadow(light, terrainShadowHalfSize([mesh]), verticalSize);
+      const edge = new Vector3(0, verticalSize * .99, -720).applyMatrix4(light.shadow.camera.projectionMatrix);
+      expect(Math.abs(edge.y)).toBeLessThan(1);
+    }
+    expect(terrainShadowVerticalHalfSize([mesh], .02)).toBeLessThan(terrainShadowHalfSize([mesh]) / 8);
   });
 });

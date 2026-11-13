@@ -1,0 +1,28 @@
+{
+  "scope": "Renderer-only correction for striped grazing-light shadows; backend visibility and requirements unchanged.",
+  "changes": [
+    "Fit shadow camera height to circular curved LODs projected onto the current solar direction, while keeping all distant casters.",
+    "Cast thin heightfield terrain from both sides to avoid backface gaps.",
+    "Correct PCF depth comparison at each sampled texel centre using receiver-plane derivatives."
+  ],
+  "frontend_tests": {
+    "passed": 77,
+    "files": 12
+  },
+  "production_build": "passed",
+  "browser": {
+    "site": "connecting-ridge",
+    "mission_start_utc": "2026-11-24T00:00:00Z",
+    "duration_hours": 72,
+    "checked_views": [
+      "Pole",
+      "Ground"
+    ],
+    "completed_time_utc": "2026-11-26T23:59:00Z",
+    "webgl_program_errors_observed": 0,
+    "screenshot": "output/playwright/terrain-shadow-receiver-plane.png"
+  },
+  "limits": [
+    "Visual inspection of this scene does not certify every site/time or a per-pixel scientific shadow solution."
+  ]
+}
