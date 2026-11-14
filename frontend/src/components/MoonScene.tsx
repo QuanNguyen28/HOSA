@@ -61,6 +61,7 @@ import type {
 import type { TerrainWindow } from "../hooks/useTerrainWindow";
 import { getLunarSurfaceTextures } from "../lib/lunarSurfaceTextures";
 import { terrainShadowFragment } from "../lib/terrainShadowShader";
+import { SPACE_COLOR, withGlobeDayNight } from "../lib/moonShading";
 import { TERRAIN_SHADOW_SIZE, terrainShadowHalfSize, terrainShadowVerticalHalfSize, updateTerrainShadow } from "../lib/terrainLighting";
 import { sceneContent, terrainCameraPose } from "../lib/terrainCamera";
 import type { TerrainGeometryMetadata } from "../lib/terrainGeometry";
@@ -1188,11 +1189,8 @@ function Moon({
         shadow-bias={-0.00008}
         shadow-normalBias={0.006}
       />
-      <directionalLight
-        color="#769ab1"
-        intensity={layers.enhancedLight ? 0.035 : 0.015}
-        position={[sun.x * -6, sun.y * -6, sun.z * -6]}
-      />
+      {/* The Sun is the globe's only directional light: the day/night rule
+          reads it as directionalLights[0]. */}
       <mesh
         onPointerMove={handlePointer}
         onPointerOut={() => onHover(null)}
@@ -1215,7 +1213,10 @@ function Moon({
           bumpScale={0.004}
           roughness={1}
           metalness={0}
-          color={new Color("#d7d5cf")}
+          color={new Color("#ffffff")}
+          toneMapped={false}
+          customProgramCacheKey={() => "lroc-globe-day-night-v1"}
+          onBeforeCompile={(shader) => { shader.fragmentShader = withGlobeDayNight(shader.fragmentShader); }}
         />
       </mesh>
       {imagery && <MoonTrekGlobe elevationMap={elevationMap} onBaseReady={markImageryReady} onStatus={onImageryStatus}/>}
@@ -1272,7 +1273,7 @@ export function MoonScene(props: MoonSceneProps) {
       camera={INITIAL_CAMERA}
       gl={{ antialias: true, powerPreference: "high-performance" }}
       onCreated={({ gl }) => {
-        gl.setClearColor("#030507");
+        gl.setClearColor(SPACE_COLOR);
         gl.shadowMap.type = PCFShadowMap;
         gl.toneMappingExposure = 1.4;
         // The renderer is already usable at this point.  Reveal the shell now
@@ -1281,8 +1282,8 @@ export function MoonScene(props: MoonSceneProps) {
         props.onReady();
       }}
     >
-      <color attach="background" args={["#030507"]} />
-      <fog attach="fog" args={["#030507", 700, 1_500]} />
+      <color attach="background" args={[SPACE_COLOR]} />
+      <fog attach="fog" args={[SPACE_COLOR, 700, 1_500]} />
       {props.cameraPreset !== "south-pole" && <Stars
         radius={54}
         depth={24}

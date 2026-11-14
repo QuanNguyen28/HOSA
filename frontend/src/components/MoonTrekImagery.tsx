@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import { BufferGeometry, CanvasTexture, DoubleSide, Float32BufferAttribute, SRGBColorSpace, Texture, Vector2, Vector3, Vector4 } from 'three';
 import { coordinateToVector, MOON_SCENE_RADIUS } from '../lib/lunar';
 import { terrainShadowFragment } from '../lib/terrainShadowShader';
+import { withGlobeDayNight } from '../lib/moonShading';
 
 // NASA mosaics are darker than the procedural albedo; scale them so the same
 // Sun intensity gives a comparable surface brightness in both appearances.
@@ -53,10 +54,12 @@ function GlobeTile({tile,heightMap,onState}: {tile:TrekTile;heightMap:Texture;on
     return ()=>{cancelled=true;owned?.dispose();};
   },[key,onState]);
   if (!texture) return null;
-  // NASA imagery is an albedo layer: the mission-time Sun shades it like the
-  // LOLA globe instead of the photo glowing with its recorded lighting.
+  // Cesium day/night rule from the reference: the day side shows the photo as
+  // recorded, the night side 30% of it (see lib/moonShading).
   return <mesh geometry={geometry} raycast={()=>{}}>
-    <meshStandardMaterial color="#e4e1da" map={texture} roughness={1} metalness={0}
+    <meshStandardMaterial color="#ffffff" map={texture} roughness={1} metalness={0} toneMapped={false}
+      customProgramCacheKey={()=>'trek-globe-day-night-v1'}
+      onBeforeCompile={shader=>{shader.fragmentShader=withGlobeDayNight(shader.fragmentShader);}}
       bumpMap={heightMap} bumpScale={0.004}
       displacementMap={heightMap} displacementScale={0.022906066536203522} displacementBias={-0.0105047772533671}
       polygonOffset polygonOffsetFactor={-1-tile.level} polygonOffsetUnits={-1-tile.level} />
