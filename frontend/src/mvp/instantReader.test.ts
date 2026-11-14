@@ -35,13 +35,24 @@ describe('current visibility reads before Analyze', () => {
       expect(signal.aborted).toBe(true);expect(publish).not.toHaveBeenCalled();
     } finally {stop();vi.useRealTimers();}
   });
-  it('reports missing evidence and backs off instead of retrying every frame', async () => {
+  it('reports missing prepared evidence once and stops polling for that request', async () => {
     vi.useFakeTimers();
     const load=vi.fn(async(_query:InstantQuery)=>{throw new Error('INSTANT_NOT_PREPARED');}), fail=vi.fn();
     const stop=startInstantReader(()=>({key:'point',at:0,request}),load,vi.fn(),fail);
     try {
-      await vi.advanceTimersByTimeAsync(500);
+      await vi.advanceTimersByTimeAsync(30000);
       expect(fail).toHaveBeenCalledOnce();expect(load).toHaveBeenCalledOnce();
+    } finally {stop();vi.useRealTimers();}
+  });
+  it('backs off and retries transient failures instead of retrying every frame', async () => {
+    vi.useFakeTimers();
+    const load=vi.fn(async(_query:InstantQuery)=>{throw new Error('API request failed (502).');}), fail=vi.fn();
+    const stop=startInstantReader(()=>({key:'point',at:0,request}),load,vi.fn(),fail);
+    try {
+      await vi.advanceTimersByTimeAsync(500);
+      expect(load).toHaveBeenCalledOnce();
+      await vi.advanceTimersByTimeAsync(2000);
+      expect(load).toHaveBeenCalledTimes(2);
     } finally {stop();vi.useRealTimers();}
   });
 });

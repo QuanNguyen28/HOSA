@@ -8,6 +8,13 @@ export function instantTime(time: number, start: string, refined: boolean) {
   return Math.max(Date.parse(start), Math.floor(time/step)*step);
 }
 
+/**
+ * Only offline catalog builds publish prepared terrain, so this answer holds
+ * for the whole request: polling again only repeats the 409. A new request
+ * (point, heights, dates or an Analyze result) starts a new reader.
+ */
+export const INSTANT_NOT_PREPARED = 'INSTANT_NOT_PREPARED';
+
 /** A moving cursor updates the next query instead of cancelling a debounce forever. */
 export function startInstantReader(
   latest: () => InstantQuery | undefined,
@@ -26,7 +33,9 @@ export function startInstantReader(
         const row = await load(query, controller.signal);
         if (!stopped) publish(query, row);
       } catch (error) {
-        if (!stopped) fail(error instanceof Error ? error : new Error('Request failed.'));
+        const failure = error instanceof Error ? error : new Error('Request failed.');
+        if (!stopped) fail(failure);
+        if (failure.message === INSTANT_NOT_PREPARED) stopped = true;
         delay = 2000;
       }
     }
