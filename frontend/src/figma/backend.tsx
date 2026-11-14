@@ -1,5 +1,5 @@
 import { useTranslation } from "../i18n/language";
-import { memo, useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { api, downloadJson } from "../mvp/api";
 import {
   boundsText,
@@ -306,8 +306,11 @@ export function MissionFields({
           <option value="end">{tr("Target end date (UTC)")}</option>
         </select>
       </label>}
+      {/* Side by side only when the panel is wide enough for the date field;
+          otherwise the start time gets its own line. */}
+      <div className="@container">
       <div
-        className={`grid gap-3 ${m.timing === "end" ? "grid-cols-1" : "grid-cols-2"}`}
+        className={`grid grid-cols-1 gap-3 ${m.timing === "end" ? "" : "@sm:grid-cols-2"}`}
       >
         <label>
           <span className="eyebrow">{tr(durationOnly ? "First start · UTC" : "From · UTC")}</span>
@@ -334,6 +337,7 @@ export function MissionFields({
             />
           </label>
         )}
+      </div>
       </div>
       <p className="text-[11px] text-mute">
         {!(Number.isFinite(missionHours(m)) && missionHours(m) > 0)
@@ -621,8 +625,11 @@ export function CurrentStatus({
         })}
       </div>
       {row?.evidence_source === "prepared_nominal" && <p className="mt-1 text-[9px] text-mute">{tr("Nominal 5-minute sample · PROVISIONAL")}</p>}
+      {row?.evidence_source === "computed_nominal" && <p className="mt-1 text-[9px] text-mute">{tr("Computed for this time from the point's terrain horizon · PROVISIONAL")}</p>}
       {!row && !known && error && <p role="status" className="mt-2 text-[10px] text-sun">{tr(error==='INSTANT_NOT_PREPARED'
         ? 'No prepared instant for this coordinate/height. Analyze point to calculate it.'
+        : error==='HORIZON_NOT_PREPARED'
+        ? "Preparing this point's terrain horizon (about 10–20 s the first time)…"
         : 'Unable to load current visibility: {0}',[error])}</p>}
     </div>
   );
@@ -845,20 +852,11 @@ export function PlanningSummary({ result }: { result: PlanningResult }) {
           <button
             type="button"
             className={actionClass}
-            onClick={() => downloadJson(result, `planning-${result.parts![0]}-merged.json`)}
+            onClick={() => downloadJson(result, `planning-${result.parts![0].id}-merged.json`)}
           >
             {tr("Download JSON")}
           </button>
-          <details className="text-xs text-mute">
-            <summary className="cursor-pointer">{tr("CSV per site")}</summary>
-            <div className="mt-2 flex max-w-xs flex-wrap gap-2">
-              {result.parts.map((id, i) => (
-                <a key={id} className="underline underline-offset-2 hover:text-white" href={`/api/planning/results/${id}?format=csv`}>
-                  {tr("CSV {0}", [i + 1])}
-                </a>
-              ))}
-            </div>
-          </details>
+          <CsvMenu parts={result.parts} />
         </div>
       ) : (
         <div className="flex gap-3">
@@ -877,6 +875,54 @@ export function PlanningSummary({ result }: { result: PlanningResult }) {
         </div>
       )}
     </section>
+  );
+}
+/** "Download CSV" opens the analysed sites; each one downloads its own result. */
+function CsvMenu({ parts }: { parts: { id: string; name: string }[] }) {
+  const { t: tr } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const away = (e: PointerEvent) => !box.current?.contains(e.target as Node) && setOpen(false);
+    const key = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("pointerdown", away);
+    window.addEventListener("keydown", key);
+    return () => {
+      window.removeEventListener("pointerdown", away);
+      window.removeEventListener("keydown", key);
+    };
+  }, [open]);
+  return (
+    <div ref={box} className="relative">
+      <button
+        type="button"
+        className={actionClass}
+        aria-expanded={open}
+        aria-haspopup="true"
+        onClick={() => setOpen((v) => !v)}
+      >
+        {tr("Download CSV")} {open ? "▴" : "▾"}
+      </button>
+      {open && (
+        <ul
+          aria-label={tr("Analysed sites")}
+          className="absolute right-0 z-40 mt-1 max-h-72 w-64 overflow-y-auto border border-line bg-panel py-1 shadow-lg"
+        >
+          {parts.map((part) => (
+            <li key={part.id}>
+              <a
+                className="block truncate px-3 py-2 text-xs text-soft hover:bg-white/[0.07] hover:text-white"
+                href={`/api/planning/results/${part.id}?format=csv`}
+                download
+              >
+                {part.name}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 export function CandidateCard({

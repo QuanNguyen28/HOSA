@@ -1,6 +1,6 @@
 import { useTranslation } from "../i18n/language";
 import { LanguageSwitcher } from "../i18n/LanguageSwitcher";
-import { Suspense, lazy, useEffect, useMemo, useState } from "react";
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
 import { SITES, HEIGHTS, HIDDEN_DEFAULT_SITE_IDS, HOUR, STEP, fmtTime, type Site } from "./model";
 import {
   Logo,
@@ -283,6 +283,54 @@ export default function App() {
     </div>
   );
 }
+const PANEL_MIN = 300, PANEL_MAX = 720, PANEL_DEFAULT = 340;
+const PANEL_KEY = "hosa.explorePanelWidth";
+/** Explore's side panel width: dragged or arrow-keyed, remembered per browser. */
+function usePanelWidth() {
+  const clampWidth = (w: number) =>
+    Math.round(Math.min(Math.max(w, PANEL_MIN), Math.max(PANEL_MIN, Math.min(PANEL_MAX, window.innerWidth * 0.6))));
+  const [width, setWidth] = useState(() => {
+    try {
+      const saved = Number(localStorage.getItem(PANEL_KEY));
+      return saved >= PANEL_MIN && saved <= PANEL_MAX ? saved : PANEL_DEFAULT;
+    } catch {
+      return PANEL_DEFAULT;
+    }
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem(PANEL_KEY, String(width));
+    } catch {
+      /* Private mode or blocked storage: the width just isn't remembered. */
+    }
+  }, [width]);
+  const drag = useRef<number | null>(null);
+  return {
+    width,
+    handle: {
+      onPointerDown: (e: React.PointerEvent<HTMLElement>) => {
+        e.currentTarget.setPointerCapture(e.pointerId);
+        drag.current = e.currentTarget.parentElement!.getBoundingClientRect().left;
+      },
+      onPointerMove: (e: React.PointerEvent<HTMLElement>) => {
+        if (drag.current != null) setWidth(clampWidth(e.clientX - drag.current));
+      },
+      onPointerUp: () => {
+        drag.current = null;
+      },
+      onPointerCancel: () => {
+        drag.current = null;
+      },
+      onDoubleClick: () => setWidth(PANEL_DEFAULT),
+      onKeyDown: (e: React.KeyboardEvent<HTMLElement>) => {
+        if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+          e.preventDefault();
+          setWidth((w) => clampWidth(w + (e.key === "ArrowRight" ? 20 : -20)));
+        }
+      },
+    },
+  };
+}
 type Operation = ReturnType<typeof useOperation<PointResult>>;
 function Explore({
   s,
@@ -323,6 +371,7 @@ function Explore({
   const { t: tr } = useTranslation();
   const [mode, setMode] = useState<Mode | "horizon">("orbit");
   const [tab, setTab] = useState<"info" | "sites">("info");
+  const panel = usePanelWidth();
   const prepared = usePreparedMetrics(issue ? undefined : missionRequest(mission, toTarget(site)), site.group === "nasa");
   const r = point.result ?? prepared,
     end = s.endMs;
@@ -353,7 +402,22 @@ function Explore({
   const stageSite = stageSites.find((x) => x.id === stageId) ?? site;
   return (
     <div className="flex min-h-[640px] flex-col lg:h-[calc(100svh-3.5rem)] lg:flex-row">
-      <aside className="flex w-full shrink-0 flex-col border-b border-line bg-panel lg:w-[340px] lg:border-r lg:border-b-0">
+      <aside
+        className="relative flex w-full shrink-0 flex-col border-b border-line bg-panel lg:w-[var(--panel)] lg:border-r lg:border-b-0"
+        style={{ "--panel": `${panel.width}px` } as React.CSSProperties}
+      >
+        <div
+          role="separator"
+          aria-orientation="vertical"
+          aria-label={tr("Resize side panel")}
+          aria-valuemin={PANEL_MIN}
+          aria-valuemax={PANEL_MAX}
+          aria-valuenow={panel.width}
+          tabIndex={0}
+          title={tr("Drag to resize · double-click to reset")}
+          className="absolute inset-y-0 -right-1.5 z-30 hidden w-3 cursor-col-resize touch-none lg:block after:absolute after:inset-y-0 after:left-1/2 after:w-px after:-translate-x-1/2 after:bg-transparent hover:after:bg-white/40 focus-visible:after:bg-white/60"
+          {...panel.handle}
+        />
         <div className="flex border-b border-line" role="tablist">
           {(["info", "sites"] as const).map((t) => (
             <button
@@ -640,6 +704,7 @@ function Explore({
                 pointAnalysis={viewResult}
                 instant={instant}
                 instantRequest={horizonRequest}
+                stateLoading={current.loading}
                 onSelect={(id) => {
                   if (!busy) {
                     onSite(id);

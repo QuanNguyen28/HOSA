@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { currentInterval, intervalAt, type Interval, type MissionRequest, type PointResult } from "./contracts";
 import { instantTime, startInstantReader, type InstantQuery } from './instantReader';
+const HORIZON_NOT_PREPARED = "HORIZON_NOT_PREPARED";
 
 export function errorText(payload: unknown, status: number): string {
   const detail = (payload as { detail?: unknown })?.detail;
@@ -208,6 +209,37 @@ export function useOperation<T>(key: string) {
   };
 }
 
+type Series = { evidence_source: Interval["evidence_source"]; sampling_minutes: number; rows: Interval[] };
+const seriesCache = new Map<string, Interval[] | null>();
+/**
+ * Every nominal five-minute state of the mission for a catalog point, loaded
+ * once with the other cached metrics. null: not available for this point
+ * (custom coordinates use one computed instant per selected time instead).
+ */
+function useNominalSeries(request?: MissionRequest) {
+  const key = request ? JSON.stringify(request) : "";
+  const [stored, setStored] = useState<{ key: string; rows: Interval[] | null }>();
+  useEffect(() => {
+    if (!key || seriesCache.has(key)) return;
+    const controller = new AbortController();
+    api<Series>("/lunar/point/instants", controller.signal, JSON.parse(key))
+      .then((series) => {
+        const rows = series.rows.map((row) => ({ ...row, evidence_source: series.evidence_source, sampling_minutes: series.sampling_minutes }));
+        seriesCache.set(key, rows);
+        if (seriesCache.size > 24) seriesCache.delete(seriesCache.keys().next().value!);
+        setStored({ key, rows });
+      })
+      .catch((error: Error) => {
+        if (controller.signal.aborted) return;
+        // Definite answers are remembered; a network failure is retried next time.
+        if (["INSTANT_NOT_PREPARED", "SERIES_TOO_LONG"].includes(error.message)) seriesCache.set(key, null);
+        setStored({ key, rows: null });
+      });
+    return () => controller.abort();
+  }, [key]);
+  return seriesCache.has(key) ? seriesCache.get(key)! : stored?.key === key ? stored.rows : undefined;
+}
+
 export function usePointInstant(result: PointResult | undefined, time: number, fallbackRequest?: MissionRequest) {
   const [stored, setStored] = useState<{ key: string; row: Interval }>();
   const [failure, setFailure] = useState<{scope: string; message: string}>();
@@ -215,13 +247,16 @@ export function usePointInstant(result: PointResult | undefined, time: number, f
   const native = result && currentInterval(result, time);
   const url = result?.interval_url;
   const request = result?.request ?? fallbackRequest;
+  // An analysed point's refined intervals beat the nominal series.
+  const series = useNominalSeries(url ? undefined : fallbackRequest ?? result?.request);
+  const fromSeries = series ? intervalAt(series, time) : undefined;
   const scope = JSON.stringify([result?.result_id,url,result?.evaluation_status,request]);
   const tick = request ? instantTime(time,request.start_utc,!!url) : NaN;
   const key = `${scope}|${tick}`;
   const cached = cache.current.get(key) ?? (stored?.key === key ? stored.row : undefined);
   const inWindow = !!request && time >= Date.parse(request.start_utc) && time < Date.parse(request.end_utc);
   const snapshot = useRef<{scope: string; query?: InstantQuery}>({scope});
-  snapshot.current = {scope,query:request && inWindow && !native && !cached && Number.isFinite(tick)
+  snapshot.current = {scope,query:request && inWindow && !native && !fromSeries && !cached && Number.isFinite(tick)
     ? {key,at:tick,request,url} : undefined};
   useEffect(() => {
     return startInstantReader(
@@ -237,9 +272,10 @@ export function usePointInstant(result: PointResult | undefined, time: number, f
       error => setFailure({scope,message:error.message}),
     );
   }, [scope]);
-  const instant = native ?? (inWindow && cached ? intervalAt([cached],time) : undefined);
+  const instant = native ?? fromSeries ?? (inWindow && cached ? intervalAt([cached],time) : undefined);
   const error = !instant && failure?.scope===scope ? failure.message : undefined;
-  return {instant,error,loading:inWindow && !instant && !error};
+  // A custom point's horizon is still being prepared in the background.
+  return {instant,error,loading:inWindow && !instant && (!error || error === HORIZON_NOT_PREPARED)};
 }
 
 const preparedMetricCache = new Map<string, PointResult>();

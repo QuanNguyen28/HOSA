@@ -79,6 +79,14 @@ def prepared_instant(request: PointAnalysisRequest, at_utc: str = Query(),
         raise HTTPException(status_code=400, detail={"code": "INVALID_INTERVAL_TIME"}) from error
 
 
+@router.post("/instants", summary="Nominal five-minute states across the whole mission for a catalog point")
+def prepared_instants(request: PointAnalysisRequest, pipeline: PointAnalysisPipeline = Depends(get_point_pipeline)):
+    try:
+        return pipeline.prepared_series(request)
+    except DomainError as error:
+        raise HTTPException(status_code=error.status_code, detail={"code": error.code}) from error
+
+
 @router.post("/analyze", response_model=PointAnalysisResult,
              summary="Calculate coordinate metrics and return the complete result directly")
 def analyze(request: PointAnalysisRequest,

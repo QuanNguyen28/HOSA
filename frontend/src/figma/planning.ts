@@ -66,7 +66,7 @@ function combine(parts: PlanningResult[], candidates: Candidate[], recommended: 
   return {
     ...parts[0],
     result_id: parts.map((p) => p.result_id).join("+"),
-    parts: parts.map((p) => p.result_id),
+    parts: parts.map((p) => ({ id: p.result_id, name: p.target?.name ?? p.result_id })),
     status: coverage.pass ? "FEASIBLE" : coverage.fail ? "NO_FEASIBLE_IN_EVALUATED_SET" : "INSUFFICIENT_DATA",
     candidates,
     recommended_candidate_id: recommended?.candidate_id ?? null,
@@ -105,6 +105,7 @@ function forTarget(result: PlanningResult, target: Target): PlanningResult {
   const tag = (c: Candidate) => ({ ...c, target: target.id });
   return {
     ...result,
+    target: { id: target.id, name: target.name },
     candidates: result.candidates.map(tag),
     ...(result.evaluations ? { evaluations: result.evaluations.map(tag) } : {}),
   };

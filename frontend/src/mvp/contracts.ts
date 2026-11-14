@@ -71,7 +71,8 @@ export type Validation = {
   policy_version?: string;
 };
 export type Interval = {
-  evidence_source?: "prepared_nominal";
+  /** prepared_nominal: packaged catalog terrain; computed_nominal: this point's own cached horizon. */
+  evidence_source?: "prepared_nominal" | "computed_nominal";
   sampling_minutes?: number;
   aggregated?: boolean;
   earth_visible_fraction_lower?: number;
@@ -226,8 +227,10 @@ export type PlanningResult = {
   warnings: string[];
   /** window_search: a compact row for every evaluated start, returned or not. */
   evaluations?: Candidate[];
-  /** Backend result ids when the frontend merged several requests into one view. */
-  parts?: string[];
+  /** Frontend only: the ticked site a single-site backend result belongs to. */
+  target?: { id: string; name: string };
+  /** Frontend only: backend results merged into this view, one per site. */
+  parts?: { id: string; name: string }[];
 };
 export const DEFAULT_MISSION: Mission = {
   start: "2026-11-24T00:00",

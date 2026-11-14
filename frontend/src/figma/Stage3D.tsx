@@ -1,5 +1,5 @@
 import { useTranslation } from "../i18n/language";
-import { useLayoutEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 
 import { MoonScene, type GroundSky } from "../components/MoonScene";
 import { useSiteAnalysis } from "../hooks/useSiteAnalysis";
@@ -29,6 +29,8 @@ type Props = {
   pointAnalysis?: PointResult | null;
   instant?: Interval;
   instantRequest?: MissionRequest;
+  /** The selected point's Sun/Earth state is still being loaded or computed. */
+  stateLoading?: boolean;
   className?: string;
   interactive?: boolean;
 };
@@ -79,6 +81,7 @@ export default function Stage3D({
   pointAnalysis,
   instant,
   instantRequest,
+  stateLoading = false,
   className = "",
   interactive = true,
 }: Props) {
@@ -90,12 +93,20 @@ export default function Stage3D({
   );
   const selected = activeSite;
   const selectedSiteId = activeSite.id === "custom" ? null : activeSite.id;
-  // Keep the local terrain origin independent of what the user selects.
   const [focus, setFocus] = useState(() => ({ mode, anchor: selected }));
   const anchor = focus.mode === mode ? focus.anchor : selected;
   useLayoutEffect(() => {
     if (focus.mode !== mode) setFocus({ mode, anchor });
   }, [mode, anchor, focus.mode]);
+  // The terrain origin (and the Sun/Earth sight lines drawn from it) follows
+  // the selected point. The short wait keeps typed coordinates from
+  // reloading terrain on every keystroke.
+  useEffect(() => {
+    const timer = setTimeout(() => setFocus((old) =>
+      old.mode === mode && sameCoordinate(old.anchor, selected) ? old : { mode, anchor: selected }), 500);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, selected.latitude, selected.longitude]);
   const [hovered, setHovered] = useState<LunarCoordinate | null>(null);
   const [ready, setReady] = useState(false);
   const { result: southPolarTerrain, loading: polarTerrainLoading } =
@@ -151,6 +162,8 @@ export default function Stage3D({
   const observerIsSelected = sameCoordinate(observer, selected);
   const focusUnavailable = mode !== "orbit" && !terrainPending && !terrainWindow?.grid &&
     !sameCoordinate(visible?.anchor, anchor);
+  // The selection changed and its terrain is on the way (or about to be requested).
+  const movingToSelected = mode !== "orbit" && !observerIsSelected && !focusUnavailable;
   const observerAnalysis = observerIsSelected ? pointAnalysis : null;
   const analysisSiteId = observer.id === "Site01_P1" || observer.id === "Site04_P1" ? observer.id : null;
   const { analysis } = useSiteAnalysis(analysisSiteId, new Date(timeMs));
@@ -270,20 +283,14 @@ export default function Stage3D({
       </div>
 
       <div className="pointer-events-none absolute top-16 right-4 z-10 flex w-60 flex-col items-stretch gap-2">
-        {mode !== "orbit" && visible && !observerIsSelected && (
-          <button type="button"
-            disabled={terrainPending && sameCoordinate(anchor, selected)}
-            onClick={() => setFocus({ mode, anchor: selected })}
-            className="pointer-events-auto border border-line bg-black/85 px-3 py-2 text-xs text-soft hover:text-white disabled:opacity-50">
-            {tr("Center on selected point")}
-          </button>
-        )}
         {mode === "surface" && visibleTerrain?.grid && (
           <div className="border border-line bg-black/80 px-3 py-2 font-mono text-[10px] leading-relaxed tracking-wider">
-            {!observerIsSelected && <div className="mb-1 text-mute">{tr("Viewing from: ")}{observer.id === "custom" ? tr("Custom point") : observer.name}</div>}
-            <div className="text-sun">{tr("☀ SUN · ")}{tr(groundSky.sun.state === "V" ? "VISIBLE" : groundSky.sun.state === "B" ? "HIDDEN" : "UNKNOWN")}</div>
+            {!observerIsSelected && (movingToSelected
+              ? <div className="mb-1 text-sun">{tr("Moving to the selected point…")}</div>
+              : <div className="mb-1 text-mute">{tr("Viewing from: ")}{observer.id === "custom" ? tr("Custom point") : observer.name}</div>)}
+            <div className="text-sun">{tr("☀ SUN · ")}{tr(groundSky.sun.state === "V" ? "VISIBLE" : groundSky.sun.state === "B" ? "HIDDEN" : (observerIsSelected && stateLoading) || movingToSelected ? "LOADING" : "UNKNOWN")}</div>
             <div className="text-mute">{tr("AZ ")}{groundSky.sun.azimuthDeg.toFixed(1)}{tr("° · EL ")}{groundSky.sun.elevationDeg.toFixed(2)}{tr("° · CLR ")}{groundSky.sun.clearanceDeg == null ? "—" : groundSky.sun.clearanceDeg.toFixed(2)}°</div>
-            <div className="mt-1 text-earth">{tr("⊕ EARTH · ")}{tr(groundSky.earth.state === "V" ? "VISIBLE" : groundSky.earth.state === "B" ? "HIDDEN" : "UNKNOWN")}</div>
+            <div className="mt-1 text-earth">{tr("⊕ EARTH · ")}{tr(groundSky.earth.state === "V" ? "VISIBLE" : groundSky.earth.state === "B" ? "HIDDEN" : (observerIsSelected && stateLoading) || movingToSelected ? "LOADING" : "UNKNOWN")}</div>
             <div className="text-mute">{tr("AZ ")}{groundSky.earth.azimuthDeg.toFixed(1)}{tr("° · EL ")}{groundSky.earth.elevationDeg.toFixed(2)}{tr("° · CLR ")}{groundSky.earth.clearanceDeg == null ? "—" : groundSky.earth.clearanceDeg.toFixed(2)}°</div>
             <div className="mt-1 text-mute">{tr("DRAG 360° TO INSPECT THE SKY")}</div>
           </div>

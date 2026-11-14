@@ -173,11 +173,23 @@ class PointAnalysisPipeline:
             result["evaluation_stages"] = {"hard": "not_started", "validation": "not_started", "soft": "not_started"}
             return result
 
+    def nominal_rows(self, request, terrain, fine, start, end):
+        """Five-minute nominal visibility rows for [start, end) from a horizon
+        that is already prepared; never scans terrain or evaluates a mission."""
+        base = {h: p.iloc[::2].reset_index(drop=True).assign(az_step_deg=.25) for h, p in fine.items()}
+        # Internal sampling window only: mission requirements remain untouched.
+        sample = request.model_copy(update={"start_utc": start.isoformat(), "end_utc": end.isoformat()})
+        sun, earth, _ = self.ephemerides(sample, terrain.site, 5)
+        return records(visibility(sun, earth, base[request.panel_height_m], base[request.antenna_height_m], solar_disc=True))
+
     def prepared_instant(self, request, at_utc):
         """One nominal five-minute interval, without a mission scan or evaluation.
 
-        Only verified packaged terrain and local shared ephemeris are used. This
-        is preview evidence, not a substitute for a refined analysis interval.
+        Catalog points use verified packaged terrain. Any other coordinate is
+        computed for the requested time from its own horizon once the
+        background horizon preparation has cached it; until then this raises
+        HORIZON_NOT_PREPARED instead of scanning terrain here. Both use local
+        shared ephemeris and are preview evidence, not a refined analysis.
         """
         request = request.resolved()
         stamp = pd.Timestamp(at_utc)
@@ -189,19 +201,47 @@ class PointAnalysisPipeline:
         if request.illumination_model != "solar_disc":
             raise DomainError("INSTANT_NOT_PREPARED", 409)
         from app.precompute.geometry import prepared_terrain
+        start = stamp.floor("5min")
+        end = start+pd.Timedelta(minutes=5)
+        heights = {request.panel_height_m, request.antenna_height_m}
+        prepared = prepared_terrain(request)
+        if prepared is not None:
+            with prepared as terrain:
+                fine, _, _, _ = self.geometry(terrain, heights, lambda _: None)
+                row = self.nominal_rows(request, terrain, fine, start, end)[0]
+            return {**row, "evidence_source": "prepared_nominal", "sampling_minutes": 5}
+        from .horizon_view import _profiles
+        with self.terrain(request) as terrain:
+            fine, _ = _profiles(request, self, terrain)
+            row = self.nominal_rows(request, terrain, fine, start, end)[0]
+        return {**row, "evidence_source": "computed_nominal", "sampling_minutes": 5}
+
+    SERIES_MAX_DAYS = 31
+    SERIES_FIELDS = ("start_utc", "end_utc", "sun_state", "earth_state", "joint_state", "sun_visible_fraction",
+                     "sun_visible_fraction_lower", "sun_visible_fraction_upper")
+
+    def prepared_series(self, request):
+        """Every nominal five-minute state of the mission for a catalog point,
+        so the viewer has the current state at any time without one request
+        per tick. Points without packaged terrain use prepared_instant."""
+        request = request.resolved()
+        if request.illumination_model != "solar_disc":
+            raise DomainError("INSTANT_NOT_PREPARED", 409)
+        start, end = pd.Timestamp(request.start_utc).tz_convert("UTC"), pd.Timestamp(request.end_utc).tz_convert("UTC")
+        if end-start > pd.Timedelta(days=self.SERIES_MAX_DAYS):
+            raise DomainError("SERIES_TOO_LONG", 409)
+        from app.precompute.geometry import prepared_terrain
         prepared = prepared_terrain(request)
         if prepared is None:
             raise DomainError("INSTANT_NOT_PREPARED", 409)
-        start = stamp.floor("5min")
-        # Internal sampling window only: mission requirements remain untouched.
-        sample = request.model_copy(update={"start_utc": start.isoformat(),
-            "end_utc": (start+pd.Timedelta(minutes=5)).isoformat()})
         with prepared as terrain:
             fine, _, _, _ = self.geometry(terrain, {request.panel_height_m, request.antenna_height_m}, lambda _: None)
-            base = {h: p.iloc[::2].reset_index(drop=True).assign(az_step_deg=.25) for h, p in fine.items()}
-            sun, earth, _ = self.ephemerides(sample, terrain.site, 5)
-            row = records(visibility(sun, earth, base[request.panel_height_m], base[request.antenna_height_m], solar_disc=True))[0]
-        return {**row, "evidence_source": "prepared_nominal", "sampling_minutes": 5}
+            rows = self.nominal_rows(request, terrain, fine, start.floor("5min"), end)
+        compact = lambda value: (None if value is None or (isinstance(value, float) and not np.isfinite(value))
+                                 else round(value, 6) if isinstance(value, float) else value)
+        return {"evidence_source": "prepared_nominal", "sampling_minutes": 5,
+                "rows": [{key: compact(row.get(key)) for key in self.SERIES_FIELDS}
+                         for row in rows if pd.Timestamp(row["start_utc"]) < end]}
 
     def run(self, request, progress=lambda stage: None, *, preview=None, display=False):
         request = request.resolved()

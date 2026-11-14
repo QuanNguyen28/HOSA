@@ -43,7 +43,7 @@ describe("per-site planning requests", () => {
     expect(merged.recommended_candidate_id).toBe("b1");
     expect(merged.coverage.returned).toBe(2);
     expect(merged.coverage.not_returned).toBe(190);
-    expect(merged.parts).toEqual(["a", "b", "c"]);
+    expect(merged.parts?.map((p) => p.id)).toEqual(["a", "b", "c"]);
     // Every evaluated start stays available for the grid, not just the picks.
     const rows = mergeSearch([
       { ...a, evaluations: [a.candidates[0], candidate("a2", "A", "2026-11-24T00:15:00Z", "PASS", 50)] },

@@ -583,8 +583,6 @@
   "Tries the same mission start times at every ticked site and checks each one against every requirement. The grid shows every start; below, each site shows its earliest PASS start. Each site is searched separately; the bar counts finished sites.": "Thử cùng các thời điểm bắt đầu ở mọi điểm đã chọn và kiểm tra từng thời điểm theo mọi yêu cầu. Lưới hiển thị mọi thời điểm; bên dưới, mỗi điểm hiển thị thời điểm ĐẠT sớm nhất. Mỗi điểm được tìm riêng; thanh tiến trình đếm số điểm đã xong.",
   "Start times per site": "Số thời điểm bắt đầu mỗi điểm",
   "{0} candidate evaluations · {1} start times × {2} sites": "{0} lượt đánh giá phương án · {1} thời điểm × {2} điểm",
-  "CSV per site": "CSV theo từng điểm",
-  "CSV {0}": "CSV {0}",
   "Sites to evaluate · {0} selected": "Điểm cần đánh giá · đã chọn {0}",
   "Custom point {0}": "Điểm tùy chọn {0}",
   "Edit {0}": "Sửa {0}",
@@ -613,5 +611,12 @@
   "Terrain data covers the south polar region only; a northern point cannot be evaluated.": "Dữ liệu địa hình chỉ phủ vùng cực Nam; điểm ở bán cầu Bắc không thể đánh giá.",
   "Outside the south polar terrain (DEM) coverage, so no start could be evaluated.": "Nằm ngoài vùng phủ địa hình (DEM) cực Nam nên không thời điểm nào được đánh giá.",
   "First start · UTC": "Thời điểm bắt đầu đầu tiên · UTC",
-  "Each candidate runs {0} hours from its own start.": "Mỗi phương án kéo dài {0} giờ tính từ thời điểm bắt đầu của nó."
+  "Each candidate runs {0} hours from its own start.": "Mỗi phương án kéo dài {0} giờ tính từ thời điểm bắt đầu của nó.",
+  "Resize side panel": "Đổi độ rộng bảng bên",
+  "Drag to resize · double-click to reset": "Kéo để đổi độ rộng · nhấp đúp để đặt lại",
+  "Analysed sites": "Các điểm đã phân tích",
+  "Computed for this time from the point's terrain horizon · PROVISIONAL": "Tính cho thời điểm này từ đường chân trời địa hình của điểm · TẠM THỜI",
+  "Preparing this point's terrain horizon (about 10–20 s the first time)…": "Đang chuẩn bị đường chân trời địa hình cho điểm này (lần đầu khoảng 10–20 giây)…",
+  "LOADING": "ĐANG TẢI",
+  "Moving to the selected point…": "Đang chuyển tới điểm đã chọn…"
 }

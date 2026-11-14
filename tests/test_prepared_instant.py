@@ -60,11 +60,62 @@ def test_instant_api_rejects_invalid_or_outside_half_open_window(pipeline, stamp
         app.dependency_overrides.pop(get_point_pipeline, None)
 
 
-def test_missing_prepared_terrain_does_not_start_dem_scan(pipeline, monkeypatch):
+def test_uncached_custom_horizon_does_not_start_dem_scan(pipeline, monkeypatch):
     monkeypatch.setattr("app.precompute.geometry.prepared_terrain", lambda request: None)
     monkeypatch.setattr(pipeline, "geometry", lambda *a: pytest.fail("unexpected terrain scan"))
-    with pytest.raises(DomainError, match="INSTANT_NOT_PREPARED"):
+    with pytest.raises(DomainError, match="HORIZON_NOT_PREPARED"):
         pipeline.prepared_instant(query(illumination_model="solar_disc"), "2026-11-17T00:00:00Z")
+
+
+def flat_horizon_sky(pipeline, monkeypatch, elevations):
+    """Sun at the given elevations over a flat 0° horizon; Earth always up."""
+    def ephemerides(sample, site, step):
+        grid = pd.date_range(sample.start_utc, sample.end_utc, freq="5min")
+        sun = pd.DataFrame({"az_deg": 90., "el_deg": [elevations(t) for t in grid],
+            "distance_km": 149600000., "row_present": True}, index=grid)
+        earth = pd.DataFrame({"az_deg": 270., "el_deg": 5., "distance_km": 384400., "row_present": True}, index=grid)
+        return sun, earth, []
+    monkeypatch.setattr(pipeline, "ephemerides", ephemerides)
+    original = pipeline.geometry
+    def geometry(*args):
+        fine, short, seams, receipt = original(*args)
+        for profiles in (fine, short):
+            for profile in profiles.values():
+                profile["horizon_deg"] = 0.
+        return fine, short, seams, receipt
+    monkeypatch.setattr(pipeline, "geometry", geometry)
+    monkeypatch.setattr(pipeline, "run", lambda *a, **k: pytest.fail("instant ran full analysis"))
+
+
+def test_custom_point_instant_is_computed_for_the_requested_time_from_its_cached_horizon(pipeline, monkeypatch):
+    monkeypatch.setattr("app.precompute.geometry.prepared_terrain", lambda request: None)
+    flat_horizon_sky(pipeline, monkeypatch, lambda t: 1. if t.minute < 30 else -1.)
+    def cached(request, pipe, terrain):
+        fine, _, _, receipt = pipe.geometry(terrain, {request.panel_height_m, request.antenna_height_m}, lambda _: None)
+        return fine, receipt
+    monkeypatch.setattr("app.point_analysis.horizon_view._profiles", cached)
+    request = query(illumination_model="solar_disc")
+    early = pipeline.prepared_instant(request, "2026-11-17T00:12:00Z")
+    late = pipeline.prepared_instant(request, "2026-11-17T00:42:00Z")
+    assert (early["start_utc"], early["sun_state"], early["earth_state"]) == ("2026-11-17T00:10:00.000Z", "V", "V")
+    assert late["sun_state"] == "B"
+    assert early["evidence_source"] == late["evidence_source"] == "computed_nominal"
+
+
+def test_catalog_series_covers_the_whole_mission_in_five_minute_rows(pipeline, monkeypatch):
+    monkeypatch.setattr("app.precompute.geometry.prepared_terrain", lambda request: SyntheticSphere(request))
+    flat_horizon_sky(pipeline, monkeypatch, lambda t: 1. if t.minute < 30 else -1.)
+    series = pipeline.prepared_series(query(illumination_model="solar_disc", duration_hours=2))
+    rows = series["rows"]
+    assert series["evidence_source"] == "prepared_nominal" and series["sampling_minutes"] == 5
+    assert len(rows) == 24 and rows[0]["start_utc"] == "2026-11-17T00:00:00.000Z"
+    assert set(rows[0]) == set(pipeline.SERIES_FIELDS)
+    assert [row["sun_state"] for row in rows[:12]] == ["V"]*6 + ["B"]*6
+    with pytest.raises(DomainError, match="SERIES_TOO_LONG"):
+        pipeline.prepared_series(query(illumination_model="solar_disc", duration_hours=40*24))
+    monkeypatch.setattr("app.precompute.geometry.prepared_terrain", lambda request: None)
+    with pytest.raises(DomainError, match="INSTANT_NOT_PREPARED"):
+        pipeline.prepared_series(query(illumination_model="solar_disc"))
 
 
 def test_visual_sky_api_normalizes_month_in_utc_without_running_analysis(pipeline, monkeypatch):
