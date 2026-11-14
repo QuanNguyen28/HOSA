@@ -62,7 +62,7 @@ import type {
 import type { TerrainWindow } from "../hooks/useTerrainWindow";
 import { getLunarSurfaceTextures } from "../lib/lunarSurfaceTextures";
 import { terrainShadowFragment } from "../lib/terrainShadowShader";
-import { SPACE_COLOR, displayLuminance, earthshineStrength, withGlobeDayNight, withTerrainLighting } from "../lib/moonShading";
+import { SPACE_COLOR, withGlobeDayNight, withTerrainDayNight } from "../lib/moonShading";
 import { NEAR_SHADOW_SIZE, TERRAIN_SHADOW_SIZE, terrainShadowHalfSize, terrainShadowVerticalHalfSize, updateTerrainShadow } from "../lib/terrainLighting";
 import { sceneContent, terrainCameraPose } from "../lib/terrainCamera";
 import type { TerrainGeometryMetadata } from "../lib/terrainGeometry";
@@ -213,14 +213,13 @@ function LunarTerrainMaterial({
       shadowSide={DoubleSide}
       toneMapped={false}
       onBeforeCompile={(shader) => {
-        shader.fragmentShader = withTerrainLighting(
-          terrainShadowFragment(shader.fragmentShader),
-          ShaderChunk.lights_fragment_begin,
-          // Mean of the procedural albedo texture (0.55 × 184/255) times the tint.
-          0.55 * (184 / 255) * displayLuminance(color),
+        shader.fragmentShader = withTerrainDayNight(
+          terrainShadowFragment(shader.fragmentShader), ShaderChunk.lights_fragment_begin,
+          // Procedural albedo texture mean (0.55 × 184/255) under a ~0.75 tint.
+          0.55 * (184 / 255) * 0.75,
         );
       }}
-      customProgramCacheKey={() => `terrain-reference-light-v1-${color}`}
+      customProgramCacheKey={() => "terrain-day-night-v3"}
     />
   );
 }
@@ -428,16 +427,6 @@ function DynamicTerrain({
     );
   }, [coordinate, groundSky, terrain.geometry, time]);
 
-  const earthshine = useMemo(() => {
-    if (!terrain.geometry || !groundSky) return null;
-    const earth = skyDirectionToTerrainAxes(
-      groundSky.earth.azimuthDeg,
-      groundSky.earth.elevationDeg,
-      terrain.geometry,
-    );
-    const sun = { x: localSun[0], y: localSun[1], z: localSun[2] };
-    return { x: earth.x, y: earth.y, z: earth.z, strength: earthshineStrength(sun, earth) };
-  }, [groundSky, terrain.geometry, localSun]);
   const sunIntensity = enhancedLight ? 8 : 4.4;
 
   useEffect(() => {
@@ -551,13 +540,6 @@ function DynamicTerrain({
         shadow-normalBias={0.0005}
         shadow-radius={1.5}
       />
-      {/* Earthshine from the Earth's direction; the terrain shader reads it as
-          directional light 2 with intensity = reference earthshine strength. */}
-      {earthshine && earthshine.strength > 0 && <directionalLight
-        position={[earthshine.x * lightDistance, earthshine.y * lightDistance, earthshine.z * lightDistance]}
-        intensity={earthshine.strength}
-        color="#ffffff"
-      />}
       {horizonTerrainMesh && (
         <mesh {...terrainInteraction} geometry={horizonTerrainMesh.geometry} position={[0, -0.012, 0]} receiveShadow castShadow>
           {imagery && horizonTerrain ? <MoonTrekTerrainMaterial terrain={horizonTerrain} fallback={<LunarTerrainMaterial color="#aaa79f" bumpScale={0.0002}/>}/> : <LunarTerrainMaterial color="#aaa79f" bumpScale={0.0002}/>}
