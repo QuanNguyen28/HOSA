@@ -51,13 +51,16 @@ def cached_display(key, compute, *, method, package_key=None):
 
 
 def mesh_response(latitude, longitude, radius, samples, detail):
-    from app.services.lunarsight.point import _terrain_window_uncached, METHOD_VERSION
+    from app.services.lunarsight.point import _terrain_window_uncached, METHOD_VERSION, REGIONAL_COVERAGE_VERSION
     if not -90 <= latitude <= 90 or not -180 <= longitude <= 360:
         raise ValueError("Invalid lunar coordinate")
     if not .5 <= radius <= 300 or samples not in {65, 129, 257, 401, 513} or detail not in {"best", "regional"}:
         raise ValueError("Invalid terrain window parameters")
     key = mesh_key(latitude, longitude, radius, samples, detail)
-    return cached_display(key, lambda: _terrain_window_uncached(latitude, longitude, radius, samples, detail), method=METHOD_VERSION)
+    # Regional windows changed source selection; best windows (and their
+    # packaged meshes) keep the original method key.
+    method = METHOD_VERSION if detail == "best" else f"{METHOD_VERSION}+{REGIONAL_COVERAGE_VERSION}"
+    return cached_display(key, lambda: _terrain_window_uncached(latitude, longitude, radius, samples, detail), method=method)
 
 
 def cap_response(samples):

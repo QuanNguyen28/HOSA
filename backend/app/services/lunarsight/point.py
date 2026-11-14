@@ -8,6 +8,10 @@ from typing import Any
 
 
 METHOD_VERSION = "terrain-point-api-0.1.0"
+# Regional (context) windows fall back to a coarser DEM that covers more of the
+# window; their display cache key carries this version (see precompute.display).
+REGIONAL_COVERAGE_VERSION = "regional-coverage-1"
+REGIONAL_MIN_COVERAGE = 0.999
 LUNAR_REFERENCE_RADIUS_M = 1_737_400.0
 
 
@@ -261,6 +265,7 @@ def _terrain_window_uncached(
     except ImportError as error:
         raise RuntimeError("Scientific terrain dependencies are not installed") from error
 
+    best: tuple[float, dict[str, Any]] | None = None
     for source in terrain_sources():
         # A wide context mesh must not inherit the finite footprint of a local
         # 5 m tile. Use the continuous south-polar DEM for that LOD instead.
@@ -311,7 +316,7 @@ def _terrain_window_uncached(
                 longitude, latitude, row_lon, row_lat
             )
             encoded = [None if not np.isfinite(value) else round(float(value), 3) for value in values.ravel()]
-            return {
+            payload = {
                 "coverage_status": "COVERED",
                 "coordinate": {"latitude_deg": latitude, "longitude_e_deg": longitude},
                 "dataset_id": source["dataset_id"],
@@ -352,7 +357,18 @@ def _terrain_window_uncached(
                     "The transported grid is bilinearly resampled for display; use the native DEM and validated horizon engine for scientific decisions."
                 ],
             }
+            # Wide context rings around points near 80 S run past the 80 m
+            # south-polar DEM (half of a 300 km ring at 81.5 S is NaN). Keep
+            # the finest source that covers the window; otherwise use the one
+            # covering most of it (the 240 m DEM reaches 60 S).
+            fraction = float(finite.mean())
+            if detail != "regional" or fraction >= REGIONAL_MIN_COVERAGE:
+                return payload
+            if best is None or fraction > best[0]:
+                best = (fraction, payload)
 
+    if best is not None:
+        return best[1]
     return {
         "coverage_status": "UNKNOWN",
         "coordinate": {"latitude_deg": latitude, "longitude_e_deg": longitude},

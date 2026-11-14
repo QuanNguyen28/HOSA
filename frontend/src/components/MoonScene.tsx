@@ -29,8 +29,9 @@ import {
   SRGBColorSpace,
   Uint32BufferAttribute,
   UnsignedByteType,
-  Vector3,
   ShaderChunk,
+  Vector2,
+  Vector3,
 } from "three";
 
 import {
@@ -62,6 +63,7 @@ import type {
 import type { TerrainWindow } from "../hooks/useTerrainWindow";
 import { getLunarSurfaceTextures } from "../lib/lunarSurfaceTextures";
 import { terrainShadowFragment } from "../lib/terrainShadowShader";
+import { RING_SEAM, RING_TUCK_KM, ringFade, ringTuck, withRingFade } from "../lib/terrainSeams";
 import { SPACE_COLOR, withGlobeDayNight, withTerrainDayNight } from "../lib/moonShading";
 import { NEAR_SHADOW_SIZE, TERRAIN_SHADOW_SIZE, terrainShadowHalfSize, terrainShadowVerticalHalfSize, updateTerrainShadow } from "../lib/terrainLighting";
 import { sceneContent, terrainCameraPose } from "../lib/terrainCamera";
@@ -150,34 +152,45 @@ function SceneRig({
 function useTerrainMesh(
   terrain?: TerrainWindow | null,
   innerRadiusSceneUnits = 0,
+  tuckSceneUnits = 0,
 ) {
   const terrainMesh = useMemo(() => {
     const grid = terrain?.grid;
     const metadata = terrain?.geometry;
     if (!grid || !metadata) return null;
     const mesh = buildTerrainMeshData(grid, metadata);
+    // Sink only the part of this ring that lies under the finer ring; the rest
+    // keeps its true height so the two meet without a step (see terrainSeams).
+    const positions = Float32Array.from(mesh.positions);
+    if (innerRadiusSceneUnits > 0 && tuckSceneUnits > 0) {
+      for (let offset = 0; offset < positions.length; offset += 3) {
+        positions[offset + 1] -= ringTuck(
+          Math.hypot(positions[offset], positions[offset + 2]), innerRadiusSceneUnits, tuckSceneUnits);
+      }
+    }
     const output = new BufferGeometry();
-    output.setAttribute("position", new Float32BufferAttribute(mesh.positions, 3));
-    const uvs = new Float32Array((mesh.positions.length / 3) * 2);
-    for (let offset = 0; offset < mesh.positions.length; offset += 3) {
+    output.setAttribute("position", new Float32BufferAttribute(positions, 3));
+    const uvs = new Float32Array((positions.length / 3) * 2);
+    for (let offset = 0; offset < positions.length; offset += 3) {
       const uvOffset = (offset / 3) * 2;
       // Stable physical texture scale across every LOD. The texture changes
       // shading only; the NASA DEM remains the sole source of mesh geometry.
-      uvs[uvOffset] = mesh.positions[offset] / 0.65;
-      uvs[uvOffset + 1] = mesh.positions[offset + 2] / 0.65;
+      uvs[uvOffset] = positions[offset] / 0.65;
+      uvs[uvOffset + 1] = positions[offset + 2] / 0.65;
     }
     output.setAttribute("uv", new Float32BufferAttribute(uvs, 2));
     const outerRadius = Math.min(mesh.widthSceneUnits, mesh.depthSceneUnits) * 0.5;
+    const overlapStart = innerRadiusSceneUnits * RING_SEAM.overlapStart;
     const ringIndices: number[] = [];
     for (let offset = 0; offset < mesh.indices.length; offset += 3) {
       const triangle = [mesh.indices[offset], mesh.indices[offset + 1], mesh.indices[offset + 2]];
       const radii = triangle.map((index) => {
         const positionOffset = index * 3;
-        return Math.hypot(mesh.positions[positionOffset], mesh.positions[positionOffset + 2]);
+        return Math.hypot(positions[positionOffset], positions[positionOffset + 2]);
       });
       if (
         radii.every((radius) => radius <= outerRadius) &&
-        (innerRadiusSceneUnits <= 0 || radii.every((radius) => radius >= innerRadiusSceneUnits))
+        (innerRadiusSceneUnits <= 0 || radii.every((radius) => radius >= overlapStart))
       ) {
         ringIndices.push(...triangle);
       }
@@ -186,8 +199,9 @@ function useTerrainMesh(
     output.computeVertexNormals();
     output.computeBoundingBox();
     output.computeBoundingSphere();
-    return { geometry: output, mesh };
-  }, [innerRadiusSceneUnits, terrain]);
+    const spacing = grid.spacing_m / 1_000;
+    return { geometry: output, mesh, fade: ringFade(outerRadius, spacing) };
+  }, [innerRadiusSceneUnits, terrain, tuckSceneUnits]);
 
   useEffect(() => () => terrainMesh?.geometry.dispose(), [terrainMesh]);
   return terrainMesh;
@@ -196,9 +210,15 @@ function useTerrainMesh(
 function LunarTerrainMaterial({
   color = "#c4c0b7",
   bumpScale = 0.0006,
+  fade,
+  offset,
 }: {
   color?: string;
   bumpScale?: number;
+  /** Dither-out band [start, end] in scene units; see terrainSeams. */
+  fade?: [number, number];
+  /** Polygon offset so finer rings win where rings overlap. */
+  offset?: number;
 }) {
   const textures = useMemo(() => getLunarSurfaceTextures(), []);
   return (
@@ -212,14 +232,17 @@ function LunarTerrainMaterial({
       metalness={0}
       shadowSide={DoubleSide}
       toneMapped={false}
+      transparent={fade !== undefined}
+      polygonOffset={offset !== undefined}
+      polygonOffsetFactor={offset ?? 0}
+      polygonOffsetUnits={offset ?? 0}
       onBeforeCompile={(shader) => {
+        shader.uniforms.ringFade = { value: new Vector2(fade?.[0] ?? 0, fade?.[1] ?? 0) };
+        withRingFade(shader);
         shader.fragmentShader = withTerrainDayNight(
-          terrainShadowFragment(shader.fragmentShader), ShaderChunk.lights_fragment_begin,
-          // Procedural albedo texture mean (0.55 × 184/255) under a ~0.75 tint.
-          0.55 * (184 / 255) * 0.75,
-        );
+          terrainShadowFragment(shader.fragmentShader), ShaderChunk.lights_fragment_begin);
       }}
-      customProgramCacheKey={() => "terrain-day-night-v3"}
+      customProgramCacheKey={() => "terrain-day-night-ring-fade"}
     />
   );
 }
@@ -395,20 +418,12 @@ function DynamicTerrain({
   const contextTerrain = terrainLods?.[3] ?? null;
   const regionalTerrain = terrainLods?.[4] ?? null;
   const horizonTerrain = terrainLods?.[5] ?? null;
-  const midTerrainMesh = useTerrainMesh(midTerrain, (terrain.radius_km ?? 1.5) * 0.94);
-  const farTerrainMesh = useTerrainMesh(farTerrain, (midTerrain?.radius_km ?? 6) * 0.94);
-  const contextTerrainMesh = useTerrainMesh(
-    contextTerrain,
-    (farTerrain?.radius_km ?? 24) * 0.9,
-  );
-  const regionalTerrainMesh = useTerrainMesh(
-    regionalTerrain,
-    (contextTerrain?.radius_km ?? 48) * 0.94,
-  );
-  const horizonTerrainMesh = useTerrainMesh(
-    horizonTerrain,
-    (regionalTerrain?.radius_km ?? 120) * 0.94,
-  );
+  // Each ring starts under the finer ring inside it and tucks that part away.
+  const midTerrainMesh = useTerrainMesh(midTerrain, terrain.radius_km ?? 1.5, RING_TUCK_KM[0]);
+  const farTerrainMesh = useTerrainMesh(farTerrain, midTerrain?.radius_km ?? 6, RING_TUCK_KM[1]);
+  const contextTerrainMesh = useTerrainMesh(contextTerrain, farTerrain?.radius_km ?? 24, RING_TUCK_KM[2]);
+  const regionalTerrainMesh = useTerrainMesh(regionalTerrain, contextTerrain?.radius_km ?? 48, RING_TUCK_KM[3]);
+  const horizonTerrainMesh = useTerrainMesh(horizonTerrain, regionalTerrain?.radius_km ?? 120, RING_TUCK_KM[4]);
 
   const localSun = useMemo(() => {
     if (!terrain.geometry) return [0.35, 0.7, 0.25] as const;
@@ -426,8 +441,6 @@ function DynamicTerrain({
       terrain.geometry,
     );
   }, [coordinate, groundSky, terrain.geometry, time]);
-
-  const sunIntensity = enhancedLight ? 8 : 4.4;
 
   useEffect(() => {
     if (terrainMesh) onReady();
@@ -450,9 +463,9 @@ function DynamicTerrain({
     if (sunLight.current) updateTerrainShadow(sunLight.current, shadowHalfSize, shadowVerticalHalfSize);
   }, [shadowHalfSize, shadowVerticalHalfSize]);
   // Near cascade: the wide map spans 300 km, so at a 1° Sun one texel covers
-  // ~800 m of ground and flat ground shadows itself. In this orthographic
-  // light view every occluder of a receiver shares its x/y, so distant
-  // ridges still shadow the near ground.
+  // ~800 m of ground and flat sunlit ground shadows itself. In this
+  // orthographic light view every occluder of a receiver shares its x/y, so
+  // distant ridges still shadow the near ground.
   const nearShadowMeshes = [terrainMesh?.mesh, midTerrainMesh?.mesh];
   const nearShadowHalfSize = terrainShadowHalfSize(nearShadowMeshes);
   const nearShadowVerticalHalfSize = terrainShadowVerticalHalfSize(nearShadowMeshes, localSun[1]);
@@ -506,7 +519,7 @@ function DynamicTerrain({
         ref={sunLight}
         castShadow
         position={lightPosition}
-        intensity={sunIntensity}
+        intensity={enhancedLight ? 8 : 4.4}
         color="#fff2d9"
         shadow-mapSize-width={TERRAIN_SHADOW_SIZE}
         shadow-mapSize-height={TERRAIN_SHADOW_SIZE}
@@ -521,7 +534,7 @@ function DynamicTerrain({
         shadow-radius={1.5}
       />
       {/* Same Sun, near shadow cascade only: the terrain shader reads its
-          shadow, not its light (directional light 1). */}
+          shadow (directional light 1), not its light. */}
       <directionalLight
         ref={nearSunLight}
         castShadow
@@ -540,45 +553,34 @@ function DynamicTerrain({
         shadow-normalBias={0.0005}
         shadow-radius={1.5}
       />
-      {horizonTerrainMesh && (
-        <mesh {...terrainInteraction} geometry={horizonTerrainMesh.geometry} position={[0, -0.012, 0]} receiveShadow castShadow>
-          {imagery && horizonTerrain ? <MoonTrekTerrainMaterial terrain={horizonTerrain} fallback={<LunarTerrainMaterial color="#aaa79f" bumpScale={0.0002}/>}/> : <LunarTerrainMaterial color="#aaa79f" bumpScale={0.0002}/>}
-        </mesh>
-      )}
-      {regionalTerrainMesh && (
-        <mesh {...terrainInteraction} geometry={regionalTerrainMesh.geometry} position={[0, -0.009, 0]} receiveShadow castShadow>
-          {imagery && regionalTerrain ? <MoonTrekTerrainMaterial terrain={regionalTerrain} fallback={<LunarTerrainMaterial color="#b2afa7" bumpScale={0.00025}/>}/> : <LunarTerrainMaterial color="#b2afa7" bumpScale={0.00025}/>}
-        </mesh>
-      )}
-      {contextTerrainMesh && (
-        <mesh
-          geometry={contextTerrainMesh.geometry}
-          position={[0, -0.0045, 0]}
-          receiveShadow
-          castShadow
-          {...terrainInteraction}
-        >
-          {imagery && contextTerrain ? <MoonTrekTerrainMaterial terrain={contextTerrain} fallback={<LunarTerrainMaterial color="#b8b5ad" bumpScale={0.0003}/>}/> : <LunarTerrainMaterial color="#b8b5ad" bumpScale={0.0003}/>}
-        </mesh>
-      )}
-      {farTerrainMesh && (
-        <mesh {...terrainInteraction} geometry={farTerrainMesh.geometry} position={[0, -0.003, 0]} receiveShadow castShadow>
-          {imagery && farTerrain ? <MoonTrekTerrainMaterial terrain={farTerrain} fallback={<LunarTerrainMaterial color="#bdb9b1" bumpScale={0.00035}/>}/> : <LunarTerrainMaterial color="#bdb9b1" bumpScale={0.00035}/>}
-        </mesh>
-      )}
-      {midTerrainMesh && (
-        <mesh {...terrainInteraction} geometry={midTerrainMesh.geometry} position={[0, -0.0015, 0]} receiveShadow castShadow>
-          {imagery && midTerrain ? <MoonTrekTerrainMaterial terrain={midTerrain} fallback={<LunarTerrainMaterial color="#c1bdb5" bumpScale={0.00045}/>}/> : <LunarTerrainMaterial color="#c1bdb5" bumpScale={0.00045}/>}
-        </mesh>
-      )}
-      <mesh
-        {...terrainInteraction}
-        geometry={terrainMesh.geometry}
-        castShadow
-        receiveShadow
-      >
-        {imagery ? <MoonTrekTerrainMaterial terrain={terrain} onStatus={onImageryStatus} fallback={<LunarTerrainMaterial color="#c5c1b8" bumpScale={0.0006}/>}/> : <LunarTerrainMaterial color="#c5c1b8" bumpScale={0.0006}/>}
-      </mesh>
+      <directionalLight
+        position={[-lightPosition[0], Math.max(2, -lightPosition[1]), -lightPosition[2]]}
+        intensity={enhancedLight ? 0.035 : 0.012}
+        color="#769ab1"
+      />
+      {[
+        { ring: horizonTerrainMesh, window: horizonTerrain, color: "#aaa79f", bump: 0.0002 },
+        { ring: regionalTerrainMesh, window: regionalTerrain, color: "#b2afa7", bump: 0.00025 },
+        { ring: contextTerrainMesh, window: contextTerrain, color: "#b8b5ad", bump: 0.0003 },
+        { ring: farTerrainMesh, window: farTerrain, color: "#bdb9b1", bump: 0.00035 },
+        { ring: midTerrainMesh, window: midTerrain, color: "#c1bdb5", bump: 0.00045 },
+        { ring: terrainMesh, window: terrain, color: "#c5c1b8", bump: 0.0006, status: onImageryStatus },
+      ].map(({ ring, window, color, bump, status }, index) => {
+        if (!ring) return null;
+        // Rings draw coarse to fine and before every overlay (negative
+        // renderOrder); finer rings win the shared band and fade out over
+        // their edge; the outermost ring keeps its edge.
+        const fade = index === 0 ? undefined : ring.fade;
+        const offset = -1 - index;
+        const relief = <LunarTerrainMaterial color={color} bumpScale={bump} fade={fade} offset={offset}/>;
+        return (
+          <mesh key={index} {...terrainInteraction} geometry={ring.geometry} renderOrder={index - 6} receiveShadow castShadow>
+            {imagery && window
+              ? <MoonTrekTerrainMaterial terrain={window} onStatus={status} color={color} fade={fade} offset={offset} fallback={relief}/>
+              : relief}
+          </mesh>
+        );
+      })}
       {!overview && <group position={observer}>
         <mesh>
           <sphereGeometry args={[0.0025, 16, 16]} />

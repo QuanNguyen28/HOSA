@@ -3,7 +3,9 @@ import { useFrame } from '@react-three/fiber';
 import { BufferGeometry, CanvasTexture, DoubleSide, Float32BufferAttribute, Frustum, Matrix4, PerspectiveCamera, Quaternion, SRGBColorSpace, ShaderChunk, Sphere, Texture, Vector2, Vector3, Vector4 } from 'three';
 import { coordinateToVector, MOON_SCENE_RADIUS } from '../lib/lunar';
 import { terrainShadowFragment } from '../lib/terrainShadowShader';
-import { TERRAIN_DISPLAY, withGlobeDayNight, withTerrainDayNight } from '../lib/moonShading';
+import { withGlobeDayNight, withTerrainDayNight } from '../lib/moonShading';
+import { withRingFade } from '../lib/terrainSeams';
+
 
 import { globeBounds, POLAR_CAP, polarAtlas, polarCapCenter, polarRho, selectGlobeTiles, southPolarXY, tileImage, tileUrl, trekCatalog, type AtlasPlan, type TrekLayer, type TrekTile } from '../lib/moonTrek';
 import type { TerrainWindow } from '../hooks/useTerrainWindow';
@@ -234,13 +236,16 @@ export function MoonTrekGlobe({elevationMap,onBaseReady,onStatus}: {
   </group>;
 }
 
-export function MoonTrekTerrainMaterial({terrain,fallback,onStatus}: {
-  terrain:TerrainWindow;fallback:ReactNode;onStatus?:(status:ImageryStatus)=>void;
+export function MoonTrekTerrainMaterial({terrain,fallback,onStatus,fade,offset}: {
+  terrain:TerrainWindow;fallback:ReactNode;onStatus?:(status:ImageryStatus)=>void;color?:string;
+  /** Fade band and polygon offset of a nested terrain ring (see terrainSeams). */
+  fade?:[number,number];offset?:number;
 }) {
-  const [atlas,setAtlas]=useState<{texture:CanvasTexture;bounds:[number,number,number,number]}|null>(null);
+  const [atlas,setAtlas]=useState<{photo:PolarAtlas;fill:PolarAtlas|null}|null>(null);
   const x=terrain.geometry?.center_x_m, y=terrain.geometry?.center_y_m, radius=(terrain.radius_km??1.5)*1000;
   useEffect(()=>{
-    let cancelled=false, owned:CanvasTexture|null=null;
+    let cancelled=false;
+    const owned:CanvasTexture[]=[];
     setAtlas(null);onStatus?.('loading');
     if(x==null || y==null || terrain.geometry?.projection!=='spherical south polar stereographic') {
       onStatus?.('unavailable');return;
@@ -248,27 +253,40 @@ export function MoonTrekTerrainMaterial({terrain,fallback,onStatus}: {
     trekCatalog().then(async catalog=>{
       const plan=polarAtlas(catalog.layers,x,y,radius);
       if(!plan)throw new Error('No imagery coverage');
-      const atlas=await loadPolarAtlas(plan);
-      if(cancelled){atlas.texture.dispose();return;}
-      owned=atlas.texture;
-      setAtlas(atlas);onStatus?.('ready');
+      // Near the pole the NAC mosaic was largely imaged in shadow, so its dark
+      // pixels are filled from the illumination-composite WAC mosaic.
+      const fillPlan=plan.layer.id==='nac-south' ? polarAtlas(catalog.layers.filter(l=>l.id==='wac-south'),x,y,radius) : null;
+      const [photo,fill]=await Promise.all([loadPolarAtlas(plan), fillPlan ? loadPolarAtlas(fillPlan).catch(()=>null) : null]);
+      for(const item of [photo,fill]) if(item) owned.push(item.texture);
+      if(cancelled)return;
+      setAtlas({photo,fill});onStatus?.('ready');
     }).catch(()=>{if(!cancelled)onStatus?.('unavailable');});
-    return ()=>{cancelled=true;owned?.dispose();};
+    return ()=>{cancelled=true;owned.forEach(texture=>texture.dispose());};
   },[x,y,radius,terrain.geometry?.projection,onStatus]);
   if(!atlas)return <>{fallback}</>;
-  // Moon view's day/night ratio (see lib/moonShading): ground in the
-  // simulated shadow or facing away from the mission-time Sun keeps 30% of
-  // its sunlit colour; the photo only textures a fixed regolith albedo and
-  // DEM relief keeps craters readable in shadow.
-  return <meshStandardMaterial key={atlas.texture.uuid} map={atlas.texture} color="#ffffff"
-    roughness={0.98} metalness={0} shadowSide={DoubleSide} toneMapped={false}
-    customProgramCacheKey={()=>'trek-terrain-day-night-v3'} onBeforeCompile={shader=>{
-    const b=atlas.bounds;
+  // Moon view's day/night look (see lib/moonShading): the photo with its own
+  // contrast, sunlit ground as recorded and ground in the simulated shadow at
+  // 30%.
+  const {photo,fill}=atlas;
+  return <meshStandardMaterial key={photo.texture.uuid} map={photo.texture} color="#ffffff" toneMapped={false}
+    roughness={0.98} metalness={0} shadowSide={DoubleSide}
+    transparent={fade!==undefined} polygonOffset={offset!==undefined} polygonOffsetFactor={offset??0} polygonOffsetUnits={offset??0}
+    customProgramCacheKey={()=>`trek-terrain-day-night-ring-fade-${fill?'fill':'single'}`} onBeforeCompile={shader=>{
+    const b=photo.bounds, f=fill?.bounds ?? b;
     shader.uniforms.trekBounds={value:new Vector4(b[0],b[1],b[2]-b[0],b[3]-b[1])};
+    shader.uniforms.fillBounds={value:new Vector4(f[0],f[1],f[2]-f[0],f[3]-f[1])};
+    shader.uniforms.fillMap={value:fill?.texture ?? photo.texture};
     shader.uniforms.trekOrigin={value:new Vector2(x,y)};
-    shader.vertexShader='uniform vec4 trekBounds;\nuniform vec2 trekOrigin;\n'+shader.vertexShader;
+    shader.uniforms.ringFade={value:new Vector2(fade?.[0]??0,fade?.[1]??0)};
+    withRingFade(shader);
+    shader.vertexShader='uniform vec4 trekBounds;\nuniform vec4 fillBounds;\nuniform vec2 trekOrigin;\nvarying vec2 vFillUv;\n'+shader.vertexShader;
     shader.vertexShader=shader.vertexShader.replace('#include <uv_vertex>',`#include <uv_vertex>
-      vMapUv = (vec2(trekOrigin.x + position.x * 1000.0, trekOrigin.y - position.z * 1000.0) - trekBounds.xy) / trekBounds.zw;`);
-    shader.fragmentShader=withTerrainDayNight(terrainShadowFragment(shader.fragmentShader),ShaderChunk.lights_fragment_begin,TERRAIN_DISPLAY.polarMosaicMean);
+      vec2 trekXY = vec2(trekOrigin.x + position.x * 1000.0, trekOrigin.y - position.z * 1000.0);
+      vMapUv = (trekXY - trekBounds.xy) / trekBounds.zw;
+      vFillUv = (trekXY - fillBounds.xy) / fillBounds.zw;`);
+    shader.fragmentShader='uniform sampler2D fillMap;\nvarying vec2 vFillUv;\n'+withTerrainDayNight(terrainShadowFragment(shader.fragmentShader),ShaderChunk.lights_fragment_begin)
+      .replace('#include <map_fragment>',fill ? `#include <map_fragment>
+        float photoLuma = dot(sRGBTransferOETF(vec4(diffuseColor.rgb, 1.0)).rgb, vec3(0.2126, 0.7152, 0.0722));
+        diffuseColor.rgb = mix(texture2D(fillMap, vFillUv).rgb, diffuseColor.rgb, smoothstep(0.04, 0.12, photoLuma));` : '#include <map_fragment>');
   }}/>;
 }

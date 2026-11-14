@@ -34,6 +34,7 @@ _SOURCES = {source["dataset_id"]: source["path"] for source in terrain_sources()
 RAW_SITE01 = _SOURCES["Site01_dem"]
 RAW_SITE06 = _SOURCES["Site06_dem"]
 RAW_DEM80 = _SOURCES["dem80"]
+RAW_DEM240 = _SOURCES["dem240"]
 
 
 def test_site_catalog_has_versioned_provenance():
@@ -138,6 +139,18 @@ def test_regional_terrain_window_uses_continuous_south_polar_dem():
     assert result["native_resolution_m"] == 80
     assert result["detail"] == "regional"
     assert result["grid"]["valid_fraction"] > 0.99
+
+
+@pytest.mark.skipif(not (RAW_DEM80.is_file() and RAW_DEM240.is_file()), reason="optional south-polar DEMs are not installed")
+def test_regional_window_near_80s_uses_the_dem_that_covers_it():
+    # A 300 km context ring around 81.5 S runs far past the 80 m DEM (80 S to
+    # the pole); half of it used to be blank. The 240 m DEM reaches 60 S.
+    wide = terrain_window(-81.517, 238.0487, 300.0, 65, "regional")
+    assert wide["dataset_id"] == "dem240"
+    assert wide["grid"]["valid_fraction"] > 0.999
+    near = terrain_window(-81.517, 238.0487, 24.0, 65, "regional")
+    assert near["dataset_id"] == "dem80"
+    assert near["grid"]["valid_fraction"] > 0.999
 
 
 @pytest.mark.skipif(not RAW_DEM80.is_file(), reason="optional south-polar DEM is not installed")

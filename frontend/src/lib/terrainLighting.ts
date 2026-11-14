@@ -2,7 +2,7 @@ import type { DirectionalLight } from "three";
 import type { TerrainMeshData } from "./terrainGeometry";
 
 export const TERRAIN_SHADOW_SIZE = 4096;
-/** Near shadow cascade around the observer (Ground and Pole focus). */
+/** Near shadow cascade around the observer (see DynamicTerrain). */
 export const NEAR_SHADOW_SIZE = 2048;
 
 /** Enclose all rendered circular LODs, including their curved vertical extent. */
