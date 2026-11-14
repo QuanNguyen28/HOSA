@@ -289,7 +289,6 @@ export default function Stage3D({
         )}
       </div>
 
-      {imagery && <a className="absolute bottom-4 left-4 z-10 border border-line bg-black/80 px-2 py-1 text-[10px] text-mute hover:text-soft" href="https://trek.nasa.gov/tiles/apidoc/trekAPI.html?body=moon" target="_blank" rel="noreferrer">{tr('Imagery: NASA/JPL Moon Trek · LRO/LROC')}</a>}
 
       {!ready && (
         <div className="pointer-events-none absolute inset-0 grid place-items-center bg-black font-mono text-[11px] tracking-widest text-mute">
