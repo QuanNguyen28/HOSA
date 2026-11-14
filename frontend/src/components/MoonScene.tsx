@@ -76,6 +76,7 @@ type MoonSceneProps = {
   sites: Site[];
   selected: LunarCoordinate | null;
   selectedSiteId: string | null;
+  terrainCoordinate?: LunarCoordinate;
   terrainWindow: TerrainWindow | null;
   terrainLods?: Array<TerrainWindow | null>;
   southPolarTerrain?: SouthPolarTerrain | null;
@@ -124,6 +125,7 @@ function SceneRig({
   const columnAzimuth = geometry?.column_azimuth_deg;
   const rowAzimuth = geometry?.row_azimuth_deg;
   useLayoutEffect(() => {
+    if (preset !== "orbit" && (columnAzimuth === undefined || rowAzimuth === undefined)) return;
     const pose = terrainCameraPose(preset, columnAzimuth === undefined || rowAzimuth === undefined
       ? null : { column_azimuth_deg: columnAzimuth, row_azimuth_deg: rowAzimuth } as TerrainGeometryMetadata);
     // Trackball can roll camera.up while viewing the globe. Local controls
@@ -352,6 +354,7 @@ function DynamicTerrain({
   overview = false,
   sites = [],
   selectedSiteId = null,
+  selected,
   onSelect,
   onHover,
   onReady,
@@ -367,12 +370,14 @@ function DynamicTerrain({
   overview?: boolean;
   sites?: Site[];
   selectedSiteId?: string | null;
+  selected?: LunarCoordinate | null;
   onSelect?: (coordinate: LunarCoordinate, siteId?: string) => void;
   onHover?: (coordinate: LunarCoordinate | null) => void;
   onReady: () => void;
   imagery?: boolean;
   onImageryStatus?: (status: ImageryStatus) => void;
 }) {
+  const { t: tr } = useTranslation();
   const sunLight = useRef<DirectionalLight>(null);
   const terrainMesh = useTerrainMesh(terrain);
   const midTerrain = terrainLods?.[1] ?? null;
@@ -460,6 +465,10 @@ function DynamicTerrain({
     onPointerOut: () => onHover?.(null),
     onClick: handleTerrainClick,
   };
+  const visibleSites = overview ? sites : sites.filter((site) => site.id === selectedSiteId);
+  const markers = selected && !selectedSiteId
+    ? [...visibleSites, { ...selected, id: "custom", name: tr("Custom point") }]
+    : visibleSites;
 
   return (
     <group>
@@ -578,10 +587,10 @@ function DynamicTerrain({
           />
         </>
       )}
-      {overview && terrain.geometry && sites.map((site) => {
+      {terrain.geometry && markers.map((site) => {
         const [x, z] = coordinateInTerrainFrame(site, coordinate, terrain.geometry!);
         const distance = Math.hypot(x, z);
-        if (distance > (horizonTerrain?.radius_km ?? 300) * 0.96) return null;
+        if (distance > (overview ? horizonTerrain?.radius_km ?? 300 : terrain.radius_km ?? 1.5) * 0.96) return null;
         const terrainAtSite = [
           terrainMesh,
           midTerrainMesh,
@@ -594,14 +603,16 @@ function DynamicTerrain({
           candidate.mesh.depthSceneUnits,
         ) * 0.48);
         const y = terrainHeightAt(terrainAtSite ?? horizonTerrainMesh, x, z) ?? 0;
-        const active = site.id === selectedSiteId;
+        const active = site.id === selectedSiteId || site.id === "custom";
+        const scale = overview ? 1 : 0.004;
         return (
-          <group key={site.id} position={[x, y + 0.22, z]}>
+          <group key={site.id} position={[x, y + 0.22 * scale, z]} scale={scale}>
             <mesh
               rotation={[-Math.PI / 2, 0, 0]}
               onClick={(event) => {
+                if (!isSurfaceSelectionGesture(event.delta)) return;
                 event.stopPropagation();
-                onSelect?.(site, site.id);
+                onSelect?.(site, site.id === "custom" ? undefined : site.id);
               }}
             >
               <ringGeometry args={[active ? 3.2 : 1.8, active ? 4.4 : 2.7, 48]} />
@@ -1048,6 +1059,7 @@ function SiteMarker({
     >
       <mesh
         onClick={(event) => {
+          if (!isSurfaceSelectionGesture(event.delta)) return;
           event.stopPropagation();
           onSelect(site, site.id);
         }}
@@ -1246,11 +1258,12 @@ function Moon({
 export function MoonScene(props: MoonSceneProps) {
   const localTerrain =
     (props.cameraPreset === "surface" || props.cameraPreset === "south-pole") &&
-    props.selected !== null &&
+    !!props.terrainCoordinate &&
     props.terrainWindow?.coverage_status === "COVERED" &&
     !!props.terrainWindow.grid && !!props.terrainWindow.geometry;
-  const selectionKey = `${props.selected?.latitude}:${props.selected?.longitude}`;
-  const controlsKey = `${props.cameraPreset}:${selectionKey}`;
+  const frameKey = props.cameraPreset === "orbit" ? "moon"
+    : `${props.terrainCoordinate?.latitude}:${props.terrainCoordinate?.longitude}`;
+  const controlsKey = `${props.cameraPreset}:${frameKey}`;
   const content = sceneContent(props.cameraPreset, localTerrain);
   return (
     <Canvas
@@ -1280,16 +1293,17 @@ export function MoonScene(props: MoonSceneProps) {
         speed={0.08}
       />}
       <Suspense fallback={null}>
-        {content === "terrain" && props.terrainWindow && props.selected ? (
+        {content === "terrain" && props.terrainWindow && props.terrainCoordinate ? (
           <DynamicTerrain
             terrain={props.terrainWindow}
             terrainLods={props.terrainLods}
-            coordinate={props.selected}
+            coordinate={props.terrainCoordinate}
             time={props.time}
             enhancedLight={props.layers.enhancedLight}
             groundSky={props.groundSky}
             overview={props.cameraPreset === "south-pole"}
-            sites={props.sites}
+            sites={props.sites.filter((site) => site.id !== "custom")}
+            selected={props.selected}
             selectedSiteId={props.selectedSiteId}
             onSelect={props.onSelect}
             onHover={props.onHover}
@@ -1304,7 +1318,7 @@ export function MoonScene(props: MoonSceneProps) {
       <SceneRig
         preset={props.cameraPreset}
         geometry={props.terrainWindow?.geometry}
-        selectionKey={selectionKey}
+        selectionKey={frameKey}
       />
       {props.cameraPreset === "surface" ? (
         <OrbitControls
@@ -1330,6 +1344,7 @@ export function MoonScene(props: MoonSceneProps) {
       ) : props.cameraPreset === "south-pole" ? (
         <MapControls
           key={controlsKey}
+          enabled={localTerrain}
           makeDefault
           target={POLE_TARGET}
           enableDamping

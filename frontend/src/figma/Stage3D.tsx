@@ -1,5 +1,5 @@
 import { useTranslation } from "../i18n/language";
-import { useEffect, useMemo, useState } from "react";
+import { useLayoutEffect, useMemo, useState } from "react";
 
 import { MoonScene, type GroundSky } from "../components/MoonScene";
 import { useSiteAnalysis } from "../hooks/useSiteAnalysis";
@@ -39,12 +39,16 @@ const LAYERS: LayerState = {
   enhancedLight: true,
 };
 
-type PoleTerrain = {
-  coordinate: LunarCoordinate;
+type LocalTerrain = {
+  mode: Mode;
+  anchor: RendererSite;
   terrain: TerrainWindow;
   lods: Array<TerrainWindow | null>;
-  sky: GroundSky;
 };
+
+function sameCoordinate(a: LunarCoordinate | null | undefined, b: LunarCoordinate) {
+  return a?.latitude === b.latitude && a.longitude === b.longitude;
+}
 
 function toRendererSite(site: Site): RendererSite {
   return {
@@ -83,6 +87,12 @@ export default function Stage3D({
   );
   const selected = activeSite;
   const selectedSiteId = activeSite.id === "custom" ? null : activeSite.id;
+  // Keep the local terrain origin independent of what the user selects.
+  const [focus, setFocus] = useState(() => ({ mode, anchor: selected }));
+  const anchor = focus.mode === mode ? focus.anchor : selected;
+  useLayoutEffect(() => {
+    if (focus.mode !== mode) setFocus({ mode, anchor });
+  }, [mode, anchor, focus.mode]);
   const [hovered, setHovered] = useState<LunarCoordinate | null>(null);
   const [ready, setReady] = useState(false);
   const [imagery,setImagery]=useState(true);
@@ -90,56 +100,70 @@ export default function Stage3D({
   const { result: southPolarTerrain, loading: polarTerrainLoading } =
     useSouthPolarTerrain(mode === "orbit");
   const { result: terrainWindow, loading: terrainLoading } = useTerrainWindow(
-    selected,
+    anchor,
     mode === "surface" || mode === "pole",
     { radiusKm: 1.5, samples: 401 },
   );
   const { result: midTerrainWindow, loading: midTerrainLoading } = useTerrainWindow(
-    selected,
+    anchor,
     mode === "surface" || mode === "pole",
     { radiusKm: 6, samples: mode === "pole" ? 257 : 401 },
   );
   const { result: farTerrainWindow, loading: farTerrainLoading } = useTerrainWindow(
-    selected,
+    anchor,
     mode === "surface" || mode === "pole",
     { radiusKm: 24, samples: mode === "pole" ? 257 : 401, regionalOnly: true },
   );
   const { result: contextTerrainWindow, loading: contextTerrainLoading } = useTerrainWindow(
-    selected,
+    anchor,
     mode === "surface" || mode === "pole",
     { radiusKm: 48, samples: mode === "pole" ? 257 : 401, regionalOnly: true },
   );
   const { result: regionalTerrainWindow, loading: regionalTerrainLoading } = useTerrainWindow(
-    selected,
+    anchor,
     mode === "surface" || mode === "pole",
     { radiusKm: 120, samples: mode === "pole" ? 257 : 401, regionalOnly: true },
   );
   const { result: horizonTerrainWindow, loading: horizonTerrainLoading } = useTerrainWindow(
-    selected,
+    anchor,
     mode === "surface" || mode === "pole",
     { radiusKm: 300, samples: mode === "pole" ? 257 : 401, regionalOnly: true },
   );
-  const analysisSiteId =
-    selectedSiteId === "Site01_P1" ? "Site01_P1"
-    : selectedSiteId === "Site04_P1" ? "Site04_P1"
-    : null;
+  const terrainLods = useMemo(() => [
+    terrainWindow, midTerrainWindow, farTerrainWindow, contextTerrainWindow,
+    regionalTerrainWindow, horizonTerrainWindow,
+  ], [terrainWindow, midTerrainWindow, farTerrainWindow, contextTerrainWindow,
+    regionalTerrainWindow, horizonTerrainWindow]);
+  const terrainPending = terrainLoading || midTerrainLoading || farTerrainLoading ||
+    contextTerrainLoading || regionalTerrainLoading || horizonTerrainLoading;
+  const [localTerrain, setLocalTerrain] = useState<LocalTerrain | null>(null);
+  useLayoutEffect(() => {
+    if (mode === "orbit" || terrainPending || !terrainWindow?.grid ||
+        terrainWindow.coverage_status !== "COVERED" || !terrainWindow.geometry) return;
+    setLocalTerrain((previous) => previous?.mode === mode && previous.anchor === anchor &&
+      previous.terrain === terrainWindow && previous.lods === terrainLods
+      ? previous : { mode, anchor, terrain: terrainWindow, lods: terrainLods });
+  }, [mode, terrainPending, terrainWindow, anchor, terrainLods]);
+  const visible = mode !== "orbit" && localTerrain?.mode === mode ? localTerrain : null;
+  const visibleTerrain = visible?.terrain ?? null;
+  const observer = mode === "orbit" ? selected : visible?.anchor ?? anchor;
+  const observerIsSelected = sameCoordinate(observer, selected);
+  const focusUnavailable = mode !== "orbit" && !terrainPending && !terrainWindow?.grid &&
+    !sameCoordinate(visible?.anchor, anchor);
+  const observerAnalysis = observerIsSelected ? pointAnalysis : null;
+  const analysisSiteId = observer.id === "Site01_P1" || observer.id === "Site04_P1" ? observer.id : null;
   const { analysis } = useSiteAnalysis(analysisSiteId, new Date(timeMs));
   const skyTable = useSkyEphemeris(timeMs);
-  const elevation = pointAnalysis?.coordinate.dem_elevation_m ?? terrainWindow?.geometry?.center_elevation_m ??
-    (Number.isFinite(activeSite.elevationM) ? activeSite.elevationM! : 0);
-  const continuousSky = useMemo(() => skyTable ? sampleSky(skyTable, timeMs, selected, elevation+(heightM ?? 2)) : undefined,
-    [skyTable, timeMs, selected, elevation, heightM]);
+  const elevation = observerAnalysis?.coordinate.dem_elevation_m ?? visibleTerrain?.geometry?.center_elevation_m ??
+    (Number.isFinite(observer.elevationM) ? observer.elevationM : 0);
+  const continuousSky = useMemo(() => skyTable ? sampleSky(skyTable, timeMs, observer, elevation+(heightM ?? 2)) : undefined,
+    [skyTable, timeMs, observer, elevation, heightM]);
   const groundSky = useMemo<GroundSky>(() => {
-    const templateSite = catalog.find((site) => site.id === siteId) ?? catalog[0];
-    const pointSite = {
-      ...templateSite,
-      id: selectedSiteId ?? `custom-${selected.latitude.toFixed(4)}-${selected.longitude.toFixed(4)}`,
-      lat: selected.latitude,
-      lon: selected.longitude,
-    };
+    const templateSite = catalog.find((site) => site.id === observer.id) ?? catalog[0];
+    const pointSite = { ...templateSite, lat: observer.latitude, lon: observer.longitude };
     const model = liveState(pointSite, timeMs, heightM ?? 2);
-    const coordinateExact = pointAnalysis?.request.panel_height_m === pointAnalysis?.request.antenna_height_m
-      ? pointAnalysis && currentInterval(pointAnalysis, timeMs)
+    const coordinateExact = observerAnalysis?.request.panel_height_m === observerAnalysis?.request.antenna_height_m
+      ? observerAnalysis && currentInterval(observerAnalysis, timeMs)
       : undefined;
     const exact = analysis?.availability === "AVAILABLE" ? analysis.instant : undefined;
     if (continuousSky) return {
@@ -154,7 +178,7 @@ export default function Stage3D({
       const earthEl = coordinateExact.earth_el_deg;
       if (sunAz != null && sunEl != null && earthAz != null && earthEl != null) {
         return {
-          source: pointAnalysis?.illumination?.model === "solar_disc" ? "SHARED_SPICE" : "JPL_HORIZONS",
+          source: observerAnalysis?.illumination?.model === "solar_disc" ? "SHARED_SPICE" : "JPL_HORIZONS",
           observerHeightM: heightM ?? 2,
           sun: {
             azimuthDeg: sunAz,
@@ -197,27 +221,7 @@ export default function Stage3D({
         state: exactEarth ? exact!.earth.state : model.earthUp ? "V" : "B",
       },
     };
-  }, [analysis, catalog, heightM, pointAnalysis, selected, selectedSiteId, siteId, timeMs, continuousSky]);
-
-  const terrainLods = useMemo(() => [
-    terrainWindow, midTerrainWindow, farTerrainWindow, contextTerrainWindow,
-    regionalTerrainWindow, horizonTerrainWindow,
-  ], [terrainWindow, midTerrainWindow, farTerrainWindow, contextTerrainWindow,
-    regionalTerrainWindow, horizonTerrainWindow]);
-  const terrainPending = terrainLoading || midTerrainLoading || farTerrainLoading ||
-    contextTerrainLoading || regionalTerrainLoading || horizonTerrainLoading;
-  const [poleTerrain, setPoleTerrain] = useState<PoleTerrain | null>(null);
-  useEffect(() => {
-    if (mode !== "pole" || terrainPending || !terrainWindow?.grid ||
-        terrainWindow.coverage_status !== "COVERED") return;
-    setPoleTerrain((previous) => previous?.terrain === terrainWindow &&
-      previous.lods === terrainLods ? previous : {
-        coordinate: selected, terrain: terrainWindow, lods: terrainLods, sky: groundSky,
-      });
-  }, [mode, terrainPending, terrainWindow, selected, terrainLods, groundSky]);
-  const poleIsCurrent = poleTerrain?.coordinate.latitude === selected.latitude &&
-    poleTerrain.coordinate.longitude === selected.longitude;
-  const visibleTerrain = mode === "pole" ? poleTerrain?.terrain ?? null : terrainWindow;
+  }, [analysis, catalog, heightM, observerAnalysis, observer, timeMs, continuousSky]);
 
   const handleSelect = (
     coordinate: LunarCoordinate,
@@ -244,12 +248,13 @@ export default function Stage3D({
           cameraPreset={modeToPreset(mode)}
           layers={LAYERS}
           sites={sites}
-          selected={mode === "pole" ? poleTerrain?.coordinate ?? null : selected}
+          selected={selected}
+          terrainCoordinate={visible?.anchor}
           selectedSiteId={selectedSiteId}
           terrainWindow={visibleTerrain}
-          terrainLods={mode === "pole" ? poleTerrain?.lods : terrainLods}
+          terrainLods={visible?.lods}
           southPolarTerrain={southPolarTerrain}
-          groundSky={mode === "pole" && !poleIsCurrent ? poleTerrain?.sky : groundSky}
+          groundSky={groundSky}
           onSelect={handleSelect}
           onHover={setHovered}
           onReady={() => setReady(true)}
@@ -264,8 +269,17 @@ export default function Stage3D({
           </div>
           {imagery && <p className={`mt-1 ${imageryStatus==='ready'?'text-mint':'text-sun'}`} role="status">{tr(imageryStatus==='ready'?'NASA Moon Trek · imagery loaded':imageryStatus==='loading'?'Loading NASA image tiles…':imageryStatus==='partial'?'Some image tiles unavailable · lower detail retained':'NASA imagery unavailable · local preview')}</p>}
         </div>
-        {mode === "surface" && terrainWindow?.grid && (
+        {mode !== "orbit" && visible && !observerIsSelected && (
+          <button type="button"
+            disabled={terrainPending && sameCoordinate(anchor, selected)}
+            onClick={() => setFocus({ mode, anchor: selected })}
+            className="pointer-events-auto border border-line bg-black/85 px-3 py-2 text-xs text-soft hover:text-white disabled:opacity-50">
+            {tr("Center on selected point")}
+          </button>
+        )}
+        {mode === "surface" && visibleTerrain?.grid && (
           <div className="border border-line bg-black/80 px-3 py-2 font-mono text-[10px] leading-relaxed tracking-wider">
+            {!observerIsSelected && <div className="mb-1 text-mute">{tr("Viewing from: ")}{observer.id === "custom" ? tr("Custom point") : observer.name}</div>}
             <div className="text-sun">{tr("☀ SUN · ")}{tr(groundSky.sun.state === "V" ? "VISIBLE" : groundSky.sun.state === "B" ? "HIDDEN" : "UNKNOWN")}</div>
             <div className="text-mute">{tr("AZ ")}{groundSky.sun.azimuthDeg.toFixed(1)}{tr("° · EL ")}{groundSky.sun.elevationDeg.toFixed(2)}{tr("° · CLR ")}{groundSky.sun.clearanceDeg == null ? "—" : groundSky.sun.clearanceDeg.toFixed(2)}°</div>
             <div className="mt-1 text-earth">{tr("⊕ EARTH · ")}{tr(groundSky.earth.state === "V" ? "VISIBLE" : groundSky.earth.state === "B" ? "HIDDEN" : "UNKNOWN")}</div>
@@ -283,15 +297,15 @@ export default function Stage3D({
         </div>
       )}
 
-      {mode === "surface" && !terrainWindow?.grid && (
+      {mode === "surface" && !visibleTerrain?.grid && (
         <div role="status" className="pointer-events-none absolute inset-0 grid place-items-center bg-black/80 font-mono text-[11px] tracking-widest text-mute">
-          {tr(terrainLoading ? "PREPARING LOLA TERRAIN…" : "TERRAIN UNAVAILABLE FOR THIS POINT")}
+          {tr(focusUnavailable ? "TERRAIN UNAVAILABLE FOR THIS POINT" : "PREPARING LOLA TERRAIN…")}
         </div>
       )}
 
-      {mode === "surface" && (terrainLoading || midTerrainLoading || farTerrainLoading || contextTerrainLoading || regionalTerrainLoading || horizonTerrainLoading) && (
+      {mode === "surface" && visibleTerrain && (terrainPending || focusUnavailable) && (
         <div className="pointer-events-none absolute top-16 left-1/2 -translate-x-1/2 border border-line bg-black/80 px-3 py-1.5 font-mono text-[10px] tracking-wider text-soft">
-          {tr("PREPARING LOLA TERRAIN…")}
+          {tr(focusUnavailable ? "TERRAIN UNAVAILABLE FOR THIS POINT" : "PREPARING LOLA TERRAIN…")}
         </div>
       )}
 
@@ -300,7 +314,7 @@ export default function Stage3D({
           {tr("STREAMING NASA SOUTH-POLE TERRAIN…")}
         </div>
       )}
-      {mode === "pole" && !terrainPending && !poleIsCurrent && !terrainWindow?.grid && (
+      {mode === "pole" && focusUnavailable && (
         <div className="pointer-events-none absolute top-16 left-1/2 -translate-x-1/2 border border-line bg-black/80 px-3 py-1.5 font-mono text-[10px] tracking-wider text-soft">
           {tr("TERRAIN UNAVAILABLE FOR THIS POINT")}
         </div>
@@ -318,17 +332,17 @@ export default function Stage3D({
         </div>
       )}
 
-      {mode === "surface" && terrainWindow?.grid && (
+      {mode === "surface" && visibleTerrain?.grid && (
         <div className="pointer-events-none absolute top-16 left-4 border border-line bg-black/80 px-3 py-2 font-mono text-[10px] leading-relaxed tracking-wider text-soft">
           <div className="text-mint">{tr("LOLA TERRAIN · TRUE SCALE 1×")}</div>
           <div className="text-mute">
-            {terrainWindow.dataset_id} {tr(" · source")}{" "}
-            {terrainWindow.native_resolution_m} {tr(" m")}</div>
+            {visibleTerrain.dataset_id} {tr(" · source")}{" "}
+            {visibleTerrain.native_resolution_m} {tr(" m")}</div>
           <div className="text-mute">
-            {tr("mesh ")}{terrainWindow.grid.spacing_m.toFixed(1)} {tr(" m ·")}{" "}
-            {tr(terrainWindow.grid.rows)}{tr("² vertices")}</div>
+            {tr("mesh ")}{visibleTerrain.grid.spacing_m.toFixed(1)} {tr(" m ·")}{" "}
+            {tr(visibleTerrain.grid.rows)}{tr("² vertices")}</div>
           <div className="text-mute">
-            {(terrainWindow.radius_km! * 2).toFixed(0)} {tr(" km field · curvature enabled")}</div>
+            {(visibleTerrain.radius_km! * 2).toFixed(0)} {tr(" km field · curvature enabled")}</div>
           <div className="text-mute">{tr(imagery?'NASA IMAGE OVERLAY · DISPLAY ONLY':"MICRO-RELIEF · SHADING ONLY")}</div>
           <div className={groundSky.source !== "MODEL_PREVIEW" ? "text-mint" : "text-sun"}>
             {tr("SKY · ")}{tr(groundSky.source === "SHARED_SPICE_PREVIEW" ? "SPICE · VISUAL PREVIEW" : groundSky.source === "SHARED_SPICE" ? "SPICE / JPL CHECKED" : groundSky.source === "JPL_HORIZONS" ? "JPL HORIZONS" : "MODEL PREVIEW")}

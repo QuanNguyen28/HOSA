@@ -29,6 +29,8 @@
   "DEM coverage unavailable.": "Chưa có thông tin phạm vi DEM.",
   "Custom coordinate": "Tọa độ tùy chọn",
   "Custom point": "Điểm tùy chọn",
+  "Center on selected point": "Đưa điểm đã chọn vào giữa",
+  "Viewing from:": "Góc nhìn từ:",
   "User coordinate": "Tọa độ người dùng",
   "Coordinates entered directly; elevation is obtained from the backend DEM.": "Tọa độ được nhập trực tiếp; độ cao được lấy từ DEM trên máy chủ.",
   "Documented backend verification coordinate; click Analyze to calculate.": "Tọa độ kiểm chứng đã được ghi nhận; nhấn Phân tích để tính toán.",

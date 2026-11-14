@@ -32,7 +32,7 @@ export function useTerrainWindow(
 ) {
   const [result, setResult] = useState<TerrainWindow | null>(null);
   const [resultKey, setResultKey] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [settledKey, setSettledKey] = useState("");
   const key = JSON.stringify([
     coordinate?.latitude,
     coordinate?.longitude,
@@ -45,7 +45,6 @@ export function useTerrainWindow(
   useEffect(() => {
     if (!coordinate || !enabled) {
       setResult(null);
-      setLoading(false);
       return;
     }
     const controller = new AbortController();
@@ -56,7 +55,7 @@ export function useTerrainWindow(
       samples: (options.samples ?? 257).toString(),
       detail: options.regionalOnly ? "regional" : "best",
     });
-    setLoading(true);
+    setSettledKey("");
     setResult(null);
     const url = `/api/lunar/point/terrain-window?${query}`;
     // A shared request outlives a single component. Cleanup only suppresses
@@ -77,10 +76,10 @@ export function useTerrainWindow(
         if (!controller.signal.aborted) setResult(null);
       })
       .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
+        if (!controller.signal.aborted) setSettledKey(key);
       });
     return () => controller.abort();
   }, [coordinate, enabled, options.radiusKm, options.samples, options.regionalOnly, key]);
 
-  return { result: resultKey === key ? result : null, loading };
+  return { result: resultKey === key ? result : null, loading: enabled && !!coordinate && settledKey !== key };
 }
