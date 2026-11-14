@@ -30,6 +30,7 @@ import {
   Uint32BufferAttribute,
   UnsignedByteType,
   Vector3,
+  ShaderChunk,
 } from "three";
 
 import {
@@ -61,8 +62,8 @@ import type {
 import type { TerrainWindow } from "../hooks/useTerrainWindow";
 import { getLunarSurfaceTextures } from "../lib/lunarSurfaceTextures";
 import { terrainShadowFragment } from "../lib/terrainShadowShader";
-import { SPACE_COLOR, withGlobeDayNight } from "../lib/moonShading";
-import { TERRAIN_SHADOW_SIZE, terrainShadowHalfSize, terrainShadowVerticalHalfSize, updateTerrainShadow } from "../lib/terrainLighting";
+import { SPACE_COLOR, displayLuminance, earthshineStrength, withGlobeDayNight, withTerrainLighting } from "../lib/moonShading";
+import { NEAR_SHADOW_SIZE, TERRAIN_SHADOW_SIZE, terrainShadowHalfSize, terrainShadowVerticalHalfSize, updateTerrainShadow } from "../lib/terrainLighting";
 import { sceneContent, terrainCameraPose } from "../lib/terrainCamera";
 import type { TerrainGeometryMetadata } from "../lib/terrainGeometry";
 import { MoonTrekGlobe, MoonTrekTerrainMaterial, type ImageryStatus } from './MoonTrekImagery';
@@ -210,8 +211,16 @@ function LunarTerrainMaterial({
       roughness={0.98}
       metalness={0}
       shadowSide={DoubleSide}
-      onBeforeCompile={(shader) => { shader.fragmentShader = terrainShadowFragment(shader.fragmentShader); }}
-      customProgramCacheKey={() => "terrain-receiver-plane-pcf-v1"}
+      toneMapped={false}
+      onBeforeCompile={(shader) => {
+        shader.fragmentShader = withTerrainLighting(
+          terrainShadowFragment(shader.fragmentShader),
+          ShaderChunk.lights_fragment_begin,
+          // Mean of the procedural albedo texture (0.55 × 184/255) times the tint.
+          0.55 * (184 / 255) * displayLuminance(color),
+        );
+      }}
+      customProgramCacheKey={() => `terrain-reference-light-v1-${color}`}
     />
   );
 }
@@ -380,6 +389,7 @@ function DynamicTerrain({
 }) {
   const { t: tr } = useTranslation();
   const sunLight = useRef<DirectionalLight>(null);
+  const nearSunLight = useRef<DirectionalLight>(null);
   const terrainMesh = useTerrainMesh(terrain);
   const midTerrain = terrainLods?.[1] ?? null;
   const farTerrain = terrainLods?.[2] ?? null;
@@ -418,6 +428,18 @@ function DynamicTerrain({
     );
   }, [coordinate, groundSky, terrain.geometry, time]);
 
+  const earthshine = useMemo(() => {
+    if (!terrain.geometry || !groundSky) return null;
+    const earth = skyDirectionToTerrainAxes(
+      groundSky.earth.azimuthDeg,
+      groundSky.earth.elevationDeg,
+      terrain.geometry,
+    );
+    const sun = { x: localSun[0], y: localSun[1], z: localSun[2] };
+    return { x: earth.x, y: earth.y, z: earth.z, strength: earthshineStrength(sun, earth) };
+  }, [groundSky, terrain.geometry, localSun]);
+  const sunIntensity = enhancedLight ? 8 : 4.4;
+
   useEffect(() => {
     if (terrainMesh) onReady();
   }, [terrainMesh, onReady]);
@@ -438,6 +460,18 @@ function DynamicTerrain({
   useLayoutEffect(() => {
     if (sunLight.current) updateTerrainShadow(sunLight.current, shadowHalfSize, shadowVerticalHalfSize);
   }, [shadowHalfSize, shadowVerticalHalfSize]);
+  // Near cascade: the wide map spans 300 km, so at a 1° Sun one texel covers
+  // ~800 m of ground and flat ground shadows itself. In this orthographic
+  // light view every occluder of a receiver shares its x/y, so distant
+  // ridges still shadow the near ground.
+  const nearShadowMeshes = [terrainMesh?.mesh, midTerrainMesh?.mesh];
+  const nearShadowHalfSize = terrainShadowHalfSize(nearShadowMeshes);
+  const nearShadowVerticalHalfSize = terrainShadowVerticalHalfSize(nearShadowMeshes, localSun[1]);
+  useLayoutEffect(() => {
+    if (nearSunLight.current) {
+      updateTerrainShadow(nearSunLight.current, nearShadowHalfSize, nearShadowVerticalHalfSize, NEAR_SHADOW_SIZE);
+    }
+  }, [nearShadowHalfSize, nearShadowVerticalHalfSize]);
   if (!terrainMesh || !terrain.grid) return null;
   const observer: [number, number, number] = [
     0,
@@ -483,7 +517,7 @@ function DynamicTerrain({
         ref={sunLight}
         castShadow
         position={lightPosition}
-        intensity={enhancedLight ? 8 : 4.4}
+        intensity={sunIntensity}
         color="#fff2d9"
         shadow-mapSize-width={TERRAIN_SHADOW_SIZE}
         shadow-mapSize-height={TERRAIN_SHADOW_SIZE}
@@ -497,19 +531,41 @@ function DynamicTerrain({
         shadow-normalBias={0.004}
         shadow-radius={1.5}
       />
+      {/* Same Sun, near shadow cascade only: the terrain shader reads its
+          shadow, not its light (directional light 1). */}
       <directionalLight
-        position={[-lightPosition[0], Math.max(2, -lightPosition[1]), -lightPosition[2]]}
-        intensity={enhancedLight ? 0.035 : 0.012}
-        color="#769ab1"
+        ref={nearSunLight}
+        castShadow
+        position={lightPosition}
+        intensity={0.01}
+        color="#fff2d9"
+        shadow-mapSize-width={NEAR_SHADOW_SIZE}
+        shadow-mapSize-height={NEAR_SHADOW_SIZE}
+        shadow-camera-left={-nearShadowHalfSize}
+        shadow-camera-right={nearShadowHalfSize}
+        shadow-camera-top={nearShadowVerticalHalfSize}
+        shadow-camera-bottom={-nearShadowVerticalHalfSize}
+        shadow-camera-near={1}
+        shadow-camera-far={1_600}
+        shadow-bias={-0.00001}
+        shadow-normalBias={0.0005}
+        shadow-radius={1.5}
       />
+      {/* Earthshine from the Earth's direction; the terrain shader reads it as
+          directional light 2 with intensity = reference earthshine strength. */}
+      {earthshine && earthshine.strength > 0 && <directionalLight
+        position={[earthshine.x * lightDistance, earthshine.y * lightDistance, earthshine.z * lightDistance]}
+        intensity={earthshine.strength}
+        color="#ffffff"
+      />}
       {horizonTerrainMesh && (
         <mesh {...terrainInteraction} geometry={horizonTerrainMesh.geometry} position={[0, -0.012, 0]} receiveShadow castShadow>
-          {imagery && horizonTerrain ? <MoonTrekTerrainMaterial terrain={horizonTerrain} color="#aaa79f" fallback={<LunarTerrainMaterial color="#aaa79f" bumpScale={0.0002}/>}/> : <LunarTerrainMaterial color="#aaa79f" bumpScale={0.0002}/>}
+          {imagery && horizonTerrain ? <MoonTrekTerrainMaterial terrain={horizonTerrain} fallback={<LunarTerrainMaterial color="#aaa79f" bumpScale={0.0002}/>}/> : <LunarTerrainMaterial color="#aaa79f" bumpScale={0.0002}/>}
         </mesh>
       )}
       {regionalTerrainMesh && (
         <mesh {...terrainInteraction} geometry={regionalTerrainMesh.geometry} position={[0, -0.009, 0]} receiveShadow castShadow>
-          {imagery && regionalTerrain ? <MoonTrekTerrainMaterial terrain={regionalTerrain} color="#b2afa7" fallback={<LunarTerrainMaterial color="#b2afa7" bumpScale={0.00025}/>}/> : <LunarTerrainMaterial color="#b2afa7" bumpScale={0.00025}/>}
+          {imagery && regionalTerrain ? <MoonTrekTerrainMaterial terrain={regionalTerrain} fallback={<LunarTerrainMaterial color="#b2afa7" bumpScale={0.00025}/>}/> : <LunarTerrainMaterial color="#b2afa7" bumpScale={0.00025}/>}
         </mesh>
       )}
       {contextTerrainMesh && (
@@ -520,17 +576,17 @@ function DynamicTerrain({
           castShadow
           {...terrainInteraction}
         >
-          {imagery && contextTerrain ? <MoonTrekTerrainMaterial terrain={contextTerrain} color="#b8b5ad" fallback={<LunarTerrainMaterial color="#b8b5ad" bumpScale={0.0003}/>}/> : <LunarTerrainMaterial color="#b8b5ad" bumpScale={0.0003}/>}
+          {imagery && contextTerrain ? <MoonTrekTerrainMaterial terrain={contextTerrain} fallback={<LunarTerrainMaterial color="#b8b5ad" bumpScale={0.0003}/>}/> : <LunarTerrainMaterial color="#b8b5ad" bumpScale={0.0003}/>}
         </mesh>
       )}
       {farTerrainMesh && (
         <mesh {...terrainInteraction} geometry={farTerrainMesh.geometry} position={[0, -0.003, 0]} receiveShadow castShadow>
-          {imagery && farTerrain ? <MoonTrekTerrainMaterial terrain={farTerrain} color="#bdb9b1" fallback={<LunarTerrainMaterial color="#bdb9b1" bumpScale={0.00035}/>}/> : <LunarTerrainMaterial color="#bdb9b1" bumpScale={0.00035}/>}
+          {imagery && farTerrain ? <MoonTrekTerrainMaterial terrain={farTerrain} fallback={<LunarTerrainMaterial color="#bdb9b1" bumpScale={0.00035}/>}/> : <LunarTerrainMaterial color="#bdb9b1" bumpScale={0.00035}/>}
         </mesh>
       )}
       {midTerrainMesh && (
         <mesh {...terrainInteraction} geometry={midTerrainMesh.geometry} position={[0, -0.0015, 0]} receiveShadow castShadow>
-          {imagery && midTerrain ? <MoonTrekTerrainMaterial terrain={midTerrain} color="#c1bdb5" fallback={<LunarTerrainMaterial color="#c1bdb5" bumpScale={0.00045}/>}/> : <LunarTerrainMaterial color="#c1bdb5" bumpScale={0.00045}/>}
+          {imagery && midTerrain ? <MoonTrekTerrainMaterial terrain={midTerrain} fallback={<LunarTerrainMaterial color="#c1bdb5" bumpScale={0.00045}/>}/> : <LunarTerrainMaterial color="#c1bdb5" bumpScale={0.00045}/>}
         </mesh>
       )}
       <mesh
@@ -539,7 +595,7 @@ function DynamicTerrain({
         castShadow
         receiveShadow
       >
-        {imagery ? <MoonTrekTerrainMaterial terrain={terrain} onStatus={onImageryStatus} color="#c5c1b8" fallback={<LunarTerrainMaterial color="#c5c1b8" bumpScale={0.0006}/>}/> : <LunarTerrainMaterial color="#c5c1b8" bumpScale={0.0006}/>}
+        {imagery ? <MoonTrekTerrainMaterial terrain={terrain} onStatus={onImageryStatus} fallback={<LunarTerrainMaterial color="#c5c1b8" bumpScale={0.0006}/>}/> : <LunarTerrainMaterial color="#c5c1b8" bumpScale={0.0006}/>}
       </mesh>
       {!overview && <group position={observer}>
         <mesh>

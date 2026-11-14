@@ -1,13 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { BufferGeometry, CanvasTexture, DoubleSide, Float32BufferAttribute, SRGBColorSpace, Texture, Vector2, Vector3, Vector4 } from 'three';
+import { BufferGeometry, CanvasTexture, DoubleSide, Float32BufferAttribute, SRGBColorSpace, ShaderChunk, Texture, Vector2, Vector3, Vector4 } from 'three';
 import { coordinateToVector, MOON_SCENE_RADIUS } from '../lib/lunar';
 import { terrainShadowFragment } from '../lib/terrainShadowShader';
-import { withGlobeDayNight } from '../lib/moonShading';
+import { meanLitLuminance, withGlobeDayNight, withTerrainLighting } from '../lib/moonShading';
 
-// NASA mosaics are darker than the procedural albedo; scale them so the same
-// Sun intensity gives a comparable surface brightness in both appearances.
-const ALBEDO_GAIN = 1.6;
 import { globeBounds, polarAtlas, tileImage, tileUrl, trekCatalog, type TrekLayer, type TrekTile } from '../lib/moonTrek';
 import type { TerrainWindow } from '../hooks/useTerrainWindow';
 
@@ -111,10 +108,10 @@ export function MoonTrekGlobe({elevationMap,onBaseReady,onStatus}: {
   return <group>{tiles.map(tile=><GlobeTile key={`${tile.level}/${tile.row}/${tile.column}`} tile={tile} heightMap={heightMap} onState={onState}/>)}</group>;
 }
 
-export function MoonTrekTerrainMaterial({terrain,fallback,onStatus,color='#ffffff'}: {
-  terrain:TerrainWindow;fallback:ReactNode;onStatus?:(status:ImageryStatus)=>void;color?:string;
+export function MoonTrekTerrainMaterial({terrain,fallback,onStatus}: {
+  terrain:TerrainWindow;fallback:ReactNode;onStatus?:(status:ImageryStatus)=>void;
 }) {
-  const [atlas,setAtlas]=useState<{texture:CanvasTexture;bounds:[number,number,number,number]}|null>(null);
+  const [atlas,setAtlas]=useState<{texture:CanvasTexture;bounds:[number,number,number,number];mean:number}|null>(null);
   const x=terrain.geometry?.center_x_m, y=terrain.geometry?.center_y_m, radius=(terrain.radius_km??1.5)*1000;
   useEffect(()=>{
     let cancelled=false, owned:CanvasTexture|null=null;
@@ -132,25 +129,25 @@ export function MoonTrekTerrainMaterial({terrain,fallback,onStatus,color='#fffff
       const context=canvas.getContext('2d');if(!context)throw new Error('Canvas unavailable');
       images.forEach((image,i)=>context.drawImage(image,(plan.tiles[i].column-plan.firstColumn)*size,(plan.tiles[i].row-plan.firstRow)*size));
       owned=new CanvasTexture(canvas);owned.colorSpace=SRGBColorSpace;owned.anisotropy=8;
-      setAtlas({texture:owned,bounds:plan.bounds});onStatus?.('ready');
+      const mean=meanLitLuminance(context.getImageData(0,0,canvas.width,canvas.height).data);
+      setAtlas({texture:owned,bounds:plan.bounds,mean});onStatus?.('ready');
     }).catch(()=>{if(!cancelled)onStatus?.('unavailable');});
     return ()=>{cancelled=true;owned?.dispose();};
   },[x,y,radius,terrain.geometry?.projection,onStatus]);
   if(!atlas)return <>{fallback}</>;
-  // Lit like the relief model: the DEM normals, mission-time Sun and terrain
-  // shadow map shade the photo, so Pole and Ground show the selected time.
-  return <meshStandardMaterial key={atlas.texture.uuid} map={atlas.texture} color={color}
-    roughness={0.98} metalness={0} shadowSide={DoubleSide}
-    customProgramCacheKey={()=>'trek-terrain-lit-v1'} onBeforeCompile={shader=>{
+  // Reference terrain light (see lib/moonShading): the DEM normals, the
+  // mission-time Sun with terrain shadows and earthshine set the brightness;
+  // the photo only varies the reference albedo, so its recorded shadows do
+  // not compete with the simulated ones.
+  return <meshStandardMaterial key={atlas.texture.uuid} map={atlas.texture} color="#ffffff"
+    roughness={0.98} metalness={0} shadowSide={DoubleSide} toneMapped={false}
+    customProgramCacheKey={()=>`trek-terrain-reference-v1-${atlas.mean.toFixed(3)}`} onBeforeCompile={shader=>{
     const b=atlas.bounds;
     shader.uniforms.trekBounds={value:new Vector4(b[0],b[1],b[2]-b[0],b[3]-b[1])};
     shader.uniforms.trekOrigin={value:new Vector2(x,y)};
     shader.vertexShader='uniform vec4 trekBounds;\nuniform vec2 trekOrigin;\n'+shader.vertexShader;
     shader.vertexShader=shader.vertexShader.replace('#include <uv_vertex>',`#include <uv_vertex>
       vMapUv = (vec2(trekOrigin.x + position.x * 1000.0, trekOrigin.y - position.z * 1000.0) - trekBounds.xy) / trekBounds.zw;`);
-    // Lift the darkest recorded shadows so the simulated shadows decide
-    // where terrain is dark, while keeping the photo's albedo detail.
-    shader.fragmentShader=terrainShadowFragment(shader.fragmentShader).replace('#include <map_fragment>',`#include <map_fragment>
-      diffuseColor.rgb = max(diffuseColor.rgb, vec3(0.035)) * ${ALBEDO_GAIN.toFixed(2)};`);
+    shader.fragmentShader=withTerrainLighting(terrainShadowFragment(shader.fragmentShader),ShaderChunk.lights_fragment_begin,atlas.mean);
   }}/>;
 }

@@ -2,6 +2,8 @@ import type { DirectionalLight } from "three";
 import type { TerrainMeshData } from "./terrainGeometry";
 
 export const TERRAIN_SHADOW_SIZE = 4096;
+/** Near shadow cascade around the observer (Ground and Pole focus). */
+export const NEAR_SHADOW_SIZE = 2048;
 
 /** Enclose all rendered circular LODs, including their curved vertical extent. */
 export function terrainShadowHalfSize(meshes: Array<TerrainMeshData | null | undefined>) {
@@ -24,13 +26,15 @@ export function terrainShadowVerticalHalfSize(
 }
 
 /** Three.js does not rebuild a shadow camera projection when its bounds mutate. */
-export function updateTerrainShadow(light: DirectionalLight, halfSize: number, verticalHalfSize = halfSize) {
+export function updateTerrainShadow(
+  light: DirectionalLight, halfSize: number, verticalHalfSize = halfSize, mapSize = TERRAIN_SHADOW_SIZE,
+) {
   const { shadow } = light;
   Object.assign(shadow.camera, { left: -halfSize, right: halfSize, top: verticalHalfSize,
     bottom: -verticalHalfSize, near: 1, far: 1600 });
   shadow.camera.updateProjectionMatrix();
-  shadow.mapSize.set(TERRAIN_SHADOW_SIZE, TERRAIN_SHADOW_SIZE);
-  if (shadow.map && (shadow.map.width !== TERRAIN_SHADOW_SIZE || shadow.map.height !== TERRAIN_SHADOW_SIZE)) {
+  shadow.mapSize.set(mapSize, mapSize);
+  if (shadow.map && (shadow.map.width !== mapSize || shadow.map.height !== mapSize)) {
     shadow.map.dispose();
     shadow.map = null;
   }
