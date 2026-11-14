@@ -43,4 +43,22 @@ def scan_windows(query, scenario, repository, first, stop, *, analyze, preflight
             break
     counts['returned'] = len(selected)
     counts['not_returned'] = counts['candidate_total']-len(selected)
-    return selected, counts
+    return selected, counts, candidates
+
+
+def evaluation_summary(candidate):
+    """Every scanned start's decision and metrics, without the per-candidate
+    evidence (provenance, sensitivity, contact detail) that makes a full
+    candidate ~30 KB."""
+    validation = candidate.validation or {}
+    path = validation.get('mission_path') or {}
+    compact = {'passed': bool(validation.get('passed')), 'reason_codes': validation.get('reason_codes', [])}
+    if path:
+        compact['mission_path'] = {k: path[k] for k in ('passed', 'scope', 'reason', 'metrics_hours') if k in path}
+    return {'candidate_id': candidate.candidate_id, 'site_id': candidate.site_id,
+            'start_utc': candidate.start_utc, 'end_utc': candidate.end_utc,
+            'decision': candidate.decision, 'nominal_sampled_decision': candidate.nominal_sampled_decision,
+            'metrics': candidate.metrics, 'constraint_states': candidate.constraint_states,
+            'soft_constraint_states': candidate.soft_constraint_states,
+            'hard_failure': candidate.hard_failure, 'coordinate': candidate.coordinate,
+            'validation': compact}

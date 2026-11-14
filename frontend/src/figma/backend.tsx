@@ -1,10 +1,12 @@
 import { useTranslation } from "../i18n/language";
 import { memo, useEffect, useMemo, useState } from "react";
-import { api } from "../mvp/api";
+import { api, downloadJson } from "../mvp/api";
 import {
   boundsText,
   currentInterval,
   intervalAt,
+  stateAt,
+  sunFractionAt,
   missionHours,
   missionEnd,
   timelineBins,
@@ -110,14 +112,176 @@ export function NumberField({
     </label>
   );
 }
+/**
+ * The native UTC datetime field (same typing and calendar picker as before),
+ * shown as a 24-hour "YYYY-MM-DD HH:MM". Browsers draw datetime-local in the
+ * UI locale, so the native text is hidden and the value is overlaid.
+ */
+export function DateTime24({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const { t: tr } = useTranslation();
+  return (
+    <span className="relative mt-1 block">
+      <input
+        className={`${inputClass} datetime-24`}
+        aria-label={tr(label)}
+        type="datetime-local"
+        step={300}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-y-0 left-2 flex items-center font-mono text-xs tabular text-soft"
+      >
+        {value.replace("T", " ")}
+      </span>
+    </span>
+  );
+}
+const wrapLon = (lon: number) => ((((lon + 180) % 360) + 360) % 360) - 180;
+/**
+ * Latitude and longitude as degrees plus a hemisphere, written the same way
+ * coordinates are displayed (89.4632°S 137.4900°W), so nobody has to know
+ * that south is negative. Emits signed latitude and east longitude.
+ */
+export function CoordinateFields({
+  lat,
+  lon,
+  disabled,
+  layout = "stack",
+  onChange,
+}: {
+  lat: number;
+  lon: number;
+  disabled?: boolean;
+  layout?: "stack" | "row";
+  onChange: (lat: number, lon: number) => void;
+}) {
+  const { t: tr } = useTranslation();
+  const [ns, setNs] = useState<"S" | "N">(lat > 0 ? "N" : "S");
+  const [ew, setEw] = useState<"E" | "W">(wrapLon(lon) < 0 ? "W" : "E");
+  // Follow a coordinate chosen elsewhere; keep the choice while a field is empty.
+  useEffect(() => {
+    if (Number.isFinite(lat) && lat !== 0) setNs(lat > 0 ? "N" : "S");
+  }, [lat]);
+  useEffect(() => {
+    if (Number.isFinite(lon) && wrapLon(lon) !== 0) setEw(wrapLon(lon) < 0 ? "W" : "E");
+  }, [lon]);
+  const latAbs = Number.isFinite(lat) ? Math.abs(lat) : NaN;
+  const lonAbs = Number.isFinite(lon) ? Math.abs(wrapLon(lon)) : NaN;
+  const emit = (a: number, aSide: "S" | "N", b: number, bSide: "E" | "W") =>
+    onChange(
+      Number.isFinite(a) ? (aSide === "S" ? -a : a) : NaN,
+      Number.isFinite(b) ? (bSide === "W" ? -b : b) : NaN,
+    );
+  return (
+    <div className={layout === "row" ? "contents" : "space-y-3"}>
+      <HemisphereField
+        label="Latitude · degrees"
+        value={latAbs}
+        max={90}
+        side={ns}
+        sides={["S", "N"]}
+        disabled={disabled}
+        onValue={(v) => emit(v, ns, lonAbs, ew)}
+        onSide={(side) => {
+          setNs(side);
+          emit(latAbs, side, lonAbs, ew);
+        }}
+      />
+      <HemisphereField
+        label="Longitude · degrees"
+        value={lonAbs}
+        max={180}
+        side={ew}
+        sides={["E", "W"]}
+        disabled={disabled}
+        onValue={(v) => emit(latAbs, ns, v, ew)}
+        onSide={(side) => {
+          setEw(side);
+          emit(latAbs, ns, lonAbs, side);
+        }}
+      />
+      {ns === "N" && (
+        <p className="col-span-full text-[11px] text-sun">
+          {tr("Terrain data covers the south polar region only; a northern point cannot be evaluated.")}
+        </p>
+      )}
+    </div>
+  );
+}
+function HemisphereField<S extends string>({
+  label,
+  value,
+  max,
+  side,
+  sides,
+  disabled,
+  onValue,
+  onSide,
+}: {
+  label: string;
+  value: number;
+  max: number;
+  side: S;
+  sides: S[];
+  disabled?: boolean;
+  onValue: (value: number) => void;
+  onSide: (side: S) => void;
+}) {
+  const { t: tr } = useTranslation();
+  return (
+    <label className="block">
+      <span className="eyebrow">{tr(label)}</span>
+      <span className="mt-1 flex gap-1">
+        <input
+          aria-label={tr(label)}
+          className={`${inputClass} min-w-0 flex-1`}
+          type="number"
+          min={0}
+          max={max}
+          step="any"
+          disabled={disabled}
+          value={Number.isFinite(value) ? value : ""}
+          onChange={(e) => onValue(e.target.value === "" ? NaN : Number(e.target.value))}
+        />
+        <select
+          aria-label={tr("{0} · hemisphere", [label])}
+          className="shrink-0 border border-line bg-ink px-1.5 py-1.5 font-mono text-xs text-soft"
+          disabled={disabled}
+          value={side}
+          onChange={(e) => onSide(e.target.value as S)}
+        >
+          {sides.map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+      </span>
+    </label>
+  );
+}
 export function MissionFields({
   mission: m,
   onChange,
   disabled,
+  durationOnly = false,
 }: {
   mission: Mission;
   onChange: (m: Mission) => void;
   disabled: boolean;
+  /**
+   * Best dates: every candidate has its own start, so a fixed end date would
+   * only fit the first one. The mission is then a duration from each start.
+   */
+  durationOnly?: boolean;
 }) {
   const { t: tr } = useTranslation();
   const change = <K extends keyof Mission>(key: K, value: Mission[K]) => {
@@ -128,7 +292,7 @@ export function MissionFields({
   };
   return (
     <fieldset disabled={disabled} className="space-y-3">
-      <label className="block">
+      {!durationOnly && <label className="block">
         <span className="eyebrow">{tr("Define mission by")}</span>
         <select
           aria-label={tr("Define mission by")}
@@ -141,19 +305,16 @@ export function MissionFields({
           <option value="hours">{tr("Duration in hours")}</option>
           <option value="end">{tr("Target end date (UTC)")}</option>
         </select>
-      </label>
+      </label>}
       <div
         className={`grid gap-3 ${m.timing === "end" ? "grid-cols-1" : "grid-cols-2"}`}
       >
         <label>
-          <span className="eyebrow">{tr("From · UTC")}</span>
-          <input
-            className={`${inputClass} mt-1`}
-            aria-label={tr("Mission start UTC")}
-            type="datetime-local"
-            step={300}
+          <span className="eyebrow">{tr(durationOnly ? "First start · UTC" : "From · UTC")}</span>
+          <DateTime24
+            label="Mission start UTC"
             value={m.start}
-            onChange={(e) => change("start", e.target.value)}
+            onChange={(v) => change("start", v)}
           />
         </label>
         {m.timing === "hours" ? (
@@ -166,21 +327,20 @@ export function MissionFields({
         ) : (
           <label>
             <span className="eyebrow">{tr("Target end · UTC")}</span>
-            <input
-              className={`${inputClass} mt-1`}
-              aria-label={tr("Mission end UTC")}
-              type="datetime-local"
-              step={300}
+            <DateTime24
+              label="Mission end UTC"
               value={m.end}
-              onChange={(e) => change("end", e.target.value)}
+              onChange={(v) => change("end", v)}
             />
           </label>
         )}
       </div>
       <p className="text-[11px] text-mute">
-        {Number.isFinite(missionHours(m)) && missionHours(m) > 0
-          ? tr("{0} hours · ends {1} UTC", [Number(missionHours(m).toFixed(4)), missionEnd(m).replace("T", " ")])
-          : tr("Choose an end after the mission start.")}
+        {!(Number.isFinite(missionHours(m)) && missionHours(m) > 0)
+          ? tr("Choose an end after the mission start.")
+          : durationOnly
+            ? tr("Each candidate runs {0} hours from its own start.", [Number(missionHours(m).toFixed(4))])
+            : tr("{0} hours · ends {1} UTC", [Number(missionHours(m).toFixed(4)), missionEnd(m).replace("T", " ")])}
       </p>
       <details>
         <summary className="eyebrow cursor-pointer py-1">
@@ -286,22 +446,72 @@ export function MissionFields({
     </fieldset>
   );
 }
+/**
+ * Progress for long backend work. `value` (0–1) fills the bar; without it, or
+ * while the current step is still running, a sweep shows the request is alive.
+ */
 export function RequestStatus({
   busy,
   stage,
   error,
+  value,
+  onCancel,
 }: {
   busy: boolean;
   stage: string;
   error?: string;
+  value?: number;
+  onCancel?: () => void;
 }) {
   const { t: tr } = useTranslation();
+  const [began, setBegan] = useState<number>();
+  const [now, setNow] = useState(0);
+  useEffect(() => {
+    if (!busy) return setBegan(undefined);
+    const start = Date.now();
+    setBegan(start);
+    setNow(start);
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, [busy]);
+  const percent = value == null ? undefined : Math.round(value * 100);
+  const elapsed = began == null ? 0 : Math.max(0, Math.round((now - began) / 1000));
   return (
     <>
       {busy && (
-        <p role="status" className="text-xs text-sun animate-pulse">
-          {tr(stage || "Calculating")}…
-        </p>
+        <div role="status" className="space-y-1.5">
+          <div className="flex items-baseline justify-between gap-3 text-xs text-sun">
+            <span className="min-w-0 break-words">{tr(stage || "Calculating")}…</span>
+            <span className="shrink-0 font-mono text-[10px] tabular">
+              {percent == null ? "" : `${percent}% · `}{elapsed} s
+            </span>
+          </div>
+          <div
+            role="progressbar"
+            aria-label={tr("Progress")}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={percent}
+            className="relative h-1.5 overflow-hidden bg-white/10"
+          >
+            {percent != null && (
+              <div
+                className="absolute inset-y-0 left-0 bg-sun transition-[width] duration-500"
+                style={{ width: `${Math.max(1.5, percent)}%` }}
+              />
+            )}
+            <div className="progress-sweep absolute inset-y-0 w-1/4 bg-gradient-to-r from-transparent via-sun/60 to-transparent" />
+          </div>
+          {onCancel && (
+            <button
+              type="button"
+              className="text-[10px] text-mute underline underline-offset-2 hover:text-white"
+              onClick={onCancel}
+            >
+              {tr("Stop")}
+            </button>
+          )}
+        </div>
       )}
       {error && (
         <p
@@ -375,11 +585,14 @@ export function CurrentStatus({
 }) {
   const { t: tr } = useTranslation();
   const row = (instant && intervalAt([instant],time)) ?? (result && currentInterval(result, time));
+  // Hourly prepared bins answer whenever a body kept one state for the hour.
+  const fraction = sunFractionAt(result, instant, time);
+  const known = stateAt(result, instant, time, "sun") !== "?" && stateAt(result, instant, time, "earth") !== "?";
   return (
     <div>
       <div className="flex gap-2">
         {(["sun", "earth"] as const).map((body) => {
-          const state = row?.[`${body}_state`] ?? "?";
+          const state = stateAt(result, instant, time, body);
           return (
             <div
               key={body}
@@ -390,17 +603,17 @@ export function CurrentStatus({
                 <p className="font-display text-sm font-semibold">
                   {tr(body === "sun" ? "Sun" : "Earth")}{" "}
                   {tr(state === "V"
-                    ? body === "sun" && row?.sun_visible_fraction != null && row.sun_visible_fraction > 0 && row.sun_visible_fraction < 1
+                    ? body === "sun" && fraction != null && fraction > 0 && fraction < 1
                       ? "partly visible" : "visible"
                     : state === "B"
                       ? "blocked"
                       : loading ? "loading" : "unknown")}
                 </p>
                 <p className="font-mono text-[10px]">
-                  {body === "sun" && row?.sun_visible_fraction != null
-                    ? tr("{0}% of disc visible", [row.sun_visible_fraction > 0 && row.sun_visible_fraction < .001 ? "<0.1"
-                      : row.sun_visible_fraction > .999 && row.sun_visible_fraction < 1 ? ">99.9" : (row.sun_visible_fraction * 100).toFixed(1)])
-                    : tr(row ? "Backend interval" : "No interval evidence")}
+                  {body === "sun" && fraction != null
+                    ? tr("{0}% of disc visible", [fraction > 0 && fraction < .001 ? "<0.1"
+                      : fraction > .999 && fraction < 1 ? ">99.9" : (fraction * 100).toFixed(1)])
+                    : tr(row ? "Backend interval" : state !== "?" ? "Prepared hourly state" : "No interval evidence")}
                 </p>
               </div>
             </div>
@@ -408,7 +621,7 @@ export function CurrentStatus({
         })}
       </div>
       {row?.evidence_source === "prepared_nominal" && <p className="mt-1 text-[9px] text-mute">{tr("Nominal 5-minute sample · PROVISIONAL")}</p>}
-      {!row && error && <p role="status" className="mt-2 text-[10px] text-sun">{tr(error==='INSTANT_NOT_PREPARED'
+      {!row && !known && error && <p role="status" className="mt-2 text-[10px] text-sun">{tr(error==='INSTANT_NOT_PREPARED'
         ? 'No prepared instant for this coordinate/height. Analyze point to calculate it.'
         : 'Unable to load current visibility: {0}',[error])}</p>}
     </div>
@@ -625,20 +838,44 @@ export function PlanningSummary({ result }: { result: PlanningResult }) {
             : "No validated feasible candidate is available.")}
         </p>
       </div>
-      <div className="flex gap-3">
-        <a
-          className={actionClass}
-          href={`/api/planning/results/${result.result_id}?format=json`}
-        >
-          {tr("Download JSON")}
-        </a>
-        <a
-          className={actionClass}
-          href={`/api/planning/results/${result.result_id}?format=csv`}
-        >
-          {tr("Download CSV")}
-        </a>
-      </div>
+      {result.parts && result.parts.length > 1 ? (
+        // Merged from one backend request per site: the JSON is the merged
+        // view; each site's own result keeps its CSV.
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          <button
+            type="button"
+            className={actionClass}
+            onClick={() => downloadJson(result, `planning-${result.parts![0]}-merged.json`)}
+          >
+            {tr("Download JSON")}
+          </button>
+          <details className="text-xs text-mute">
+            <summary className="cursor-pointer">{tr("CSV per site")}</summary>
+            <div className="mt-2 flex max-w-xs flex-wrap gap-2">
+              {result.parts.map((id, i) => (
+                <a key={id} className="underline underline-offset-2 hover:text-white" href={`/api/planning/results/${id}?format=csv`}>
+                  {tr("CSV {0}", [i + 1])}
+                </a>
+              ))}
+            </div>
+          </details>
+        </div>
+      ) : (
+        <div className="flex gap-3">
+          <a
+            className={actionClass}
+            href={`/api/planning/results/${result.result_id}?format=json`}
+          >
+            {tr("Download JSON")}
+          </a>
+          <a
+            className={actionClass}
+            href={`/api/planning/results/${result.result_id}?format=csv`}
+          >
+            {tr("Download CSV")}
+          </a>
+        </div>
+      )}
     </section>
   );
 }

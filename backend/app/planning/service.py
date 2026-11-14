@@ -8,7 +8,7 @@ from app.mission.snapshot import SnapshotProvider
 from app.mission.evaluation import EVALUATION_VERSION, VALIDATION_VERSION
 from app.services.lunarsight.shared_ephemeris import SharedEphemeris
 from app.services.lunarsight.solar_disc import VERSION as SOLAR_DISC_VERSION
-from .finder import scan_windows
+from .finder import evaluation_summary, scan_windows
 from .metrics import violation_key
 from .models import CompareRequest, PlanningResult, SearchRequest, utc
 from .ranking import display_key, rank_candidates
@@ -153,11 +153,12 @@ class PlanningService:
         if query.resolve_indeterminate and (stop-first)*len(query.mission_targets()) > 128:
             raise DomainError("SEARCH_TOO_LARGE", 422)
         snapshot = SnapshotProvider()
-        selected, counts = scan_windows(query, scenario, self.repository, first, stop,
+        selected, counts, evaluated = scan_windows(query, scenario, self.repository, first, stop,
             analyze=self.analyzer(snapshot), preflight=snapshot.preflight_failure if query.data_source == "snapshot" and not query.resolve_indeterminate else None)
-        return self.finish(query, caps, selected, counts, "window_search")
+        return self.finish(query, caps, selected, counts, "window_search",
+                           evaluations=[evaluation_summary(c) for c in evaluated])
 
-    def finish(self, query, caps, candidates, counts, operation):
+    def finish(self, query, caps, candidates, counts, operation, evaluations=None):
         if self.source_capabilities(query)["source_hash"] != caps["source_hash"]:
             raise DomainError("STALE_DATASET", 409)
         passing = [c for c in candidates if c.decision == "PASS"]
@@ -176,7 +177,7 @@ class PlanningService:
             operation=operation, status=status, candidates=candidates,
             recommended_candidate_id=recommendation.candidate_id if recommendation else None,
             apply_allowed=bool(passing), rank_by=query.rank_by, ranking=rank_candidates(candidates, query.rank_by),
-            coverage=counts, request=request, dataset_version=caps["dataset_version"],
+            coverage=counts, evaluations=evaluations, request=request, dataset_version=caps["dataset_version"],
             method_version=METHOD_VERSION, source_hash=caps["source_hash"],
             warnings=[*caps["warnings"], "Only selected sites and evaluated starts are covered.",
                       "A failed hard availability or contact requirement returns FAIL with quality warnings; PASS requires full or sampled mission-path validation. Continuity limits are soft preferences.",

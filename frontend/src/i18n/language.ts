@@ -28,6 +28,8 @@ const sharedMessageTemplates = new Set([
   "{0}:COMPARISON_EVIDENCE_MISSING",
   "{0}:SENSITIVITY_FAILED",
   "azimuth_{0}_vs_{1}",
+  "Comparing site {0} of {1} · {2}",
+  "Searching start times · site {0} of {1} · {2}",
 ]);
 const messagePatterns = Object.entries(catalog)
   .filter(([key]) => sharedMessageTemplates.has(key))

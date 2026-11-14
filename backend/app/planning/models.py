@@ -141,6 +141,8 @@ class PlanningResult(Contract):
     rank_by: RankMetric
     ranking: list[RankRange]
     coverage: dict[str, int]
+    # window_search only: a compact row for every evaluated start, returned or not.
+    evaluations: list[dict] | None = None
     dataset_version: str
     method_version: str
     source_hash: str

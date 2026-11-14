@@ -3,7 +3,7 @@ import { useLayoutEffect, useMemo, useState } from "react";
 
 import { MoonScene, type GroundSky } from "../components/MoonScene";
 import { useSiteAnalysis } from "../hooks/useSiteAnalysis";
-import { currentInterval, intervalAt, type Interval, type MissionRequest, type PointResult } from "../mvp/contracts";
+import { currentInterval, intervalAt, stateAt, type Interval, type MissionRequest, type PointResult } from "../mvp/contracts";
 import { useSouthPolarTerrain } from "../hooks/useSouthPolarTerrain";
 import { useSkyEphemeris } from "../hooks/useSkyEphemeris";
 import { sampleSky } from "../lib/skyEphemeris";
@@ -163,16 +163,22 @@ export default function Stage3D({
     const templateSite = catalog.find((site) => site.id === observer.id) ?? catalog[0];
     const pointSite = { ...templateSite, lat: observer.latitude, lon: observer.longitude };
     const model = liveState(pointSite, timeMs, heightM ?? 2);
-    const selectedInstant = observerIsSelected && instantRequest?.panel_height_m===(heightM??2)
-      && instantRequest.antenna_height_m===(heightM??2) && instant ? intervalAt([instant],timeMs) : undefined;
-    const coordinateExact = (observerAnalysis?.request.panel_height_m === observerAnalysis?.request.antenna_height_m
-      ? observerAnalysis && currentInterval(observerAnalysis, timeMs)
-      : undefined) ?? selectedInstant;
+    // Sun states belong to the panel height and Earth states to the antenna
+    // height; each is shown only when it matches the camera height.
+    const h = heightM ?? 2;
+    const stateRequest = observerAnalysis?.request ?? (observerIsSelected ? instantRequest : undefined);
+    const observerResult = observerAnalysis ?? undefined;
+    const observerInstant = observerIsSelected ? instant : undefined;
+    const sunState = stateRequest?.panel_height_m === h ? stateAt(observerResult, observerInstant, timeMs, "sun") : "?";
+    const earthState = stateRequest?.antenna_height_m === h ? stateAt(observerResult, observerInstant, timeMs, "earth") : "?";
+    const coordinateExact = stateRequest?.panel_height_m === h && stateRequest.antenna_height_m === h
+      ? (observerInstant && intervalAt([observerInstant], timeMs)) ?? (observerResult && currentInterval(observerResult, timeMs))
+      : undefined;
     const exact = analysis?.availability === "AVAILABLE" ? analysis.instant : undefined;
     if (continuousSky) return {
       source: "SHARED_SPICE_PREVIEW", observerHeightM: heightM ?? 2,
-      sun: { ...continuousSky.sun, angularRadiusDeg: SUN_R, state: coordinateExact?.sun_state ?? "?" },
-      earth: { ...continuousSky.earth, angularRadiusDeg: EARTH_R, state: coordinateExact?.earth_state ?? "?" },
+      sun: { ...continuousSky.sun, angularRadiusDeg: SUN_R, state: sunState },
+      earth: { ...continuousSky.earth, angularRadiusDeg: EARTH_R, state: earthState },
     };
     if (coordinateExact) {
       const sunAz = coordinateExact.sun_az_deg;

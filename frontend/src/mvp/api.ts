@@ -57,11 +57,25 @@ export function wait(ms: number, signal: AbortSignal): Promise<void> {
     signal.addEventListener("abort", onAbort, { once: true });
   });
 }
+/** Rough position of each PointAnalysisService stage in a full Analyze run. */
+const ANALYSIS_STAGES: [string, number][] = [
+  ["queued", .03], ["waiting_for_worker", .05], ["verify_dem", .1], ["cached_horizon", .15],
+  ["precomputed_horizon", .15], ["seam_validation", .18], ["horizons_5min", .22], ["indexed_metrics", .3],
+  ["cached_physical_series", .3], ["initial_metrics", .36], ["metrics_ready_preparing_details", .45],
+  ["horizons_1min", .5], ["hard_requirements", .58], ["confirming_hard_failure_1min", .62],
+  ["scientific_validation", .66], ["metrics_and_validation", .7], ["checking_mission_bounds", .75],
+  ["refining_horizon_", .8], ["revalidating_", .85], ["soft_preferences", .93], ["commit_artifacts", .97],
+  ["cached", .95], ["complete", 1],
+];
+export function analysisProgress(stage: string): number | undefined {
+  return ANALYSIS_STAGES.find(([name]) => name.endsWith("_") ? stage.startsWith(name) : stage === name || stage.startsWith(name + "_"))?.[1];
+}
 export async function analyzePoint(
   request: MissionRequest,
   signal: AbortSignal,
   progress: (stage: string) => void,
   preview?: (result: PointResult) => void,
+  advance?: (fraction: number) => void,
 ): Promise<PointResult> {
   const job = await api<{ job_id: string }>(
     "/lunar/point/analyses",
@@ -71,6 +85,7 @@ export async function analyzePoint(
   let previewLoaded = false;
   let chartReady = false;
   let polls = 0;
+  let reached = 0;
   const intervalUrl = `/lunar/point/analyses/${job.job_id}/interval`;
   for (;;) {
     const state = await api<{
@@ -86,6 +101,8 @@ export async function analyzePoint(
       previewLoaded = true;
       chartReady = (initial.timeline?.length ?? 0) > 0;
     }
+    reached = Math.max(reached, analysisProgress(state.stage) ?? reached);
+    advance?.(reached);
     progress(
       state.stage.startsWith("refining_horizon_") ||
         state.stage.startsWith("revalidating_")
@@ -108,6 +125,13 @@ export async function analyzePoint(
     await wait(previewLoaded ? 750 : polls < 12 ? 100 : 500, signal);
   }
 }
+/** Work callbacks: stage text, partial result, and numeric progress (0–1). */
+export type OperationWork<T> = (
+  signal: AbortSignal,
+  progress: (stage: string) => void,
+  publish: (value: T) => void,
+  advance: (fraction: number) => void,
+) => Promise<T>;
 export function useOperation<T>(key: string) {
   const [stored, setStored] = useState<{
     key: string;
@@ -116,6 +140,7 @@ export function useOperation<T>(key: string) {
   }>({ key });
   const [busy, setBusy] = useState(false);
   const [stage, setStage] = useState("");
+  const [fraction, setFraction] = useState<number>();
   const active = useRef<AbortController | null>(null);
   const sequence = useRef(0);
   useEffect(() => {
@@ -123,48 +148,63 @@ export function useOperation<T>(key: string) {
     sequence.current++;
     setBusy(false);
     setStage("");
+    setFraction(undefined);
     return () => {
       active.current?.abort();
     };
   }, [key]);
   const run = useCallback(
-    async (
-      work: (signal: AbortSignal, progress: (v: string) => void, publish: (value: T) => void) => Promise<T>,
-    ) => {
+    async (work: OperationWork<T>) => {
       active.current?.abort();
       const controller = new AbortController();
       active.current = controller;
       const id = ++sequence.current;
+      const live = () => !controller.signal.aborted && id === sequence.current;
       setStored({ key });
       setBusy(true);
       setStage("Starting");
+      setFraction(undefined);
       try {
         const data = await work(controller.signal, (v) => {
-          if (!controller.signal.aborted && id === sequence.current) setStage(v);
+          if (live()) setStage(v);
         }, (data) => {
-          if (!controller.signal.aborted && id === sequence.current) setStored({ key, data });
+          if (live()) setStored({ key, data });
+        }, (v) => {
+          if (live()) setFraction(Math.max(0, Math.min(1, v)));
         });
-        if (!controller.signal.aborted && id === sequence.current)
-          setStored({ key, data });
+        if (live()) setStored({ key, data });
       } catch (e) {
-        if (!controller.signal.aborted && id === sequence.current)
+        if (live())
           setStored((previous) => ({
             key,
             data: previous.key === key ? previous.data : undefined,
             error: e instanceof Error ? e.message : "Request failed.",
           }));
       } finally {
-        if (id === sequence.current) setBusy(false);
+        if (id === sequence.current) {
+          setBusy(false);
+          setFraction(undefined);
+        }
       }
     },
     [key],
   );
+  /** Stop the running request; anything already published stays visible. */
+  const cancel = useCallback(() => {
+    active.current?.abort();
+    sequence.current++;
+    setBusy(false);
+    setStage("");
+    setFraction(undefined);
+  }, []);
   return {
     result: stored.key === key ? stored.data : undefined,
     error: stored.key === key ? stored.error : undefined,
     busy,
     stage,
+    fraction,
     run,
+    cancel,
   };
 }
 

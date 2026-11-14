@@ -12,33 +12,30 @@ import {
   coords,
   type Shared,
 } from "./ui";
-import { Finder } from "./views";
+import { Compare, Finder } from "./views";
+import { PLANNING_EXCLUDED, validCoordinate } from "./SitePicker";
 import ChatDock, { ChatPage, useAssistant } from "./Chat";
 import type { Mode } from "./Stage3D";
 import { usePointTerrain } from "../hooks/usePointTerrain";
 import { useHorizonProfile } from "../hooks/useHorizonView";
-import { analyzePoint, api, downloadJson, useOperation, usePointInstant, usePreparedMetrics } from "../mvp/api";
+import { analyzePoint, downloadJson, useOperation, usePointInstant, usePreparedMetrics } from "../mvp/api";
 import {
   DEFAULT_MISSION,
   boundsText,
   missionIssue,
   missionHours,
   missionRequest,
-  planningRequest,
   type Candidate,
   type Mission,
-  type PlanningResult,
   type PointResult,
 } from "../mvp/contracts";
 import { DecisionBadge } from "../mvp/DecisionBadge";
 import {
   BackendTimeline,
-  CandidateCard,
   CurrentStatus,
   MetricBar,
+  CoordinateFields,
   MissionFields,
-  NumberField,
-  PlanningSummary,
   RequestStatus,
   ValidationInfo,
   actionClass,
@@ -106,46 +103,23 @@ export default function App() {
       : Date.parse(DEFAULT_MISSION.start + "Z");
   const [playing, setPlaying] = useState(false),
     [speed, setSpeed] = useState(24);
-  const [selected, setSelected] = useState(SITES.slice(0, 2).map((site) => site.id));
-  const targets = useMemo(
-    () =>
-      selected
-        .map((id) => sites.find((x) => x.id === id))
-        .filter((x): x is Site => !!x)
-        .map(toTarget),
-    [selected, sites],
-  );
+  // Compare and Best dates keep their own sites, custom points, mission and results.
+  const planningSites = useMemo(() => catalog.filter((x) => !PLANNING_EXCLUDED.has(x.id)), [catalog]);
   const point = useOperation<PointResult>(
     JSON.stringify([mission, site.lat, site.lon]),
   );
-  const compared = useOperation<PlanningResult>(
-    JSON.stringify([mission, targets]),
-  );
-  const busy = point.busy || compared.busy;
-  const coordinateIssue =
-    !Number.isFinite(site.lat) ||
+  const busy = point.busy;
+  const coordinateIssue = !Number.isFinite(site.lat) && !Number.isFinite(site.lon)
+    ? "Enter latitude and longitude for the custom coordinate."
+    : !Number.isFinite(site.lat) ||
     site.lat <= -90 ||
     site.lat >= 90 ||
     !Number.isFinite(site.lon) ||
     site.lon < -180 ||
     site.lon > 360
-      ? "Use latitude between −90 and 90 (excluding poles), and longitude between −180 and 360."
+      ? "Use a latitude below 90° (S or N) and a longitude up to 180° (E or W)."
       : null;
-  const issue =
-    missionIssue(mission) ??
-    (view === "explore"
-      ? coordinateIssue
-      : targets.some(
-            (t) =>
-              !Number.isFinite(t.latitude) ||
-              t.latitude <= -90 ||
-              t.latitude >= 90 ||
-              !Number.isFinite(t.longitude) ||
-              t.longitude < -180 ||
-              t.longitude > 360,
-          )
-        ? "Choose valid candidate coordinates."
-        : null);
+  const issue = missionIssue(mission) ?? coordinateIssue;
   const s: Shared = {
     startMs: Number.isFinite(start) ? start : time,
     endMs: Number.isFinite(end) && end > start ? end : time + HOUR,
@@ -177,13 +151,13 @@ export default function App() {
     setCustom((old) => ({ ...old, lat: latitude, lon: longitude }));
     setSiteId("custom");
   };
-  const open = (c: Candidate) => {
+  const open = (c: Candidate, from: Mission) => {
     if (!c.coordinate) return;
-    const known = sites.find((t) => matches(t, c));
+    const known = sites.find((t) => t.id !== "custom" && matches(t, c));
     if (known) setSiteId(known.id);
     else coordinate(c.coordinate.latitude_deg, c.coordinate.longitude_e_deg);
     onMission({
-      ...mission,
+      ...from,
       start: c.start_utc.slice(0, 16),
       end: c.end_utc.slice(0, 16),
       hours: (Date.parse(c.end_utc) - Date.parse(c.start_utc)) / HOUR,
@@ -290,118 +264,20 @@ export default function App() {
           onSite={setSiteId}
           onCoordinate={coordinate}
           onAnalyze={() =>
-            void point.run((signal, progress, preview) =>
+            void point.run((signal, progress, preview, advance) =>
               analyzePoint(
                 missionRequest(mission, toTarget(site)),
                 signal,
                 progress,
                 preview,
+                advance,
               ),
             )
           }
         />
       )}
-      {view === "compare" && (
-        <main className="mx-auto max-w-[1400px] space-y-4 px-4 py-6 lg:px-8">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <h2 className="font-display text-3xl font-semibold">
-              {tr("Compare sites")}
-            </h2>
-            <button
-              className={actionClass}
-              disabled={busy || !!issue || !targets.length}
-              onClick={() =>
-                void compared.run((signal) =>
-                  api<PlanningResult>(
-                    "/planning/compare",
-                    signal,
-                    planningRequest(mission, targets),
-                  ),
-                )
-              }
-            >
-              {tr("Compare sites")}
-            </button>
-          </div>
-          <section className="glass space-y-3 p-4">
-            <MissionFields
-              mission={mission}
-              onChange={onMission}
-              disabled={busy}
-            />
-            <p className="text-xs text-mute">
-              {tr("Same mission, requirements and hardware for every candidate. Only validated PASS candidates can be recommended.")}
-            </p>
-            {issue && (
-              <p role="alert" className="text-xs text-rose">
-                {tr(issue)}
-              </p>
-            )}
-          </section>
-          <section className="grid gap-4 md:grid-cols-3">
-            {Array.from(
-              { length: Math.min(3, selected.length + 1) },
-              (_, i) => (
-                <label key={i} className="glass p-5">
-                  <span className="eyebrow">{tr("Site ")}{i + 1}</span>
-                  <select
-                    className={`${inputClass} mt-2`}
-                    aria-label={tr("Site {0}", [i + 1])}
-                    value={selected[i] ?? ""}
-                    disabled={busy}
-                    onChange={(e) => {
-                      const n = [...selected];
-                      if (e.target.value) n[i] = e.target.value;
-                      else n.splice(i, 1);
-                      setSelected([...new Set(n)]);
-                    }}
-                  >
-                    <option value="">{tr("— Add a site —")}</option>
-                    {sites.map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.id === "custom" ? tr("Custom coordinate") : t.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              ),
-            )}
-          </section>
-          <RequestStatus
-            busy={compared.busy}
-            stage="Calculating and validating candidates"
-            error={compared.error}
-          />
-          {compared.result && (
-            <>
-              <PlanningSummary result={compared.result} />
-              <div className="grid gap-4 md:grid-cols-3">
-                {compared.result.candidates.map((c) => (
-                  <CandidateCard
-                    key={c.candidate_id}
-                    candidate={c}
-                    name={sites.find((t) => matches(t, c))?.name ?? c.site_id}
-                    hours={missionHours(mission)}
-                    onOpen={() => open(c)}
-                    recommended={
-                      compared.result!.recommended_candidate_id ===
-                      c.candidate_id
-                    }
-                  />
-                ))}
-              </div>
-            </>
-          )}
-        </main>
-      )}
-      {view === "dates" && (
-        <Finder
-          {...{ mission, sites, selected }}
-          onMission={onMission}
-          onSelected={setSelected}
-          onOpen={open}
-        />
-      )}
+      <Compare sites={planningSites} hidden={view !== "compare"} onOpen={open} />
+      <Finder sites={planningSites} hidden={view !== "dates"} onOpen={open} />
       {view === "chat" && <ChatPage a={assistant} />}
       <ChatDock a={assistant} hidden={view === "chat"} />
     </div>
@@ -465,6 +341,16 @@ function Explore({
   const { result: customTerrain, loading: terrainLoading } =
     usePointTerrain(customCoordinate, customCoordinate !== null);
   const terrain = customTerrain?.terrain;
+  // While the custom coordinate fields are being filled in, the views keep
+  // showing the last valid point instead of going blank.
+  const siteValid = validCoordinate(site.lat, site.lon);
+  const [lastShown, setLastShown] = useState({ sites, id: site.id });
+  useEffect(() => {
+    if (siteValid) setLastShown({ sites, id: site.id });
+  }, [siteValid, sites, site.id]);
+  const stageSites = siteValid ? sites : lastShown.sites;
+  const stageId = siteValid ? site.id : lastShown.id;
+  const stageSite = stageSites.find((x) => x.id === stageId) ?? site;
   return (
     <div className="flex min-h-[640px] flex-col lg:h-[calc(100svh-3.5rem)] lg:flex-row">
       <aside className="flex w-full shrink-0 flex-col border-b border-line bg-panel lg:w-[340px] lg:border-r lg:border-b-0">
@@ -486,7 +372,7 @@ function Explore({
           {tab === "sites" ? (
             <div className="px-2 pb-4">
               <p className="eyebrow px-3 py-3">{tr("Sites · ")}{sites.filter((site) => site.id !== "custom").length}</p>
-              {sites.map((t) => (
+              {sites.filter((t) => t.id !== "custom").map((t) => (
                 <button
                   key={t.id}
                   disabled={busy}
@@ -498,7 +384,7 @@ function Explore({
                   className={`flex w-full items-center gap-3 px-3 py-2.5 text-left text-[13px] ${t.id === site.id ? "bg-white/[0.07] text-white" : "text-soft hover:bg-white/[0.04]"}`}
                 >
                   <i className="size-1.5 shrink-0 rounded-full bg-mute/60" />
-                  <span>{t.id === "custom" ? tr("Custom coordinate") : t.name}</span>
+                  <span>{t.name}</span>
                 </button>
               ))}
               <p className="px-3 pt-3 text-[10px] text-mute">
@@ -512,7 +398,7 @@ function Explore({
                   {site.id === "custom" ? tr("Custom coordinate") : site.name}
                 </h2>
                 <p className="mt-2 font-mono text-xs text-mute tabular">
-                  {coords(site.lat, site.lon, 4)}
+                  {siteValid ? coords(site.lat, site.lon, 4) : tr("Enter latitude and longitude below")}
                 </p>
                 <details className="mt-3">
                   <summary className="cursor-pointer text-xs text-mute">
@@ -527,8 +413,8 @@ function Explore({
                         disabled={busy}
                         value={site.id}
                         onChange={(e) => {
-                          if (e.target.value === "custom")
-                            onCoordinate(site.lat, site.lon);
+                          // Custom starts from empty fields for the user's own coordinate.
+                          if (e.target.value === "custom") onCoordinate(NaN, NaN);
                           else onSite(e.target.value);
                         }}
                       >
@@ -539,21 +425,11 @@ function Explore({
                         ))}
                       </select>
                     </label>
-                    <NumberField
-                      label="Latitude · degrees"
-                      value={site.lat}
-                      min={-89.99999999}
-                      max={89.99999999}
+                    <CoordinateFields
+                      lat={site.lat}
+                      lon={site.lon}
                       disabled={busy}
-                      onChange={(v) => onCoordinate(v, site.lon)}
-                    />
-                    <NumberField
-                      label="East longitude · degrees"
-                      value={site.lon}
-                      min={-180}
-                      max={360}
-                      disabled={busy}
-                      onChange={(v) => onCoordinate(site.lat, v)}
+                      onChange={onCoordinate}
                     />
                   </div>
                 </details>
@@ -585,6 +461,9 @@ function Explore({
                     {tr(issue)}
                   </p>
                 )}
+                <p className="text-[11px] leading-relaxed text-mute">
+                  {tr("Sun/Earth states and metrics load from the prepared cache when this site has them. Analyze point runs the full check here: terrain horizon, visibility at the panel and antenna heights, contact windows and requirements.")}
+                </p>
                 <button
                   className={`${actionClass} w-full`}
                   disabled={point.busy || !!issue}
@@ -595,7 +474,9 @@ function Explore({
                 <RequestStatus
                   busy={point.busy}
                   stage={point.stage}
+                  value={point.fraction}
                   error={point.error}
+                  onCancel={point.cancel}
                 />
                 {!r && !point.busy && !point.error && (
                   <p className="text-xs text-mute">
@@ -747,18 +628,13 @@ function Explore({
             </div>
           }
         >
-          {Number.isFinite(site.lat) &&
-            site.lat > -90 &&
-            site.lat < 90 &&
-            Number.isFinite(site.lon) &&
-            site.lon >= -180 &&
-            site.lon <= 360 &&
+          {validCoordinate(stageSite.lat, stageSite.lon) &&
             Number.isFinite(s.timeMs) && (
-              mode === "horizon" ? <HorizonView request={horizonRequest} site={site} timeMs={s.timeMs} result={viewResult} instant={instant} /> : <Stage3D
+              mode === "horizon" ? <HorizonView request={horizonRequest} site={stageSite} timeMs={s.timeMs} result={viewResult} instant={instant} /> : <Stage3D
                 className="absolute inset-0"
                 mode={mode}
-                sites={sites}
-                siteId={site.id}
+                sites={stageSites}
+                siteId={stageId}
                 timeMs={s.timeMs}
                 heightM={s.hIdx >= 0 ? HEIGHTS[s.hIdx] : mission.panel}
                 pointAnalysis={viewResult}

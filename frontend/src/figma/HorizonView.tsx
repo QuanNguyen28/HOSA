@@ -5,7 +5,7 @@ import { useSkyEphemeris } from "../hooks/useSkyEphemeris";
 import { sampleSky } from "../lib/skyEphemeris";
 import { bearing, bearingInView, horizonAt, horizonVisibility, horizonTrackSegments } from "../lib/horizonView";
 import { HorizonMarker } from './HorizonMarker';
-import { currentInterval, intervalAt, type Interval, type MissionRequest, type PointResult } from "../mvp/contracts";
+import { currentInterval, intervalAt, stateAt, type Interval, type MissionRequest, type PointResult } from "../mvp/contracts";
 import type { Site } from "./model";
 
 const COLOURS = { sun: "#ffc62b", earth: "#47afe8" };
@@ -161,7 +161,7 @@ export default function HorizonView({request, site, timeMs, result, instant}: {
     setSpan(value => Math.max(15, Math.min(360,value*factor)));
   };
   const status = (body: "sun" | "earth") => {
-    const state = interval?.[`${body}_state`];
+    const state = stateAt(result, instant, timeMs, body);
     return tr(state === "V" ? "Visible" : state === "B" ? "Hidden" : "Unknown");
   };
   const horizonTooltip = tooltip == null ? undefined : horizonAt(shown, tooltip);
@@ -225,7 +225,7 @@ export default function HorizonView({request, site, timeMs, result, instant}: {
         </g>
         {bodies && (["sun","earth"] as const).map(body=><HorizonMarker key={body}
           x={plot.left+bodies[body].azimuthDeg/360*(plot.right-plot.left)} y={385} radius={3} colour={COLOURS[body]}
-          state={horizonVisibility(bodies[body].elevationDeg,horizonAt(body==='sun'?sunProfile:earthProfile,bodies[body].azimuthDeg),interval?.[`${body}_state`])}/>)}
+          state={horizonVisibility(bodies[body].elevationDeg,horizonAt(body==='sun'?sunProfile:earthProfile,bodies[body].azimuthDeg),stateAt(result, instant, timeMs, body))}/>)}
       </svg>
       {tooltip!==undefined && <div className="pointer-events-none absolute top-2 left-16 border border-line bg-black/90 p-2 font-mono text-[10px] text-soft">
         {tr("Azimuth")} {tooltip.toFixed(2)}° · {tr("Terrain horizon")} {horizonTooltip?`${horizonTooltip.elevation.toFixed(3)}°`:tr("Unknown")}
@@ -238,6 +238,6 @@ export default function HorizonView({request, site, timeMs, result, instant}: {
       </span>)}
     </div>
     <p className="mt-1 font-mono text-[9px] text-mute">{tr("Paths cover the entire mission; sampled every")} {track.chunks[0]?`${track.chunks[0].sampling_seconds/60} ${tr("min")}`:"—"}. {tr("Directions are a geometric preview. Visibility status uses backend intervals.")} {tr("Dashed paths are below the terrain skyline.")}</p>
-    <p className="font-mono text-[9px] text-mute">{request ? `${new Date(request.start_utc).toLocaleString(locale,{timeZone:"UTC"})} → ${new Date(request.end_utc).toLocaleString(locale,{timeZone:"UTC"})} UTC` : tr("Choose a valid mission range.")}</p>
+    <p className="font-mono text-[9px] text-mute">{request ? `${new Date(request.start_utc).toLocaleString(locale,{timeZone:"UTC",hourCycle:"h23"})} → ${new Date(request.end_utc).toLocaleString(locale,{timeZone:"UTC",hourCycle:"h23"})} UTC` : tr("Choose a valid mission range.")}</p>
   </section>;
 }

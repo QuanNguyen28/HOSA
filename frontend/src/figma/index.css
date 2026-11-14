@@ -40,6 +40,15 @@
 }
 @utility eyebrow { font-family: var(--font-display); font-weight: 600; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-mute); }
 
+/* DateTime24: keep the native field's input and picker, hide its locale (AM/PM) text. */
+.datetime-24 { color: transparent; caret-color: transparent; }
+.datetime-24::-webkit-datetime-edit { opacity: 0; }
+.datetime-24::-webkit-calendar-picker-indicator { cursor: pointer; }
+
+.progress-sweep { left: -25%; animation: progress-sweep 1.6s ease-in-out infinite; }
+@keyframes progress-sweep { to { left: 100%; } }
+@media (prefers-reduced-motion: reduce) { .progress-sweep { animation: none; display: none; } }
+
 .ground-sky-label {
   min-width: 124px;
   padding: 7px 9px;

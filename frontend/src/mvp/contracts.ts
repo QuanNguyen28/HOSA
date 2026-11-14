@@ -206,6 +206,9 @@ export type Candidate = {
   nominal_sampled_decision: Decision | null;
   metrics: Record<string, Bounds>;
   constraint_states: Record<string, Decision>;
+  soft_constraint_states?: Record<string, Decision>;
+  /** Frontend only: id of the ticked site this row was evaluated for. */
+  target?: string;
   validation: Validation;
   resolution?: Resolution;
   coordinate?: { latitude_deg: number; longitude_e_deg: number };
@@ -221,6 +224,10 @@ export type PlanningResult = {
   coverage: Record<string, number>;
   method_version: string;
   warnings: string[];
+  /** window_search: a compact row for every evaluated start, returned or not. */
+  evaluations?: Candidate[];
+  /** Backend result ids when the frontend merged several requests into one view. */
+  parts?: string[];
 };
 export const DEFAULT_MISSION: Mission = {
   start: "2026-11-24T00:00",
@@ -348,11 +355,9 @@ export function boundsText(pair?: Bounds, digits = 2): string {
   const [lower, upper] = pair.map((value) => `${Number(value.toFixed(digits))}`);
   return lower === upper ? lower : `${lower}–${upper}`;
 }
-export function intervalAt(
-  rows: Interval[],
-  time: number,
-): Interval | undefined {
-  // Do not treat a display average across days as an exact current state.
+/** The timeline row (native or display bin) whose half-open span holds `time`. */
+export function rowAt(rows: Interval[] | undefined, time: number): Interval | undefined {
+  if (!rows) return undefined;
   let low = 0, high = rows.length;
   while (low < high) {
     const mid = (low + high) >>> 1;
@@ -360,7 +365,41 @@ export function intervalAt(
     else high = mid;
   }
   const row = rows[low - 1];
-  return row && !row.aggregated && time < Date.parse(row.end_utc) ? row : undefined;
+  return row && time < Date.parse(row.end_utc) ? row : undefined;
+}
+export function intervalAt(
+  rows: Interval[],
+  time: number,
+): Interval | undefined {
+  // Do not treat a display average across days as an exact current state.
+  const row = rowAt(rows, time);
+  return row && !row.aggregated ? row : undefined;
+}
+type Body = "sun" | "earth" | "joint";
+/**
+ * Visibility state of one body at `time`. An exact interval wins; otherwise a
+ * display bin still answers when the body kept one state over the whole bin
+ * (the backend marks bins that mix V and B as "?"). Prepared catalog metrics
+ * therefore give Sun/Earth states for every hour before any instant arrives,
+ * and while playback outruns the five-minute instant samples.
+ */
+export function stateAt(
+  result: PointResult | undefined,
+  instant: Interval | undefined,
+  time: number,
+  body: Body,
+): "V" | "B" | "?" {
+  const exact = (instant && intervalAt([instant], time)) ?? (result && currentInterval(result, time));
+  if (exact) return exact[`${body}_state`];
+  const bin = rowAt(result?.timeline, time);
+  return bin?.[`${body}_state`] ?? "?";
+}
+/** Sun disc fraction from an exact interval, or from a bin whose fraction bounds agree. */
+export function sunFractionAt(result: PointResult | undefined, instant: Interval | undefined, time: number) {
+  const exact = (instant && intervalAt([instant], time)) ?? (result && currentInterval(result, time));
+  if (exact) return exact.sun_visible_fraction ?? undefined;
+  const bin = rowAt(result?.timeline, time);
+  return bin && bin.sun_state !== "?" ? bin.sun_visible_fraction ?? undefined : undefined;
 }
 
 export function currentInterval(result: PointResult, time: number): Interval | undefined {
