@@ -445,7 +445,7 @@ function Explore({
   onAnalyze: () => void;
 }) {
   const { t: tr } = useTranslation();
-  const [mode, setMode] = useState<Mode | "horizon">("pole");
+  const [mode, setMode] = useState<Mode | "horizon">("orbit");
   const [tab, setTab] = useState<"info" | "sites">("info");
   const prepared = usePreparedMetrics(issue ? undefined : missionRequest(mission, toTarget(site)), site.group === "nasa");
   const r = point.result ?? prepared,

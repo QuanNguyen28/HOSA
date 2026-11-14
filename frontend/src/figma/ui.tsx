@@ -25,23 +25,12 @@ export type Ctl = {
 /* ---------- icons ---------- */
 export function Logo({ size = 34 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
-      <circle
-        cx="16"
-        cy="16"
-        r="15"
-        fill="none"
-        stroke="#fff"
-        strokeWidth="1.2"
-      />
-      <path
-        d="M20.5 9.2a7.8 7.8 0 1 0 2.3 11.4A6.3 6.3 0 0 1 20.5 9.2Z"
-        fill="none"
-        stroke="#fff"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
-      <circle cx="22.5" cy="9.5" r="1.6" fill="#ffc53d" />
+    <svg width={size} height={size} viewBox="0 0 1250 1250" aria-hidden="true">
+      <rect x="12" y="12" width="1228" height="1228" rx="215" fill="#fbc102" />
+      <path d="M481 498C640 498 730 440 771 265V542C700 605 600 636 481 636Z" fill="#fddc66" />
+      <rect x="331" y="251" width="150" height="155" fill="#fff" />
+      <rect x="331" y="498" width="150" height="503" fill="#fff" />
+      <rect x="771" y="251" width="150" height="750" fill="#fff" />
     </svg>
   );
 }
