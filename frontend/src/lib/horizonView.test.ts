@@ -1,9 +1,30 @@
 import { describe, expect, it } from "vitest";
-import { adjacentTrackPoint, bearingInView, compactTrack, horizonAt, wrappedTrackEdges, type HorizonProfile } from "./horizonView";
+import { adjacentTrackPoint, bearingInView, compactTrack, horizonAt, horizonVisibility, horizonTrackSegments, wrappedTrackEdges, type HorizonProfile } from "./horizonView";
 
 const profile: HorizonProfile = {height_m: 20, azimuth_step_deg: 90, coverage_complete: true,
   points: [0,90,180,270].map((az,i)=>({azimuth_deg: az, horizon_deg: i, coverage_complete: true, blocker_distance_m: 4000}))};
 describe("Horizon panorama geometry", () => {
+  it('keeps backend partial-disc visibility authoritative and never fills unknown evidence', () => {
+    expect(horizonVisibility(-.1,{elevation:0},'V')).toBe('visible');
+    expect(horizonVisibility(1,{elevation:0},'B')).toBe('hidden');
+    expect(horizonVisibility(1,{elevation:0},'?')).toBe('unknown');
+    expect(horizonVisibility(0,{elevation:0})).toBe('hidden');
+    expect(horizonVisibility(1)).toBe('unknown');
+  });
+  it('splits visible and hidden path pieces at the skyline without a missing segment', () => {
+    const flat={...profile,points:profile.points.map(p=>({...p,horizon_deg:2}))};
+    expect(horizonTrackSegments([10,3,.26,20,1,.26],flat)).toEqual([
+      {from:[10,3],to:[15,2],state:'visible'},
+      {from:[15,2],to:[20,1],state:'hidden'},
+    ]);
+    expect(horizonTrackSegments([359,3,.26,1,1,.26],flat)).toEqual([
+      {from:[359,3],to:[360,2],state:'visible'},
+      {from:[0,2],to:[1,1],state:'hidden'},
+    ]);
+    expect(horizonTrackSegments([10,3,.26,20,1,.26])).toEqual([
+      {from:[10,3],to:[20,1],state:'unknown'},
+    ]);
+  });
   it("interpolates cyclic bearings without filling incomplete terrain", () => {
     expect(horizonAt(profile,315)?.elevation).toBe(1.5);
     expect(horizonAt(profile,-45)?.elevation).toBe(1.5);

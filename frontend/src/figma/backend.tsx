@@ -4,6 +4,7 @@ import { api } from "../mvp/api";
 import {
   boundsText,
   currentInterval,
+  intervalAt,
   missionHours,
   missionEnd,
   timelineBins,
@@ -361,13 +362,19 @@ export function MetricBar({
 }
 export function CurrentStatus({
   result,
+  instant,
+  error,
+  loading,
   time,
 }: {
   result?: PointResult;
+  instant?: Interval;
+  error?: string;
+  loading?: boolean;
   time: number;
 }) {
   const { t: tr } = useTranslation();
-  const row = result && currentInterval(result, time);
+  const row = (instant && intervalAt([instant],time)) ?? (result && currentInterval(result, time));
   return (
     <div>
       <div className="flex gap-2">
@@ -387,7 +394,7 @@ export function CurrentStatus({
                       ? "partly visible" : "visible"
                     : state === "B"
                       ? "blocked"
-                      : "unknown")}
+                      : loading ? "loading" : "unknown")}
                 </p>
                 <p className="font-mono text-[10px]">
                   {body === "sun" && row?.sun_visible_fraction != null
@@ -401,6 +408,9 @@ export function CurrentStatus({
         })}
       </div>
       {row?.evidence_source === "prepared_nominal" && <p className="mt-1 text-[9px] text-mute">{tr("Nominal 5-minute sample · PROVISIONAL")}</p>}
+      {!row && error && <p role="status" className="mt-2 text-[10px] text-sun">{tr(error==='INSTANT_NOT_PREPARED'
+        ? 'No prepared instant for this coordinate/height. Analyze point to calculate it.'
+        : 'Unable to load current visibility: {0}',[error])}</p>}
     </div>
   );
 }

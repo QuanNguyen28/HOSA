@@ -358,7 +358,7 @@ function DynamicTerrain({
   onSelect,
   onHover,
   onReady,
-  imagery = false,
+  imagery = true,
   onImageryStatus,
 }: {
   terrain: TerrainWindow;
@@ -1132,7 +1132,7 @@ function Moon({
   onSelect,
   onHover,
   onReady,
-  imagery = false,
+  imagery = true,
   onImageryStatus,
 }: MoonSceneProps) {
   const [imageryBaseReady,setImageryBaseReady]=useState(false);

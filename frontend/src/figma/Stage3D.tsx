@@ -3,11 +3,10 @@ import { useLayoutEffect, useMemo, useState } from "react";
 
 import { MoonScene, type GroundSky } from "../components/MoonScene";
 import { useSiteAnalysis } from "../hooks/useSiteAnalysis";
-import { currentInterval, type PointResult } from "../mvp/contracts";
+import { currentInterval, intervalAt, type Interval, type MissionRequest, type PointResult } from "../mvp/contracts";
 import { useSouthPolarTerrain } from "../hooks/useSouthPolarTerrain";
 import { useSkyEphemeris } from "../hooks/useSkyEphemeris";
 import { sampleSky } from "../lib/skyEphemeris";
-import type { ImageryStatus } from '../components/MoonTrekImagery';
 import { useTerrainWindow, type TerrainWindow } from "../hooks/useTerrainWindow";
 import type {
   CameraPreset,
@@ -28,6 +27,8 @@ type Props = {
   heightM?: number;
   onSelect?: (id: string) => void;
   pointAnalysis?: PointResult | null;
+  instant?: Interval;
+  instantRequest?: MissionRequest;
   className?: string;
   interactive?: boolean;
 };
@@ -76,6 +77,8 @@ export default function Stage3D({
   heightM,
   onSelect,
   pointAnalysis,
+  instant,
+  instantRequest,
   className = "",
   interactive = true,
 }: Props) {
@@ -95,8 +98,6 @@ export default function Stage3D({
   }, [mode, anchor, focus.mode]);
   const [hovered, setHovered] = useState<LunarCoordinate | null>(null);
   const [ready, setReady] = useState(false);
-  const [imagery,setImagery]=useState(true);
-  const [imageryStatus,setImageryStatus]=useState<ImageryStatus>('loading');
   const { result: southPolarTerrain, loading: polarTerrainLoading } =
     useSouthPolarTerrain(mode === "orbit");
   const { result: terrainWindow, loading: terrainLoading } = useTerrainWindow(
@@ -162,9 +163,11 @@ export default function Stage3D({
     const templateSite = catalog.find((site) => site.id === observer.id) ?? catalog[0];
     const pointSite = { ...templateSite, lat: observer.latitude, lon: observer.longitude };
     const model = liveState(pointSite, timeMs, heightM ?? 2);
-    const coordinateExact = observerAnalysis?.request.panel_height_m === observerAnalysis?.request.antenna_height_m
+    const selectedInstant = observerIsSelected && instantRequest?.panel_height_m===(heightM??2)
+      && instantRequest.antenna_height_m===(heightM??2) && instant ? intervalAt([instant],timeMs) : undefined;
+    const coordinateExact = (observerAnalysis?.request.panel_height_m === observerAnalysis?.request.antenna_height_m
       ? observerAnalysis && currentInterval(observerAnalysis, timeMs)
-      : undefined;
+      : undefined) ?? selectedInstant;
     const exact = analysis?.availability === "AVAILABLE" ? analysis.instant : undefined;
     if (continuousSky) return {
       source: "SHARED_SPICE_PREVIEW", observerHeightM: heightM ?? 2,
@@ -221,7 +224,7 @@ export default function Stage3D({
         state: exactEarth ? exact!.earth.state : model.earthUp ? "V" : "B",
       },
     };
-  }, [analysis, catalog, heightM, observerAnalysis, observer, timeMs, continuousSky]);
+  }, [analysis, catalog, heightM, observerAnalysis, observer, timeMs, continuousSky, instant, instantRequest, observerIsSelected]);
 
   const handleSelect = (
     coordinate: LunarCoordinate,
@@ -240,8 +243,7 @@ export default function Stage3D({
     >
       <div className="relative h-full w-full">
         <MoonScene
-          imagery={imagery}
-          onImageryStatus={setImageryStatus}
+          imagery
           key={mode === "orbit" ? "globe" : "terrain"}
           time={new Date(timeMs)}
           sunVector={continuousSky?.worldSun}
@@ -262,13 +264,6 @@ export default function Stage3D({
       </div>
 
       <div className="pointer-events-none absolute top-16 right-4 z-10 flex w-60 flex-col items-stretch gap-2">
-        <div className="pointer-events-auto border border-line bg-black/85 p-2.5 text-[10px] text-soft">
-          <div className="flex gap-1" role="group" aria-label={tr('Surface appearance')}>
-            <button type="button" aria-pressed={imagery} onClick={()=>setImagery(true)} className={`border px-2 py-1.5 ${imagery?'border-mint text-mint':'border-line text-mute'}`}>{tr('NASA imagery')}</button>
-            <button type="button" aria-pressed={!imagery} onClick={()=>setImagery(false)} className={`border px-2 py-1.5 ${!imagery?'border-sun text-sun':'border-line text-mute'}`}>{tr('Relief model')}</button>
-          </div>
-          {imagery && <p className={`mt-1 ${imageryStatus==='ready'?'text-mint':'text-sun'}`} role="status">{tr(imageryStatus==='ready'?'NASA Moon Trek · imagery loaded':imageryStatus==='loading'?'Loading NASA image tiles…':imageryStatus==='partial'?'Some image tiles unavailable · lower detail retained':'NASA imagery unavailable · local preview')}</p>}
-        </div>
         {mode !== "orbit" && visible && !observerIsSelected && (
           <button type="button"
             disabled={terrainPending && sameCoordinate(anchor, selected)}
@@ -326,7 +321,7 @@ export default function Stage3D({
           <div className="text-mute">{tr("6 circular LOD rings · south-pole flight view")}</div>
           <div className="text-sun">{tr("FOCUS LOD · 1.5 / 6 / 24 / 48 / 120 / 300 km")}</div>
           <div className="text-mute">{tr("SOURCE · ")}{tr(visibleTerrain.dataset_id ?? "regional terrain")}</div>
-          <div className="text-mute">{tr(imagery?'NASA IMAGE OVERLAY · DISPLAY ONLY':"MICRO-RELIEF · SHADING ONLY")}</div>
+          <div className="text-mute">{tr('NASA IMAGE OVERLAY · DISPLAY ONLY')}</div>
           <div className="mt-1 text-mint">{tr("MOUSE · LEFT DRAG MOVE · RIGHT DRAG TILT · WHEEL ZOOM")}</div>
         </div>
       )}
@@ -342,7 +337,7 @@ export default function Stage3D({
             {tr(visibleTerrain.grid.rows)}{tr("² vertices")}</div>
           <div className="text-mute">
             {(visibleTerrain.radius_km! * 2).toFixed(0)} {tr(" km field · curvature enabled")}</div>
-          <div className="text-mute">{tr(imagery?'NASA IMAGE OVERLAY · DISPLAY ONLY':"MICRO-RELIEF · SHADING ONLY")}</div>
+          <div className="text-mute">{tr('NASA IMAGE OVERLAY · DISPLAY ONLY')}</div>
           <div className={groundSky.source !== "MODEL_PREVIEW" ? "text-mint" : "text-sun"}>
             {tr("SKY · ")}{tr(groundSky.source === "SHARED_SPICE_PREVIEW" ? "SPICE · VISUAL PREVIEW" : groundSky.source === "SHARED_SPICE" ? "SPICE / JPL CHECKED" : groundSky.source === "JPL_HORIZONS" ? "JPL HORIZONS" : "MODEL PREVIEW")}
           </div>

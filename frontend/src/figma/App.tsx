@@ -451,9 +451,10 @@ function Explore({
   const r = point.result ?? prepared,
     end = s.endMs;
   const busy = operationsBusy && !r;
-  const instant = usePointInstant(r, s.timeMs);
-  const viewResult = useMemo(() => r ? { ...r, instant } : undefined, [r, instant]);
   const horizonRequest = useMemo(() => issue ? undefined : missionRequest(mission, toTarget(site)), [issue, mission, site]);
+  const current = usePointInstant(r, s.timeMs, horizonRequest);
+  const instant = current.instant;
+  const viewResult = useMemo(() => r ? { ...r, instant } : undefined, [r, instant]);
   useHorizonProfile(horizonRequest);
   const customCoordinate = useMemo(
     () => site.id === "custom" && Number.isFinite(site.lat) && Number.isFinite(site.lon)
@@ -559,7 +560,7 @@ function Explore({
               </div>
               <div className="space-y-3 border-b border-line p-5">
                 <p className="eyebrow">{tr("Right now · backend intervals")}</p>
-                <CurrentStatus result={viewResult} time={s.timeMs} />
+                <CurrentStatus result={viewResult} instant={instant} loading={current.loading} error={current.error} time={s.timeMs} />
               </div>
               {customCoordinate && (
                 <div className="space-y-1 border-b border-line p-5 text-xs text-soft">
@@ -753,7 +754,7 @@ function Explore({
             site.lon >= -180 &&
             site.lon <= 360 &&
             Number.isFinite(s.timeMs) && (
-              mode === "horizon" ? <HorizonView request={horizonRequest} site={site} timeMs={s.timeMs} result={viewResult} /> : <Stage3D
+              mode === "horizon" ? <HorizonView request={horizonRequest} site={site} timeMs={s.timeMs} result={viewResult} instant={instant} /> : <Stage3D
                 className="absolute inset-0"
                 mode={mode}
                 sites={sites}
@@ -761,6 +762,8 @@ function Explore({
                 timeMs={s.timeMs}
                 heightM={s.hIdx >= 0 ? HEIGHTS[s.hIdx] : mission.panel}
                 pointAnalysis={viewResult}
+                instant={instant}
+                instantRequest={horizonRequest}
                 onSelect={(id) => {
                   if (!busy) {
                     onSite(id);

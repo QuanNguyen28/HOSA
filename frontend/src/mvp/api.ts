@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { intervalAt, type Interval, type MissionRequest, type PointResult } from "./contracts";
+import { currentInterval, intervalAt, type Interval, type MissionRequest, type PointResult } from "./contracts";
+import { instantTime, startInstantReader, type InstantQuery } from './instantReader';
 
 export function errorText(payload: unknown, status: number): string {
   const detail = (payload as { detail?: unknown })?.detail;
@@ -167,38 +168,38 @@ export function useOperation<T>(key: string) {
   };
 }
 
-export function usePointInstant(result: PointResult | undefined, time: number) {
+export function usePointInstant(result: PointResult | undefined, time: number, fallbackRequest?: MissionRequest) {
   const [stored, setStored] = useState<{ key: string; row: Interval }>();
+  const [failure, setFailure] = useState<{scope: string; message: string}>();
   const cache = useRef(new Map<string, Interval>());
-  const native = result && intervalAt(result.timeline, time);
+  const native = result && currentInterval(result, time);
   const url = result?.interval_url;
-  const request = result ? JSON.stringify(result.request) : undefined;
-  // A refined result may use one-minute intervals; a five-minute request key
-  // would keep reusing its first minute and leave the other four minutes wrong.
-  const step = url ? 60000 : 300000;
-  const tick = Math.floor(time / step) * step;
-  const key = `${result?.result_id}|${url}|${result?.evaluation_status}|${tick}`;
+  const request = result?.request ?? fallbackRequest;
+  const scope = JSON.stringify([result?.result_id,url,result?.evaluation_status,request]);
+  const tick = request ? instantTime(time,request.start_utc,!!url) : NaN;
+  const key = `${scope}|${tick}`;
   const cached = cache.current.get(key) ?? (stored?.key === key ? stored.row : undefined);
-  const inWindow = result && time >= Date.parse(result.request.start_utc) && time < Date.parse(result.request.end_utc);
+  const inWindow = !!request && time >= Date.parse(request.start_utc) && time < Date.parse(request.end_utc);
+  const snapshot = useRef<{scope: string; query?: InstantQuery}>({scope});
+  snapshot.current = {scope,query:request && inWindow && !native && !cached && Number.isFinite(tick)
+    ? {key,at:tick,request,url} : undefined};
   useEffect(() => {
-    if (!request || native || cached || !inWindow || !Number.isFinite(tick)) return;
-    const controller = new AbortController();
-    // Scrubbing is coalesced; stale responses never replace the selected instant.
-    const timer = setTimeout(() => {
-      const query = `?at_utc=${encodeURIComponent(new Date(tick).toISOString())}`;
-      void api<Interval>(`${url ?? "/lunar/point/instant"}${query}`, controller.signal, url ? undefined : JSON.parse(request))
-        .then((row) => {
-          if (!controller.signal.aborted && intervalAt([row], tick)) {
-            cache.current.set(key, row);
-            if (cache.current.size > 64) cache.current.delete(cache.current.keys().next().value!);
-            setStored({ key, row });
-          }
-        })
-        .catch(() => { /* Unknown until exact evidence is available. */ });
-    }, 150);
-    return () => { clearTimeout(timer); controller.abort(); };
-  }, [key, native, cached, url, request, tick, inWindow]);
-  return native ?? (inWindow && cached ? intervalAt([cached], time) : undefined);
+    return startInstantReader(
+      () => snapshot.current.scope===scope ? snapshot.current.query : undefined,
+      (query,signal) => api<Interval>(`${query.url ?? '/lunar/point/instant'}?at_utc=${encodeURIComponent(new Date(query.at).toISOString())}`,
+        signal,query.url ? undefined : query.request),
+      (query,row) => {
+        if (!intervalAt([row],query.at)) return;
+        cache.current.set(query.key,row);
+        if(cache.current.size>64) cache.current.delete(cache.current.keys().next().value!);
+        setStored({key:query.key,row});setFailure(undefined);
+      },
+      error => setFailure({scope,message:error.message}),
+    );
+  }, [scope]);
+  const instant = native ?? (inWindow && cached ? intervalAt([cached],time) : undefined);
+  const error = !instant && failure?.scope===scope ? failure.message : undefined;
+  return {instant,error,loading:inWindow && !instant && !error};
 }
 
 const preparedMetricCache = new Map<string, PointResult>();

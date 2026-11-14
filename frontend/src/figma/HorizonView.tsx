@@ -3,8 +3,9 @@ import { useTranslation } from "../i18n/language";
 import { useHorizonView } from "../hooks/useHorizonView";
 import { useSkyEphemeris } from "../hooks/useSkyEphemeris";
 import { sampleSky } from "../lib/skyEphemeris";
-import { adjacentTrackPoint, bearing, bearingInView, horizonAt, wrappedTrackEdges } from "../lib/horizonView";
-import { currentInterval, type MissionRequest, type PointResult } from "../mvp/contracts";
+import { bearing, bearingInView, horizonAt, horizonVisibility, horizonTrackSegments } from "../lib/horizonView";
+import { HorizonMarker } from './HorizonMarker';
+import { currentInterval, intervalAt, type Interval, type MissionRequest, type PointResult } from "../mvp/contracts";
 import type { Site } from "./model";
 
 const COLOURS = { sun: "#ffc62b", earth: "#47afe8" };
@@ -12,8 +13,8 @@ const W = 4096, H = 640;
 const plot = {left: 56, right: 980, top: 18, bottom: 346};
 const buttonClass = "rounded-sm border border-line px-2 py-1.5 font-mono text-[10px] text-soft hover:border-white/50 disabled:opacity-40";
 
-export default function HorizonView({request, site, timeMs, result}: {
-  request?: MissionRequest; site: Site; timeMs: number; result?: PointResult;
+export default function HorizonView({request, site, timeMs, result, instant}: {
+  request?: MissionRequest; site: Site; timeMs: number; result?: PointResult; instant?: Interval;
 }) {
   const {t: tr, locale} = useTranslation();
   const {profile, profileError, track} = useHorizonView(request, result ? `${result.result_id}:${result.evaluation_status}` : undefined);
@@ -39,7 +40,7 @@ export default function HorizonView({request, site, timeMs, result}: {
   const earthProfile = profile?.profiles.find(p => p.height_m === request?.antenna_height_m);
   const [profileBody, setProfileBody] = useState<"sun" | "earth">("sun");
   const shown = profileBody === "sun" ? sunProfile : earthProfile;
-  const interval = result && currentInterval(result, timeMs);
+  const interval = (instant && intervalAt([instant],timeMs)) ?? (result && currentInterval(result, timeMs));
   const viewCentre = follow && bodies ? bodies[follow].azimuthDeg : centre;
   const minAz = viewCentre - span/2;
   const bounds = useMemo(() => {
@@ -109,28 +110,22 @@ export default function HorizonView({request, site, timeMs, result}: {
     for (const chunk of track.chunks) {
       if (painted.current.chunks.has(chunk.chunk_index)) continue;
       for (const body of ["sun", "earth"] as const) {
-        context.strokeStyle = COLOURS[body]; context.globalAlpha = .48;
-        context.lineWidth = 1.3;
+        context.strokeStyle = COLOURS[body];
+        context.lineWidth = 3.5;
         const points = chunk.bodies[body], skyline = body === "sun" ? sunProfile : earthProfile;
+        const segments = horizonTrackSegments(points,skyline);
         // Dashes indicate centre directions below the skyline, not a second
         // visibility decision (solar-disc fractions remain backend evidence).
-        for (const below of [false, true]) {
-          context.setLineDash(below ? [8,5] : []); context.beginPath();
-          let previous = NaN, previousY = NaN, previousMatches = false;
-          for (let i=0; i<points.length; i+=3) {
-            const az = points[i], px = az/360*W, pyValue = py(points[i+1]);
-            const horizon = horizonAt(skyline,az);
-            const matches = (horizon !== undefined && points[i+1] < horizon.elevation) === below;
-            if(matches && previousMatches && adjacentTrackPoint(previous,az)) context.lineTo(px,pyValue);
-            else if(matches && previousMatches && Number.isFinite(previous)) {
-              // Clip duplicate short segments at each panorama edge. Simply
-              // omitting the seam leaves a conspicuous slit in Follow views.
-              const edges=wrappedTrackEdges(previous,az);
-              if(edges.length){context.lineTo(edges[0][1]/360*W,pyValue);context.moveTo(edges[1][0]/360*W,previousY);context.lineTo(px,pyValue);}
-              else context.moveTo(px,pyValue);
-            }
-            else context.moveTo(px,pyValue);
-            previous=az; previousY=pyValue; previousMatches=matches;
+        for (const visibility of ['visible', 'hidden', 'unknown'] as const) {
+          context.globalAlpha = visibility === 'unknown' ? .35 : .75;
+          context.setLineDash(visibility === 'hidden' ? [20,12] : visibility === 'unknown' ? [3,12] : []); context.beginPath();
+          let previous: [number,number] | undefined;
+          for (const segment of segments) {
+            if(segment.state!==visibility) {previous=undefined;continue;}
+            if(!previous || previous[0]!==segment.from[0] || previous[1]!==segment.from[1])
+              context.moveTo(segment.from[0]/360*W,py(segment.from[1]));
+            context.lineTo(segment.to[0]/360*W,py(segment.to[1]));
+            previous=segment.to;
           }
           context.stroke();
         }
@@ -221,14 +216,16 @@ export default function HorizonView({request, site, timeMs, result}: {
           {bodies && (["sun","earth"] as const).map(body=> {
             const point=bodies[body], px=x(point.azimuthDeg), py=y(point.elevationDeg);
             const horizon=horizonAt(body==="sun"?sunProfile:earthProfile,point.azimuthDeg);
+            const visibility=horizonVisibility(point.elevationDeg,horizon,interval?.[`${body}_state`]);
             return <g key={body}>
-              {horizon && <line x1={px} x2={px} y1={py} y2={y(horizon.elevation)} stroke={COLOURS[body]} strokeOpacity={.7} strokeDasharray="3 3"/>}
-              <circle cx={px} cy={py} r={5} fill={COLOURS[body]} stroke="black" strokeWidth={1.5}/>
+              <HorizonMarker x={px} y={py} colour={COLOURS[body]} state={visibility}/>
               <text x={px+8} y={py-9} fill={COLOURS[body]} fontSize={12}>{tr(body==="sun"?"Sun":"Earth")}</text>
             </g>;
           })}
         </g>
-        {bodies && (["sun","earth"] as const).map(body=><circle key={body} cx={plot.left+bodies[body].azimuthDeg/360*(plot.right-plot.left)} cy={385} r={3} fill={COLOURS[body]}/>)}
+        {bodies && (["sun","earth"] as const).map(body=><HorizonMarker key={body}
+          x={plot.left+bodies[body].azimuthDeg/360*(plot.right-plot.left)} y={385} radius={3} colour={COLOURS[body]}
+          state={horizonVisibility(bodies[body].elevationDeg,horizonAt(body==='sun'?sunProfile:earthProfile,bodies[body].azimuthDeg),interval?.[`${body}_state`])}/>)}
       </svg>
       {tooltip!==undefined && <div className="pointer-events-none absolute top-2 left-16 border border-line bg-black/90 p-2 font-mono text-[10px] text-soft">
         {tr("Azimuth")} {tooltip.toFixed(2)}° · {tr("Terrain horizon")} {horizonTooltip?`${horizonTooltip.elevation.toFixed(3)}°`:tr("Unknown")}

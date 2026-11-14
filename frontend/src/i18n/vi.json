@@ -570,5 +570,8 @@
   "Some image tiles unavailable · lower detail retained": "Thiếu một số ô ảnh · giữ mức chi tiết thấp hơn",
   "NASA imagery unavailable · local preview": "Chưa tải được ảnh NASA · đang xem bản local",
   "Imagery: NASA/JPL Moon Trek · LRO/LROC": "Ảnh: NASA/JPL Moon Trek · LRO/LROC",
-  "NASA IMAGE OVERLAY · DISPLAY ONLY": "LỚP ẢNH NASA · CHỈ ĐỂ HIỂN THỊ"
+  "NASA IMAGE OVERLAY · DISPLAY ONLY": "LỚP ẢNH NASA · CHỈ ĐỂ HIỂN THỊ",
+  "loading": "đang tải",
+  "No prepared instant for this coordinate/height. Analyze point to calculate it.": "Chưa có mẫu tức thời cho tọa độ/độ cao này. Chạy Analyze để tính.",
+  "Unable to load current visibility: {0}": "Không tải được trạng thái hiện tại: {0}"
 }

@@ -47,6 +47,12 @@ describe("prepared preview charts", () => {
 });
 
 describe("instant visibility", () => {
+  it('shows a prepared instant without requiring aggregate metrics or Analyze', () => {
+    const instant={start_utc:'2026-11-24T00:00:00Z',end_utc:'2026-11-24T00:05:00Z',sun_state:'V',earth_state:'B',joint_state:'B',sun_visible_fraction:1,evidence_source:'prepared_nominal'} as const;
+    const html=renderToStaticMarkup(<CurrentStatus instant={instant} time={Date.parse(instant.start_utc)}/>);
+    expect(html).toContain('Sun');expect(html).toContain('visible');expect(html).toContain('blocked');
+    expect(html).not.toContain('No interval evidence');expect(html).not.toContain('unknown');
+  });
   it("offers Continue plus Replay while paused, and only Replay at the final minute", () => {
     const start = Date.parse("2026-01-27T00:00:00Z");
     const s = { startMs: start, endMs: start+72*3600000, timeMs: start+60000,

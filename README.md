@@ -274,6 +274,8 @@ curl --fail-with-body --silent --show-error \
 
 Endpoint trả đúng một khoảng cơ sở 5 phút chứa thời điểm yêu cầu, dùng địa hình đã chuẩn bị và SPICE cục bộ; không quét toàn nhiệm vụ hay đánh giá requirements. `evidence_source="prepared_nominal"` nghĩa là mẫu tạm thời, chưa tinh chỉnh/validation. Thiếu địa hình phù hợp trả `INSTANT_NOT_PREPARED`; thời điểm ngoài khoảng `[start_utc, end_utc)` trả `OUTSIDE_MISSION_WINDOW`. Sau Analyze, dùng endpoint interval của job để đọc mẫu từ kết quả đã tinh chỉnh.
 
+Explore tự đọc mẫu tức thời ngay khi chọn điểm, độc lập với việc metrics đã tải hay đã bấm Analyze. Ô Sun/Earth hiển thị đang tải trong lúc chờ; lỗi lấy mẫu có thông báo riêng. Khi Play chạy nhanh, request đang gửi vẫn hoàn tất rồi đọc vị trí con trỏ mới nhất, thay vì liên tục hủy request. Mẫu của tọa độ, độ cao hoặc thời điểm khác không được dùng thay cho trạng thái hiện tại. Mẫu thật có trạng thái `?` vẫn được giữ là Unknown.
+
 ### 6.2. Đánh giá requirements và validation cho nhiệm vụ 72 giờ
 
 Request: [point-haworth-evaluation-request.json](docs/examples/point-haworth-evaluation-request.json), dùng ngày 24–27/11/2026 UTC, panel/antenna 20 m và tỷ lệ đĩa Mặt Trời trung bình tối thiểu 80%.
@@ -329,6 +331,8 @@ Simulation dùng **Play → Pause → Continue / Replay**; khi tới phút cuố
 
 Hướng sáng 3D dùng bảng vector SPICE theo tháng qua `/api/lunar/point/sky-vectors?at_utc=...`, nội suy vector theo thời gian rồi chuyển sang cùng hệ tọa độ địa hình. Bảng tháng được dùng chung khi đổi điểm, lưu tạm trên trình duyệt và tải trước tháng tiếp theo. Không cần build thêm cache hay gọi LLM. Trong Ground, nhãn **SPICE · VISUAL PREVIEW** phân biệt hướng hình học với kết luận V/B/? từ backend. Shadow map phủ toàn bộ các lớp địa hình hiển thị, bao gồm lớp xa, để mép vùng shadow không tạo dải tối quay quanh điểm chọn; camera mặt đất không tự quay theo Sun trong lúc chạy. Tăng sáng và tương phản chỉ áp dụng cho renderer. Đây vẫn là preview trên mesh và shadow map, không phải mô phỏng bức xạ/penumbra hay chứng nhận độ chính xác của mọi pixel bóng đổ.
 
+NASA imagery luôn bật mặc định; không còn lựa chọn Relief model. Khung thông báo NASA imagery ở góc phải đã được bỏ.
+
 Kiểm thử simulation, phép đổi hệ tọa độ và lỗi projection khi tải LOD: [simulation-render-verification.json](docs/validation/lunarsight/simulation-render-verification.json).
 
 ### Horizon: đường chân trời 360° và quỹ đạo toàn nhiệm vụ
@@ -336,6 +340,8 @@ Kiểm thử simulation, phép đổi hệ tọa độ và lỗi projection khi 
 Trong **Explore**, chọn **Horizon** cạnh Moon / Pole / Ground. Biểu đồ dùng chung tọa độ, độ cao panel/antenna, khoảng nhiệm vụ và thanh Play/Pause/Replay. Trục ngang là phương vị tính từ Bắc theo chiều kim đồng hồ; trục dọc là góc cao. Phần xám là đường chân trời địa hình, không phải độ cao mặt đất theo khoảng cách. Rê chuột để đọc góc chân trời và khoảng cách vật chắn; vùng thiếu dữ liệu được gạch chéo. Dùng **+/−**, **Full 360°**, **Follow Sun/Earth**, hoặc bấm dải tổng quan dưới biểu đồ để đổi vùng nhìn. Khi panel và antenna khác độ cao, có thể chọn đường chân trời tương ứng.
 
 Sun/Earth được vẽ trên **toàn bộ khoảng nhiệm vụ**, kể cả nhiều năm. Quỹ đạo tải dần theo từng phần 120 ngày, không cắt ngắn nhiệm vụ. Nhiệm vụ tối đa 7 ngày có mẫu vẽ 5 phút; nhiệm vụ dài hơn có mẫu vẽ 1 giờ từ bảng SPICE cục bộ đã kiểm tra. Nét đứt chỉ hướng tâm thiên thể nằm dưới đường chân trời; trạng thái visible/hidden/unknown ở thời điểm hiện tại lấy từ khoảng backend, còn Sun dùng diện tích đĩa theo mô hình hiện hành. Quỹ đạo hiển thị không được dùng lại để tính metrics hoặc requirements. Vị trí hiện tại được cập nhật riêng, nên Play/Follow không dựng lại toàn bộ quỹ đạo mỗi khung hình.
+
+Marker hiện tại khi bị khuất là vòng rỗng nét đứt; khi nhìn thấy là hình tròn tô màu, khi chưa đủ bằng chứng là vòng chấm mờ. Marker ưu tiên trạng thái backend, nên Sun còn một phần đĩa nhìn thấy vẫn được tô màu. Không có đường vuông góc nối marker xuống địa hình. Quỹ đạo đổi nét tại giao điểm với skyline và ngắt tại phương vị Bắc để tránh đường nối giả qua toàn biểu đồ.
 
 Các điểm/độ cao đã có trong gói đọc horizon từ cache. Khi chọn tọa độ mới trong Explore, web tự yêu cầu chuẩn bị horizon ở nền (có debounce và gộp request trùng), kể cả trước khi mở tab Horizon; **không cần bấm Analyze point**. Lần đầu tại tọa độ/độ cao chưa cache cần quét DEM, hiển thị đang chuẩn bị rồi tự cập nhật. Công việc này chỉ dựng horizon, không tính requirements/validation hoặc kết luận PASS/FAIL. Các phần quỹ đạo được cache ở `data/cache/point-analysis/sky-tracks/`, có identity/checksum; thiếu kernel hoặc ngoài khoảng phủ sẽ báo lỗi dữ liệu. Mở lần đầu một khoảng dài cần tải thêm các phần chưa cache, nhưng vẫn có thể xem đường chân trời và chạy con trỏ trong khi chờ.
 
